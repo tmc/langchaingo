@@ -706,11 +706,17 @@ func TestAnthropic_StructuredOutputResponseValidation(t *testing.T) {
 		require.Equal(t, `{"answer":"ok"}`, resp.Choices[0].Content)
 	})
 
-	t.Run("invalid end_turn fails with typed error", func(t *testing.T) {
+	t.Run("invalid end_turn fails with typed error and preserves the response", func(t *testing.T) {
 		t.Parallel()
-		_, _, err := runStructured(t, "claude-sonnet-4-5", endTurnResp(`{"answer":5}`), so)
+		_, resp, err := runStructured(t, "claude-sonnet-4-5", endTurnResp(`{"answer":5}`), so)
 		var ve *llms.ErrStructuredOutputValidation
 		require.True(t, errors.As(err, &ve), "want ErrStructuredOutputValidation, got %v", err)
+		// The public GenerateContent must return the assembled response alongside the
+		// error so usage/content/stop metadata are not lost.
+		require.NotNil(t, resp, "validation error must still return the response")
+		require.NotEmpty(t, resp.Choices)
+		require.Equal(t, `{"answer":5}`, resp.Choices[0].Content)
+		require.Equal(t, "end_turn", resp.Choices[0].StopReason)
 	})
 
 	t.Run("two text blocks are concatenated then validated", func(t *testing.T) {

@@ -343,6 +343,7 @@ func (g *GoogleAI) generateStreamingContent(
 	var thoughtSignature []byte
 	var lastUsageMetadata *genai.GenerateContentResponseUsageMetadata
 	var lastCandidate *genai.Candidate
+	var streamErr error
 
 	// Trying to keep the same ID for the same tool call name
 	toolCallIDs := make(map[string]string)
@@ -394,11 +395,13 @@ func (g *GoogleAI) generateStreamingContent(
 						},
 					}
 					if err := opts.StreamingFunc(ctx, chunk); err != nil {
+						streamErr = err
 						goto StreamEnd
 					}
 				} else {
 					accumulatedContent.WriteString(part.Text)
 					if err := streaming.CallWithText(ctx, opts.StreamingFunc, part.Text); err != nil {
+						streamErr = err
 						goto StreamEnd
 					}
 				}
@@ -470,14 +473,28 @@ StreamEnd:
 		}
 	}
 
-	return &llms.ContentResponse{
+	// Carry the finish reason so structured-output validation runs on a normal
+	// STOP (an empty reason would make the validator skip a streamed choice).
+	var stopReason string
+	if lastCandidate != nil {
+		stopReason = string(lastCandidate.FinishReason)
+	}
+
+	resp := &llms.ContentResponse{
 		Choices: []*llms.ContentChoice{{
 			Content:        accumulatedContent.String(),
 			Reasoning:      choiceReasoning,
 			ToolCalls:      accumulatedToolCalls,
+			StopReason:     stopReason,
 			GenerationInfo: metadata,
 		}},
-	}, nil
+	}
+	// A callback that returned an error stopped the stream early; surface it
+	// (matching the other providers) instead of masking it as a success.
+	if streamErr != nil {
+		return resp, streamErr
+	}
+	return resp, nil
 }
 
 func convertResponse(resp *genai.GenerateContentResponse) (*llms.ContentResponse, error) {

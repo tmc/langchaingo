@@ -25,7 +25,7 @@ func objectSchema() json.RawMessage {
 	return json.RawMessage(`{"type":"object","properties":{"answer":{"type":"string"}},"required":["answer"],"additionalProperties":false}`)
 }
 
-func TestCreateChatRequest_ResponseFormatModes(t *testing.T) {
+func TestCreateChatRequest_ResponseFormatModes(t *testing.T) { //nolint:funlen // table of request-mode sub-cases
 	t.Parallel()
 
 	t.Run("WithJSONMode yields json_object", func(t *testing.T) {
@@ -54,9 +54,26 @@ func TestCreateChatRequest_ResponseFormatModes(t *testing.T) {
 		if req.ResponseFormat == nil || req.ResponseFormat.Type != "json_schema" {
 			t.Fatalf("want json_schema, got %+v", req.ResponseFormat)
 		}
-		js := req.ResponseFormat.JSONSchema
-		if js == nil || js.Name != "s" || js.Description != "d" || !js.Strict {
-			t.Fatalf("json_schema fields wrong: %+v", js)
+		// The general raw path serializes to json_schema on the wire (it does not
+		// populate the public typed JSONSchema field), so assert via marshaling.
+		b, err := json.Marshal(req.ResponseFormat)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var round struct {
+			Type       string `json:"type"`
+			JSONSchema struct {
+				Name        string `json:"name"`
+				Description string `json:"description"`
+				Strict      bool   `json:"strict"`
+			} `json:"json_schema"`
+		}
+		if err := json.Unmarshal(b, &round); err != nil {
+			t.Fatal(err)
+		}
+		js := round.JSONSchema
+		if js.Name != "s" || js.Description != "d" || !js.Strict {
+			t.Fatalf("json_schema fields wrong: %s", b)
 		}
 	})
 
@@ -114,7 +131,8 @@ func TestCreateChatRequest_ResponseFormatModes(t *testing.T) {
 }
 
 // TestResponseFormatJSONSchema_TypedBuilderStillMarshals guards source and wire
-// compatibility of the provider-specific typed builder after Schema became `any`.
+// compatibility of the provider-specific typed builder: the public type keeps its
+// original fields, stays readable and comparable, and marshals as before.
 func TestResponseFormatJSONSchema_TypedBuilderStillMarshals(t *testing.T) {
 	t.Parallel()
 	rf := &ResponseFormat{
@@ -149,6 +167,41 @@ func TestResponseFormatJSONSchema_TypedBuilderStillMarshals(t *testing.T) {
 	// *ResponseFormatJSONSchemaProperty (not widened to any).
 	if got := rf.JSONSchema.Schema.Type; got != "object" {
 		t.Errorf("typed Schema must stay readable, Schema.Type = %q", got)
+	}
+	// Source compatibility: the public type must stay comparable (no []byte field).
+	// This block fails to compile if ResponseFormatJSONSchema becomes non-comparable.
+	var a, b2 ResponseFormatJSONSchema
+	if a != b2 {
+		t.Error("zero values must compare equal")
+	}
+}
+
+// TestRawJSONSchemaResponseFormat covers the general WithStructuredOutput wire path:
+// a verbatim schema and optional description are emitted under json_schema without
+// going through (or changing) the public typed builder.
+func TestRawJSONSchemaResponseFormat(t *testing.T) {
+	t.Parallel()
+	rf := openaiclient.NewRawJSONSchemaResponseFormat("answer", "an answer",
+		json.RawMessage(`{"type":"object","properties":{"x":{"type":"string"}},"required":["x"],"additionalProperties":false}`))
+
+	b, err := json.Marshal(rf)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var round map[string]any
+	if err := json.Unmarshal(b, &round); err != nil {
+		t.Fatal(err)
+	}
+	if round["type"] != "json_schema" {
+		t.Fatalf("type = %v, want json_schema", round["type"])
+	}
+	js, ok := round["json_schema"].(map[string]any)
+	if !ok || js["name"] != "answer" || js["description"] != "an answer" || js["strict"] != true {
+		t.Fatalf("raw json_schema fields wrong: %s", b)
+	}
+	sc, ok := js["schema"].(map[string]any)
+	if !ok || sc["additionalProperties"] != false {
+		t.Fatalf("raw schema not embedded verbatim: %s", b)
 	}
 }
 

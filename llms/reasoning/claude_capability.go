@@ -113,6 +113,19 @@ func ClaudeMutuallyExclusiveSampling(model string) bool {
 	return containsAny(strings.ToLower(model), mutuallyExclusiveSamplingClaude)
 }
 
+// legacyNoStructuredClaude are Claude generations known to predate structured
+// outputs (the output_config.format JSON Schema mode). A structured-output request
+// on them is rejected locally rather than sent for a guaranteed 4xx.
+var legacyNoStructuredClaude = []string{"claude-2", "claude-instant", "claude-3-", "claude-3."}
+
+// ClaudeSupportsStructuredOutput reports whether the model can be asked for schema
+// constrained output. Known-legacy families are rejected; every current model and
+// any unrecognized (newer) name passes through so the provider API stays the final
+// arbiter and the local table never blocks a future model.
+func ClaudeSupportsStructuredOutput(model string) bool {
+	return !containsAny(strings.ToLower(model), legacyNoStructuredClaude)
+}
+
 // ResolveClaudeAdaptive returns whether to send adaptive thinking (true) or
 // budget thinking (false) for a Claude model, given the caller's preference
 // (adaptivePreferred is true when the caller used WithAdaptiveReasoning).

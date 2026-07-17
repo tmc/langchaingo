@@ -58,15 +58,7 @@ func (o *LLM) setStructuredOutput(req *openaiclient.ChatRequest, opts llms.CallO
 	if err := validateOpenAIStructuredSchema(so.Schema); err != nil {
 		return err
 	}
-	req.ResponseFormat = &openaiclient.ResponseFormat{
-		Type: "json_schema",
-		JSONSchema: &openaiclient.ResponseFormatJSONSchema{
-			Name:        so.Name,
-			Description: so.Description,
-			Strict:      true,
-			SchemaRaw:   so.Schema,
-		},
-	}
+	req.ResponseFormat = openaiclient.NewRawJSONSchemaResponseFormat(so.Name, so.Description, so.Schema)
 	return nil
 }
 

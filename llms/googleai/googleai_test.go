@@ -450,7 +450,7 @@ func TestGoogleAIWithJSONMode(t *testing.T) {
 // TestGoogleAIStructuredOutput exercises schema-constrained output against the real
 // backend (httprr-recorded): the model returns ResponseJsonSchema-constrained JSON
 // matching the schema, for both an object and an array schema.
-func TestGoogleAIStructuredOutput(t *testing.T) {
+func TestGoogleAIStructuredOutput(t *testing.T) { //nolint:funlen // table of httprr sub-cases
 	t.Run("object schema is honored", func(t *testing.T) {
 		llm := newHTTPRRClient(t, WithDefaultModel("gemini-2.5-flash"))
 
@@ -518,6 +518,51 @@ func TestGoogleAIStructuredOutput(t *testing.T) {
 		}
 		require.NoError(t, json.Unmarshal([]byte(resp.Choices[0].Content), &out))
 		assert.NotEmpty(t, out.Colors)
+	})
+
+	// Streaming must also carry the finish reason so structured-output validation
+	// runs on the assembled response (a missing StopReason would skip it).
+	t.Run("streaming object schema is validated", func(t *testing.T) {
+		llm := newHTTPRRClient(t, WithDefaultModel("gemini-2.5-flash"))
+
+		schema := json.RawMessage(`{
+			"type": "object",
+			"properties": {
+				"country": {"type": "string"},
+				"capital": {"type": "string"}
+			},
+			"required": ["country", "capital"]
+		}`)
+		content := []llms.MessageContent{{
+			Role:  llms.ChatMessageTypeHuman,
+			Parts: []llms.ContentPart{llms.TextPart("What is the capital of Japan?")},
+		}}
+
+		var streamed strings.Builder
+		resp, err := llm.GenerateContent(t.Context(), content,
+			llms.WithStructuredOutput(llms.StructuredOutputConfig{Name: "capital", Schema: schema}),
+			llms.WithStreamingFunc(func(_ context.Context, chunk streaming.Chunk) error {
+				if chunk.Type == streaming.ChunkTypeText {
+					streamed.WriteString(chunk.Content)
+				}
+				return nil
+			}),
+		)
+		if err != nil {
+			require.NoError(t, err)
+		}
+		require.NotNil(t, resp)
+		require.NotEmpty(t, resp.Choices)
+		// The finish reason must be surfaced on the streamed choice.
+		assert.Equal(t, "STOP", resp.Choices[0].StopReason)
+
+		var out struct {
+			Country string `json:"country"`
+			Capital string `json:"capital"`
+		}
+		require.NoError(t, json.Unmarshal([]byte(resp.Choices[0].Content), &out),
+			"streamed structured output must be valid JSON")
+		assert.Contains(t, strings.ToLower(out.Capital), "tokyo")
 	})
 }
 

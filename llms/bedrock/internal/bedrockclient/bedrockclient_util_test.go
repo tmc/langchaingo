@@ -286,7 +286,7 @@ func TestLegacyAnthropic_StructuredOutput_FormatAndEffort(t *testing.T) {
 	input := anthropicTextGenerationInput{
 		OutputConfig: &anthropicOutputConfig{Effort: "high"},
 	}
-	require.NoError(t, applyAnthropicStructuredOutput(&input, soConfig()))
+	require.NoError(t, applyAnthropicStructuredOutput(&input, "anthropic.claude-sonnet-4-5-v1:0", soConfig()))
 
 	got := marshalAnthropicInput(t, input)
 	oc, _ := got["output_config"].(map[string]any)
@@ -298,4 +298,12 @@ func TestLegacyAnthropic_StructuredOutput_FormatAndEffort(t *testing.T) {
 	// Schema must be an embedded JSON object, not a double-encoded string.
 	_, isObject := format["schema"].(map[string]any)
 	assert.True(t, isObject, "schema must not be double-encoded, got %T", format["schema"])
+}
+
+func TestLegacyAnthropic_StructuredOutput_UnsupportedModel(t *testing.T) {
+	t.Parallel()
+	input := anthropicTextGenerationInput{}
+	err := applyAnthropicStructuredOutput(&input, "anthropic.claude-3-sonnet-20240229-v1:0", soConfig())
+	var unsup *llms.ErrStructuredOutputUnsupported
+	require.True(t, errors.As(err, &unsup), "legacy 3.x must be unsupported, got %v", err)
 }

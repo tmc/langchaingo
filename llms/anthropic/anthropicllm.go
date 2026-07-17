@@ -138,7 +138,10 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 
 	resp, err := generateMessagesContent(ctx, o, messages, opts)
 	if err != nil {
-		return nil, err
+		// resp is non-nil for a structured-output validation failure (the assembled
+		// response is returned alongside the typed error so usage/content/stop
+		// metadata survive); it is nil for a hard error.
+		return resp, err
 	}
 
 	if o.CallbacksHandler != nil {
@@ -237,7 +240,7 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 
 	// Structured output rides in output_config.format, merged with any effort set
 	// above (the two are independent). The schema constrains the final text only.
-	if outputConfig, err = applyAnthropicStructuredOutput(opts, messages, outputConfig); err != nil {
+	if outputConfig, err = applyAnthropicStructuredOutput(opts, model, messages, outputConfig); err != nil {
 		return nil, err
 	}
 
@@ -926,6 +929,7 @@ func extractBetaHeaders(opts *llms.CallOptions, thinking *anthropicclient.Thinki
 // with typed errors before the request is sent.
 func applyAnthropicStructuredOutput(
 	opts *llms.CallOptions,
+	model string,
 	messages []llms.MessageContent,
 	cfg *anthropicclient.OutputConfig,
 ) (*anthropicclient.OutputConfig, error) {
@@ -935,6 +939,13 @@ func applyAnthropicStructuredOutput(
 	}
 	if err := opts.ValidateStructuredOutput(); err != nil {
 		return nil, err
+	}
+	if !reasoning.ClaudeSupportsStructuredOutput(model) {
+		return nil, &llms.ErrStructuredOutputUnsupported{
+			Provider: providerAnthropic,
+			Model:    model,
+			Reason:   "model predates the output_config.format JSON Schema mode",
+		}
 	}
 	if anthropicHasAssistantPrefill(messages) {
 		return nil, &llms.ErrStructuredOutputConflict{

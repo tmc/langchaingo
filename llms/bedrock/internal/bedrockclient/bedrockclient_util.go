@@ -1,13 +1,13 @@
 package bedrockclient
 
 import (
-	"encoding/json"
 	"reflect"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime/types"
 	"github.com/vxcontrol/langchaingo/llms"
+	"github.com/vxcontrol/langchaingo/llms/reasoning"
 	"github.com/vxcontrol/langchaingo/llms/structuredoutput"
 )
 
@@ -127,10 +127,18 @@ func applyConverseStructuredOutput(input *ConverseInput, converseInput *bedrockr
 }
 
 // applyAnthropicStructuredOutput folds a per-call schema into the legacy Anthropic
-// output_config.format, preserving any effort already set.
-func applyAnthropicStructuredOutput(input *anthropicTextGenerationInput, so *llms.StructuredOutputConfig) error {
+// output_config.format, preserving any effort already set. A known-legacy model that
+// predates structured output is rejected with a typed error before the request.
+func applyAnthropicStructuredOutput(input *anthropicTextGenerationInput, modelID string, so *llms.StructuredOutputConfig) error {
 	if so == nil {
 		return nil
+	}
+	if !reasoning.ClaudeSupportsStructuredOutput(modelID) {
+		return &llms.ErrStructuredOutputUnsupported{
+			Provider: providerBedrock,
+			Model:    modelID,
+			Reason:   "model predates the output_config.format JSON Schema mode",
+		}
 	}
 	// Bedrock rejects an object schema that omits additionalProperties:false;
 	// surface that documented, locally-detectable requirement as a typed error.
@@ -142,7 +150,7 @@ func applyAnthropicStructuredOutput(input *anthropicTextGenerationInput, so *llm
 	}
 	input.OutputConfig.Format = &anthropicOutputFormat{
 		Type:   "json_schema",
-		Schema: json.RawMessage(so.Schema),
+		Schema: so.Schema,
 	}
 	return nil
 }

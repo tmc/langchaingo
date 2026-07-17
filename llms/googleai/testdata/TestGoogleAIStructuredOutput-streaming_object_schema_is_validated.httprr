@@ -1,0 +1,27 @@
+httprr trace v1
+992 840
+POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?alt=sse HTTP/1.1
+Host: generativelanguage.googleapis.com
+User-Agent: langchaingo-httprr
+Content-Length: 658
+Content-Type: application/json
+X-Goog-Api-Client: google-genai-sdk/X.XX.X gl-go/go1.24.1
+X-Goog-Api-Key: test-api-key
+
+{"contents":[{"parts":[{"text":"What is the capital of Japan?"}],"role":"user"}],"generationConfig":{"candidateCount":1,"maxOutputTokens":2048,"responseJsonSchema":{"properties":{"capital":{"type":"string"},"country":{"type":"string"}},"required":["country","capital"],"type":"object"},"responseMimeType":"application/json","temperature":0.5,"topK":3,"topP":0.95},"safetySettings":[{"category":"HARM_CATEGORY_DANGEROUS_CONTENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HARASSMENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HATE_SPEECH","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_SEXUALLY_EXPLICIT","threshold":"BLOCK_NONE"}]}HTTP/2.0 200 OK
+Content-Length: 442
+Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+Content-Disposition: attachment
+Content-Type: text/event-stream
+Date: Fri, 17 Jul 2026 09:07:54 GMT
+Server: scaffolding on HTTPServer2
+Server-Timing: gfet4t7; dur=1551
+Vary: Origin
+Vary: X-Origin
+Vary: Referer
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+X-Xss-Protection: 0
+
+data: {"candidates": [{"content": {"parts": [{"text": "{\"capital\": \"Tokyo\", \"country\": \"Japan\"}"}],"role": "model"},"finishReason": "STOP","index": 0}],"usageMetadata": {"promptTokenCount": 8,"candidatesTokenCount": 12,"totalTokenCount": 90,"promptTokensDetails": [{"modality": "TEXT","tokenCount": 8}],"thoughtsTokenCount": 70,"serviceTier": "standard"},"modelVersion": "gemini-2.5-flash","responseId": "6fBZapSfLZrlxN8Pu9CxwQ8"}
+

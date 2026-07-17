@@ -67,6 +67,29 @@ func TestResolveClaudeAdaptive(t *testing.T) {
 	}
 }
 
+func TestClaudeSupportsStructuredOutput(t *testing.T) {
+	t.Parallel()
+	cases := []struct {
+		model string
+		want  bool
+	}{
+		{"claude-sonnet-5", true},
+		{"claude-opus-4-5", true},
+		{"claude-haiku-4-5", true},
+		{"us.anthropic.claude-sonnet-4-5-v1:0", true},
+		{"some-future-model", true}, // unknown passes through
+		{"claude-3-5-sonnet-latest", false},
+		{"claude-3-7-sonnet", false},
+		{"claude-2.1", false},
+		{"claude-instant-1", false},
+	}
+	for _, tc := range cases {
+		if got := ClaudeSupportsStructuredOutput(tc.model); got != tc.want {
+			t.Errorf("ClaudeSupportsStructuredOutput(%q) = %v, want %v", tc.model, got, tc.want)
+		}
+	}
+}
+
 func TestClaudeRejectsSampling(t *testing.T) {
 	t.Parallel()
 	cases := []struct {

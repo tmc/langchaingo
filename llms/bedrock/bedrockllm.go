@@ -150,7 +150,9 @@ func (l *LLM) generateContentWithConverseAPI(ctx context.Context, messages []llm
 		if l.CallbacksHandler != nil {
 			l.CallbacksHandler.HandleLLMError(ctx, err)
 		}
-		return nil, err
+		// res is non-nil for a structured-output validation failure (returned with
+		// the typed error so usage/content/stop metadata survive); nil for a hard error.
+		return res, err
 	}
 
 	if l.CallbacksHandler != nil {
@@ -174,7 +176,9 @@ func (l *LLM) generateContentWithLegacyAPI(ctx context.Context, messages []llms.
 		if l.CallbacksHandler != nil {
 			l.CallbacksHandler.HandleLLMError(ctx, err)
 		}
-		return nil, err
+		// res is non-nil for a structured-output validation failure (returned with
+		// the typed error so usage/content/stop metadata survive); nil for a hard error.
+		return res, err
 	}
 
 	if l.CallbacksHandler != nil {

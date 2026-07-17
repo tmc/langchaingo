@@ -184,47 +184,55 @@ type ResponseFormatJSONSchemaProperty struct {
 	Ref                  string                                       `json:"$ref,omitempty"`
 }
 
+// ResponseFormatJSONSchema is the provider-specific typed JSON Schema builder. Its
+// shape is unchanged (exported via the openai package alias) so it stays source
+// compatible: same fields, still comparable.
 type ResponseFormatJSONSchema struct {
-	Name        string `json:"name"`
-	Description string `json:"description,omitempty"`
-	Strict      bool   `json:"strict"`
-	// Schema is the typed provider-specific builder; its type is unchanged for
-	// source compatibility (callers may read Schema.Type etc).
-	Schema *ResponseFormatJSONSchemaProperty `json:"-"`
-	// SchemaRaw carries a schema verbatim for the general WithStructuredOutput
-	// path, so an arbitrary JSON Schema construct is not lost. When set it takes
-	// precedence over Schema on the wire. Kept separate rather than widening
-	// Schema's type, which would break readers of the exported alias.
-	SchemaRaw json.RawMessage `json:"-"`
+	Name   string                            `json:"name"`
+	Strict bool                              `json:"strict"`
+	Schema *ResponseFormatJSONSchemaProperty `json:"schema"`
 }
 
-// MarshalJSON emits the JSON Schema under "schema" from SchemaRaw when present,
-// otherwise from the typed Schema, so both the provider-specific builder and the
-// general raw-schema path produce the same wire shape.
-func (r ResponseFormatJSONSchema) MarshalJSON() ([]byte, error) {
-	out := struct {
-		Name        string          `json:"name"`
-		Description string          `json:"description,omitempty"`
-		Strict      bool            `json:"strict"`
-		Schema      json.RawMessage `json:"schema"`
-	}{Name: r.Name, Description: r.Description, Strict: r.Strict}
-	switch {
-	case r.SchemaRaw != nil:
-		out.Schema = r.SchemaRaw
-	case r.Schema != nil:
-		b, err := json.Marshal(r.Schema)
-		if err != nil {
-			return nil, err
-		}
-		out.Schema = b
-	}
-	return json.Marshal(out)
+// rawResponseFormatJSONSchema carries a verbatim JSON Schema for the general
+// WithStructuredOutput path. It is deliberately NOT exposed through the public
+// openai aliases, so an arbitrary JSON Schema construct reaches the wire without
+// changing the shape or comparability of the public types.
+type rawResponseFormatJSONSchema struct {
+	Name        string          `json:"name"`
+	Description string          `json:"description,omitempty"`
+	Strict      bool            `json:"strict"`
+	Schema      json.RawMessage `json:"schema"`
 }
 
-// ResponseFormat is the format of the response.
+// ResponseFormat is the format of the response. The public shape (Type, JSONSchema)
+// is unchanged; the raw-schema path is carried in an unexported field so the type
+// stays comparable and its exported layout is preserved.
 type ResponseFormat struct {
 	Type       string                    `json:"type"`
 	JSONSchema *ResponseFormatJSONSchema `json:"json_schema,omitempty"`
+	raw        *rawResponseFormatJSONSchema
+}
+
+// MarshalJSON emits the raw-schema path as json_schema when set, otherwise the
+// public typed shape unchanged.
+func (r ResponseFormat) MarshalJSON() ([]byte, error) {
+	if r.raw != nil {
+		return json.Marshal(struct {
+			Type       string                       `json:"type"`
+			JSONSchema *rawResponseFormatJSONSchema `json:"json_schema,omitempty"`
+		}{Type: r.Type, JSONSchema: r.raw})
+	}
+	type alias ResponseFormat
+	return json.Marshal(alias(r))
+}
+
+// NewRawJSONSchemaResponseFormat builds a strict json_schema response_format from a
+// verbatim JSON Schema, for the general llms.WithStructuredOutput path.
+func NewRawJSONSchemaResponseFormat(name, description string, schema json.RawMessage) *ResponseFormat {
+	return &ResponseFormat{
+		Type: "json_schema",
+		raw:  &rawResponseFormatJSONSchema{Name: name, Description: description, Strict: true, Schema: schema},
+	}
 }
 
 // ChatMessage is a message in a chat request.

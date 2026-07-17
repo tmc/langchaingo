@@ -239,7 +239,7 @@ func createAnthropicCompletion(ctx context.Context,
 
 	// Structured output rides in output_config.format, merged with any effort set
 	// by applyAnthropicReasoning (the two are independent).
-	if err := applyAnthropicStructuredOutput(&input, options.StructuredOutput); err != nil {
+	if err := applyAnthropicStructuredOutput(&input, modelID, options.StructuredOutput); err != nil {
 		return nil, err
 	}
 
