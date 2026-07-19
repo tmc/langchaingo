@@ -290,7 +290,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		}(),
 
 		ToolChoice:           opts.ToolChoice,
-		FunctionCallBehavior: openaiclient.FunctionCallBehavior(opts.FunctionCallBehavior),
+		FunctionCallBehavior: opts.FunctionCallBehavior,
 		Seed:                 opts.Seed,
 		Metadata:             apiMetadata,
 		WebSearchOptions:     webSearchOptionsFromCallOptions(opts.WebSearchOptions),
