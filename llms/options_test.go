@@ -408,6 +408,34 @@ func TestDeprecatedFunctionOptions(t *testing.T) {
 	})
 }
 
+func TestWithFunctionCallBehaviorFunction(t *testing.T) {
+	t.Run("sets object form", func(t *testing.T) {
+		var opts llms.CallOptions
+		llms.WithFunctionCallBehaviorFunction("my_function")(&opts)
+
+		want := llms.FunctionCallBehaviorFunctionObject{Name: "my_function"}
+		if !reflect.DeepEqual(opts.FunctionCallBehavior, want) {
+			t.Errorf("FunctionCallBehavior = %v, want %v", opts.FunctionCallBehavior, want)
+		}
+	})
+
+	t.Run("unset is nil", func(t *testing.T) {
+		var opts llms.CallOptions
+		if opts.FunctionCallBehavior != nil {
+			t.Errorf("default FunctionCallBehavior = %v, want nil", opts.FunctionCallBehavior)
+		}
+	})
+
+	t.Run("string and object forms are distinct", func(t *testing.T) {
+		var opts llms.CallOptions
+		llms.WithFunctionCallBehaviorFunction("get_weather")(&opts)
+
+		if opts.FunctionCallBehavior == llms.FunctionCallBehaviorAuto {
+			t.Error("object-form FunctionCallBehavior should not equal string-form auto")
+		}
+	})
+}
+
 func TestMultipleOptions(t *testing.T) {
 	var opts llms.CallOptions
 
