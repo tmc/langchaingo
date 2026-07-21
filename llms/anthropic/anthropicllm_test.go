@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/tmc/langchaingo/llms"
+	"github.com/tmc/langchaingo/llms/anthropic/internal/anthropicclient"
 )
 
 func TestNew(t *testing.T) {
@@ -229,4 +230,72 @@ func TestGenerateMessagesContent_EmptyContent(t *testing.T) {
 	// Without the fix, accessing result.Content[0] would panic when Anthropic
 	// returns a response with nil or empty content (addresses issue #993)
 	t.Skip("Requires mock client - would demonstrate panic without len(result.Content) == 0 check")
+}
+
+// TestHandleAIMessageMultipleParts verifies that an assistant message
+// containing both text and tool-call parts is fully serialized. Previously
+// handleAIMessage only inspected Parts[0], silently dropping any additional
+// content blocks (issue #1468).
+func TestHandleAIMessageMultipleParts(t *testing.T) {
+	t.Parallel()
+
+	msg := llms.MessageContent{
+		Role: llms.ChatMessageTypeAI,
+		Parts: []llms.ContentPart{
+			llms.TextContent{Text: "I'll look that up for you."},
+			llms.ToolCall{
+				ID: "toolu_123",
+				FunctionCall: &llms.FunctionCall{
+					Name:      "get_weather",
+					Arguments: `{"location":"Paris"}`,
+				},
+			},
+		},
+	}
+
+	result, err := handleAIMessage(msg)
+	if err != nil {
+		t.Fatalf("handleAIMessage returned error: %v", err)
+	}
+
+	contents, ok := result.Content.([]anthropicclient.Content)
+	if !ok {
+		t.Fatalf("expected Content to be []anthropicclient.Content, got %T", result.Content)
+	}
+	if len(contents) != 2 {
+		t.Fatalf("expected 2 content blocks, got %d", len(contents))
+	}
+
+	text, ok := contents[0].(*anthropicclient.TextContent)
+	if !ok {
+		t.Fatalf("expected first block to be *TextContent, got %T", contents[0])
+	}
+	if text.Text != "I'll look that up for you." {
+		t.Errorf("unexpected text content: %q", text.Text)
+	}
+
+	toolUse, ok := contents[1].(anthropicclient.ToolUseContent)
+	if !ok {
+		t.Fatalf("expected second block to be ToolUseContent, got %T", contents[1])
+	}
+	if toolUse.ID != "toolu_123" {
+		t.Errorf("unexpected tool use ID: %q", toolUse.ID)
+	}
+	if toolUse.Name != "get_weather" {
+		t.Errorf("unexpected tool use name: %q", toolUse.Name)
+	}
+	if got := toolUse.Input["location"]; got != "Paris" {
+		t.Errorf("unexpected tool use input location: %v", got)
+	}
+}
+
+// TestHandleAIMessageEmptyParts verifies that a message with no usable parts
+// returns an error rather than panicking on an empty slice.
+func TestHandleAIMessageEmptyParts(t *testing.T) {
+	t.Parallel()
+
+	_, err := handleAIMessage(llms.MessageContent{Role: llms.ChatMessageTypeAI})
+	if err == nil {
+		t.Fatal("expected error for AI message with no parts, got nil")
+	}
 }
