@@ -113,9 +113,21 @@ func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOptio
 }
 
 // GenerateContent implements the Model interface.
-func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) { //nolint:lll
+func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (resp *llms.ContentResponse, err error) { //nolint:lll,nonamedreturns
+	// Emit exactly one closing callback: HandleLLMError on any error (transport,
+	// config or a structured-output validation failure), otherwise
+	// HandleLLMGenerateContentEnd — consistent across every provider adapter. For a
+	// structured-output validation failure resp is non-nil (the assembled response
+	// is returned alongside the typed error); it is nil for a hard error.
 	if o.CallbacksHandler != nil {
 		o.CallbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
+		defer func() {
+			if err != nil {
+				o.CallbacksHandler.HandleLLMError(ctx, err)
+			} else {
+				o.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, resp)
+			}
+		}()
 	}
 
 	opts := &llms.CallOptions{}
@@ -124,31 +136,10 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	}
 
 	if o.client.UseLegacyTextCompletionsAPI {
-		resp, err := generateCompletionsContent(ctx, o, messages, opts)
-		if err != nil {
-			return nil, err
-		}
-
-		if o.CallbacksHandler != nil {
-			o.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, resp)
-		}
-
-		return resp, nil
+		return generateCompletionsContent(ctx, o, messages, opts)
 	}
 
-	resp, err := generateMessagesContent(ctx, o, messages, opts)
-	if err != nil {
-		// resp is non-nil for a structured-output validation failure (the assembled
-		// response is returned alongside the typed error so usage/content/stop
-		// metadata survive); it is nil for a hard error.
-		return resp, err
-	}
-
-	if o.CallbacksHandler != nil {
-		o.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, resp)
-	}
-
-	return resp, nil
+	return generateMessagesContent(ctx, o, messages, opts)
 }
 
 func generateCompletionsContent(ctx context.Context, o *LLM, messages []llms.MessageContent, opts *llms.CallOptions) (*llms.ContentResponse, error) { //nolint:lll
@@ -173,9 +164,7 @@ func generateCompletionsContent(ctx context.Context, o *LLM, messages []llms.Mes
 		StreamingFunc: opts.StreamingFunc,
 	})
 	if err != nil {
-		if o.CallbacksHandler != nil {
-			o.CallbacksHandler.HandleLLMError(ctx, err)
-		}
+		// The closing callback is emitted once by GenerateContent's deferred handler.
 		return nil, fmt.Errorf("anthropic: failed to create completion: %w", err)
 	}
 
@@ -310,9 +299,7 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 		StreamingFunc: opts.StreamingFunc,
 	})
 	if err != nil {
-		if o.CallbacksHandler != nil {
-			o.CallbacksHandler.HandleLLMError(ctx, err)
-		}
+		// The closing callback is emitted once by GenerateContent's deferred handler.
 		return nil, fmt.Errorf("anthropic: failed to create message: %w", err)
 	}
 	response, err := processAnthropicResponse(result)

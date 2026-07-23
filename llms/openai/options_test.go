@@ -1,11 +1,18 @@
 package openai
 
 import (
+	"context"
+	"encoding/json"
+	"io"
+	"net/http"
+	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/vxcontrol/langchaingo/llms"
+	"github.com/vxcontrol/langchaingo/llms/openai/internal/openaiclient"
 )
 
 func TestWithMaxCompletionTokens(t *testing.T) {
@@ -244,4 +251,159 @@ func TestGetExtraBody(t *testing.T) {
 		result := getExtraBody(opts)
 		assert.Nil(t, result)
 	})
+}
+
+// Qwen3.x models are not forced-reasoning: their thinking is user-toggleable and
+// their sampling is configurable. The caller's sampling parameters must reach an
+// OpenAI-compatible backend verbatim (temperature is NOT pinned to 1.0), and the
+// thinking switch travels through extra_body.chat_template_kwargs.enable_thinking.
+func TestQwenSamplingReachesWireVerbatim(t *testing.T) { //nolint:funlen // three wire sub-cases
+	t.Parallel()
+
+	const completion = `{"id":"x","object":"chat.completion","created":1,"model":"m",` +
+		`"choices":[{"index":0,"message":{"role":"assistant","content":"ok"},"finish_reason":"stop"}],` +
+		`"usage":{"prompt_tokens":1,"completion_tokens":1,"total_tokens":2}}`
+
+	const model = "Qwen/Qwen3.6-27B-FP8"
+
+	capture := func(t *testing.T, callOpts []llms.CallOption) map[string]any {
+		t.Helper()
+		var raw []byte
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			raw, _ = io.ReadAll(r.Body)
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = io.WriteString(w, completion)
+		}))
+		t.Cleanup(srv.Close)
+
+		llm, err := New(WithBaseURL(srv.URL), WithToken("test"), WithModel(model))
+		if err != nil {
+			t.Fatalf("New() error: %v", err)
+		}
+		if _, err := llm.GenerateContent(context.Background(),
+			[]llms.MessageContent{llms.TextParts(llms.ChatMessageTypeHuman, "hi")},
+			callOpts...); err != nil {
+			t.Fatalf("GenerateContent() error: %v", err)
+		}
+		var body map[string]any
+		if err := json.Unmarshal(raw, &body); err != nil {
+			t.Fatalf("unmarshal wire body: %v\nraw: %s", err, raw)
+		}
+		return body
+	}
+
+	// numeric JSON fields decode to float64; assert exact presence and value.
+	assertNum := func(t *testing.T, body map[string]any, key string, want float64) {
+		t.Helper()
+		got, ok := body[key]
+		if !ok {
+			t.Fatalf("wire body missing %q; body=%v", key, body)
+		}
+		if f, _ := got.(float64); f != want {
+			t.Fatalf("wire %q = %v, want %v", key, got, want)
+		}
+	}
+
+	t.Run("thinking mode default sampling passes through", func(t *testing.T) {
+		body := capture(t, []llms.CallOption{
+			llms.WithTemperature(1.0),
+			llms.WithTopP(0.95),
+			llms.WithTopK(20),
+			llms.WithMinP(0.0),
+			llms.WithPresencePenalty(1.5),
+			llms.WithRepetitionPenalty(1.0),
+		})
+		assertNum(t, body, "temperature", 1.0)
+		assertNum(t, body, "top_p", 0.95)
+		assertNum(t, body, "top_k", 20)
+		assertNum(t, body, "min_p", 0.0)
+		assertNum(t, body, "presence_penalty", 1.5)
+		assertNum(t, body, "repetition_penalty", 1.0)
+	})
+
+	t.Run("precise-coding thinking sampling passes through", func(t *testing.T) {
+		body := capture(t, []llms.CallOption{
+			llms.WithTemperature(0.6),
+			llms.WithTopP(0.95),
+			llms.WithTopK(20),
+			llms.WithMinP(0.0),
+			llms.WithPresencePenalty(0.0),
+			llms.WithRepetitionPenalty(1.0),
+		})
+		// temperature must NOT be pinned to 1.0 for a bare Qwen3 model.
+		assertNum(t, body, "temperature", 0.6)
+		assertNum(t, body, "presence_penalty", 0.0)
+		assertNum(t, body, "min_p", 0.0)
+		assertNum(t, body, "repetition_penalty", 1.0)
+	})
+
+	t.Run("non-thinking mode via extra_body", func(t *testing.T) {
+		body := capture(t, []llms.CallOption{
+			llms.WithTemperature(0.7),
+			llms.WithTopP(0.8),
+			llms.WithTopK(20),
+			llms.WithMinP(0.0),
+			llms.WithPresencePenalty(1.5),
+			llms.WithRepetitionPenalty(1.0),
+			llms.WithN(1),
+			llms.WithMaxTokens(32768),
+			WithExtraBody(map[string]any{
+				"chat_template_kwargs": map[string]any{"enable_thinking": false},
+			}),
+		})
+		assertNum(t, body, "temperature", 0.7)
+		assertNum(t, body, "top_p", 0.8)
+		assertNum(t, body, "top_k", 20)
+		assertNum(t, body, "min_p", 0.0)
+		assertNum(t, body, "presence_penalty", 1.5)
+		assertNum(t, body, "repetition_penalty", 1.0)
+		assertNum(t, body, "n", 1)
+
+		ctk, ok := body["chat_template_kwargs"].(map[string]any)
+		if !ok {
+			t.Fatalf("wire body missing chat_template_kwargs object; body=%v", body)
+		}
+		if enable, _ := ctk["enable_thinking"].(bool); enable {
+			t.Fatalf("enable_thinking must be false on wire, got %v", ctk["enable_thinking"])
+		}
+	})
+}
+
+// With no model set anywhere, capability decisions must key off the package
+// default the client substitutes on the wire — not off an empty model. Otherwise
+// WithReasoningDisabled() on a zero-config client is a silent no-op.
+func TestZeroConfigReasoningDisabledUsesDefaultModel(t *testing.T) {
+	// Ensure no ambient model is configured so the client falls through to the
+	// package default (cannot use t.Parallel with t.Setenv).
+	t.Setenv("OPENAI_MODEL", "")
+
+	const completion = `{"id":"x","object":"chat.completion","created":1,"model":"m",` +
+		`"choices":[{"index":0,"message":{"role":"assistant","content":"ok"},"finish_reason":"stop"}],` +
+		`"usage":{"prompt_tokens":1,"completion_tokens":1,"total_tokens":2}}`
+
+	var body string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		b, _ := io.ReadAll(r.Body)
+		body = string(b)
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = io.WriteString(w, completion)
+	}))
+	defer srv.Close()
+
+	// No WithModel and no OPENAI_MODEL: the default (gpt-5.4-mini) is reasoning-on.
+	llm, err := New(WithBaseURL(srv.URL), WithToken("test"))
+	if err != nil {
+		t.Fatalf("New() error: %v", err)
+	}
+
+	if _, err := llm.GenerateContent(context.Background(),
+		[]llms.MessageContent{llms.TextParts(llms.ChatMessageTypeHuman, "hi")},
+		llms.WithReasoningDisabled()); err != nil {
+		t.Fatalf("GenerateContent() error: %v", err)
+	}
+
+	if !strings.Contains(body, `"reasoning_effort":"none"`) {
+		t.Fatalf("zero-config disable must send the disable wire for %s, got body: %s",
+			openaiclient.DefaultChatModel, body)
+	}
 }

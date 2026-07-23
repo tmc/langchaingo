@@ -76,6 +76,11 @@ func ResolveOff(model string, p Provider) OffWire {
 		if !GeminiCanDisable(model) {
 			return OffUnsupported
 		}
+		// Known non-thinking families reject thinkingBudget:0, so omit rather than
+		// send it; unknown Gemini/Gemma names stay optimistic (attempt budget:0).
+		if geminiKnownNonThinking(model) {
+			return OffOmit
+		}
 		return OffZeroBudget
 	case ProviderOpenAI:
 		if !IsReasoningModel(model) {

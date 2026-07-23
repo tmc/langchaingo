@@ -684,6 +684,37 @@ func TestConvertAndStreamFromIterator(t *testing.T) {
 	t.Skip("Skipping iterator tests - requires real genai.GenerateContentResponseIterator")
 }
 
+// A stream whose finish reason arrives on a trailing content-less chunk must still
+// carry that reason onto the accumulated candidate, so structured-output
+// validation runs on a normal STOP instead of being silently skipped.
+func TestMergeStreamCandidateCarriesFinishReasonOnContentlessChunk(t *testing.T) {
+	t.Parallel()
+
+	acc := &genai.Candidate{Content: &genai.Content{}}
+
+	// First chunk: content, not yet finished.
+	contentChunk := &genai.Candidate{
+		Content:      &genai.Content{Role: "model", Parts: []genai.Part{genai.Text(`{"x":"hi"}`)}},
+		FinishReason: genai.FinishReasonUnspecified,
+	}
+	if !mergeStreamCandidate(acc, contentChunk) {
+		t.Fatal("content chunk must report content to append")
+	}
+
+	// Final chunk: no content, only the finish reason.
+	finalChunk := &genai.Candidate{FinishReason: genai.FinishReasonStop}
+	if mergeStreamCandidate(acc, finalChunk) {
+		t.Fatal("content-less chunk must report no content (end of stream)")
+	}
+
+	if acc.FinishReason != genai.FinishReasonStop {
+		t.Fatalf("finish reason = %v, want STOP", acc.FinishReason)
+	}
+	if len(acc.Content.Parts) != 1 {
+		t.Fatalf("accumulated parts = %d, want 1", len(acc.Content.Parts))
+	}
+}
+
 // Test that Vertex implements llms.Model interface
 func TestVertexImplementsModel(t *testing.T) {
 	var _ llms.Model = &Vertex{}

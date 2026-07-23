@@ -29,7 +29,7 @@ require (
 // LLM providers
 require (
 	github.com/gage-technologies/mistral-go v1.1.0
-	github.com/ollama/ollama v0.18.0
+	github.com/ollama/ollama v0.23.0
 	github.com/pkoukk/tiktoken-go v0.1.8
 	google.golang.org/genai v1.42.0
 )

@@ -150,6 +150,24 @@ func ResolveClaudeAdaptive(model string, adaptivePreferred bool) bool {
 	}
 }
 
+// preAdaptiveClaude are known Claude generations released before adaptive thinking
+// existed (adaptive arrived with Opus 4.6 / Sonnet 4.6). They are "unknown" to the
+// reasoning-kind table only because legacy models are not enumerated there; an
+// adaptive request on them must not be forwarded as thinking.type=adaptive, which
+// these models reject with a 400.
+var preAdaptiveClaude = []string{
+	"claude-2", "claude-instant",
+	"claude-3", // claude-3, claude-3-5, claude-3-7 all predate adaptive
+	"claude-opus-4-1",
+}
+
+// ClaudePredatesAdaptive reports whether the model is a known pre-adaptive Claude
+// generation, so an adaptive request must be gated (not sent verbatim) rather than
+// optimistically forwarded the way a genuinely newer, unclassified model is.
+func ClaudePredatesAdaptive(model string) bool {
+	return containsAny(strings.ToLower(model), preAdaptiveClaude)
+}
+
 // ClaudeRejectsSampling reports whether the model rejects temperature/top_p
 // outright (true only for the adaptive-only generation), so sampling params
 // must be dropped even when no thinking is requested.

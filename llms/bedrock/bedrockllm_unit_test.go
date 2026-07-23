@@ -282,6 +282,16 @@ func TestSupportsCaching(t *testing.T) {
 			expected: true,
 		},
 		{
+			name:     "Claude Sonnet 5 supports caching",
+			modelID:  ModelAnthropicClaudeSonnet5,
+			expected: true,
+		},
+		{
+			name:     "Claude Fable 5 supports caching",
+			modelID:  ModelAnthropicClaudeFable5,
+			expected: true,
+		},
+		{
 			name:     "Amazon Nova does not support caching",
 			modelID:  ModelAmazonNovaProV1,
 			expected: false,

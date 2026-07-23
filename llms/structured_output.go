@@ -1,9 +1,12 @@
 package llms
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
+
+	"github.com/santhosh-tekuri/jsonschema/v6"
 )
 
 // StructuredOutputConfig requests provider-native, schema-constrained output for a
@@ -129,7 +132,31 @@ func (o *CallOptions) ValidateStructuredOutput() error {
 	if so.Name != "" && !isValidStructuredOutputName(so.Name) {
 		return fmt.Errorf("%w: name %q must be 1-64 chars of letters, digits, '_' or '-'", ErrStructuredOutputConfig, so.Name)
 	}
+	// Compile the schema now so a document that parses as an object but cannot be
+	// compiled (e.g. a pattern using ECMA-262 lookahead that Go's regexp rejects)
+	// fails locally as a configuration error, before a request is sent and paid for,
+	// instead of surfacing later as a mis-attributed response-validation failure.
+	if err := compileStructuredOutputSchema(so.Schema); err != nil {
+		return fmt.Errorf("%w: schema does not compile: %w", ErrStructuredOutputConfig, err)
+	}
 	return nil
+}
+
+// compileStructuredOutputSchema compiles a raw JSON Schema document (Draft 2020-12
+// without an explicit $schema) purely to surface compile errors. It mirrors the
+// compiler the response path uses so both accept the exact same schemas.
+func compileStructuredOutputSchema(schema json.RawMessage) error {
+	doc, err := jsonschema.UnmarshalJSON(bytes.NewReader(schema))
+	if err != nil {
+		return err
+	}
+	const resource = "structuredoutput:schema"
+	comp := jsonschema.NewCompiler()
+	if err := comp.AddResource(resource, doc); err != nil {
+		return err
+	}
+	_, err = comp.Compile(resource)
+	return err
 }
 
 // isValidStructuredOutputName reports whether name satisfies the OpenAI schema-name

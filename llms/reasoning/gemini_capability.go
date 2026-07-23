@@ -24,6 +24,19 @@ func GeminiUsesThinkingLevel(model string) bool {
 	return strings.Contains(strings.ToLower(model), "gemini-3")
 }
 
+// geminiKnownNonThinking reports whether the model is a pre-thinking Gemini/Gemma
+// generation that never thinks (Gemini 1.x/2.0, Gemma 1–3), so it takes no thinking
+// control at all. Unclassified names are NOT matched, staying optimistic so a
+// future thinking model is not wrongly treated as non-thinking.
+func geminiKnownNonThinking(model string) bool {
+	m := strings.ToLower(model)
+	return strings.Contains(m, "gemini-1") ||
+		strings.Contains(m, "gemini-2.0") ||
+		strings.Contains(m, "gemma-1") ||
+		strings.Contains(m, "gemma-2") ||
+		strings.Contains(m, "gemma-3")
+}
+
 // GeminiCanDisable reports whether thinking can be turned off via
 // thinkingBudget:0. Gemini 2.5 Flash/Flash-Lite and Gemma 4 can; Gemini 2.5 Pro
 // and Gemini 3.x (budget:0 is ignored) cannot. Unclassified Google models are

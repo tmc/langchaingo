@@ -74,7 +74,7 @@ func (c *Client) setCompletionDefaults(payload *CompletionRequest) {
 		payload.Model = c.Model
 	// Fallback: use the default model
 	default:
-		payload.Model = defaultChatModel
+		payload.Model = DefaultChatModel
 	}
 }
 

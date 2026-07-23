@@ -64,6 +64,19 @@ func TestApplyAnthropicReasoning_AdaptiveBypassesVersionGate(t *testing.T) {
 	assert.Equal(t, "high", input.OutputConfig.Effort)
 }
 
+func TestApplyAnthropicReasoning_AdaptiveOnPreAdaptiveModelIsGated(t *testing.T) {
+	t.Parallel()
+
+	// claude-3-5-haiku has no adaptive (indeed no extended thinking): an adaptive
+	// request must not be forwarded as thinking.type=adaptive, which would 400.
+	input := anthropicTextGenerationInput{MaxTokens: 2048}
+	applyAnthropicReasoning(&input,
+		&llms.ReasoningConfig{Effort: llms.ReasoningHigh, Adaptive: true},
+		"us.anthropic.claude-3-5-haiku-20241022-v1:0", 2048)
+
+	assert.Nil(t, input.Thinking, "pre-adaptive model must not receive adaptive thinking")
+}
+
 func TestApplyAnthropicReasoning_AdaptiveEmptyEffortDefaultsToHigh(t *testing.T) {
 	t.Parallel()
 

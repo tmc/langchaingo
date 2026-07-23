@@ -79,9 +79,21 @@ func (l *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOptio
 }
 
 // GenerateContent implements llms.Model.
-func (l *LLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) {
+func (l *LLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (resp *llms.ContentResponse, err error) { //nolint:nonamedreturns
+	// Emit exactly one closing callback: HandleLLMError on any error (config
+	// preflight, transport or a structured-output validation failure), otherwise
+	// HandleLLMGenerateContentEnd — consistent across every provider adapter. For a
+	// structured-output validation failure resp is non-nil (the assembled response
+	// is returned alongside the typed error); it is nil for a hard error.
 	if l.CallbacksHandler != nil {
 		l.CallbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
+		defer func() {
+			if err != nil {
+				l.CallbacksHandler.HandleLLMError(ctx, err)
+			} else {
+				l.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, resp)
+			}
+		}()
 	}
 
 	opts := llms.CallOptions{
@@ -145,21 +157,10 @@ func (l *LLM) generateContentWithConverseAPI(ctx context.Context, messages []llm
 		input.StopSequences = opts.StopWords
 	}
 
-	res, err := l.converseClient.CreateCompletionConverse(ctx, input)
-	if err != nil {
-		if l.CallbacksHandler != nil {
-			l.CallbacksHandler.HandleLLMError(ctx, err)
-		}
-		// res is non-nil for a structured-output validation failure (returned with
-		// the typed error so usage/content/stop metadata survive); nil for a hard error.
-		return res, err
-	}
-
-	if l.CallbacksHandler != nil {
-		l.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, res)
-	}
-
-	return res, nil
+	// res is non-nil for a structured-output validation failure (returned with the
+	// typed error so usage/content/stop metadata survive); nil for a hard error.
+	// The closing callback is emitted once by GenerateContent's deferred handler.
+	return l.converseClient.CreateCompletionConverse(ctx, input)
 }
 
 // generateContentWithLegacyAPI uses the original model-specific implementations
@@ -171,21 +172,10 @@ func (l *LLM) generateContentWithLegacyAPI(ctx context.Context, messages []llms.
 		return nil, err
 	}
 
-	res, err := l.client.CreateCompletion(ctx, opts.GetModel(), m, opts)
-	if err != nil {
-		if l.CallbacksHandler != nil {
-			l.CallbacksHandler.HandleLLMError(ctx, err)
-		}
-		// res is non-nil for a structured-output validation failure (returned with
-		// the typed error so usage/content/stop metadata survive); nil for a hard error.
-		return res, err
-	}
-
-	if l.CallbacksHandler != nil {
-		l.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, res)
-	}
-
-	return res, nil
+	// res is non-nil for a structured-output validation failure (returned with the
+	// typed error so usage/content/stop metadata survive); nil for a hard error.
+	// The closing callback is emitted once by GenerateContent's deferred handler.
+	return l.client.CreateCompletion(ctx, opts.GetModel(), m, opts)
 }
 
 func processMessages(messages []llms.MessageContent) ([]bedrockclient.Message, error) {
@@ -350,11 +340,18 @@ func checkIfCachingRequested(messages []llms.MessageContent) bool {
 
 // supportsCaching checks if the model supports prompt caching
 func (l *LLM) supportsCaching(modelID string) bool {
-	// All Claude 4.x models support prompt caching (Opus, Sonnet, Haiku)
+	// All Claude 4.x and 5.x models support prompt caching. The 5.x line uses
+	// bare-name IDs (e.g. claude-sonnet-5, claude-fable-5) rather than the dated
+	// 4.x form, so both shapes are matched here.
 	cachingPatterns := []string{
 		"claude-opus-4",
 		"claude-sonnet-4",
 		"claude-haiku-4",
+		"claude-opus-5",
+		"claude-sonnet-5",
+		"claude-haiku-5",
+		"claude-fable-5",
+		"claude-mythos-5",
 	}
 
 	for _, pattern := range cachingPatterns {

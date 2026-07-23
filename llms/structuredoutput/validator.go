@@ -57,7 +57,10 @@ func (c *Compiled) ValidateText(text string) error {
 func Validate(schema json.RawMessage, provider, model string, choice int, stopReason, text string) error {
 	compiled, err := Compile(schema)
 	if err != nil {
-		return wrap(provider, model, choice, stopReason, err)
+		// A schema that fails to compile is a configuration error, not the model
+		// answering badly; the preflight normally catches this before the network,
+		// but classify it correctly here too rather than blaming the response.
+		return fmt.Errorf("%w: schema does not compile: %w", llms.ErrStructuredOutputConfig, err)
 	}
 	if err := compiled.ValidateText(text); err != nil {
 		return wrap(provider, model, choice, stopReason, err)

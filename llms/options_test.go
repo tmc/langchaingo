@@ -505,6 +505,55 @@ func TestStreamingFuncError(t *testing.T) {
 	}
 }
 
+func TestGetTemperatureReasoningGuard(t *testing.T) {
+	t.Parallel()
+
+	// A model from the forced-reasoning catalog whose thinking is not toggled off.
+	const reasoningModel = "o3-mini"
+	const plainModel = "gpt-4.1"
+
+	temp := func(v float64) *float64 { return &v }
+	model := func(v string) *string { return &v }
+
+	cases := []struct {
+		name      string
+		model     string
+		reasoning *llms.ReasoningConfig
+		want      float64
+	}{
+		{
+			name:  "reasoning model without reasoning option is pinned to 1.0",
+			model: reasoningModel,
+			want:  1.0,
+		},
+		{
+			name:      "reasoning model with explicit disable honors user temperature",
+			model:     reasoningModel,
+			reasoning: &llms.ReasoningConfig{Mode: llms.ReasoningOff},
+			want:      0.2,
+		},
+		{
+			name:  "non-reasoning model always honors user temperature",
+			model: plainModel,
+			want:  0.2,
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			opts := llms.CallOptions{
+				Model:       model(tc.model),
+				Temperature: temp(0.2),
+				Reasoning:   tc.reasoning,
+			}
+			if got := opts.GetTemperature(); got != tc.want {
+				t.Fatalf("GetTemperature() = %v, want %v", got, tc.want)
+			}
+		})
+	}
+}
+
 func TestEmptyOptions(t *testing.T) {
 	var opts llms.CallOptions
 
@@ -627,6 +676,14 @@ func TestValidateStructuredOutput(t *testing.T) {
 		{
 			name:    "invalid name",
 			opts:    llms.CallOptions{JSONMode: true, StructuredOutput: &llms.StructuredOutputConfig{Name: "bad name!", Schema: json.RawMessage(`{"type":"object"}`)}},
+			wantErr: true,
+		},
+		{
+			// A pattern using ECMA-262 lookahead compiles in a browser but Go's
+			// regexp engine rejects it, so this schema parses as an object yet does
+			// not compile — it must be caught locally as a configuration error.
+			name:    "uncompilable pattern schema",
+			opts:    llms.CallOptions{JSONMode: true, StructuredOutput: &llms.StructuredOutputConfig{Name: "s", Schema: json.RawMessage(`{"type":"object","properties":{"p":{"type":"string","pattern":"(?=.*[a-z])"}}}`)}},
 			wantErr: true,
 		},
 	}

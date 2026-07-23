@@ -115,9 +115,21 @@ func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOptio
 }
 
 // GenerateContent implements the Model interface.
-func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) { // nolint: lll, cyclop, funlen
+func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (response *llms.ContentResponse, err error) { // nolint: lll, cyclop, funlen, nonamedreturns
+	// Emit exactly one closing callback: HandleLLMError on any error (config
+	// preflight, transport or a structured-output validation failure), otherwise
+	// HandleLLMGenerateContentEnd — consistent across every provider adapter. For a
+	// structured-output validation failure response is non-nil (returned alongside
+	// the typed error so usage is preserved); it is nil for a hard error.
 	if o.CallbacksHandler != nil {
 		o.CallbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
+		defer func() {
+			if err != nil {
+				o.CallbacksHandler.HandleLLMError(ctx, err)
+			} else {
+				o.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, response)
+			}
+		}()
 	}
 
 	opts := llms.CallOptions{}
@@ -152,25 +164,15 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 
 	resp, err := o.handleChat(ctx, req, opts)
 	if err != nil {
-		if o.CallbacksHandler != nil {
-			o.CallbacksHandler.HandleLLMError(ctx, err)
-		}
 		return nil, err
 	}
 
-	response := o.createContentResponse(resp)
+	response = o.createContentResponse(resp)
 
 	// When a schema was requested, validate the final response against it; the
 	// response is returned alongside the typed error so usage is preserved.
-	if err := o.validateStructuredOutput(opts, response); err != nil {
-		if o.CallbacksHandler != nil {
-			o.CallbacksHandler.HandleLLMError(ctx, err)
-		}
+	if err = o.validateStructuredOutput(opts, response); err != nil {
 		return response, err
-	}
-
-	if o.CallbacksHandler != nil {
-		o.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, response)
 	}
 
 	return response, nil
@@ -187,6 +189,11 @@ func (o *LLM) validateStructuredOutput(opts llms.CallOptions, resp *llms.Content
 	model := o.getModel(opts)
 	for i, choice := range resp.Choices {
 		if choice.StopReason != "" && choice.StopReason != "stop" {
+			continue
+		}
+		// A tool-call turn is an intermediate step, not the final schema-typed
+		// answer: its content is empty and must not be validated against the schema.
+		if len(choice.ToolCalls) > 0 {
 			continue
 		}
 		if err := structuredoutput.Validate(so.Schema, providerOllama, model, i, choice.StopReason, choice.Content); err != nil {

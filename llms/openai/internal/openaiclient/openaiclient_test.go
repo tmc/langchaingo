@@ -183,8 +183,8 @@ func TestClient_WithResponseFormat(t *testing.T) {
 		},
 		Temperature:         getFloatPointer(0.0),
 		MaxCompletionTokens: getIntPointer(50),
-		ResponseFormat:      respFormat,
 	}
+	req.SetResponseFormat(respFormat)
 
 	resp, err := client.CreateChat(ctx, req)
 	require.NoError(t, err)

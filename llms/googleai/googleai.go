@@ -84,9 +84,19 @@ func (g *GoogleAI) GenerateContent(
 	ctx context.Context,
 	messages []llms.MessageContent,
 	options ...llms.CallOption,
-) (*llms.ContentResponse, error) {
+) (resp *llms.ContentResponse, err error) { //nolint:nonamedreturns
+	// Emit exactly one closing callback: HandleLLMError on any error (transport,
+	// config or a structured-output validation failure), otherwise
+	// HandleLLMGenerateContentEnd — consistent across every provider adapter.
 	if g.CallbacksHandler != nil {
 		g.CallbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
+		defer func() {
+			if err != nil {
+				g.CallbacksHandler.HandleLLMError(ctx, err)
+			} else {
+				g.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, resp)
+			}
+		}()
 	}
 
 	opts := llms.CallOptions{
@@ -189,10 +199,6 @@ func (g *GoogleAI) GenerateContent(
 	// against the original schema; the response is returned with the typed error.
 	if err := validateGoogleStructuredOutput(&opts, response); err != nil {
 		return response, err
-	}
-
-	if g.CallbacksHandler != nil {
-		g.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, response)
 	}
 
 	return response, nil

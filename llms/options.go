@@ -318,7 +318,10 @@ func (o *CallOptions) GetTemperature() float64 {
 	if o.Temperature == nil {
 		return DefaultTemperature
 	}
-	if reasoning.IsReasoningModel(o.GetModel()) {
+	// Reasoning models require temperature=1.0, but only when thinking is not
+	// explicitly disabled — an explicit WithReasoningDisabled() must let the
+	// user's temperature through, matching the OpenAI adapter's guard.
+	if reasoning.IsReasoningModel(o.GetModel()) && !o.Reasoning.IsDisabled() {
 		return 1.0
 	}
 	return *o.Temperature

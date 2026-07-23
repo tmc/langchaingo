@@ -231,10 +231,10 @@ func DefaultIsReasoningModel(model string) bool { //nolint:funlen // a flat cata
 		return true
 	}
 
-	// Qwen reasoning models. Qwen3.x models reason (thinking is toggleable), while
-	// older qwen models need an explicit "thinking" marker or the QwQ line.
-	if strings.HasPrefix(modelLower, "qwen3") ||
-		(strings.HasPrefix(modelLower, "qwen") && strings.Contains(modelLower, "thinking")) ||
+	// Qwen reasoning models. Qwen3.x thinking is user-toggleable with configurable
+	// sampling, so the bare qwen3 prefix must not force temperature pinning; only
+	// an explicit "thinking" marker or the QwQ line count as always-on reasoning.
+	if (strings.HasPrefix(modelLower, "qwen") && strings.Contains(modelLower, "thinking")) ||
 		strings.Contains(modelLower, "qwq-") {
 		return true
 	}

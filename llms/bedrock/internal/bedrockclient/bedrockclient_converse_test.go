@@ -618,6 +618,51 @@ func TestConverseClient_AdaptiveReasoningNonAnthropicModel(t *testing.T) {
 	mockClient.AssertExpectations(t)
 }
 
+func TestConverseClient_AdaptiveReasoningPreAdaptiveModelGated(t *testing.T) {
+	mockClient := &MockBedrockRuntimeClient{}
+	client := NewConverseClient(mockClient)
+
+	var capturedInput *bedrockruntime.ConverseInput
+	mockClient.On("Converse", mock.Anything, mock.MatchedBy(func(input *bedrockruntime.ConverseInput) bool {
+		capturedInput = input
+		return true
+	}), mock.Anything).Return(&bedrockruntime.ConverseOutput{
+		Output: &types.ConverseOutputMemberMessage{
+			Value: types.Message{
+				Role:    types.ConversationRoleAssistant,
+				Content: []types.ContentBlock{&types.ContentBlockMemberText{Value: "ok"}},
+			},
+		},
+	}, nil)
+
+	// claude-3-5-haiku predates adaptive thinking: an adaptive request must not be
+	// forwarded as thinking.type=adaptive (the API would reject it with a 400).
+	input := &ConverseInput{
+		ModelID:         "us.anthropic.claude-3-5-haiku-20241022-v1:0",
+		Messages:        []Message{{Role: llms.ChatMessageTypeHuman, Content: "Hello", Type: "text"}},
+		MaxTokens:       ptr(2000),
+		Temperature:     ptr(0.8),
+		ReasoningConfig: &llms.ReasoningConfig{Effort: llms.ReasoningHigh, Adaptive: true},
+	}
+
+	_, err := client.CreateCompletionConverse(t.Context(), input)
+	assert.NoError(t, err)
+
+	if capturedInput.AdditionalModelRequestFields == nil {
+		mockClient.AssertExpectations(t)
+		return // no thinking payload at all is the acceptable outcome
+	}
+	raw, err := capturedInput.AdditionalModelRequestFields.MarshalSmithyDocument()
+	assert.NoError(t, err)
+	var fields map[string]any
+	assert.NoError(t, json.Unmarshal(raw, &fields))
+	if thinking, ok := fields["thinking"].(map[string]any); ok {
+		assert.NotEqual(t, "adaptive", thinking["type"], "pre-adaptive model must not receive adaptive thinking")
+	}
+
+	mockClient.AssertExpectations(t)
+}
+
 func TestConverseClient_EmptyResponse(t *testing.T) {
 	mockClient := &MockBedrockRuntimeClient{}
 	client := NewConverseClient(mockClient)

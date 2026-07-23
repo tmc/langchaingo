@@ -50,9 +50,19 @@ func (g *Vertex) GenerateContent(
 	ctx context.Context,
 	messages []llms.MessageContent,
 	options ...llms.CallOption,
-) (*llms.ContentResponse, error) {
+) (resp *llms.ContentResponse, err error) { //nolint:nonamedreturns
+	// Emit exactly one closing callback: HandleLLMError on any error (transport,
+	// config or a structured-output validation failure), otherwise
+	// HandleLLMGenerateContentEnd — consistent across every provider adapter.
 	if g.CallbacksHandler != nil {
 		g.CallbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
+		defer func() {
+			if err != nil {
+				g.CallbacksHandler.HandleLLMError(ctx, err)
+			} else {
+				g.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, resp)
+			}
+		}()
 	}
 
 	opts := llms.CallOptions{
@@ -102,7 +112,6 @@ func (g *Vertex) GenerateContent(
 			Threshold: convertVertexHarmBlockThreshold(g.opts.HarmThreshold),
 		},
 	}
-	var err error
 	if model.Tools, err = convertTools(opts.Tools); err != nil {
 		return nil, err
 	}
@@ -132,10 +141,6 @@ func (g *Vertex) GenerateContent(
 	// against the original schema; the response is returned with the typed error.
 	if err := validateVertexStructuredOutput(&opts, response); err != nil {
 		return response, err
-	}
-
-	if g.CallbacksHandler != nil {
-		g.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, response)
 	}
 
 	return response, nil
@@ -371,14 +376,9 @@ DoStream:
 		}
 		respCandidate := resp.Candidates[0]
 
-		if respCandidate.Content == nil {
+		if !mergeStreamCandidate(candidate, respCandidate) {
 			break DoStream
 		}
-		candidate.Content.Parts = append(candidate.Content.Parts, respCandidate.Content.Parts...)
-		candidate.Content.Role = respCandidate.Content.Role
-		candidate.FinishReason = respCandidate.FinishReason
-		candidate.SafetyRatings = respCandidate.SafetyRatings
-		candidate.CitationMetadata = respCandidate.CitationMetadata
 
 		for _, part := range respCandidate.Content.Parts {
 			if text, ok := part.(genai.Text); ok {
@@ -390,6 +390,23 @@ DoStream:
 	}
 	mresp := iter.MergedResponse()
 	return convertCandidates([]*genai.Candidate{candidate}, mresp.UsageMetadata)
+}
+
+// mergeStreamCandidate folds one streamed candidate into the accumulator. It
+// records the finish reason and metadata even when the chunk carries no content —
+// the finish reason often arrives on a trailing content-less chunk, and dropping
+// it would leave StopReason unset and silently skip structured-output validation.
+// It reports whether the chunk had content to append (false ends the stream).
+func mergeStreamCandidate(acc, chunk *genai.Candidate) bool {
+	acc.FinishReason = chunk.FinishReason
+	acc.SafetyRatings = chunk.SafetyRatings
+	acc.CitationMetadata = chunk.CitationMetadata
+	if chunk.Content == nil {
+		return false
+	}
+	acc.Content.Parts = append(acc.Content.Parts, chunk.Content.Parts...)
+	acc.Content.Role = chunk.Content.Role
+	return true
 }
 
 // convertTools converts from a list of langchaingo tools to a list of genai

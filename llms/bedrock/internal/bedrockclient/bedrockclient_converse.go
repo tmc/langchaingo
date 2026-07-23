@@ -180,8 +180,11 @@ func (c *ConverseClient) buildConverseInput(input *ConverseInput) (*bedrockrunti
 			} else {
 				setBudget()
 			}
-		case input.ReasoningConfig.Adaptive && isAnthropicModelID(input.ModelID):
-			// Unclassified Claude generation with an explicit adaptive request.
+		case input.ReasoningConfig.Adaptive && isAnthropicModelID(input.ModelID) &&
+			!reasoning.ClaudePredatesAdaptive(input.ModelID):
+			// Unclassified — assumed newer than the table — Claude generation with an
+			// explicit adaptive request. Known pre-adaptive families are excluded so
+			// adaptive is never sent to a model (e.g. claude-3-5-haiku) that rejects it.
 			setAdaptive()
 		case c.supportsReasoning(input.ModelID):
 			// Non-Claude reasoning model (gpt-oss, kimi): budget thinking.

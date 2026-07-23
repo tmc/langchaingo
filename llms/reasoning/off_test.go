@@ -27,6 +27,10 @@ func TestResolveOff(t *testing.T) {
 		{"gemini-3-flash", ProviderGoogleAI, OffUnsupported},
 		{"gemma-4-31b-it", ProviderGoogleAI, OffZeroBudget},
 		{"gemma-4-26b-a4b-it", ProviderGoogleAI, OffZeroBudget},
+		// Pre-thinking Gemini/Gemma never think: omit rather than send budget:0.
+		{"gemini-2.0-flash", ProviderGoogleAI, OffOmit},
+		{"gemini-1.5-pro", ProviderGoogleAI, OffOmit},
+		{"gemma-3-27b-it", ProviderGoogleAI, OffOmit},
 		{"gpt-5.5", ProviderOpenAI, OffEffortNone},
 		{"o3-mini", ProviderOpenAI, OffUnsupported},
 		{"o1-preview", ProviderOpenAI, OffUnsupported},

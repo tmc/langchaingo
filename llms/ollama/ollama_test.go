@@ -552,4 +552,14 @@ func TestValidateStructuredOutput(t *testing.T) {
 		t.Parallel()
 		require.NoError(t, llm.validateStructuredOutput(applyOpts(), mk(`not json`, "stop")))
 	})
+
+	t.Run("tool-call turn is not validated against schema", func(t *testing.T) {
+		t.Parallel()
+		resp := &llms.ContentResponse{Choices: []*llms.ContentChoice{{
+			Content:    "",
+			StopReason: "stop",
+			ToolCalls:  []llms.ToolCall{{ID: "1", FunctionCall: &llms.FunctionCall{Name: "f", Arguments: "{}"}}},
+		}}}
+		require.NoError(t, llm.validateStructuredOutput(opts, resp))
+	})
 }

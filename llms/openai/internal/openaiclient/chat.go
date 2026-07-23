@@ -18,7 +18,10 @@ import (
 )
 
 const (
-	defaultChatModel = "gpt-5.4-mini"
+	// DefaultChatModel is the model the client substitutes when none is set. It is
+	// exported so capability decisions in the adapter key off the same model the
+	// request will actually run on.
+	DefaultChatModel = "gpt-5.4-mini"
 )
 
 var ErrContentExclusive = errors.New("only one of Content / MultiContent allowed in message")
@@ -67,8 +70,11 @@ type ChatRequest struct {
 	// Do not set both Reasoning and ReasoningEffort at the same time, as they are mutually exclusive.
 	Reasoning *ReasoningOptions `json:"reasoning,omitempty"`
 
-	// ResponseFormat is the format of the response.
-	ResponseFormat *ResponseFormat `json:"response_format,omitempty"`
+	// ResponseFormat is the format of the response. Its wire value is either the
+	// typed public builder or a verbatim WithStructuredOutput schema; both are held
+	// by the internal responseFormatField so the raw-schema path never rides on the
+	// public ResponseFormat type. Set it via SetResponseFormat / SetStructuredOutputSchema.
+	ResponseFormat *responseFormatField `json:"response_format,omitempty"`
 
 	// LogProbs indicates whether to return log probabilities of the output tokens or not.
 	// If true, returns the log probabilities of each output token returned in the content of message.
@@ -106,6 +112,16 @@ type ChatRequest struct {
 	// ExtraBody allows passing additional fields that will be merged into the request body.
 	// These fields take precedence over the standard fields.
 	ExtraBody map[string]any `json:"-"`
+}
+
+// SetResponseFormat sets the response_format from the typed public builder (or the
+// json_object shortcut). Passing nil clears it.
+func (r *ChatRequest) SetResponseFormat(rf *ResponseFormat) {
+	if rf == nil {
+		r.ResponseFormat = nil
+		return
+	}
+	r.ResponseFormat = &responseFormatField{typed: rf}
 }
 
 // ToolType is the type of a tool.
@@ -193,10 +209,20 @@ type ResponseFormatJSONSchema struct {
 	Schema *ResponseFormatJSONSchemaProperty `json:"schema"`
 }
 
+// ResponseFormat is the format of the response. It carries only the exported
+// public shape (Type, JSONSchema) so the type stays comparable and, as a public
+// alias, keeps its layout and default marshaling — the verbatim-schema path for
+// the general WithStructuredOutput flow lives on ChatRequest instead (see
+// ChatRequest.rawResponseFormat), never on this public type.
+type ResponseFormat struct {
+	Type       string                    `json:"type"`
+	JSONSchema *ResponseFormatJSONSchema `json:"json_schema,omitempty"`
+}
+
 // rawResponseFormatJSONSchema carries a verbatim JSON Schema for the general
-// WithStructuredOutput path. It is deliberately NOT exposed through the public
-// openai aliases, so an arbitrary JSON Schema construct reaches the wire without
-// changing the shape or comparability of the public types.
+// WithStructuredOutput path. It is internal to ChatRequest serialization and is
+// never exposed through the public openai aliases, so an arbitrary JSON Schema
+// construct reaches the wire without touching the public types.
 type rawResponseFormatJSONSchema struct {
 	Name        string          `json:"name"`
 	Description string          `json:"description,omitempty"`
@@ -204,34 +230,51 @@ type rawResponseFormatJSONSchema struct {
 	Schema      json.RawMessage `json:"schema"`
 }
 
-// ResponseFormat is the format of the response. The public shape (Type, JSONSchema)
-// is unchanged; the raw-schema path is carried in an unexported field so the type
-// stays comparable and its exported layout is preserved.
-type ResponseFormat struct {
-	Type       string                    `json:"type"`
-	JSONSchema *ResponseFormatJSONSchema `json:"json_schema,omitempty"`
-	raw        *rawResponseFormatJSONSchema
+// rawResponseFormatEnvelope is the response_format object emitted for a raw schema.
+type rawResponseFormatEnvelope struct {
+	Type       string                       `json:"type"`
+	JSONSchema *rawResponseFormatJSONSchema `json:"json_schema,omitempty"`
 }
 
-// MarshalJSON emits the raw-schema path as json_schema when set, otherwise the
-// public typed shape unchanged.
-func (r ResponseFormat) MarshalJSON() ([]byte, error) {
-	if r.raw != nil {
-		return json.Marshal(struct {
-			Type       string                       `json:"type"`
-			JSONSchema *rawResponseFormatJSONSchema `json:"json_schema,omitempty"`
-		}{Type: r.Type, JSONSchema: r.raw})
+// responseFormatField is ChatRequest's internal response_format value. It carries
+// either the typed public builder or a verbatim raw schema and serializes to the
+// same wire shape either would, so raw-schema support stays off the public
+// ResponseFormat type without changing the request wire format or field order.
+type responseFormatField struct {
+	typed *ResponseFormat
+	raw   *rawResponseFormatJSONSchema
+}
+
+func (f responseFormatField) MarshalJSON() ([]byte, error) {
+	if f.raw != nil {
+		return json.Marshal(rawResponseFormatEnvelope{Type: "json_schema", JSONSchema: f.raw})
 	}
-	type alias ResponseFormat
-	return json.Marshal(alias(r))
+	return json.Marshal(f.typed)
 }
 
-// NewRawJSONSchemaResponseFormat builds a strict json_schema response_format from a
-// verbatim JSON Schema, for the general llms.WithStructuredOutput path.
-func NewRawJSONSchemaResponseFormat(name, description string, schema json.RawMessage) *ResponseFormat {
-	return &ResponseFormat{
-		Type: "json_schema",
-		raw:  &rawResponseFormatJSONSchema{Name: name, Description: description, Strict: true, Schema: schema},
+// FormatType reports the response_format "type" this field serializes to
+// ("json_schema" for a raw schema, otherwise the typed builder's Type).
+func (f *responseFormatField) FormatType() string {
+	if f.raw != nil {
+		return "json_schema"
+	}
+	if f.typed != nil {
+		return f.typed.Type
+	}
+	return ""
+}
+
+// SetStructuredOutputSchema records a verbatim JSON Schema to emit as a strict
+// json_schema response_format for the general llms.WithStructuredOutput path,
+// keeping the raw schema off the public ResponseFormat type.
+func (r *ChatRequest) SetStructuredOutputSchema(name, description string, schema json.RawMessage) {
+	r.ResponseFormat = &responseFormatField{
+		raw: &rawResponseFormatJSONSchema{
+			Name:        name,
+			Description: description,
+			Strict:      true,
+			Schema:      schema,
+		},
 	}
 }
 

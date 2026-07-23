@@ -76,9 +76,19 @@ func (o *LLM) GenerateTTS(ctx context.Context, input string, options ...llms.Cal
 }
 
 // GenerateContent implements the Model interface.
-func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) { //nolint:lll
+func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (resp *llms.ContentResponse, err error) { //nolint:lll,nonamedreturns
+	// Emit exactly one closing callback for the call: HandleLLMError on any error
+	// (transport, config or a structured-output validation failure), otherwise
+	// HandleLLMGenerateContentEnd — consistent across every provider adapter.
 	if o.CallbacksHandler != nil {
 		o.CallbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
+		defer func() {
+			if err != nil {
+				o.CallbacksHandler.HandleLLMError(ctx, err)
+			} else {
+				o.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, resp)
+			}
+		}()
 	}
 
 	opts := llms.CallOptions{}
@@ -113,9 +123,6 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		return response, err
 	}
 
-	if o.CallbacksHandler != nil {
-		o.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, response)
-	}
 	return response, nil
 }
 
@@ -248,7 +255,7 @@ func (o *LLM) createChatRequest(chatMsgs []*ChatMessage, opts llms.CallOptions) 
 	}
 
 	if opts.GetJSONMode() {
-		req.ResponseFormat = ResponseFormatJSON
+		req.SetResponseFormat(ResponseFormatJSON)
 	}
 
 	// set temperature to 1.0 for reasoning models, unless reasoning is explicitly
@@ -265,7 +272,7 @@ func (o *LLM) createChatRequest(chatMsgs []*ChatMessage, opts llms.CallOptions) 
 
 	// set response format from client if available
 	if o.client.ResponseFormat != nil {
-		req.ResponseFormat = o.client.ResponseFormat
+		req.SetResponseFormat(o.client.ResponseFormat)
 	}
 
 	// per-call schema-constrained structured output takes precedence over JSONMode
@@ -283,13 +290,17 @@ func (o *LLM) createChatRequest(chatMsgs []*ChatMessage, opts llms.CallOptions) 
 }
 
 // effectiveModel resolves the model the request runs on: a per-call model wins,
-// otherwise the client default (only substituted downstream), so capability
-// decisions key off the same model the API will use.
+// then the client default, and finally the package default the client itself
+// substitutes on the wire — so capability decisions (reasoning-off, effort clamp,
+// temperature pinning) key off the same model the API will actually use.
 func (o *LLM) effectiveModel(opts llms.CallOptions) string {
 	if m := opts.GetModel(); m != "" {
 		return m
 	}
-	return o.client.Model
+	if o.client.Model != "" {
+		return o.client.Model
+	}
+	return openaiclient.DefaultChatModel
 }
 
 // setReasoning sets reasoning options, depends on the client and request options.

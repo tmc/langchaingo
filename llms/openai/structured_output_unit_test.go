@@ -1,10 +1,15 @@
 package openai
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
+	"io"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 
+	"github.com/vxcontrol/langchaingo/callbacks"
 	"github.com/vxcontrol/langchaingo/llms"
 	"github.com/vxcontrol/langchaingo/llms/openai/internal/openaiclient"
 )
@@ -37,7 +42,7 @@ func TestCreateChatRequest_ResponseFormatModes(t *testing.T) { //nolint:funlen /
 		if err != nil {
 			t.Fatal(err)
 		}
-		if req.ResponseFormat == nil || req.ResponseFormat.Type != "json_object" {
+		if req.ResponseFormat == nil || req.ResponseFormat.FormatType() != "json_object" {
 			t.Fatalf("want json_object, got %+v", req.ResponseFormat)
 		}
 	})
@@ -51,7 +56,7 @@ func TestCreateChatRequest_ResponseFormatModes(t *testing.T) { //nolint:funlen /
 		if err != nil {
 			t.Fatal(err)
 		}
-		if req.ResponseFormat == nil || req.ResponseFormat.Type != "json_schema" {
+		if req.ResponseFormat == nil || req.ResponseFormat.FormatType() != "json_schema" {
 			t.Fatalf("want json_schema, got %+v", req.ResponseFormat)
 		}
 		// The general raw path serializes to json_schema on the wire (it does not
@@ -124,7 +129,7 @@ func TestCreateChatRequest_ResponseFormatModes(t *testing.T) { //nolint:funlen /
 		if err != nil {
 			t.Fatalf("unknown model must pass through, got %v", err)
 		}
-		if req.ResponseFormat.Type != "json_schema" {
+		if req.ResponseFormat.FormatType() != "json_schema" {
 			t.Fatalf("want json_schema, got %+v", req.ResponseFormat)
 		}
 	})
@@ -177,31 +182,85 @@ func TestResponseFormatJSONSchema_TypedBuilderStillMarshals(t *testing.T) {
 }
 
 // TestRawJSONSchemaResponseFormat covers the general WithStructuredOutput wire path:
-// a verbatim schema and optional description are emitted under json_schema without
-// going through (or changing) the public typed builder.
+// a verbatim schema and optional description are emitted under response_format's
+// json_schema on the request body, without going through (or changing) the public
+// ResponseFormat type.
 func TestRawJSONSchemaResponseFormat(t *testing.T) {
 	t.Parallel()
-	rf := openaiclient.NewRawJSONSchemaResponseFormat("answer", "an answer",
-		json.RawMessage(`{"type":"object","properties":{"x":{"type":"string"}},"required":["x"],"additionalProperties":false}`))
 
-	b, err := json.Marshal(rf)
+	const completion = `{"id":"x","object":"chat.completion","created":1,"model":"m",` +
+		`"choices":[{"index":0,"message":{"role":"assistant","content":"{\"x\":\"hi\"}"},"finish_reason":"stop"}],` +
+		`"usage":{"prompt_tokens":1,"completion_tokens":1,"total_tokens":2}}`
+
+	var raw []byte
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		raw, _ = io.ReadAll(r.Body)
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = io.WriteString(w, completion)
+	}))
+	defer srv.Close()
+
+	llm, err := New(WithBaseURL(srv.URL), WithToken("test"), WithModel("gpt-5.4-mini"))
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("New: %v", err)
 	}
-	var round map[string]any
-	if err := json.Unmarshal(b, &round); err != nil {
-		t.Fatal(err)
+	if _, err := llm.GenerateContent(context.Background(),
+		[]llms.MessageContent{llms.TextParts(llms.ChatMessageTypeHuman, "hi")},
+		llms.WithStructuredOutput(llms.StructuredOutputConfig{
+			Name:        "answer",
+			Description: "an answer",
+			Schema:      json.RawMessage(`{"type":"object","properties":{"x":{"type":"string"}},"required":["x"],"additionalProperties":false}`),
+		})); err != nil {
+		t.Fatalf("GenerateContent: %v", err)
 	}
-	if round["type"] != "json_schema" {
-		t.Fatalf("type = %v, want json_schema", round["type"])
+
+	var body map[string]any
+	if err := json.Unmarshal(raw, &body); err != nil {
+		t.Fatalf("unmarshal wire body: %v\nraw: %s", err, raw)
 	}
-	js, ok := round["json_schema"].(map[string]any)
+	rf, ok := body["response_format"].(map[string]any)
+	if !ok || rf["type"] != "json_schema" {
+		t.Fatalf("response_format wire shape wrong: %s", raw)
+	}
+	js, ok := rf["json_schema"].(map[string]any)
 	if !ok || js["name"] != "answer" || js["description"] != "an answer" || js["strict"] != true {
-		t.Fatalf("raw json_schema fields wrong: %s", b)
+		t.Fatalf("raw json_schema fields wrong: %s", raw)
 	}
 	sc, ok := js["schema"].(map[string]any)
 	if !ok || sc["additionalProperties"] != false {
-		t.Fatalf("raw schema not embedded verbatim: %s", b)
+		t.Fatalf("raw schema not embedded verbatim: %s", raw)
+	}
+}
+
+// The public ResponseFormat must keep its exported layout: an unkeyed composite
+// literal with exactly Type and JSONSchema still compiles (downstream source
+// compatibility), and embedding it does not hijack the outer type's marshaling.
+func TestResponseFormatPublicContract(t *testing.T) {
+	t.Parallel()
+
+	// Unkeyed literal — fails to compile if a field is added/removed/reordered.
+	rf := openaiclient.ResponseFormat{
+		Type: "json_object",
+	} //nolint:govet,typecheck // intentional: asserts the public unkeyed-literal contract
+	if rf.Type != "json_object" {
+		t.Fatalf("Type = %q", rf.Type)
+	}
+
+	// Embedding must not promote a custom MarshalJSON that drops the outer fields.
+	type wrapper struct {
+		openaiclient.ResponseFormat
+		Extra string `json:"extra"`
+	}
+	b, err := json.Marshal(wrapper{ResponseFormat: openaiclient.ResponseFormat{Type: "json_object"}, Extra: "kept"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	var m map[string]any
+	if err := json.Unmarshal(b, &m); err != nil {
+		t.Fatal(err)
+	}
+	if m["extra"] != "kept" {
+		t.Fatalf("embedding dropped outer field: %s", b)
 	}
 }
 
@@ -303,4 +362,62 @@ func TestValidateStructuredResponse(t *testing.T) {
 			t.Fatalf("want validation error at choice 1, got %v", err)
 		}
 	})
+}
+
+// countingCallbackHandler records how many closing callbacks fire, to assert a
+// call emits exactly one (Error or End) and never both.
+type countingCallbackHandler struct {
+	callbacks.SimpleHandler
+	starts int
+	ends   int
+	errs   int
+}
+
+func (h *countingCallbackHandler) HandleLLMGenerateContentStart(context.Context, []llms.MessageContent) {
+	h.starts++
+}
+
+func (h *countingCallbackHandler) HandleLLMGenerateContentEnd(context.Context, *llms.ContentResponse) {
+	h.ends++
+}
+
+func (h *countingCallbackHandler) HandleLLMError(context.Context, error) { h.errs++ }
+
+// A structured-output validation failure must close the call with exactly one
+// HandleLLMError and no HandleLLMGenerateContentEnd (no span leak, no double-fire).
+func TestStructuredOutputValidationFailureFiresSingleErrorCallback(t *testing.T) {
+	t.Parallel()
+
+	// finish_reason stop but content violates the schema (x must be a string).
+	const completion = `{"id":"x","object":"chat.completion","created":1,"model":"m",` +
+		`"choices":[{"index":0,"message":{"role":"assistant","content":"{\"x\":42}"},"finish_reason":"stop"}],` +
+		`"usage":{"prompt_tokens":1,"completion_tokens":1,"total_tokens":2}}`
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = io.WriteString(w, completion)
+	}))
+	defer srv.Close()
+
+	h := &countingCallbackHandler{}
+	llm, err := New(WithBaseURL(srv.URL), WithToken("test"), WithModel("gpt-5.4-mini"),
+		WithCallback(h))
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+
+	_, err = llm.GenerateContent(context.Background(),
+		[]llms.MessageContent{llms.TextParts(llms.ChatMessageTypeHuman, "hi")},
+		llms.WithStructuredOutput(llms.StructuredOutputConfig{
+			Name:   "answer",
+			Schema: []byte(`{"type":"object","properties":{"x":{"type":"string"}},"required":["x"],"additionalProperties":false}`),
+		}))
+
+	var ve *llms.ErrStructuredOutputValidation
+	if !errors.As(err, &ve) {
+		t.Fatalf("want ErrStructuredOutputValidation, got %v", err)
+	}
+	if h.starts != 1 || h.errs != 1 || h.ends != 0 {
+		t.Fatalf("callback counts: starts=%d errs=%d ends=%d; want 1/1/0", h.starts, h.errs, h.ends)
+	}
 }

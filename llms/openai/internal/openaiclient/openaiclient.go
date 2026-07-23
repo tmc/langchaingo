@@ -167,7 +167,7 @@ func (c *Client) CreateEmbedding(ctx context.Context, r *EmbeddingRequest) ([][]
 func (c *Client) CreateChat(ctx context.Context, r *ChatRequest) (*ChatCompletionResponse, error) {
 	if r.Model == "" {
 		if c.Model == "" {
-			r.Model = defaultChatModel
+			r.Model = DefaultChatModel
 		} else {
 			r.Model = c.Model
 		}

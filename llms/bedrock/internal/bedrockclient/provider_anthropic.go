@@ -737,8 +737,11 @@ func applyAnthropicReasoning(
 		} else {
 			setBudget()
 		}
-	case cfg.Adaptive:
-		// Unclassified Claude generation with an explicit adaptive request.
+	case cfg.Adaptive && !reasoning.ClaudePredatesAdaptive(modelID):
+		// Unclassified — assumed newer than the table — Claude generation with an
+		// explicit adaptive request. Known pre-adaptive families are excluded so
+		// adaptive is never sent to a model that would reject it with a 400; those
+		// fall through to the budget gate below (or send no thinking at all).
 		setAdaptive()
 	case supportsAnthropicReasoning(modelID):
 		setBudget()
