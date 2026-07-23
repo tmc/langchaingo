@@ -7,38 +7,44 @@ import CodeBlock from "@theme/CodeBlock";
 
 # Integrations: Chat Models
 
-LangChainGo offers a number of Chat Models implementations that integrate with various model providers. These include:
+In LangChainGo every provider implements the same `llms.Model` interface, so a "chat
+model" is just a provider used with `GenerateContent` and chat messages. Construction
+is provider-specific; the calling code is identical.
 
-## OpenAI
+## Providers
+
+| Provider | Package | Constructor |
+|----------|---------|-------------|
+| OpenAI | `llms/openai` | `openai.New()` |
+| Anthropic | `llms/anthropic` | `anthropic.New()` |
+| Google Gemini | `llms/googleai` | `googleai.New(ctx)` |
+| Vertex AI | `llms/googleai/vertex` | `vertex.New(ctx)` |
+| AWS Bedrock | `llms/bedrock` | `bedrock.New()` |
+| Mistral | `llms/mistral` | `mistral.New()` |
+| Ollama | `llms/ollama` | `ollama.New()` |
+| Hugging Face | `llms/huggingface` | `huggingface.New()` |
+
+OpenAI-compatible endpoints (Groq, DeepSeek, OpenRouter, NVIDIA, Ollama Cloud, …) use
+the `llms/openai` package with `openai.WithBaseURL(...)`. See the per-provider pages
+under [LLM Integrations](../llms/) for details.
+
+## Sending chat messages
 
 ```go
-import "github.com/vxcontrol/langchaingo/llms/openai"
+import (
+    "github.com/vxcontrol/langchaingo/llms"
+    "github.com/vxcontrol/langchaingo/llms/openai"
+)
 
 llm, err := openai.New()
-```
 
-## Anthropic
+messages := []llms.MessageContent{
+    llms.TextParts(llms.ChatMessageTypeSystem, "You are a helpful assistant."),
+    llms.TextParts(llms.ChatMessageTypeHuman, "Hello!"),
+}
 
-```go
-import "github.com/vxcontrol/langchaingo/llms/anthropic"
-
-llm, err := anthropic.New()
-```
-
-## Google AI (Gemini)
-
-```go
-import "github.com/vxcontrol/langchaingo/llms/googleai"
-
-llm, err := googleai.New(ctx)
-```
-
-## Ollama (Local Models)
-
-```go
-import "github.com/vxcontrol/langchaingo/llms/ollama"
-
-llm, err := ollama.New()
+resp, err := llm.GenerateContent(ctx, messages)
+fmt.Println(resp.Choices[0].Content)
 ```
 
 For detailed configuration options for each provider, see the [Configure LLM Providers](../../../../how-to/configure-llm-providers.md) guide.

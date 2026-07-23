@@ -270,7 +270,7 @@ go run main.go
 
 ## Complete Example
 
-You can find the complete working example with all steps in the [tutorial-basic-chat-app](https://github.com/vxcontrol/langchaingo/tree/main/examples/tutorial-basic-chat-app) directory.
+You can find the complete working example with all steps in the [tutorial-basic-chat-app](https://github.com/vxcontrol/langchaingo/tree/main-vxcontrol/examples/tutorial-basic-chat-app) directory.
 
 ## Conclusion
 

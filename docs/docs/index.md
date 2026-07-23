@@ -20,7 +20,7 @@ Our documentation follows a structured approach to help you learn and use LangCh
 ### 📚 [Tutorials](./tutorials/)
 Step-by-step guides to build complete applications. Perfect for learning LangChainGo from the ground up.
 
-- **Getting Started**: [Quick setup with Ollama](./getting-started/guide-ollama.mdx) • [Quick setup with OpenAI](./getting-started/guide-openai.mdx)
+- **Getting Started**: [Ollama](./getting-started/guide-ollama.mdx) • [OpenAI](./getting-started/guide-openai.mdx) • [Mistral](./getting-started/guide-mistral.mdx) • [Anthropic](./getting-started/guide-anthropic.mdx) • [Google Gemini](./getting-started/guide-gemini.mdx) • [Chat models](./getting-started/guide-chat.mdx)
 - **Basic Applications**: Simple chat apps, Q&A systems, document summarization
 - **Advanced Applications**: RAG systems, agents with tools, multi-modal apps
 - **Production**: Deployment, optimization, monitoring

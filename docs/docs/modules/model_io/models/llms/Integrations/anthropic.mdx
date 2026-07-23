@@ -1,0 +1,32 @@
+---
+sidebar_label: Anthropic
+---
+
+import CodeBlock from "@theme/CodeBlock";
+import ExampleAnthropic from "@examples/anthropic-completion-example/anthropic_completion_example.go";
+
+# Anthropic
+
+[Anthropic](https://www.anthropic.com/)'s Claude models support long context, tool
+use, and extended ("thinking") reasoning through the `llms/anthropic` package.
+
+## Setup
+
+Set your API key in the `ANTHROPIC_API_KEY` environment variable, or pass it explicitly:
+
+```go
+llm, err := anthropic.New(
+    anthropic.WithModel("claude-sonnet-4-5-20250929"),
+    anthropic.WithToken("your-api-key"), // or ANTHROPIC_API_KEY
+)
+```
+
+Extended thinking is controlled per call with the provider-neutral reasoning options
+(`llms.WithReasoning`, `llms.WithAdaptiveReasoning`, `llms.WithReasoningDisabled`); the
+adapter resolves the correct wire form (budget vs. adaptive) from the model.
+
+For a full walkthrough, see the [Anthropic quickstart](/docs/getting-started/guide-anthropic).
+
+## Example
+
+<CodeBlock language="go">{ExampleAnthropic}</CodeBlock>

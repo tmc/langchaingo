@@ -1,0 +1,74 @@
+---
+sidebar_position: 5
+---
+
+import CodeBlock from "@theme/CodeBlock";
+import ExampleAnthropic from "@examples/anthropic-completion-example/anthropic_completion_example.go";
+
+# Quickstart: LangChainGo with Anthropic
+
+Get started by running your first program with LangChainGo and [Anthropic](https://www.anthropic.com/). Anthropic's Claude models are known for strong reasoning, long context windows, and extended ("thinking") modes.
+
+## Prerequisites
+
+1. **Anthropic API Key**: Sign up on the [Anthropic Console](https://console.anthropic.com/) and retrieve your API key.
+2. **Go**: [Download and install Go](https://go.dev/doc/install).
+
+## Setup
+
+Before interacting with the Anthropic API, you need to set up your API key as an environment variable.
+
+### Linux/macOS (bash/zsh)
+```bash
+export ANTHROPIC_API_KEY="your_anthropic_api_key_here"
+```
+
+### Windows (Command Prompt)
+```cmd
+set ANTHROPIC_API_KEY=your_anthropic_api_key_here
+```
+
+### Windows (PowerShell)
+```powershell
+$env:ANTHROPIC_API_KEY="your_anthropic_api_key_here"
+```
+
+For permanent setup, add the environment variable to your shell's profile file (`~/.bashrc`, `~/.zshrc`, etc.) or system environment variables on Windows.
+
+## Steps
+
+1. **Set up your Anthropic API Key**: Follow the setup instructions above to configure your API key.
+
+2. **Run the example**: Execute the following command:
+
+```shell
+go run github.com/vxcontrol/langchaingo/examples/anthropic-completion-example@main-vxcontrol
+```
+
+The example streams the model's response chunk by chunk, so you will see a poem about Go-powered AI systems printed as it is generated.
+
+Congratulations! You have successfully built and executed your first LangChainGo LLM-backed program using Anthropic's cloud-based inference.
+
+## Selecting a model
+
+The client picks a sensible default model, but you can choose one explicitly with `anthropic.WithModel`:
+
+```go
+llm, err := anthropic.New(anthropic.WithModel("claude-sonnet-4-5-20250929"))
+```
+
+## Extended thinking
+
+Claude's extended-thinking models can spend extra tokens reasoning before answering. Enable it per call with the provider-neutral reasoning options — `llms.WithReasoning` for a token budget or effort, or `llms.WithAdaptiveReasoning` on the newest generations. The adapter resolves the correct wire shape (budget vs. adaptive) from the model, so a request is never sent in a form the model rejects:
+
+```go
+completion, err := llms.GenerateFromSinglePrompt(ctx, llm, prompt,
+    llms.WithReasoning(llms.ReasoningMedium, 0),
+)
+```
+
+See [Configure LLM Providers](../how-to/configure-llm-providers.md) for the full set of reasoning and structured-output options.
+
+Here is the entire program (from [anthropic-completion-example](https://github.com/vxcontrol/langchaingo/blob/main-vxcontrol/examples/anthropic-completion-example/anthropic_completion_example.go)):
+
+<CodeBlock language="go">{ExampleAnthropic}</CodeBlock>

@@ -7,33 +7,58 @@ import CodeBlock from "@theme/CodeBlock";
 
 # Integrations: Embeddings
 
-LangChainGo offers a number of Embeddings implementations that integrate with various model providers. These include:
+LangChainGo produces embeddings in two ways. Either way you get an
+`embeddings.Embedder` with `EmbedDocuments(ctx, texts)` and `EmbedQuery(ctx, text)`,
+ready to pass to a vector store.
 
-## OpenAI Embeddings
+## Using an LLM client
+
+Providers whose LLM client can also embed satisfy `embeddings.EmbedderClient`; wrap
+the client with `embeddings.NewEmbedder` to get a full `Embedder`:
 
 ```go
-import "github.com/vxcontrol/langchaingo/embeddings"
+import (
+    "github.com/vxcontrol/langchaingo/embeddings"
+    "github.com/vxcontrol/langchaingo/llms/openai"
+)
 
+llm, err := openai.New()
 embedder, err := embeddings.NewEmbedder(llm)
+
+vectors, err := embedder.EmbedDocuments(ctx, []string{"hello", "world"})
 ```
 
-## Google AI Embeddings
+The same `NewEmbedder(client)` pattern works with:
+
+| Client | Package |
+|--------|---------|
+| OpenAI | `llms/openai` |
+| Google Gemini | `llms/googleai` |
+| Vertex AI | `llms/googleai/vertex` |
+| Ollama | `llms/ollama` |
+
+## Dedicated embedding providers
+
+These packages under `embeddings/` implement `embeddings.Embedder` directly — use
+their constructor, no `NewEmbedder` wrapper needed:
 
 ```go
-import "github.com/vxcontrol/langchaingo/llms/googleai"
+import "github.com/vxcontrol/langchaingo/embeddings/voyageai"
 
-// The GoogleAI client can be used for embeddings
-llm, err := googleai.New(ctx)
-embedder, err := llm.CreateEmbedding(ctx, texts)
+// Reads VOYAGEAI_API_KEY from the environment; default model "voyage-4".
+embedder, err := voyageai.NewVoyageAI(voyageai.WithModel("voyage-4"))
 ```
 
-## Vertex AI Embeddings
+| Provider | Constructor | Auth / notes |
+|----------|-------------|--------------|
+| AWS Bedrock | `bedrock.NewBedrock(...)` | AWS credentials; default model Titan Embeddings G1 |
+| VoyageAI | `voyageai.NewVoyageAI(...)` | `VOYAGEAI_API_KEY` |
+| Jina | `jina.NewJina(...)` | `JINA_API_KEY`; default `jina-embeddings-v2-small-en` |
+| Hugging Face | `huggingface.NewHuggingface(...)` | Hugging Face inference API; default `BAAI/bge-small-en-v1.5` |
+| Cybertron | `cybertron.NewCybertron(...)` | Fully local (no API key); downloads the model on first use |
 
-```go
-import "github.com/vxcontrol/langchaingo/llms/googleai/vertex"
+Common options on these constructors include `WithModel`, `WithBatchSize`, and (where
+applicable) `WithAPIKey` / `WithToken`.
 
-llm, err := vertex.New(ctx)
-embedder, err := llm.CreateEmbedding(ctx, texts)
-```
-
-For more details on using embeddings, see the [Embeddings documentation](./index.mdx).
+For more on using embeddings with vector stores, see the [Embeddings documentation](./index.mdx)
+and [Vector stores](/docs/modules/data_connection/vector_stores/).

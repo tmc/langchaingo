@@ -29,6 +29,11 @@ There are currently four different classes of `ChatMessage` supported by LangCha
 - `SystemChatMessage`: A chat message that gives the AI system some information about the conversation. This is usually sent at the beginning of a conversation.
 - `ChatMessage`: A generic chat message, with not only a `"text"` field but also an arbitrary `"role"` field.
 
+These classes model conversation history. When calling a model with `GenerateContent`,
+messages are passed as `llms.MessageContent`, which carries a role plus one or more
+`ContentPart`s — so a single message can mix text, images, and other modalities on
+providers that support it (build them with `llms.TextParts`, `llms.TextPart`,
+`llms.ImageURLPart`, and related helpers).
 
 ## Dig deeper
 

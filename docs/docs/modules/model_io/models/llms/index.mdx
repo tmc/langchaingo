@@ -47,4 +47,30 @@ For backwards compatibility, `llms.LLM` is provided as a type alias:
 type LLM = Model
 ```
 
+## Supported providers
+
+Each provider lives in its own package under `github.com/vxcontrol/langchaingo/llms` and implements the same `llms.Model` interface, so switching providers only changes construction, not your calling code:
+
+| Provider | Package | Notes |
+|----------|---------|-------|
+| OpenAI | `llms/openai` | Also the client for OpenAI-compatible APIs (Groq, DeepSeek, OpenRouter, NVIDIA, Ollama Cloud, …) via `WithBaseURL` |
+| Anthropic | `llms/anthropic` | Claude models, extended thinking |
+| Google Gemini | `llms/googleai` | Google AI Studio endpoint |
+| Vertex AI | `llms/googleai/vertex` | Gemini through Google Cloud |
+| AWS Bedrock | `llms/bedrock` | Claude, Llama, Titan, Nova and more |
+| Mistral | `llms/mistral` | |
+| Ollama | `llms/ollama` | Local models |
+| Hugging Face | `llms/huggingface` | |
+| Fake | `llms/fake` | Scripted responses for tests |
+
+## Provider-neutral call options
+
+Options passed to `GenerateContent` (or `llms.GenerateFromSinglePrompt`) work across providers; the adapter maps each to the target provider's wire format:
+
+- **Sampling**: `llms.WithTemperature`, `llms.WithTopP`, `llms.WithTopK`, `llms.WithMaxTokens`, `llms.WithN`.
+- **Reasoning (thinking)**: `llms.WithReasoning`, `llms.WithAdaptiveReasoning`, `llms.WithReasoningDisabled` — see [Configure LLM Providers](/docs/how-to/configure-llm-providers).
+- **Structured output**: `llms.WithStructuredOutput` requests schema-constrained JSON and validates the response against your schema.
+- **Streaming**: `llms.WithStreamingFunc` receives a `streaming.Chunk` per token.
+- **Tools / function calling**: `llms.WithTools`.
+
 <DocCardList />

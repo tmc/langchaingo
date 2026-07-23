@@ -1,0 +1,34 @@
+---
+sidebar_label: Google Gemini
+---
+
+import CodeBlock from "@theme/CodeBlock";
+import ExampleGoogleAI from "@examples/googleai-completion-example/googleai-completion-example.go";
+
+# Google Gemini
+
+The `llms/googleai` package calls [Google Gemini](https://ai.google.dev/) through the
+Google AI Studio endpoint. To use Gemini through Google Cloud instead, see
+[Vertex AI](./vertexai.mdx).
+
+## Setup
+
+Create an API key at [Google AI Studio](https://ai.google.dev/) and set it in
+`GOOGLE_API_KEY`, or pass it explicitly. Note that `googleai.New` takes a `context.Context`:
+
+```go
+llm, err := googleai.New(ctx,
+    googleai.WithAPIKey(os.Getenv("GOOGLE_API_KEY")),
+    googleai.WithDefaultModel("gemini-2.5-flash"),
+)
+```
+
+On thinking-capable models, control reasoning per call with `llms.WithReasoning`
+(Gemini 3.x maps effort to a thinking level; 2.5 uses a token budget), and request
+schema-constrained JSON with `llms.WithStructuredOutput`.
+
+For a full walkthrough, see the [Gemini quickstart](/docs/getting-started/guide-gemini).
+
+## Example
+
+<CodeBlock language="go">{ExampleGoogleAI}</CodeBlock>

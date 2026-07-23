@@ -9,37 +9,43 @@ import ExampleGroq from "@examples/groq-completion-example/groq_completion_examp
 
 ## Overview
 
-This documentation provides a detailed overview and technical guidance for integrating Groq's machine learning models with the Langchaingo library in the Go programming environment. This integration allows Go developers to leverage the power of pre-trained AI models for various applications, including natural language processing, text generation, and more.
+[Groq](https://groq.com/) serves open models (Llama, Mixtral, and others) over an
+OpenAI-compatible API with very low latency. Because the API is OpenAI-compatible,
+LangChainGo talks to Groq through the `llms/openai` package pointed at Groq's base
+URL — no separate provider package is required.
 
 ## Prerequisites
 
-- Go programming language installed on your machine (version 1.22.0 or higher recommended).
--  A valid Groq API key. Obtain it by creating an account on the Groq platform and generating a new token.
+- Go installed on your machine (version 1.24 or higher recommended).
+- A valid Groq API key. Obtain it by creating an account on the Groq platform and generating a new token.
 
 ## Installation
-
-To install the Groq package in your Go project, run the following command:
 
 ```bash
 go get github.com/vxcontrol/langchaingo
 ```
 
-Ensure that your Groq API key is set as an environment variable:
-    
-    ```bash
-    export GROQ_API_KEY=your-api-key
-    ```
+Set your Groq API key as an environment variable:
 
-You can use .env file to store the API key and load it in your Go application.
+```bash
+export GROQ_API_KEY=your-api-key
+```
 
-.env file:
+## Configuration
 
-    ```bash
-    GROQ_API_KEY=your-api-key
-    ```
-but you not need use godotenv package to load the .env file.
+The example builds an OpenAI client aimed at Groq's endpoint:
 
+```go
+llm, err := openai.New(
+    openai.WithModel("moonshotai/kimi-k2-instruct"),
+    openai.WithBaseURL("https://api.groq.com/openai/v1"),
+    openai.WithToken(os.Getenv("GROQ_API_KEY")),
+)
+```
+
+The same pattern works for other OpenAI-compatible providers (DeepSeek, OpenRouter,
+NVIDIA, Ollama Cloud, …) — only the base URL, token, and model name change.
 
 ## Usage
 
-<CodeBlock language="go">{ExampleGroq}</CodeBlock> 
+<CodeBlock language="go">{ExampleGroq}</CodeBlock>

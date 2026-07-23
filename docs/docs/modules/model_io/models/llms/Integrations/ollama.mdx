@@ -1,0 +1,37 @@
+---
+sidebar_label: Ollama
+---
+
+import CodeBlock from "@theme/CodeBlock";
+import ExampleOllama from "@examples/ollama-completion-example/ollama_completion_example.go";
+
+# Ollama
+
+[Ollama](https://ollama.ai/) runs open models locally. The `llms/ollama` package
+talks to a local (or remote) Ollama server — no API key required.
+
+## Prerequisites
+
+- [Install Ollama](https://ollama.ai/) and pull a model, e.g. `ollama pull llama2`.
+
+## Setup
+
+```go
+// Defaults to the local server at http://localhost:11434
+llm, err := ollama.New(ollama.WithModel("llama2"))
+
+// Point at a remote server
+llm, err = ollama.New(
+    ollama.WithServerURL("http://custom-server:11434"),
+    ollama.WithModel("codellama"),
+)
+```
+
+Ollama supports schema-constrained output through its native `format` field, wired
+up by the provider-neutral `llms.WithStructuredOutput` option.
+
+For a full walkthrough, see the [Ollama quickstart](/docs/getting-started/guide-ollama).
+
+## Example
+
+<CodeBlock language="go">{ExampleOllama}</CodeBlock>

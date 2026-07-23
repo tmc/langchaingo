@@ -21,7 +21,7 @@ llm, err := openai.New(openai.WithToken("your-api-key"))
 ```go
 llm, err := openai.New(
     openai.WithToken("your-api-key"),
-    openai.WithModel("gpt-4"), // Specify model
+    openai.WithModel("gpt-4o"), // Specify model
     openai.WithBaseURL("https://custom-endpoint.com"), // Custom endpoint
     openai.WithOrganization("org-id"), // Organization ID
     openai.WithAPIVersion("2023-12-01"), // API version
@@ -59,7 +59,7 @@ llm, err := anthropic.New(anthropic.WithToken("your-api-key"))
 
 ```go
 llm, err := anthropic.New(
-    anthropic.WithModel("claude-3-opus-20240229"),
+    anthropic.WithModel("claude-sonnet-4-5-20250929"),
     anthropic.WithToken("your-api-key"),
 )
 ```
@@ -89,7 +89,7 @@ llm, err := googleai.New(
 ```go
 llm, err := googleai.New(
     context.Background(),
-    googleai.WithDefaultModel("gemini-pro"),
+    googleai.WithDefaultModel("gemini-2.5-flash"),
     googleai.WithAPIKey("your-api-key"),
 )
 ```
@@ -195,10 +195,10 @@ export GOOGLE_APPLICATION_CREDENTIALS="path/to/service-account.json"
 ### OpenAI functions
 
 ```go
-tools := []openai.Tool{
+tools := []llms.Tool{
     {
         Type: "function",
-        Function: openai.FunctionDefinition{
+        Function: &llms.FunctionDefinition{
             Name:        "get_weather",
             Description: "Get current weather",
             Parameters: map[string]any{
@@ -227,15 +227,60 @@ messages := []llms.MessageContent{
 }
 ```
 
+### Reasoning (thinking)
+
+Reasoning-capable models (OpenAI o-series/GPT-5, Anthropic Claude extended thinking,
+Gemini 2.5/3.x, and others) are controlled with provider-neutral options. The adapter
+resolves the correct wire form for the target model, so a request is never sent in a
+shape the model rejects:
+
+```go
+// Effort-based reasoning (token budget of 0 lets the model choose).
+resp, err := llm.GenerateContent(ctx, messages,
+    llms.WithReasoning(llms.ReasoningMedium, 0),
+)
+
+// Adaptive reasoning on the newest generations (e.g. Claude 4.6+).
+resp, err = llm.GenerateContent(ctx, messages,
+    llms.WithAdaptiveReasoning(llms.ReasoningHigh),
+)
+
+// Turn thinking off where the model allows disabling it.
+resp, err = llm.GenerateContent(ctx, messages, llms.WithReasoningDisabled())
+```
+
+### Structured output
+
+Request schema-constrained JSON with a provider-neutral option. The SDK sends the
+schema through each provider's native structured-output mechanism and validates the
+response against the original schema:
+
+```go
+schema := json.RawMessage(`{
+    "type": "object",
+    "properties": {"answer": {"type": "string"}},
+    "required": ["answer"],
+    "additionalProperties": false
+}`)
+
+resp, err := llm.GenerateContent(ctx, messages,
+    llms.WithStructuredOutput(llms.StructuredOutputConfig{
+        Name:   "answer_schema",
+        Schema: schema,
+    }),
+)
+```
+
 ### Streaming responses
 
 ```go
-// Works with most providers
+// Works with most providers. The callback receives a streaming.Chunk
+// (import "github.com/vxcontrol/langchaingo/llms/streaming").
 response, err := llm.GenerateContent(
-    ctx, 
-    messages, 
-    llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {
-        fmt.Print(string(chunk))
+    ctx,
+    messages,
+    llms.WithStreamingFunc(func(ctx context.Context, chunk streaming.Chunk) error {
+        fmt.Print(chunk.String())
         return nil
     }),
 )

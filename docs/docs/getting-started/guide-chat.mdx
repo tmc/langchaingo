@@ -201,22 +201,18 @@ import (
 template := prompts.NewChatPromptTemplate(
     []prompts.MessageFormatter{
         prompts.NewSystemMessagePromptTemplate(
-            prompts.NewPromptTemplate(
-                "You are a helpful assistant that translates {{.input_language}} to {{.output_language}}.",
-                []string{"input_language", "output_language"},
-            ),
+            "You are a helpful assistant that translates {{.input_language}} to {{.output_language}}.",
+            []string{"input_language", "output_language"},
         ),
         prompts.NewHumanMessagePromptTemplate(
-            prompts.NewPromptTemplate(
-                "Translate: {{.text}}",
-                []string{"text"},
-            ),
+            "Translate: {{.text}}",
+            []string{"text"},
         ),
     },
 )
 
-// Format the template with values
-messages, err := template.FormatMessages(map[string]interface{}{
+// Format the template into chat messages
+chatMessages, err := template.FormatMessages(map[string]any{
     "input_language":  "English",
     "output_language": "French",
     "text":            "Hello, how are you?",
@@ -225,13 +221,19 @@ if err != nil {
     log.Fatal(err)
 }
 
+// Convert prompt chat messages to the []llms.MessageContent GenerateContent expects
+content := make([]llms.MessageContent, len(chatMessages))
+for i, m := range chatMessages {
+    content[i] = llms.TextParts(m.GetType(), m.GetContent())
+}
+
 // Use the formatted messages with your model
 llm, err := openai.New()
 if err != nil {
     log.Fatal(err)
 }
 
-resp, err := llm.GenerateContent(context.Background(), messages)
+resp, err := llm.GenerateContent(context.Background(), content)
 if err != nil {
     log.Fatal(err)
 }
@@ -259,16 +261,12 @@ import (
 template := prompts.NewChatPromptTemplate(
     []prompts.MessageFormatter{
         prompts.NewSystemMessagePromptTemplate(
-            prompts.NewPromptTemplate(
-                "You are a helpful assistant.",
-                []string{},
-            ),
+            "You are a helpful assistant.",
+            nil,
         ),
         prompts.NewHumanMessagePromptTemplate(
-            prompts.NewPromptTemplate(
-                "{{.question}}",
-                []string{"question"},
-            ),
+            "{{.question}}",
+            []string{"question"},
         ),
     },
 )
@@ -308,8 +306,10 @@ import (
     "log"
     
     "github.com/vxcontrol/langchaingo/agents"
+    "github.com/vxcontrol/langchaingo/chains"
     "github.com/vxcontrol/langchaingo/llms/openai"
     "github.com/vxcontrol/langchaingo/tools"
+    "github.com/vxcontrol/langchaingo/tools/duckduckgo"
 )
 
 // Create a model
@@ -320,7 +320,7 @@ if err != nil {
 
 // Create tools that the agent can use
 calculator := tools.Calculator{}
-search, err := tools.NewDuckDuckGo()
+search, err := duckduckgo.New(5, duckduckgo.DefaultUserAgent)
 if err != nil {
     log.Fatal(err)
 }
@@ -335,8 +335,8 @@ if err != nil {
     log.Fatal(err)
 }
 
-// Run the agent
-result, err := agents.Run(
+// Run the agent's executor via chains.Run
+result, err := chains.Run(
     context.Background(),
     agent,
     "If a person is born in 1990, how old are they in 2023? After that, search for famous people born in that year.",
@@ -359,33 +359,12 @@ import (
     "log"
     
     "github.com/vxcontrol/langchaingo/chains"
-    "github.com/vxcontrol/langchaingo/llms"
     "github.com/vxcontrol/langchaingo/llms/openai"
     "github.com/vxcontrol/langchaingo/memory"
-    "github.com/vxcontrol/langchaingo/prompts"
 )
 
 // Create a chat memory
 chatMemory := memory.NewConversationBuffer()
-
-// Create a template that includes the chat history
-template := prompts.NewChatPromptTemplate(
-    []prompts.MessageFormatter{
-        prompts.NewSystemMessagePromptTemplate(
-            prompts.NewPromptTemplate(
-                "You are a helpful assistant. Use the conversation history to provide context for your responses.",
-                []string{},
-            ),
-        ),
-        prompts.NewMessagesPlaceholder("history"),
-        prompts.NewHumanMessagePromptTemplate(
-            prompts.NewPromptTemplate(
-                "{{.input}}",
-                []string{"input"},
-            ),
-        ),
-    },
-)
 
 // Create a model
 llm, err := openai.New()
@@ -393,38 +372,35 @@ if err != nil {
     log.Fatal(err)
 }
 
-// Create a chain with memory
-chain := chains.NewConversationChain(
-    llm,
-    template,
-    chains.WithMemory(chatMemory),
-)
+// Create a conversation chain with memory. NewConversation supplies its own
+// prompt (including the conversation history), so no custom template is needed.
+chain := chains.NewConversation(llm, chatMemory)
 
 // First interaction
 result1, err := chains.Call(
     context.Background(),
     chain,
-    map[string]interface{}{
+    map[string]any{
         "input": "My name is Alice.",
     },
 )
 if err != nil {
     log.Fatal(err)
 }
-fmt.Println(result1["response"]) // "Hello Alice, nice to meet you! How can I assist you today?"
+fmt.Println(result1["text"]) // "Hello Alice, nice to meet you! How can I assist you today?"
 
 // Second interaction (memory remembers the name)
 result2, err := chains.Call(
     context.Background(),
     chain,
-    map[string]interface{}{
+    map[string]any{
         "input": "What's my name?",
     },
 )
 if err != nil {
     log.Fatal(err)
 }
-fmt.Println(result2["response"]) // "Your name is Alice, as you mentioned earlier."
+fmt.Println(result2["text"]) // "Your name is Alice, as you mentioned earlier."
 ```
 
 #### Different Types of Memory

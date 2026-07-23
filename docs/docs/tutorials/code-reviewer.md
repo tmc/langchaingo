@@ -387,7 +387,7 @@ func (r NoGlobalVarsRule) Check(node ast.Node, fset *token.FileSet) []Issue {
 Create `Dockerfile`:
 
 ```dockerfile
-FROM golang:1.21-alpine AS builder
+FROM golang:1.24-alpine AS builder
 WORKDIR /app
 COPY . .
 RUN go build -o code-reviewer

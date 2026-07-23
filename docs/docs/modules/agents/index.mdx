@@ -62,9 +62,13 @@ LangChainGo provides several built-in tools:
 
 ```go
 // Create tools
+search, err := serpapi.New() // reads SERPAPI_API_KEY from the environment
+if err != nil {
+    log.Fatal(err)
+}
 tools := []tools.Tool{
     tools.Calculator{},
-    tools.WebSearch{APIKey: "your-api-key"},
+    search,
 }
 
 // Create agent

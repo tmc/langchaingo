@@ -1238,7 +1238,7 @@ jobs:
     - uses: actions/checkout@v2
     - uses: actions/setup-go@v2
       with:
-        go-version: 1.21
+        go-version: 1.24
     
     - name: Generate Documentation
       env:

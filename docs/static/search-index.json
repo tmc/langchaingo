@@ -6,15 +6,15 @@
     "type": "doc",
     "keywords": [
       "architecture",
-      "adoption",
-      "package",
       "langchaingo",
+      "package",
       "only",
-      "client?**",
-      "`memory`",
-      "designed",
-      "**building",
-      "document"
+      "adoption",
+      "state",
+      "templating?**",
+      "**you",
+      "adopt",
+      "entire"
     ]
   },
   {
@@ -23,16 +23,16 @@
     "content": "Concepts Understanding the fundamental concepts behind LangChainGo helps you build better applications. Core architecture LangChainGo is built around several key architectural principles: Framework design - **Interface-driven design**: Every major component is defined by interfaces for modularity and testability - **Component architecture**: Clear separation between models, chains, memory, agents, and tools - **Go-specific patterns**: Leverage Go's strengths like interfaces, goroutines, and expl...",
     "type": "doc",
     "keywords": [
-      "langchaingo",
       "concepts",
+      "langchaingo",
       "interfaces",
-      "architecture",
-      "several",
-      "helps",
-      "testability",
-      "design",
-      "principles",
-      "framework"
+      "architecture**",
+      "between",
+      "separation",
+      "like",
+      "patterns**",
+      "strengths",
+      "around"
     ]
   },
   {
@@ -42,15 +42,15 @@
     "type": "doc",
     "keywords": [
       "documentation",
-      "tutorials",
-      "**purpose**",
       "guide",
-      "help",
-      "decisions",
-      "contribute",
-      "runnable",
-      "how-to",
-      "organized"
+      "**purpose**",
+      "tutorials",
+      "provide",
+      "experiences",
+      "into",
+      "learning",
+      "background",
+      "complete"
     ]
   },
   {
@@ -59,16 +59,34 @@
     "content": "Contributing to LangChainGo Thank you for your interest in contributing to LangChainGo! This guide helps you get started. Ways to contribute 1. Code contributions - **Bug fixes**: Help us squash bugs and improve stability - **New features**: Implement new LLM providers, tools, or chains - **Performance improvements**: Optimize existing code - **Tests**: Improve test coverage and add missing tests 2. Documentation contributions - **Tutorials**: Write step-by-step guides for common use cases - **H...",
     "type": "doc",
     "keywords": [
-      "langchaingo",
       "code",
       "contributions",
-      "contributing",
+      "langchaingo",
       "improve",
-      "missing",
-      "features**",
-      "ways",
-      "contribute",
-      "help"
+      "contributing",
+      "**tutorials**",
+      "documentation",
+      "started",
+      "coverage",
+      "stability"
+    ]
+  },
+  {
+    "title": "Guide Anthropic",
+    "url": "/langchaingo/docs/getting-started/guide-anthropic",
+    "content": "import CodeBlock from \"@theme/CodeBlock\"; import ExampleAnthropic from \"@examples/anthropic-completion-example/anthropic_completion_example.go\"; Quickstart: LangChainGo with Anthropic Get started by running your first program with LangChainGo and Anthropic. Anthropic's Claude models are known for strong reasoning, long context windows, and extended (\"thinking\") modes. Prerequisites 1. **Anthropic API Key**: Sign up on the Anthropic Console and retrieve your API key. 2. **Go**: Download and insta...",
+    "type": "doc",
+    "keywords": [
+      "anthropic",
+      "api",
+      "import",
+      "langchaingo",
+      "your",
+      "\"@examples/anthropic-completion-example/anthropic_completion_example.go\"",
+      "(\"thinking\")",
+      "key",
+      "anthropic's",
+      "download"
     ]
   },
   {
@@ -80,13 +98,31 @@
       "models",
       "chat",
       "expose",
+      "started",
       "language",
       "interface",
       "langchain",
-      "started",
-      "need",
-      "get",
-      "command"
+      "few",
+      "\"chat",
+      "while"
+    ]
+  },
+  {
+    "title": "Guide Gemini",
+    "url": "/langchaingo/docs/getting-started/guide-gemini",
+    "content": "import CodeBlock from \"@theme/CodeBlock\"; import ExampleGemini from \"@examples/googleai-completion-example/googleai-completion-example.go\"; Quickstart: LangChainGo with Google Gemini Get started by running your first program with LangChainGo and Google Gemini. Gemini models offer large context windows, native multimodality, and configurable \"thinking\" on the newer generations. Prerequisites 1. **Google AI API Key**: Create an API key at Google AI Studio. 2. **Go**: Download and install Go. Setup...",
+    "type": "doc",
+    "keywords": [
+      "google",
+      "gemini",
+      "langchaingo",
+      "import",
+      "api",
+      "models",
+      "newer",
+      "install",
+      "first",
+      "windows"
     ]
   },
   {
@@ -99,12 +135,12 @@
       "mistral",
       "your",
       "import",
-      "key",
       "langchaingo",
-      "download",
-      "program",
-      "\"@theme/codeblock\"",
-      "set"
+      "key",
+      "sign",
+      "prerequisites",
+      "install",
+      "\"@theme/codeblock\""
     ]
   },
   {
@@ -114,15 +150,15 @@
     "type": "doc",
     "keywords": [
       "ollama",
-      "langchaingo",
-      "your",
       "install",
       "download",
+      "langchaingo",
+      "your",
       "import",
-      "\"@examples/ollama-completion-example/ollama_completion_example.go\"",
-      "llm",
-      "quickstart",
-      "\"@theme/codeblock\""
+      "running",
+      "setup",
+      "computer",
+      "get"
     ]
   },
   {
@@ -133,14 +169,14 @@
     "keywords": [
       "openai",
       "api",
-      "your",
       "import",
+      "your",
       "langchaingo",
-      "proficiency",
-      "**openai",
-      "retrieve",
-      "before",
-      "need"
+      "quickstart",
+      "started",
+      "\"@theme/codeblock\"",
+      "exampleopenai",
+      "**openai"
     ]
   },
   {
@@ -152,13 +188,13 @@
       "configuration",
       "basic",
       "model",
-      "how",
+      "different",
+      "selection",
       "configure",
       "providers",
-      "selection",
-      "environment",
+      "how",
       "llm",
-      "openai"
+      "environment"
     ]
   },
   {
@@ -169,14 +205,14 @@
     "keywords": [
       "how",
       "guides",
-      "llms",
       "how-to",
+      "llms",
       "providers",
       "llm",
-      "configuration",
-      "still",
-      "our",
-      "guide"
+      "handle",
+      "models",
+      "questions",
+      "want"
     ]
   },
   {
@@ -192,9 +228,9 @@
       "_be",
       "langchaingo",
       "applications",
-      "powered",
-      "above",
-      "programming"
+      "api",
+      "only",
+      "port/fork"
     ]
   },
   {
@@ -204,13 +240,13 @@
     "type": "doc",
     "keywords": [
       "agents",
+      "info",
+      "conceptual",
       "guide",
       "\u003cdoccardlist",
       "import",
       "doccardlist",
-      "\"@theme/doccardlist\"",
-      "info",
-      "conceptual"
+      "\"@theme/doccardlist\""
     ]
   },
   {
@@ -222,13 +258,13 @@
       "agents",
       "order",
       "import",
-      "getting",
-      "when",
-      "\"@examples/mrkl-agent-example/mrkl_agent.go\"",
+      "easily",
+      "show",
       "executors",
-      "take",
-      "powerful",
-      "which"
+      "llm",
+      "actions",
+      "determine",
+      "user"
     ],
     "metadata": {
       "sidebar_label": "Getting Started"
@@ -244,12 +280,12 @@
       "example",
       "make",
       "agent",
-      "times",
-      "(modular",
+      "executors",
       "\"@theme/doccardlist\"",
-      "that's",
-      "reasoning",
-      "\"miracle\")"
+      "conceptual",
+      "info",
+      "powerful",
+      "call"
     ]
   },
   {
@@ -259,15 +295,15 @@
     "type": "doc",
     "keywords": [
       "agents",
-      "agent",
       "tools",
+      "agent",
       "which",
-      "chooses",
-      "based",
-      "language",
-      "component",
-      "user",
-      "input"
+      "behavior",
+      "several",
+      "their",
+      "**tools**",
+      "doccardlist",
+      "\"@theme/doccardlist\""
     ]
   },
   {
@@ -276,13 +312,13 @@
     "content": "import DocCardList from \"@theme/DocCardList\"; Tools :::info Conceptual Guide :::",
     "type": "doc",
     "keywords": [
-      "conceptual",
       "guide",
       "import",
       "doccardlist",
       "\"@theme/doccardlist\"",
       "tools",
-      "info"
+      "info",
+      "conceptual"
     ]
   },
   {
@@ -292,15 +328,15 @@
     "type": "doc",
     "keywords": [
       "chains",
-      "import",
+      "language",
       "other",
       "models",
-      "language",
-      "interface",
-      "enable",
-      "beyond",
-      "built-in",
-      "common"
+      "import",
+      "applications",
+      "third-party",
+      "several",
+      "common",
+      "conceptual"
     ],
     "metadata": {
       "sidebar_label": "Chains"
@@ -312,16 +348,16 @@
     "content": "import CodeBlock from \"@theme/CodeBlock\"; import ExampleLLM from \"@examples/llm-chain-example/llm_chain_example.go\"; Getting Started: LLMChain :::info Conceptual Guide ::: An `LLMChain` is a simple chain that adds some functionality around language models. It is used widely throughout LangChain, including in other chains and agents. An `LLMChain` consists of a `PromptTemplate` and a language model (either an LLM or chat model). Usage with LLMs We can construct an LLMChain which takes user input,...",
     "type": "doc",
     "keywords": [
+      "language",
       "import",
       "`llmchain`",
       "llmchain",
-      "language",
+      "guide",
+      "model)",
+      "input",
+      "\"@examples/llm-chain-example/llm_chain_example.go\"",
       "started",
-      "construct",
-      "model",
-      "llm",
-      "chat",
-      "input"
+      "\"@theme/codeblock\""
     ],
     "metadata": {
       "sidebar_label": "LLM Chain"
@@ -339,10 +375,10 @@
       "loader",
       "implement",
       "create",
+      "advanced",
       "source",
-      "struct",
-      "interface",
-      "these"
+      "must",
+      "import"
     ],
     "metadata": {
       "sidebar_label": "Document Loaders"
@@ -355,15 +391,15 @@
     "type": "doc",
     "keywords": [
       "data",
-      "store",
+      "your",
       "load",
+      "store",
       "many",
       "query",
-      "your",
       "documents",
-      "sources",
-      "\"@theme/doccardlist\"",
-      "different"
+      "over",
+      "splitter",
+      "langchain"
     ]
   },
   {
@@ -373,15 +409,15 @@
     "type": "doc",
     "keywords": [
       "blockchain",
-      "states",
-      "retrieving",
-      "refers",
-      "details",
-      "\"@theme/doccardlist\"",
-      "retrievers",
-      "designated",
-      "contexts",
-      "block"
+      "provides",
+      "particularly",
+      "block",
+      "contracts",
+      "blockchain's",
+      "retriever",
+      "info",
+      "conceptual",
+      "involve"
     ]
   },
   {
@@ -391,15 +427,15 @@
     "type": "doc",
     "keywords": [
       "splitters",
-      "texts",
-      "text",
-      "such",
-      "more",
-      "complex",
       "into",
       "specific",
-      "divide",
-      "division"
+      "such",
+      "texts",
+      "complex",
+      "more",
+      "text",
+      "paragraphs",
+      "topics"
     ],
     "metadata": {
       "sidebar_label": "Examples"
@@ -412,15 +448,15 @@
     "type": "doc",
     "keywords": [
       "text",
-      "smaller",
-      "import",
       "chunks",
       "them",
-      "started",
-      "splitters",
-      "several",
-      "more",
-      "match"
+      "smaller",
+      "import",
+      "store",
+      "sometimes",
+      "using",
+      "results",
+      "may"
     ],
     "metadata": {
       "sidebar_label": "Text Splitters"
@@ -433,15 +469,15 @@
     "type": "doc",
     "keywords": [
       "vector",
-      "documents",
-      "most",
+      "query",
+      "particular",
       "embeddings",
       "stores",
-      "particular",
+      "documents",
       "import",
-      "query",
-      "database",
-      "\u003cdoccardlist"
+      "most",
+      "\"react\"",
+      "conceptual"
     ],
     "metadata": {
       "sidebar_label": "Vector Stores"
@@ -457,12 +493,12 @@
       "search",
       "distance",
       "import",
+      "create",
       "code",
-      "instructions",
-      "codeblock",
-      "cosine",
-      "index",
-      "based"
+      "neighbor",
+      "ollama",
+      "\"@examples/pgvector-vectorstore-example/pgvector_vectorstore_example.go\"",
+      "vector"
     ],
     "metadata": {
       "sidebar_label": "pgvector"
@@ -493,14 +529,14 @@
     "keywords": [
       "memory",
       "interactions",
-      "langchaingo",
       "context",
-      "across",
-      "management**",
+      "langchaingo",
       "messages",
-      "**state",
-      "between",
-      "guides"
+      "import",
+      "guides",
+      "responses",
+      "conversation",
+      "**state"
     ],
     "metadata": {
       "sidebar_label": "Memory"
@@ -509,19 +545,19 @@
   {
     "title": "Model I/O",
     "url": "/langchaingo/docs/modules/model_io",
-    "content": "import DocCardList from \"@theme/DocCardList\"; Model I/0 Working with language models can often be divided into three steps. - Firstly constructing the input to the model. In langchain this is done using the prompts package. - Next the input must be sent to the model. This is easy to do using the model package. - In many cases, information needs to be extracted from the model output. Doing this is simple using the output parser package \u003cDocCardList /\u003e",
+    "content": "import DocCardList from \"@theme/DocCardList\"; Model I/O Working with language models can often be divided into three steps. - Firstly constructing the input to the model. In langchain this is done using the prompts package. - Next the input must be sent to the model. This is easy to do using the model package. - In many cases, information needs to be extracted from the model output. Doing this is simple using the output parser package \u003cDocCardList /\u003e",
     "type": "doc",
     "keywords": [
       "model",
       "package",
       "using",
-      "output",
       "input",
+      "output",
       "next",
-      "models",
-      "many",
-      "i/0",
-      "\u003cdoccardlist"
+      "\u003cdoccardlist",
+      "easy",
+      "i/o",
+      "doing"
     ],
     "metadata": {
       "sidebar_label": "Model I/O"
@@ -539,10 +575,10 @@
       "interface",
       "language",
       "import",
-      "inputs",
-      "guide",
-      "info",
-      "messages"
+      "where",
+      "doccardlist",
+      "hood",
+      "standard"
     ],
     "metadata": {
       "sidebar_label": "Chat Models"
@@ -551,19 +587,19 @@
   {
     "title": "Integrations",
     "url": "/langchaingo/docs/modules/model_io/models/chat/integrations",
-    "content": "import CodeBlock from \"@theme/CodeBlock\"; Integrations: Chat Models LangChainGo offers a number of Chat Models implementations that integrate with various model providers. These include: OpenAI Anthropic Google AI (Gemini) Ollama (Local Models) For detailed configuration options for each provider, see the Configure LLM Providers guide.",
+    "content": "import CodeBlock from \"@theme/CodeBlock\"; Integrations: Chat Models In LangChainGo every provider implements the same `llms.Model` interface, so a \"chat model\" is just a provider used with `GenerateContent` and chat messages. Construction is provider-specific; the calling code is identical. Providers | Provider | Package | Constructor | |----------|---------|-------------| | OpenAI | `llms/openai` | `openai.New()` | | Anthropic | `llms/anthropic` | `anthropic.New()` | | Google Gemini | `llms/goo...",
     "type": "doc",
     "keywords": [
+      "provider",
       "chat",
-      "providers",
-      "models",
-      "various",
-      "implementations",
-      "codeblock",
-      "\"@theme/codeblock\"",
-      "langchaingo",
-      "these",
-      "see"
+      "`anthropic.new()`",
+      "same",
+      "integrations",
+      "google",
+      "just",
+      "import",
+      "provider-specific",
+      "identical"
     ],
     "metadata": {
       "sidebar_label": "Integrations"
@@ -576,15 +612,15 @@
     "type": "doc",
     "keywords": [
       "import",
-      "example",
-      "numerical",
       "used",
       "representation",
+      "numerical",
       "embeddings",
-      "deeper",
-      "codeblock",
-      "\"@theme/doccardlist\"",
-      "find"
+      "example",
+      "data",
+      "documents",
+      "language=\"go\"\u003e{example}\u003c/codeblock\u003e",
+      "doccardlist"
     ],
     "metadata": {
       "sidebar_label": "Embeddings"
@@ -593,19 +629,19 @@
   {
     "title": "Integrations",
     "url": "/langchaingo/docs/modules/model_io/models/embeddings/integrations",
-    "content": "import CodeBlock from \"@theme/CodeBlock\"; Integrations: Embeddings LangChainGo offers a number of Embeddings implementations that integrate with various model providers. These include: OpenAI Embeddings Google AI Embeddings Vertex AI Embeddings For more details on using embeddings, see the Embeddings documentation.",
+    "content": "import CodeBlock from \"@theme/CodeBlock\"; Integrations: Embeddings LangChainGo produces embeddings in two ways. Either way you get an `embeddings.Embedder` with `EmbedDocuments(ctx, texts)` and `EmbedQuery(ctx, text)`, ready to pass to a vector store. Using an LLM client Providers whose LLM client can also embed satisfy `embeddings.EmbedderClient`; wrap the client with `embeddings.NewEmbedder` to get a full `Embedder`: The same `NewEmbedder(client)` pattern works with: | Client | Package | |----...",
     "type": "doc",
     "keywords": [
+      "client",
       "embeddings",
-      "more",
-      "openai",
-      "see",
+      "get",
+      "llm",
+      "langchaingo",
+      "satisfy",
       "using",
-      "import",
-      "integrations",
-      "offers",
-      "\"@theme/codeblock\"",
-      "documentation"
+      "whose",
+      "full",
+      "\"@theme/codeblock\""
     ],
     "metadata": {
       "sidebar_label": "Integrations"
@@ -619,17 +655,59 @@
     "keywords": [
       "models",
       "langchain",
-      "chat",
       "language",
-      "input",
-      "provides",
-      "output",
       "text-based",
-      "(llms)",
-      "while"
+      "input",
+      "output",
+      "chat",
+      "provides",
+      "cha",
+      "but"
     ],
     "metadata": {
       "sidebar_label": "Models"
+    }
+  },
+  {
+    "title": "Anthropic",
+    "url": "/langchaingo/docs/modules/model_io/models/llms/Integrations/anthropic",
+    "content": "import CodeBlock from \"@theme/CodeBlock\"; import ExampleAnthropic from \"@examples/anthropic-completion-example/anthropic_completion_example.go\"; Anthropic Anthropic's Claude models support long context, tool use, and extended (\"thinking\") reasoning through the `llms/anthropic` package. Setup Set your API key in the `ANTHROPIC_API_KEY` environment variable, or pass it explicitly: Extended thinking is controlled per call with the provider-neutral reasoning options (`llms.WithReasoning`, `llms.With...",
+    "type": "doc",
+    "keywords": [
+      "reasoning",
+      "import",
+      "extended",
+      "support",
+      "models",
+      "your",
+      "api",
+      "options",
+      "(`llms.withreasoning`",
+      "exampleanthropic"
+    ],
+    "metadata": {
+      "sidebar_label": "Anthropic"
+    }
+  },
+  {
+    "title": "AWS Bedrock",
+    "url": "/langchaingo/docs/modules/model_io/models/llms/Integrations/bedrock",
+    "content": "import CodeBlock from \"@theme/CodeBlock\"; import ExampleBedrock from \"@examples/bedrock-provider-example/main.go\"; AWS Bedrock Amazon Bedrock exposes foundation models from several vendors (Anthropic Claude, Meta Llama, Amazon Titan and Nova, and others) behind one API. The `llms/bedrock` package talks to it through the AWS SDK. Prerequisites - AWS credentials with Bedrock access, resolved the standard AWS way (environment variables such as `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` / `AWS_RE...",
+    "type": "doc",
+    "keywords": [
+      "aws",
+      "bedrock",
+      "import",
+      "amazon",
+      "several",
+      "`llms/bedrock`",
+      "models",
+      "prerequisites",
+      "access",
+      "(environment"
+    ],
+    "metadata": {
+      "sidebar_label": "AWS Bedrock"
     }
   },
   {
@@ -639,36 +717,57 @@
     "type": "doc",
     "keywords": [
       "package",
-      "`fake`",
+      "language",
       "overview",
       "fake",
-      "language",
-      "your",
       "example",
-      "simulated",
-      "reference",
-      "higher"
+      "your",
+      "`fake`",
+      "llm",
+      "(llm)",
+      "how"
     ],
     "metadata": {
       "sidebar_label": "Fake LLM"
     }
   },
   {
-    "title": "Groq",
-    "url": "/langchaingo/docs/modules/model_io/models/llms/Integrations/groq",
-    "content": "import CodeBlock from \"@theme/CodeBlock\"; import ExampleGroq from \"@examples/groq-completion-example/groq_completion_example.go\"; Groq Overview This documentation provides a detailed overview and technical guidance for integrating Groq's machine learning models with the Langchaingo library in the Go programming environment. This integration allows Go developers to leverage the power of pre-trained AI models for various applications, including natural language processing, text generation, and mor...",
+    "title": "Google Gemini",
+    "url": "/langchaingo/docs/modules/model_io/models/llms/Integrations/googleai",
+    "content": "import CodeBlock from \"@theme/CodeBlock\"; import ExampleGoogleAI from \"@examples/googleai-completion-example/googleai-completion-example.go\"; Google Gemini The `llms/googleai` package calls Google Gemini through the Google AI Studio endpoint. To use Gemini through Google Cloud instead, see Vertex AI. Setup Create an API key at Google AI Studio and set it in `GOOGLE_API_KEY`, or pass it explicitly. Note that `googleai.New` takes a `context.Context`: On thinking-capable models, control reasoning p...",
     "type": "doc",
     "keywords": [
-      "overview",
+      "google",
+      "gemini",
+      "studio",
+      "through",
       "import",
+      "set",
+      "reasoning",
+      "key",
+      "explicitly",
+      "note"
+    ],
+    "metadata": {
+      "sidebar_label": "Google Gemini"
+    }
+  },
+  {
+    "title": "Groq",
+    "url": "/langchaingo/docs/modules/model_io/models/llms/Integrations/groq",
+    "content": "import CodeBlock from \"@theme/CodeBlock\"; import ExampleGroq from \"@examples/groq-completion-example/groq_completion_example.go\"; Groq Overview Groq serves open models (Llama, Mixtral, and others) over an OpenAI-compatible API with very low latency. Because the API is OpenAI-compatible, LangChainGo talks to Groq through the `llms/openai` package pointed at Groq's base URL — no separate provider package is required. Prerequisites - Go installed on your machine (version 1.24 or higher recommende...",
+    "type": "doc",
+    "keywords": [
+      "groq",
+      "import",
+      "api",
+      "package",
+      "openai-compatible",
+      "others)",
+      "url",
+      "`llms/openai`",
       "models",
-      "codeblock",
-      "environment",
-      "documentation",
-      "\"@examples/groq-completion-example/groq_completion_example.go\"",
-      "integrating",
-      "learning",
-      "langchaingo"
+      "mixtral"
     ],
     "metadata": {
       "sidebar_label": "Groq"
@@ -680,16 +779,16 @@
     "content": "import CodeBlock from \"@theme/CodeBlock\"; import ExampleHuggingFace from \"@examples/huggingface-llm-example/huggingface_example.go\"; Hugging Face Overview This documentation provides a detailed overview and technical guidance for integrating the Hugging Face machine learning models with the LangchainGo library in the Go programming environment. This integration allows Go developers to leverage the power of pre-trained AI models for various applications, including natural language processing, tex...",
     "type": "doc",
     "keywords": [
-      "models",
-      "face",
-      "hugging",
       "import",
       "overview",
-      "codeblock",
-      "natural",
-      "environment",
-      "allows",
-      "\"@examples/huggingface-llm-example/huggingface_example.go\""
+      "hugging",
+      "models",
+      "face",
+      "applications",
+      "power",
+      "leverage",
+      "provides",
+      "including"
     ],
     "metadata": {
       "sidebar_label": "Hugging Face"
@@ -702,18 +801,39 @@
     "type": "doc",
     "keywords": [
       "mistral",
-      "import",
-      "models",
       "how",
       "different",
+      "import",
+      "models",
       "example",
-      "streaming",
-      "(https://mistral.ai)",
-      "interact",
-      "examplemistral"
+      "configuring",
+      "over",
+      "goes",
+      "levels"
     ],
     "metadata": {
       "sidebar_label": "Mistral"
+    }
+  },
+  {
+    "title": "Ollama",
+    "url": "/langchaingo/docs/modules/model_io/models/llms/Integrations/ollama",
+    "content": "import CodeBlock from \"@theme/CodeBlock\"; import ExampleOllama from \"@examples/ollama-completion-example/ollama_completion_example.go\"; Ollama Ollama runs open models locally. The `llms/ollama` package talks to a local (or remote) Ollama server — no API key required. Prerequisites - Install Ollama and pull a model, e.g. `ollama pull llama2`. Setup Ollama supports schema-constrained output through its native `format` field, wired up by the provider-neutral `llms.WithStructuredOutput` option. Fo...",
+    "type": "doc",
+    "keywords": [
+      "ollama",
+      "import",
+      "pull",
+      "\"@examples/ollama-completion-example/ollama_completion_example.go\"",
+      "field",
+      "remote)",
+      "talks",
+      "key",
+      "setup",
+      "schema-constrained"
+    ],
+    "metadata": {
+      "sidebar_label": "Ollama"
     }
   },
   {
@@ -723,15 +843,15 @@
     "type": "doc",
     "keywords": [
       "openai",
-      "different",
-      "models",
       "key",
+      "different",
       "import",
-      "exampleopenai",
-      "example",
-      "variable",
+      "models",
+      "suitable",
+      "interact",
+      "when",
       "\"@examples/openai-completion-example/openai_completion_example.go\"",
-      "offers"
+      "goes"
     ],
     "metadata": {
       "sidebar_label": "OpenAI"
@@ -743,16 +863,16 @@
     "content": "import CodeBlock from \"@theme/CodeBlock\"; import ExampleVertexAICompletion from \"@examples/vertex-completion-example/vertex-completion-example.go\"; Vertex AI To use the Vertex AI LLM you need to set the google project ID. You can do this by setting the `GOOGLE_CLOUD_PROJECT` environment variable or giving it as a variaic option when creating the wrapper. \u003cCodeBlock language=\"go\"\u003e{ExampleVertexAICompletion}\u003c/CodeBlock\u003e",
     "type": "doc",
     "keywords": [
-      "import",
       "vertex",
-      "google",
+      "import",
+      "variable",
+      "giving",
+      "wrapper",
+      "\u003ccodeblock",
       "\"@theme/codeblock\"",
-      "when",
-      "variaic",
       "set",
-      "examplevertexaicompletion",
-      "language=\"go\"\u003e{examplevertexaicompletion}\u003c/codeblock\u003e",
-      "need"
+      "google",
+      "project"
     ],
     "metadata": {
       "sidebar_label": "Vertex AI"
@@ -766,14 +886,14 @@
     "keywords": [
       "llms",
       "interface",
+      "langchain",
       "provides",
       "import",
-      "langchain",
-      "implement",
+      "standard",
       "message",
-      "does",
-      "multi-modal",
-      "inputs"
+      "two",
+      "methods",
+      "modern"
     ],
     "metadata": {
       "sidebar_label": "LLMs"
@@ -782,19 +902,19 @@
   {
     "title": "Output Parsers",
     "url": "/langchaingo/docs/modules/model_io/output_parsers",
-    "content": "Output Parsers :::info Conceptual Guide ::: Language models output text. But many times you may want to get more structured information than just text back. This is where output parsers come in. Output parsers are structs that help structure language model responses. There are three main methods an output parser must implement:",
+    "content": "Output Parsers :::info Conceptual Guide ::: Language models output text. But many times you may want to get more structured information than just text back. This is where output parsers come in. Output parsers are structs that help structure language model responses. There are four main methods an output parser must implement:",
     "type": "doc",
     "keywords": [
       "output",
       "parsers",
-      "text",
       "language",
-      "conceptual",
-      "methods",
-      "get",
-      "where",
-      "there",
-      "back"
+      "text",
+      "want",
+      "just",
+      "many",
+      "may",
+      "more",
+      "come"
     ],
     "metadata": {
       "sidebar_label": "Output Parsers"
@@ -807,15 +927,15 @@
     "type": "doc",
     "keywords": [
       "prompts",
-      "import",
-      "input",
-      "templates",
-      "template",
       "prompt",
+      "template",
       "multiple",
-      "refers",
-      "f-strings",
-      "(default)"
+      "templates",
+      "input",
+      "import",
+      "**multiple",
+      "simplest",
+      "utilities"
     ],
     "metadata": {
       "sidebar_label": "Prompts"
@@ -829,14 +949,14 @@
     "keywords": [
       "prompt",
       "import",
-      "template",
       "templates",
+      "template",
       "multiple",
-      "effective",
-      "allow",
-      "reusable",
-      "dynamically",
-      "langchain"
+      "prompts",
+      "foundation",
+      "engineering",
+      "security",
+      "templating"
     ],
     "metadata": {
       "sidebar_label": "Prompt templates"
@@ -852,12 +972,12 @@
       "partial",
       "template",
       "prompt",
-      "two",
-      "string",
-      "formatting",
-      "variables",
       "subset",
-      "case"
+      "variables",
+      "formatting",
+      "string",
+      "two",
+      "which"
     ],
     "metadata": {
       "sidebar_label": "Partial values"
@@ -873,10 +993,10 @@
       "chat",
       "application",
       "your",
-      "basic",
       "api",
+      "basic",
       "key",
-      "create",
+      "building",
       "set",
       "environment"
     ]
@@ -888,15 +1008,15 @@
     "type": "doc",
     "keywords": [
       "code",
-      "create",
-      "improvements",
-      "review",
+      "step",
+      "analyzes",
       "reviewer",
       "git",
-      "issues",
-      "step",
       "files",
-      "analyzes"
+      "improvements",
+      "issues",
+      "review",
+      "create"
     ]
   },
   {
@@ -907,14 +1027,14 @@
     "keywords": [
       "langchaingo",
       "tutorials",
-      "applications",
       "these",
-      "code",
       "learn",
-      "application",
+      "applications",
       "analyze",
-      "analyzer",
-      "logs"
+      "application",
+      "code",
+      "build",
+      "using"
     ]
   },
   {
@@ -924,15 +1044,15 @@
     "type": "doc",
     "keywords": [
       "log",
-      "identifies",
-      "tool",
-      "patterns",
       "etc.)",
       "anomalies",
       "issues",
-      "building",
-      "critical",
-      "detected"
+      "patterns",
+      "tool",
+      "identifies",
+      "analysis",
+      "error",
+      "(openai"
     ]
   },
   {
@@ -944,13 +1064,13 @@
       "documentation",
       "generates",
       "code",
-      "automatically",
+      "api",
       "project",
       "tool",
-      "api",
-      "building",
-      "codebase",
-      "maintains"
+      "automatically",
+      "tutorials",
+      "changes",
+      "purpose"
     ]
   },
   {
@@ -6782,6 +6902,46 @@
     ]
   },
   {
+    "title": "package main",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/examples/googleai-structured-output-example",
+    "content": "Set the GOOGLE_API_KEY env var to your API key taken from ai.google.dev\n",
+    "type": "package",
+    "package": "main",
+    "external": true,
+    "keywords": [
+      "package",
+      "main"
+    ]
+  },
+  {
+    "title": "main",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/examples/googleai-structured-output-example#main",
+    "content": "",
+    "type": "function",
+    "package": "main",
+    "signature": "main()",
+    "external": true,
+    "keywords": [
+      "function",
+      "main",
+      "main"
+    ]
+  },
+  {
+    "title": "MoonLanding",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/examples/googleai-structured-output-example#MoonLanding",
+    "content": "MoonLanding is the typed result we ask Gemini to produce. Its shape mirrors the\nJSON Schema below.\n",
+    "type": "type",
+    "package": "main",
+    "signature": "type MoonLanding",
+    "external": true,
+    "keywords": [
+      "type",
+      "MoonLanding",
+      "main"
+    ]
+  },
+  {
     "title": "main",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/examples/googleai-tool-call-example#main",
     "content": "",
@@ -10643,6 +10803,34 @@
     ]
   },
   {
+    "title": "anthropicHasAssistantPrefill",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/anthropic#anthropicHasAssistantPrefill",
+    "content": "anthropicHasAssistantPrefill reports whether the last message is an assistant\nturn, i.e. a prefilled response, which Anthropic rejects with structured output.\n",
+    "type": "function",
+    "package": "anthropic",
+    "signature": "anthropicHasAssistantPrefill()",
+    "external": true,
+    "keywords": [
+      "function",
+      "anthropicHasAssistantPrefill",
+      "anthropic"
+    ]
+  },
+  {
+    "title": "anthropicTextContent",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/anthropic#anthropicTextContent",
+    "content": "anthropicTextContent concatenates the text of every text block in a response.\n",
+    "type": "function",
+    "package": "anthropic",
+    "signature": "anthropicTextContent()",
+    "external": true,
+    "keywords": [
+      "function",
+      "anthropicTextContent",
+      "anthropic"
+    ]
+  },
+  {
     "title": "appendIfMissing",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/anthropic#appendIfMissing",
     "content": "appendIfMissing appends val to slice if not already present\n",
@@ -10653,6 +10841,20 @@
     "keywords": [
       "function",
       "appendIfMissing",
+      "anthropic"
+    ]
+  },
+  {
+    "title": "applyAnthropicStructuredOutput",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/anthropic#applyAnthropicStructuredOutput",
+    "content": "applyAnthropicStructuredOutput folds a per-call structured-output schema into\noutput_config.format, preserving any effort already set on cfg. It rejects a\nknown-unsupported model and message prefilling (a trailing assistant message)\nwith typed errors before the request is sent.\n",
+    "type": "function",
+    "package": "anthropic",
+    "signature": "applyAnthropicStructuredOutput()",
+    "external": true,
+    "keywords": [
+      "function",
+      "applyAnthropicStructuredOutput",
       "anthropic"
     ]
   },
@@ -10687,7 +10889,7 @@
   {
     "title": "extractBetaHeaders",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/anthropic#extractBetaHeaders",
-    "content": "extractBetaHeaders extracts beta headers from call options\n",
+    "content": "extractBetaHeaders extracts beta headers from call options. thinking is the\nmechanism actually resolved for this request (nil when no thinking), so the\ninterleaved-thinking beta keys off the real wire shape rather than the caller's\nraw Adaptive flag, which the model-aware resolver may have overridden.\n",
     "type": "function",
     "package": "anthropic",
     "signature": "extractBetaHeaders()",
@@ -10895,6 +11097,49 @@
     ]
   },
   {
+    "title": "validateAnthropicStructuredOutput",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/anthropic#validateAnthropicStructuredOutput",
+    "content": "validateAnthropicStructuredOutput validates the concatenation of all final text\nblocks against the original schema, but only for a normal-final turn. A tool_use\nor max_tokens/refusal turn is intermediate/aborted and is not validated. On a\nstructured call the returned content is the full concatenation (a schema answer\nmay legitimately span several text blocks).\n",
+    "type": "function",
+    "package": "anthropic",
+    "signature": "validateAnthropicStructuredOutput()",
+    "external": true,
+    "keywords": [
+      "function",
+      "validateAnthropicStructuredOutput",
+      "anthropic"
+    ]
+  },
+  {
+    "title": "ErrModelRefusal",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/anthropic#ErrModelRefusal",
+    "content": "ErrModelRefusal is returned when the model declines to respond (Anthropic\nstop_reason \"refusal\"), e.g. a creative model such as Claude Fable 5 hitting a\ncontent boundary. It is distinct from an empty or failed response; any refusal\ntext the model returned is in Message. Category and Explanation carry the API's\nstop_details so callers can pick a fallback by classifier; InputTokens and\nOutputTokens preserve billed usage (a refusal is still billed for what ran).\n",
+    "type": "type",
+    "package": "anthropic",
+    "signature": "type ErrModelRefusal",
+    "external": true,
+    "keywords": [
+      "type",
+      "ErrModelRefusal",
+      "anthropic"
+    ]
+  },
+  {
+    "title": "ErrModelRefusal.Error",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/anthropic#ErrModelRefusal.Error",
+    "content": "",
+    "type": "method",
+    "package": "anthropic",
+    "signature": "Error()",
+    "external": true,
+    "keywords": [
+      "method",
+      "Error",
+      "ErrModelRefusal",
+      "anthropic"
+    ]
+  },
+  {
     "title": "LLM",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/anthropic#LLM",
     "content": "",
@@ -11048,6 +11293,21 @@
     "keywords": [
       "method",
       "CreateMessage",
+      "Client",
+      "anthropicclient"
+    ]
+  },
+  {
+    "title": "Client.EffectiveModel",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/anthropic/internal/anthropicclient#Client.EffectiveModel",
+    "content": "EffectiveModel resolves the model actually sent to the API: a per-call model\nwins, then the client default, then the package default. Capability decisions\nmade before the request (thinking mechanism, sampling handling) must key off\nthis same value, since the default is otherwise substituted only downstream.\n",
+    "type": "method",
+    "package": "anthropicclient",
+    "signature": "EffectiveModel()",
+    "external": true,
+    "keywords": [
+      "method",
+      "EffectiveModel",
       "Client",
       "anthropicclient"
     ]
@@ -11451,6 +11711,34 @@
     ]
   },
   {
+    "title": "OutputConfig",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/anthropic/internal/anthropicclient#OutputConfig",
+    "content": "OutputConfig carries the adaptive-thinking effort and/or a structured-output\nformat. It is a top-level sibling of \"thinking\" in the Messages request body.\nEffort and Format are independent: a call may set either or both.\n",
+    "type": "type",
+    "package": "anthropicclient",
+    "signature": "type OutputConfig",
+    "external": true,
+    "keywords": [
+      "type",
+      "OutputConfig",
+      "anthropicclient"
+    ]
+  },
+  {
+    "title": "OutputFormat",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/anthropic/internal/anthropicclient#OutputFormat",
+    "content": "OutputFormat constrains the final text output to a JSON Schema. Schema is the\nraw JSON Schema document, sent verbatim.\n",
+    "type": "type",
+    "package": "anthropicclient",
+    "signature": "type OutputFormat",
+    "external": true,
+    "keywords": [
+      "type",
+      "OutputFormat",
+      "anthropicclient"
+    ]
+  },
+  {
     "title": "PartialJSONContent",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/anthropic/internal/anthropicclient#PartialJSONContent",
     "content": "",
@@ -11476,6 +11764,20 @@
       "method",
       "GetType",
       "PartialJSONContent",
+      "anthropicclient"
+    ]
+  },
+  {
+    "title": "StopDetails",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/anthropic/internal/anthropicclient#StopDetails",
+    "content": "StopDetails accompanies a refusal stop reason: Category names the safety\nclassifier that declined (e.g. \"cyber\", \"bio\"), Explanation is human-readable;\nboth may be empty.\n",
+    "type": "type",
+    "package": "anthropicclient",
+    "signature": "type StopDetails",
+    "external": true,
+    "keywords": [
+      "type",
+      "StopDetails",
       "anthropicclient"
     ]
   },
@@ -12205,6 +12507,20 @@
     ]
   },
   {
+    "title": "isAnthropicModelID",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#isAnthropicModelID",
+    "content": "isAnthropicModelID reports whether the Bedrock model ID belongs to the Claude\nfamily (with or without a region prefix such as \"us.\").\n",
+    "type": "function",
+    "package": "bedrockclient",
+    "signature": "isAnthropicModelID()",
+    "external": true,
+    "keywords": [
+      "function",
+      "isAnthropicModelID",
+      "bedrockclient"
+    ]
+  },
+  {
     "title": "ptrStringOrNil",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#ptrStringOrNil",
     "content": "",
@@ -12309,7 +12625,7 @@
   {
     "title": "ConverseClient.convertMessages",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#ConverseClient.convertMessages",
-    "content": "convertMessages converts our messages to Converse format\n",
+    "content": "convertMessages converts our messages to Converse format\nAll consecutive AI messages (with or without tool calls) are combined into a single assistant message\nAll consecutive tool result messages are combined into a single user message\n",
     "type": "method",
     "package": "bedrockclient",
     "signature": "convertMessages()",
@@ -12332,21 +12648,6 @@
     "keywords": [
       "method",
       "convertToolCallInput",
-      "ConverseClient",
-      "bedrockclient"
-    ]
-  },
-  {
-    "title": "ConverseClient.convertToolMessage",
-    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#ConverseClient.convertToolMessage",
-    "content": "convertToolMessage converts tool result messages\n",
-    "type": "method",
-    "package": "bedrockclient",
-    "signature": "convertToolMessage()",
-    "external": true,
-    "keywords": [
-      "method",
-      "convertToolMessage",
       "ConverseClient",
       "bedrockclient"
     ]
@@ -12377,6 +12678,21 @@
     "keywords": [
       "method",
       "convertUserOrAssistantMessage",
+      "ConverseClient",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "ConverseClient.createCachePointBlock",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#ConverseClient.createCachePointBlock",
+    "content": "createCachePointBlock creates a cache point block from cache control\n",
+    "type": "method",
+    "package": "bedrockclient",
+    "signature": "createCachePointBlock()",
+    "external": true,
+    "keywords": [
+      "method",
+      "createCachePointBlock",
       "ConverseClient",
       "bedrockclient"
     ]
@@ -12471,6 +12787,110 @@
     ]
   },
   {
+    "title": "aiMessageAccumulator",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#aiMessageAccumulator",
+    "content": "aiMessageAccumulator accumulates consecutive AI messages into a single assistant message\n",
+    "type": "type",
+    "package": "bedrockclient",
+    "signature": "type aiMessageAccumulator",
+    "external": true,
+    "keywords": [
+      "type",
+      "aiMessageAccumulator",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "aiMessageAccumulator.addTextContent",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#aiMessageAccumulator.addTextContent",
+    "content": "addTextContent adds text content to the accumulator\n",
+    "type": "method",
+    "package": "bedrockclient",
+    "signature": "addTextContent()",
+    "external": true,
+    "keywords": [
+      "method",
+      "addTextContent",
+      "aiMessageAccumulator",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "aiMessageAccumulator.addToolUse",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#aiMessageAccumulator.addToolUse",
+    "content": "addToolUse adds a tool use block to the accumulator\n",
+    "type": "method",
+    "package": "bedrockclient",
+    "signature": "addToolUse()",
+    "external": true,
+    "keywords": [
+      "method",
+      "addToolUse",
+      "aiMessageAccumulator",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "aiMessageAccumulator.build",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#aiMessageAccumulator.build",
+    "content": "build creates a Converse Message from accumulated data\n",
+    "type": "method",
+    "package": "bedrockclient",
+    "signature": "build()",
+    "external": true,
+    "keywords": [
+      "method",
+      "build",
+      "aiMessageAccumulator",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "aiMessageAccumulator.isEmpty",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#aiMessageAccumulator.isEmpty",
+    "content": "isEmpty returns true if no content has been accumulated\n",
+    "type": "method",
+    "package": "bedrockclient",
+    "signature": "isEmpty()",
+    "external": true,
+    "keywords": [
+      "method",
+      "isEmpty",
+      "aiMessageAccumulator",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "aiMessageAccumulator.reset",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#aiMessageAccumulator.reset",
+    "content": "reset clears the accumulator\n",
+    "type": "method",
+    "package": "bedrockclient",
+    "signature": "reset()",
+    "external": true,
+    "keywords": [
+      "method",
+      "reset",
+      "aiMessageAccumulator",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "aiMessageAccumulator.setCacheControl",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#aiMessageAccumulator.setCacheControl",
+    "content": "setCacheControl sets cache control if not already set\n",
+    "type": "method",
+    "package": "bedrockclient",
+    "signature": "setCacheControl()",
+    "external": true,
+    "keywords": [
+      "method",
+      "setCacheControl",
+      "aiMessageAccumulator",
+      "bedrockclient"
+    ]
+  },
+  {
     "title": "converseAdditionalModelRequestFields",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#converseAdditionalModelRequestFields",
     "content": "",
@@ -12485,6 +12905,20 @@
     ]
   },
   {
+    "title": "converseOutputConfig",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#converseOutputConfig",
+    "content": "converseOutputConfig carries the adaptive-thinking effort. It is a sibling of\n\"thinking\" inside additionalModelRequestFields.\n",
+    "type": "type",
+    "package": "bedrockclient",
+    "signature": "type converseOutputConfig",
+    "external": true,
+    "keywords": [
+      "type",
+      "converseOutputConfig",
+      "bedrockclient"
+    ]
+  },
+  {
     "title": "converseThinkingPayload",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#converseThinkingPayload",
     "content": "",
@@ -12495,6 +12929,108 @@
     "keywords": [
       "type",
       "converseThinkingPayload",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "toolResultAccumulator",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#toolResultAccumulator",
+    "content": "toolResultAccumulator accumulates consecutive tool result messages into a single user message\n",
+    "type": "type",
+    "package": "bedrockclient",
+    "signature": "type toolResultAccumulator",
+    "external": true,
+    "keywords": [
+      "type",
+      "toolResultAccumulator",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "toolResultAccumulator.addToolResult",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#toolResultAccumulator.addToolResult",
+    "content": "addToolResult adds a tool result block to the accumulator\n",
+    "type": "method",
+    "package": "bedrockclient",
+    "signature": "addToolResult()",
+    "external": true,
+    "keywords": [
+      "method",
+      "addToolResult",
+      "toolResultAccumulator",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "toolResultAccumulator.build",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#toolResultAccumulator.build",
+    "content": "build creates a Converse Message from accumulated tool results\n",
+    "type": "method",
+    "package": "bedrockclient",
+    "signature": "build()",
+    "external": true,
+    "keywords": [
+      "method",
+      "build",
+      "toolResultAccumulator",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "toolResultAccumulator.isEmpty",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#toolResultAccumulator.isEmpty",
+    "content": "isEmpty returns true if no tool results have been accumulated\n",
+    "type": "method",
+    "package": "bedrockclient",
+    "signature": "isEmpty()",
+    "external": true,
+    "keywords": [
+      "method",
+      "isEmpty",
+      "toolResultAccumulator",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "toolResultAccumulator.reset",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#toolResultAccumulator.reset",
+    "content": "reset clears the accumulator\n",
+    "type": "method",
+    "package": "bedrockclient",
+    "signature": "reset()",
+    "external": true,
+    "keywords": [
+      "method",
+      "reset",
+      "toolResultAccumulator",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "applyAnthropicStructuredOutput",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#applyAnthropicStructuredOutput",
+    "content": "applyAnthropicStructuredOutput folds a per-call schema into the legacy Anthropic\noutput_config.format, preserving any effort already set. A known-legacy model that\npredates structured output is rejected with a typed error before the request.\n",
+    "type": "function",
+    "package": "bedrockclient",
+    "signature": "applyAnthropicStructuredOutput()",
+    "external": true,
+    "keywords": [
+      "function",
+      "applyAnthropicStructuredOutput",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "applyConverseStructuredOutput",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#applyConverseStructuredOutput",
+    "content": "applyConverseStructuredOutput sets the native Converse OutputConfig.TextFormat\nfrom a per-call schema. Converse Structured Outputs is not Claude-only, so there\nis no local model gate here — an unsupported model surfaces as the provider 4xx.\nThe AWS JsonSchemaDefinition.Schema field is a JSON string, so the raw schema is\npassed as-is with no second encoding.\n",
+    "type": "function",
+    "package": "bedrockclient",
+    "signature": "applyConverseStructuredOutput()",
+    "external": true,
+    "keywords": [
+      "function",
+      "applyConverseStructuredOutput",
       "bedrockclient"
     ]
   },
@@ -12523,6 +13059,34 @@
     "keywords": [
       "function",
       "isSmithyValidObject",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "validateConverseStructuredOutput",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#validateConverseStructuredOutput",
+    "content": "validateConverseStructuredOutput validates the Converse response against a\nper-call schema, using the shared normal-final matrix.\n",
+    "type": "function",
+    "package": "bedrockclient",
+    "signature": "validateConverseStructuredOutput()",
+    "external": true,
+    "keywords": [
+      "function",
+      "validateConverseStructuredOutput",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "validateStructuredResponse",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#validateStructuredResponse",
+    "content": "validateStructuredResponse validates the final text of each normal-final turn\n(end_turn / stop_sequence) against the original schema. tool_use, max_tokens,\nguardrail_intervened, content_filtered and unknown reasons are intermediate or\naborted and are not validated as final JSON. Shared by the Converse and legacy\nAnthropic paths, which use the same stop-reason vocabulary.\n",
+    "type": "function",
+    "package": "bedrockclient",
+    "signature": "validateStructuredResponse()",
+    "external": true,
+    "keywords": [
+      "function",
+      "validateStructuredResponse",
       "bedrockclient"
     ]
   },
@@ -12751,6 +13315,20 @@
     ]
   },
   {
+    "title": "applyAnthropicReasoning",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#applyAnthropicReasoning",
+    "content": "applyAnthropicReasoning resolves the thinking mechanism from the model via the\nreasoning capability resolver: an adaptive-only generation gets adaptive\nthinking and drops sampling params, a budget-only generation gets budget\nthinking, and the caller's preference is honored where the model supports both.\n",
+    "type": "function",
+    "package": "bedrockclient",
+    "signature": "applyAnthropicReasoning()",
+    "external": true,
+    "keywords": [
+      "function",
+      "applyAnthropicReasoning",
+      "bedrockclient"
+    ]
+  },
+  {
     "title": "createAnthropicCompletion",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#createAnthropicCompletion",
     "content": "",
@@ -12859,6 +13437,34 @@
     "keywords": [
       "type",
       "anthropicContentBlock",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "anthropicOutputConfig",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#anthropicOutputConfig",
+    "content": "",
+    "type": "type",
+    "package": "bedrockclient",
+    "signature": "type anthropicOutputConfig",
+    "external": true,
+    "keywords": [
+      "type",
+      "anthropicOutputConfig",
+      "bedrockclient"
+    ]
+  },
+  {
+    "title": "anthropicOutputFormat",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient#anthropicOutputFormat",
+    "content": "anthropicOutputFormat carries a structured-output JSON Schema for the legacy\nInvokeModel Anthropic payload, mirroring first-party output_config.format.\n",
+    "type": "type",
+    "package": "bedrockclient",
+    "signature": "type anthropicOutputFormat",
+    "external": true,
+    "keywords": [
+      "type",
+      "anthropicOutputFormat",
       "bedrockclient"
     ]
   },
@@ -14089,7 +14695,7 @@
   {
     "title": "package llms",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms",
-    "content": "Package llms provides unified support for interacting with different Language Models (LLMs) from various providers.\nDesigned with an extensible architecture, the package facilitates seamless integration of LLMs\nwith a focus on modularity, encapsulation, and easy configurability.\n\nThe package includes the following subpackages for LLM providers:\n1. Hugging Face:      llms/huggingface/\n2. Mistral:           llms/mistral/\n3. OpenAI:            llms/openai/\n4. Google AI:         llms/googleai/\n5. Bedrock:           llms/bedrock/\n6. Anthropic:         llms/anthropic/\n7. Ollama:            llms/ollama/\n8. Cache:             llms/cache/\n10. Streaming:        llms/streaming/\n11. Reasoning:        llms/reasoning/\n\nEach subpackage includes provider-specific LLM implementations and helper files for communication\nwith supported LLM providers. The internal directories within these subpackages contain provider-specific\nclient and API implementations.\n\nThe `llms.go` file contains the types and interfaces for interacting with different LLMs.\n\nThe `options.go` file provides various options and functions to configure the LLMs.\n",
+    "content": "Package llms provides unified support for interacting with different Language Models (LLMs) from various providers.\nDesigned with an extensible architecture, the package facilitates seamless integration of LLMs\nwith a focus on modularity, encapsulation, and easy configurability.\n\nThe package includes the following subpackages for LLM providers:\n1. Hugging Face:       llms/huggingface/\n2. Mistral:            llms/mistral/\n3. OpenAI:             llms/openai/\n4. Google AI:          llms/googleai/\n5. Bedrock:            llms/bedrock/\n6. Anthropic:          llms/anthropic/\n7. Ollama:             llms/ollama/\n8. Cache:              llms/cache/\n10. Streaming:         llms/streaming/\n11. Reasoning:         llms/reasoning/\n12. Structured Output: llms/structuredoutput/\n\nEach subpackage includes provider-specific LLM implementations and helper files for communication\nwith supported LLM providers. The internal directories within these subpackages contain provider-specific\nclient and API implementations.\n\nThe `llms.go` file contains the types and interfaces for interacting with different LLMs.\n\nThe `options.go` file provides various per-call options to configure the LLMs, including reasoning\ncontrols (WithReasoning, WithAdaptiveReasoning, WithReasoningDisabled) and provider-neutral\nschema-constrained output (WithStructuredOutput). The reasoning package resolves model capabilities\nfor the former; the structuredoutput package validates responses for the latter.\n",
     "type": "package",
     "package": "llms",
     "external": true,
@@ -14951,6 +15557,20 @@
     ]
   },
   {
+    "title": "applyGoogleResponseFormat",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/googleai#applyGoogleResponseFormat",
+    "content": "applyGoogleResponseFormat sets the generation config's response format from the\ncall options. With a per-call StructuredOutput it sets ResponseJsonSchema (never\nResponseSchema at the same time) plus application/json; otherwise it keeps the\npre-existing schema-less JSON mode / ResponseMIMEType behavior unchanged.\n",
+    "type": "function",
+    "package": "googleai",
+    "signature": "applyGoogleResponseFormat()",
+    "external": true,
+    "keywords": [
+      "function",
+      "applyGoogleResponseFormat",
+      "googleai"
+    ]
+  },
+  {
     "title": "cleanFunctionCallID",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/googleai#cleanFunctionCallID",
     "content": "cleanFunctionCallID removes generated ID prefix when sending to LLM backend.\nIf ID has the generated prefix, returns empty string; otherwise returns the original ID.\n",
@@ -15217,6 +15837,34 @@
     ]
   },
   {
+    "title": "resolveTemperature",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/googleai#resolveTemperature",
+    "content": "resolveTemperature returns the temperature to use when the caller left it\nunset. Gemini 3 defaults to 1.0, the value Google recommends (lower values can\ncause looping and degraded reasoning); other models keep the SDK-wide default.\n",
+    "type": "function",
+    "package": "googleai",
+    "signature": "resolveTemperature()",
+    "external": true,
+    "keywords": [
+      "function",
+      "resolveTemperature",
+      "googleai"
+    ]
+  },
+  {
+    "title": "resolveThinkingConfig",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/googleai#resolveThinkingConfig",
+    "content": "resolveThinkingConfig builds the Gemini thinking config for the reasoning mode.\nOff forces budget 0 on models that disable that way (Gemini 2.5 Flash), since\nomitting would not disable a default-on model; a model whose thinking cannot be\ndisabled (Gemini 2.5 Pro, Gemini 3.x) returns a typed error before the request.\n",
+    "type": "function",
+    "package": "googleai",
+    "signature": "resolveThinkingConfig()",
+    "external": true,
+    "keywords": [
+      "function",
+      "resolveThinkingConfig",
+      "googleai"
+    ]
+  },
+  {
     "title": "showContent",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/googleai#showContent",
     "content": "",
@@ -15231,42 +15879,42 @@
     ]
   },
   {
+    "title": "thinkingLevelForEffort",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/googleai#thinkingLevelForEffort",
+    "content": "thinkingLevelForEffort maps a reasoning effort to a Gemini thinking_level.\nxhigh/max collapse to HIGH (the top level); an unset effort returns empty so\nthe caller falls back to a budget or the model default.\n",
+    "type": "function",
+    "package": "googleai",
+    "signature": "thinkingLevelForEffort()",
+    "external": true,
+    "keywords": [
+      "function",
+      "thinkingLevelForEffort",
+      "googleai"
+    ]
+  },
+  {
+    "title": "validateGoogleStructuredOutput",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/googleai#validateGoogleStructuredOutput",
+    "content": "validateGoogleStructuredOutput validates each normal-final (STOP) candidate\nagainst the original schema. MAX_TOKENS, safety, recitation, blocklist and tool\noutcomes keep their prior semantics and are not validated as final JSON.\n",
+    "type": "function",
+    "package": "googleai",
+    "signature": "validateGoogleStructuredOutput()",
+    "external": true,
+    "keywords": [
+      "function",
+      "validateGoogleStructuredOutput",
+      "googleai"
+    ]
+  },
+  {
     "title": "package main",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/googleai/internal/cmd",
-    "content": "Code generator for vertex.go from googleai.go\nnolint\n",
+    "content": "Obsolete generator: the vertex package is now hand-maintained.\n\nIt used to regenerate llms/googleai/vertex/vertex.go from googleai.go, but the\ntwo packages now target different SDKs (google.golang.org/genai for googleai vs\ncloud.google.com/go/vertexai/genai for vertex), so a mechanical rewrite of the\nold import no longer produces a compilable file. Running it would clobber the\nhand-written vertex code. It refuses to run rather than silently corrupt.\n\nnolint\n",
     "type": "package",
     "package": "main",
     "external": true,
     "keywords": [
       "package",
-      "main"
-    ]
-  },
-  {
-    "title": "addCastToTopK",
-    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/googleai/internal/cmd#addCastToTopK",
-    "content": "",
-    "type": "function",
-    "package": "main",
-    "signature": "addCastToTopK()",
-    "external": true,
-    "keywords": [
-      "function",
-      "addCastToTopK",
-      "main"
-    ]
-  },
-  {
-    "title": "getIdentName",
-    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/googleai/internal/cmd#getIdentName",
-    "content": "getIdentName returns the identifier name from ast.Ident expressions; for\nother expressions, returns an empty string.\n",
-    "type": "function",
-    "package": "main",
-    "signature": "getIdentName()",
-    "external": true,
-    "keywords": [
-      "function",
-      "getIdentName",
       "main"
     ]
   },
@@ -15281,48 +15929,6 @@
     "keywords": [
       "function",
       "main",
-      "main"
-    ]
-  },
-  {
-    "title": "removeTokenCount",
-    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/googleai/internal/cmd#removeTokenCount",
-    "content": "",
-    "type": "function",
-    "package": "main",
-    "signature": "removeTokenCount()",
-    "external": true,
-    "keywords": [
-      "function",
-      "removeTokenCount",
-      "main"
-    ]
-  },
-  {
-    "title": "rewriteImport",
-    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/googleai/internal/cmd#rewriteImport",
-    "content": "",
-    "type": "function",
-    "package": "main",
-    "signature": "rewriteImport()",
-    "external": true,
-    "keywords": [
-      "function",
-      "rewriteImport",
-      "main"
-    ]
-  },
-  {
-    "title": "rewriteReceiverName",
-    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/googleai/internal/cmd#rewriteReceiverName",
-    "content": "",
-    "type": "function",
-    "package": "main",
-    "signature": "rewriteReceiverName()",
-    "external": true,
-    "keywords": [
-      "function",
-      "rewriteReceiverName",
       "main"
     ]
   },
@@ -15936,6 +16542,130 @@
     ]
   },
   {
+    "title": "package vertex",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/googleai/vertex",
+    "content": "This file is hand-written (not generated). It builds Vertex's response schema\nfrom the provider-neutral llms.StructuredOutput. The Vertex SDK accepts only a\n*genai.Schema (a subset of OpenAPI 3.0), so the raw JSON Schema is converted\nexplicitly; any construct that cannot be represented without changing meaning is\na typed error rather than a silent drop.\n",
+    "type": "package",
+    "package": "vertex",
+    "external": true,
+    "keywords": [
+      "package",
+      "vertex"
+    ]
+  },
+  {
+    "title": "applyVertexResponseFormat",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/googleai/vertex#applyVertexResponseFormat",
+    "content": "applyVertexResponseFormat sets the model's response format from the call options.\nWith a per-call StructuredOutput it sets ResponseSchema (converted from the raw\nJSON Schema) plus application/json; otherwise it keeps the pre-existing schema-\nless JSON mode / ResponseMIMEType behavior.\n",
+    "type": "function",
+    "package": "vertex",
+    "signature": "applyVertexResponseFormat()",
+    "external": true,
+    "keywords": [
+      "function",
+      "applyVertexResponseFormat",
+      "vertex"
+    ]
+  },
+  {
+    "title": "convertJSONSchemaToVertex",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/googleai/vertex#convertJSONSchemaToVertex",
+    "content": "convertJSONSchemaToVertex converts a raw JSON Schema document to *genai.Schema.\nNumbers decode via json.Number so integer keywords can be checked for\nintegrality instead of being silently truncated.\n",
+    "type": "function",
+    "package": "vertex",
+    "signature": "convertJSONSchemaToVertex()",
+    "external": true,
+    "keywords": [
+      "function",
+      "convertJSONSchemaToVertex",
+      "vertex"
+    ]
+  },
+  {
+    "title": "convertVertexNode",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/googleai/vertex#convertVertexNode",
+    "content": "",
+    "type": "function",
+    "package": "vertex",
+    "signature": "convertVertexNode()",
+    "external": true,
+    "keywords": [
+      "function",
+      "convertVertexNode",
+      "vertex"
+    ]
+  },
+  {
+    "title": "mapVertexType",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/googleai/vertex#mapVertexType",
+    "content": "",
+    "type": "function",
+    "package": "vertex",
+    "signature": "mapVertexType()",
+    "external": true,
+    "keywords": [
+      "function",
+      "mapVertexType",
+      "vertex"
+    ]
+  },
+  {
+    "title": "setVertexNumeric",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/googleai/vertex#setVertexNumeric",
+    "content": "setVertexNumeric transfers numeric keywords. Values arrive as json.Number\n(UseNumber). Float-valued keywords parse as float64; integer-valued keywords\n(item/property/length counts) must be integral — a fractional value is a typed\nerror rather than a silent truncation.\n",
+    "type": "function",
+    "package": "vertex",
+    "signature": "setVertexNumeric()",
+    "external": true,
+    "keywords": [
+      "function",
+      "setVertexNumeric",
+      "vertex"
+    ]
+  },
+  {
+    "title": "unsupportedVertexSchema",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/googleai/vertex#unsupportedVertexSchema",
+    "content": "",
+    "type": "function",
+    "package": "vertex",
+    "signature": "unsupportedVertexSchema()",
+    "external": true,
+    "keywords": [
+      "function",
+      "unsupportedVertexSchema",
+      "vertex"
+    ]
+  },
+  {
+    "title": "validateVertexStructuredOutput",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/googleai/vertex#validateVertexStructuredOutput",
+    "content": "validateVertexStructuredOutput validates each normal-final (FinishReasonStop)\ncandidate against the original schema. Other finish reasons keep their prior\nsemantics and are not validated as final JSON.\n",
+    "type": "function",
+    "package": "vertex",
+    "signature": "validateVertexStructuredOutput()",
+    "external": true,
+    "keywords": [
+      "function",
+      "validateVertexStructuredOutput",
+      "vertex"
+    ]
+  },
+  {
+    "title": "vertexTypeOf",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/googleai/vertex#vertexTypeOf",
+    "content": "vertexTypeOf resolves the genai type from a \"type\" that is a string or a\n[T, \"null\"] pair (the common JSON Schema nullable idiom). A wider union is not\nrepresentable.\n",
+    "type": "function",
+    "package": "vertex",
+    "signature": "vertexTypeOf()",
+    "external": true,
+    "keywords": [
+      "function",
+      "vertexTypeOf",
+      "vertex"
+    ]
+  },
+  {
     "title": "convertAndStreamFromIterator",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/googleai/vertex#convertAndStreamFromIterator",
     "content": "convertAndStreamFromIterator takes an iterator of GenerateContentResponse\nand produces a llms.ContentResponse reply from it, while streaming the\nresulting text into the opts-provided streaming function.\nNote that this is tricky in the face of multiple\ncandidates, so this code assumes only a single candidate for now.\n",
@@ -16058,6 +16788,20 @@
     "keywords": [
       "function",
       "generateFromSingleMessage",
+      "vertex"
+    ]
+  },
+  {
+    "title": "mergeStreamCandidate",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/googleai/vertex#mergeStreamCandidate",
+    "content": "mergeStreamCandidate folds one streamed candidate into the accumulator. It\nrecords the finish reason and metadata even when the chunk carries no content —\nthe finish reason often arrives on a trailing content-less chunk, and dropping\nit would leave StopReason unset and silently skip structured-output validation.\nIt reports whether the chunk had content to append (false ends the stream).\n",
+    "type": "function",
+    "package": "vertex",
+    "signature": "mergeStreamCandidate()",
+    "external": true,
+    "keywords": [
+      "function",
+      "mergeStreamCandidate",
       "vertex"
     ]
   },
@@ -16921,6 +17665,36 @@
     ]
   },
   {
+    "title": "LLM.resolveFormat",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/ollama#LLM.resolveFormat",
+    "content": "resolveFormat picks the Ollama `format` field. A per-call structured-output\nschema is sent as the native JSON Schema (Ollama constrains generation to it);\notherwise the legacy string mode is preserved unchanged — the client-level\nformat, or \"json\" for JSONMode.\n",
+    "type": "method",
+    "package": "ollama",
+    "signature": "resolveFormat()",
+    "external": true,
+    "keywords": [
+      "method",
+      "resolveFormat",
+      "LLM",
+      "ollama"
+    ]
+  },
+  {
+    "title": "LLM.validateStructuredOutput",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/ollama#LLM.validateStructuredOutput",
+    "content": "validateStructuredOutput validates each normal-final choice against the requested\nschema. Ollama marks a normal completion with done_reason \"stop\" (older servers\nmay leave it empty); a truncated (\"length\") response is not final JSON.\n",
+    "type": "method",
+    "package": "ollama",
+    "signature": "validateStructuredOutput()",
+    "external": true,
+    "keywords": [
+      "method",
+      "validateStructuredOutput",
+      "LLM",
+      "ollama"
+    ]
+  },
+  {
     "title": "authRoundTripper",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/ollama#authRoundTripper",
     "content": "authRoundTripper is a proxy HTTP RoundTripper that adds Authorization header to requests.\nIt wraps an existing RoundTripper and adds the API key as a Bearer token.\n",
@@ -17216,6 +17990,36 @@
     ]
   },
   {
+    "title": "ChatRequest.SetResponseFormat",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/openai/internal/openaiclient#ChatRequest.SetResponseFormat",
+    "content": "SetResponseFormat sets the response_format from the typed public builder (or the\njson_object shortcut). Passing nil clears it.\n",
+    "type": "method",
+    "package": "openaiclient",
+    "signature": "SetResponseFormat()",
+    "external": true,
+    "keywords": [
+      "method",
+      "SetResponseFormat",
+      "ChatRequest",
+      "openaiclient"
+    ]
+  },
+  {
+    "title": "ChatRequest.SetStructuredOutputSchema",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/openai/internal/openaiclient#ChatRequest.SetStructuredOutputSchema",
+    "content": "SetStructuredOutputSchema records a verbatim JSON Schema to emit as a strict\njson_schema response_format for the general llms.WithStructuredOutput path,\nkeeping the raw schema off the public ResponseFormat type.\n",
+    "type": "method",
+    "package": "openaiclient",
+    "signature": "SetStructuredOutputSchema()",
+    "external": true,
+    "keywords": [
+      "method",
+      "SetStructuredOutputSchema",
+      "ChatRequest",
+      "openaiclient"
+    ]
+  },
+  {
     "title": "ChatUsage",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/openai/internal/openaiclient#ChatUsage",
     "content": "ChatUsage is the usage of a chat completion request.\n",
@@ -17345,7 +18149,7 @@
   {
     "title": "ResponseFormat",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/openai/internal/openaiclient#ResponseFormat",
-    "content": "ResponseFormat is the format of the response.\n",
+    "content": "ResponseFormat is the format of the response. It carries only the exported\npublic shape (Type, JSONSchema) so the type stays comparable and, as a public\nalias, keeps its layout and default marshaling — the verbatim-schema path for\nthe general WithStructuredOutput flow lives on ChatRequest instead (see\nChatRequest.rawResponseFormat), never on this public type.\n",
     "type": "type",
     "package": "openaiclient",
     "signature": "type ResponseFormat",
@@ -17359,7 +18163,7 @@
   {
     "title": "ResponseFormatJSONSchema",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/openai/internal/openaiclient#ResponseFormatJSONSchema",
-    "content": "",
+    "content": "ResponseFormatJSONSchema is the provider-specific typed JSON Schema builder. Its\nshape is unchanged (exported via the openai package alias) so it stays source\ncompatible: same fields, still comparable.\n",
     "type": "type",
     "package": "openaiclient",
     "signature": "type ResponseFormatJSONSchema",
@@ -17577,6 +18381,78 @@
     "keywords": [
       "type",
       "WebSearchOptions",
+      "openaiclient"
+    ]
+  },
+  {
+    "title": "rawResponseFormatEnvelope",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/openai/internal/openaiclient#rawResponseFormatEnvelope",
+    "content": "rawResponseFormatEnvelope is the response_format object emitted for a raw schema.\n",
+    "type": "type",
+    "package": "openaiclient",
+    "signature": "type rawResponseFormatEnvelope",
+    "external": true,
+    "keywords": [
+      "type",
+      "rawResponseFormatEnvelope",
+      "openaiclient"
+    ]
+  },
+  {
+    "title": "rawResponseFormatJSONSchema",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/openai/internal/openaiclient#rawResponseFormatJSONSchema",
+    "content": "rawResponseFormatJSONSchema carries a verbatim JSON Schema for the general\nWithStructuredOutput path. It is internal to ChatRequest serialization and is\nnever exposed through the public openai aliases, so an arbitrary JSON Schema\nconstruct reaches the wire without touching the public types.\n",
+    "type": "type",
+    "package": "openaiclient",
+    "signature": "type rawResponseFormatJSONSchema",
+    "external": true,
+    "keywords": [
+      "type",
+      "rawResponseFormatJSONSchema",
+      "openaiclient"
+    ]
+  },
+  {
+    "title": "responseFormatField",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/openai/internal/openaiclient#responseFormatField",
+    "content": "responseFormatField is ChatRequest's internal response_format value. It carries\neither the typed public builder or a verbatim raw schema and serializes to the\nsame wire shape either would, so raw-schema support stays off the public\nResponseFormat type without changing the request wire format or field order.\n",
+    "type": "type",
+    "package": "openaiclient",
+    "signature": "type responseFormatField",
+    "external": true,
+    "keywords": [
+      "type",
+      "responseFormatField",
+      "openaiclient"
+    ]
+  },
+  {
+    "title": "responseFormatField.FormatType",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/openai/internal/openaiclient#responseFormatField.FormatType",
+    "content": "FormatType reports the response_format \"type\" this field serializes to\n(\"json_schema\" for a raw schema, otherwise the typed builder's Type).\n",
+    "type": "method",
+    "package": "openaiclient",
+    "signature": "FormatType()",
+    "external": true,
+    "keywords": [
+      "method",
+      "FormatType",
+      "responseFormatField",
+      "openaiclient"
+    ]
+  },
+  {
+    "title": "responseFormatField.MarshalJSON",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/openai/internal/openaiclient#responseFormatField.MarshalJSON",
+    "content": "",
+    "type": "method",
+    "package": "openaiclient",
+    "signature": "MarshalJSON()",
+    "external": true,
+    "keywords": [
+      "method",
+      "MarshalJSON",
+      "responseFormatField",
       "openaiclient"
     ]
   },
@@ -18155,6 +19031,21 @@
     ]
   },
   {
+    "title": "LLM.effectiveModel",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/openai#LLM.effectiveModel",
+    "content": "effectiveModel resolves the model the request runs on: a per-call model wins,\nthen the client default, and finally the package default the client itself\nsubstitutes on the wire — so capability decisions (reasoning-off, effort clamp,\ntemperature pinning) key off the same model the API will actually use.\n",
+    "type": "method",
+    "package": "openai",
+    "signature": "effectiveModel()",
+    "external": true,
+    "keywords": [
+      "method",
+      "effectiveModel",
+      "LLM",
+      "openai"
+    ]
+  },
+  {
     "title": "LLM.handleFunctionMessage",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/openai#LLM.handleFunctionMessage",
     "content": "handleFunctionMessage handles function messages.\n",
@@ -18270,6 +19161,21 @@
     "keywords": [
       "method",
       "setReasoning",
+      "LLM",
+      "openai"
+    ]
+  },
+  {
+    "title": "LLM.setReasoningOff",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/openai#LLM.setReasoningOff",
+    "content": "setReasoningOff sends the model's explicit disable token so a reasoning model\nruns as a plain completion. Sampling params are left intact (a non-thinking\ncall); a model whose thinking cannot be disabled returns a typed error.\n",
+    "type": "method",
+    "package": "openai",
+    "signature": "setReasoningOff()",
+    "external": true,
+    "keywords": [
+      "method",
+      "setReasoningOff",
       "LLM",
       "openai"
     ]
@@ -18425,6 +19331,91 @@
     "keywords": [
       "function",
       "isLegacyMaxTokensField",
+      "openai"
+    ]
+  },
+  {
+    "title": "checkOpenAIObjectNodes",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/openai#checkOpenAIObjectNodes",
+    "content": "",
+    "type": "function",
+    "package": "openai",
+    "signature": "checkOpenAIObjectNodes()",
+    "external": true,
+    "keywords": [
+      "function",
+      "checkOpenAIObjectNodes",
+      "openai"
+    ]
+  },
+  {
+    "title": "openAIStructuredOutputUnsupported",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/openai#openAIStructuredOutputUnsupported",
+    "content": "openAIStructuredOutputUnsupported reports models KNOWN to lack Structured Outputs\n(json_schema). Unknown or newer names pass through so the local table never\nblocks a future model — the API is the final arbiter.\n",
+    "type": "function",
+    "package": "openai",
+    "signature": "openAIStructuredOutputUnsupported()",
+    "external": true,
+    "keywords": [
+      "function",
+      "openAIStructuredOutputUnsupported",
+      "openai"
+    ]
+  },
+  {
+    "title": "openAISubschemas",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/openai#openAISubschemas",
+    "content": "openAISubschemas returns nested schema nodes worth recursing into for the\nobject-node checks (properties, $defs/definitions, items, composition arrays).\n",
+    "type": "function",
+    "package": "openai",
+    "signature": "openAISubschemas()",
+    "external": true,
+    "keywords": [
+      "function",
+      "openAISubschemas",
+      "openai"
+    ]
+  },
+  {
+    "title": "validateOpenAIStructuredSchema",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/openai#validateOpenAIStructuredSchema",
+    "content": "validateOpenAIStructuredSchema enforces the OpenAI Structured Outputs subset that\nis checkable locally: a root object, no top-level anyOf, and every object node\nsetting additionalProperties:false with all its properties listed in required.\n",
+    "type": "function",
+    "package": "openai",
+    "signature": "validateOpenAIStructuredSchema()",
+    "external": true,
+    "keywords": [
+      "function",
+      "validateOpenAIStructuredSchema",
+      "openai"
+    ]
+  },
+  {
+    "title": "ErrStructuredOutputRefusal",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/openai#ErrStructuredOutputRefusal",
+    "content": "ErrStructuredOutputRefusal reports that the model declined a structured-output\nrequest (OpenAI Structured Outputs). A refusal may legitimately not match the\nschema, so it is a distinct typed outcome rather than a validation failure. The\nusage-carrying ContentResponse is returned alongside this error.\n",
+    "type": "type",
+    "package": "openai",
+    "signature": "type ErrStructuredOutputRefusal",
+    "external": true,
+    "keywords": [
+      "type",
+      "ErrStructuredOutputRefusal",
+      "openai"
+    ]
+  },
+  {
+    "title": "ErrStructuredOutputRefusal.Error",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/openai#ErrStructuredOutputRefusal.Error",
+    "content": "",
+    "type": "method",
+    "package": "openai",
+    "signature": "Error()",
+    "external": true,
+    "keywords": [
+      "method",
+      "Error",
+      "ErrStructuredOutputRefusal",
       "openai"
     ]
   },
@@ -18786,6 +19777,21 @@
     ]
   },
   {
+    "title": "CallOptions.GetStructuredOutput",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms#CallOptions.GetStructuredOutput",
+    "content": "GetStructuredOutput returns an independent copy of the structured-output\nconfiguration (or nil), so a caller cannot mutate the option's schema bytes\nthrough the returned value.\n",
+    "type": "method",
+    "package": "llms",
+    "signature": "GetStructuredOutput()",
+    "external": true,
+    "keywords": [
+      "method",
+      "GetStructuredOutput",
+      "CallOptions",
+      "llms"
+    ]
+  },
+  {
     "title": "CallOptions.GetTemperature",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms#CallOptions.GetTemperature",
     "content": "GetTemperature returns the model temperature.\n",
@@ -18977,9 +19983,24 @@
     ]
   },
   {
+    "title": "ReasoningConfig.IsDisabled",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms#ReasoningConfig.IsDisabled",
+    "content": "IsDisabled reports whether reasoning is explicitly turned off (ReasoningOff),\nas distinct from merely unset (ReasoningDefault).\n",
+    "type": "method",
+    "package": "llms",
+    "signature": "IsDisabled()",
+    "external": true,
+    "keywords": [
+      "method",
+      "IsDisabled",
+      "ReasoningConfig",
+      "llms"
+    ]
+  },
+  {
     "title": "ReasoningConfig.IsEnabled",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms#ReasoningConfig.IsEnabled",
-    "content": "IsEnabled returns true if reasoning is enabled based on the effort and tokens.\n",
+    "content": "IsEnabled reports whether reasoning is explicitly on. It is a backward-compatible\nalias for ResolveMode() == ReasoningOn: true for legacy Effort/Tokens/Adaptive\nconfigs, false for an unset config, and false for an explicit ReasoningOff.\n",
     "type": "method",
     "package": "llms",
     "signature": "IsEnabled()",
@@ -18987,6 +20008,21 @@
     "keywords": [
       "method",
       "IsEnabled",
+      "ReasoningConfig",
+      "llms"
+    ]
+  },
+  {
+    "title": "ReasoningConfig.ResolveMode",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms#ReasoningConfig.ResolveMode",
+    "content": "ResolveMode returns the effective on/off/defer state that adapters switch on.\nAn explicit Mode wins; otherwise (Mode == ReasoningDefault) a legacy config\ncarrying Effort/Tokens/Adaptive resolves to ReasoningOn, and an empty config\nresolves to ReasoningDefault — preserving the pre-Mode behavior exactly.\n",
+    "type": "method",
+    "package": "llms",
+    "signature": "ResolveMode()",
+    "external": true,
+    "keywords": [
+      "method",
+      "ResolveMode",
       "ReasoningConfig",
       "llms"
     ]
@@ -19002,6 +20038,20 @@
     "keywords": [
       "type",
       "ReasoningEffort",
+      "llms"
+    ]
+  },
+  {
+    "title": "ReasoningMode",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms#ReasoningMode",
+    "content": "ReasoningMode is the explicit on/off/defer switch for reasoning, orthogonal to\nhow much reasoning to do (Effort/Tokens/Adaptive). It exists because models\nthat think by default (e.g. Gemini 2.5, Claude Fable 5) cannot be turned off\nby simply omitting reasoning — that defers to the model default. The zero\nvalue is ReasoningDefault, so a config built only with Effort/Tokens/Adaptive\n(the pre-Mode API) keeps deferring/enabling exactly as before.\n",
+    "type": "type",
+    "package": "llms",
+    "signature": "type ReasoningMode",
+    "external": true,
+    "keywords": [
+      "type",
+      "ReasoningMode",
       "llms"
     ]
   },
@@ -19076,14 +20126,338 @@
     ]
   },
   {
+    "title": "ClaudeMutuallyExclusiveSampling",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/reasoning#ClaudeMutuallyExclusiveSampling",
+    "content": "ClaudeMutuallyExclusiveSampling reports whether the model returns a 400 when\ntemperature and top_p are set together, so the caller must send at most one.\n",
+    "type": "function",
+    "package": "reasoning",
+    "signature": "ClaudeMutuallyExclusiveSampling()",
+    "external": true,
+    "keywords": [
+      "function",
+      "ClaudeMutuallyExclusiveSampling",
+      "reasoning"
+    ]
+  },
+  {
+    "title": "ClaudePredatesAdaptive",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/reasoning#ClaudePredatesAdaptive",
+    "content": "ClaudePredatesAdaptive reports whether the model is a known pre-adaptive Claude\ngeneration, so an adaptive request must be gated (not sent verbatim) rather than\noptimistically forwarded the way a genuinely newer, unclassified model is.\n",
+    "type": "function",
+    "package": "reasoning",
+    "signature": "ClaudePredatesAdaptive()",
+    "external": true,
+    "keywords": [
+      "function",
+      "ClaudePredatesAdaptive",
+      "reasoning"
+    ]
+  },
+  {
+    "title": "ClaudeRejectsSampling",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/reasoning#ClaudeRejectsSampling",
+    "content": "ClaudeRejectsSampling reports whether the model rejects temperature/top_p\noutright (true only for the adaptive-only generation), so sampling params\nmust be dropped even when no thinking is requested.\n",
+    "type": "function",
+    "package": "reasoning",
+    "signature": "ClaudeRejectsSampling()",
+    "external": true,
+    "keywords": [
+      "function",
+      "ClaudeRejectsSampling",
+      "reasoning"
+    ]
+  },
+  {
+    "title": "ClaudeSupportsEffortWithBudget",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/reasoning#ClaudeSupportsEffortWithBudget",
+    "content": "ClaudeSupportsEffortWithBudget reports whether the model accepts\noutput_config.effort together with manual (budget) thinking, so the effort is\nnot lost on the budget path for models that honor it.\n",
+    "type": "function",
+    "package": "reasoning",
+    "signature": "ClaudeSupportsEffortWithBudget()",
+    "external": true,
+    "keywords": [
+      "function",
+      "ClaudeSupportsEffortWithBudget",
+      "reasoning"
+    ]
+  },
+  {
+    "title": "ClaudeSupportsStructuredOutput",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/reasoning#ClaudeSupportsStructuredOutput",
+    "content": "ClaudeSupportsStructuredOutput reports whether the model can be asked for schema\nconstrained output. Known-legacy families are rejected; every current model and\nany unrecognized (newer) name passes through so the provider API stays the final\narbiter and the local table never blocks a future model.\n",
+    "type": "function",
+    "package": "reasoning",
+    "signature": "ClaudeSupportsStructuredOutput()",
+    "external": true,
+    "keywords": [
+      "function",
+      "ClaudeSupportsStructuredOutput",
+      "reasoning"
+    ]
+  },
+  {
+    "title": "ClaudeSupportsThinking",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/reasoning#ClaudeSupportsThinking",
+    "content": "ClaudeSupportsThinking reports whether the model is a known extended-thinking\nClaude generation (any tier except Unknown).\n",
+    "type": "function",
+    "package": "reasoning",
+    "signature": "ClaudeSupportsThinking()",
+    "external": true,
+    "keywords": [
+      "function",
+      "ClaudeSupportsThinking",
+      "reasoning"
+    ]
+  },
+  {
+    "title": "ClaudeThinkingAlwaysOn",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/reasoning#ClaudeThinkingAlwaysOn",
+    "content": "ClaudeThinkingAlwaysOn reports whether the model's thinking cannot be disabled\n(Fable 5 / Mythos 5 — an explicit disable returns 400).\n",
+    "type": "function",
+    "package": "reasoning",
+    "signature": "ClaudeThinkingAlwaysOn()",
+    "external": true,
+    "keywords": [
+      "function",
+      "ClaudeThinkingAlwaysOn",
+      "reasoning"
+    ]
+  },
+  {
+    "title": "ClaudeThinkingDefaultsOn",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/reasoning#ClaudeThinkingDefaultsOn",
+    "content": "ClaudeThinkingDefaultsOn reports whether the model thinks when thinking is\nomitted, so disabling it requires an explicit disable rather than omission.\n",
+    "type": "function",
+    "package": "reasoning",
+    "signature": "ClaudeThinkingDefaultsOn()",
+    "external": true,
+    "keywords": [
+      "function",
+      "ClaudeThinkingDefaultsOn",
+      "reasoning"
+    ]
+  },
+  {
+    "title": "ResolveClaudeAdaptive",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/reasoning#ResolveClaudeAdaptive",
+    "content": "ResolveClaudeAdaptive returns whether to send adaptive thinking (true) or\nbudget thinking (false) for a Claude model, given the caller's preference\n(adaptivePreferred is true when the caller used WithAdaptiveReasoning).\n\nThe rule is deterministic and honors the caller's preference whenever the\nmodel supports it, falling back only where the preferred mechanism would be\nrejected:\n  - AdaptiveOnly  → always adaptive (budget would 400).\n  - BudgetOnly    → always budget   (adaptive would 400).\n  - AdaptiveAndBudget / Unknown → the caller's preference, unchanged.\n\nSo a currently-accepted call keeps its mechanism; only a currently-rejected\n(400) combination is redirected to the mechanism the model accepts.\n",
+    "type": "function",
+    "package": "reasoning",
+    "signature": "ResolveClaudeAdaptive()",
+    "external": true,
+    "keywords": [
+      "function",
+      "ResolveClaudeAdaptive",
+      "reasoning"
+    ]
+  },
+  {
+    "title": "containsAny",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/reasoning#containsAny",
+    "content": "",
+    "type": "function",
+    "package": "reasoning",
+    "signature": "containsAny()",
+    "external": true,
+    "keywords": [
+      "function",
+      "containsAny",
+      "reasoning"
+    ]
+  },
+  {
+    "title": "ClaudeReasoningKind",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/reasoning#ClaudeReasoningKind",
+    "content": "ClaudeReasoningKind classifies how a Claude model accepts extended thinking.\nIt is the single source of truth for adaptive-vs-budget thinking and whether\nsampling params are permitted, so every provider path resolves the wire shape\nthe same way instead of re-deriving it from scattered model-string checks.\n",
+    "type": "type",
+    "package": "reasoning",
+    "signature": "type ClaudeReasoningKind",
+    "external": true,
+    "keywords": [
+      "type",
+      "ClaudeReasoningKind",
+      "reasoning"
+    ]
+  },
+  {
     "title": "package reasoning",
     "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/reasoning",
-    "content": "Package reasoning provides primitives for working with reasoning content.\n\nThis package implements utilities for extracting and processing reasoning\n(step-by-step thinking) content from language model responses. It operates in two modes:\n\n 1. Streaming mode: Uses a stateful ChunkContentSplitter to process content chunks\n    as they arrive, separating text from reasoning blocks marked with \u003cthink\u003e or\n    \u003cthinking\u003e tags. The splitter maintains state between calls to handle cases\n    where reasoning blocks span multiple chunks.\n\n 2. Complete content mode: Uses SplitContent function to separate reasoning content\n    from a complete response, handling cases where the LLM backend hasn't explicitly\n    divided reasoning from regular content.\n\nThe package recognizes reasoning content enclosed in \u003cthink\u003e...\u003c/think\u003e or\n\u003cthinking\u003e...\u003c/thinking\u003e tags, which various LLM providers use to indicate\nstep-by-step thinking processes.\n\nExample usage for streaming mode:\n\n\tsplitter := reasoning.NewChunkContentSplitter()\n\n\tfor chunk := range responseChunks {\n\t    text, reasoning := splitter.Split(chunk)\n\n\t    if reasoning != \"\" {\n\t        // Process reasoning content (e.g., display as step-by-step thinking)\n\t        fmt.Println(\"Reasoning:\", reasoning)\n\t    }\n\n\t    if text != \"\" {\n\t        // Process regular text content\n\t        fmt.Println(\"Content:\", text)\n\t    }\n\t}\n\nExample usage for complete content mode:\n\n\tresponse := \"Here's what I found: \u003cthinking\u003eFirst, I need to analyze the data.\n\tThe pattern shows increasing values.\u003c/thinking\u003e The trend is clearly upward.\"\n\n\treasoning, content := reasoning.SplitContent(response)\n\n\tfmt.Println(\"Reasoning:\", reasoning)  // \"First, I need to analyze the data. The pattern shows increasing values.\"\n\tfmt.Println(\"Content:\", content)      // \"Here's what I found: The trend is clearly upward.\"\n\nSee also:\n  - IsReasoningModel: Checks if a model supports reasoning\n  - DefaultIsReasoningModel: Provides the default reasoning model detection logic\n",
+    "content": "Package reasoning provides primitives for working with reasoning content.\n\nThis package implements utilities for extracting and processing reasoning\n(step-by-step thinking) content from language model responses. It operates in two modes:\n\n 1. Streaming mode: Uses a stateful ChunkContentSplitter to process content chunks\n    as they arrive, separating text from reasoning blocks marked with \u003cthink\u003e or\n    \u003cthinking\u003e tags. The splitter maintains state between calls to handle cases\n    where reasoning blocks span multiple chunks.\n\n 2. Complete content mode: Uses SplitContent function to separate reasoning content\n    from a complete response, handling cases where the LLM backend hasn't explicitly\n    divided reasoning from regular content.\n\nThe package recognizes reasoning content enclosed in \u003cthink\u003e...\u003c/think\u003e or\n\u003cthinking\u003e...\u003c/thinking\u003e tags, which various LLM providers use to indicate\nstep-by-step thinking processes.\n\nBeyond content splitting, the package is the low-level source of truth for model\ncapabilities, shared by every provider adapter so the wire shape is resolved the\nsame way everywhere. It sits below llms and must not import it. It provides:\n\n  - Reasoning-model detection: IsReasoningModel / DefaultIsReasoningModel.\n  - Per-family capability resolvers keyed by the distinctive part of the model\n    name (so they work with and without an OpenRouter provider prefix):\n    ClaudeReasoningKindFor and the Claude_* helpers (adaptive vs budget thinking,\n    sampling rules, effort-with-budget, structured-output support),\n    OpenAIReasoningCapsFor / ClampEffort, and the Gemini* helpers.\n  - ResolveOff: the single, provider-aware decision of how to disable thinking\n    (an explicit disable wire, a zero budget, or ErrReasoningOffUnsupported for\n    models that cannot be disabled, e.g. always-on Claude or Bedrock defaults).\n\nUnrecognized models are treated as optimistic pass-through: the provider API,\nnot a local table, is the final arbiter, so a newer model never regresses.\n\nExample usage for streaming mode:\n\n\tsplitter := reasoning.NewChunkContentSplitter()\n\n\tfor chunk := range responseChunks {\n\t    text, reasoning := splitter.Split(chunk)\n\n\t    if reasoning != \"\" {\n\t        // Process reasoning content (e.g., display as step-by-step thinking)\n\t        fmt.Println(\"Reasoning:\", reasoning)\n\t    }\n\n\t    if text != \"\" {\n\t        // Process regular text content\n\t        fmt.Println(\"Content:\", text)\n\t    }\n\t}\n\nExample usage for complete content mode:\n\n\tresponse := \"Here's what I found: \u003cthinking\u003eFirst, I need to analyze the data.\n\tThe pattern shows increasing values.\u003c/thinking\u003e The trend is clearly upward.\"\n\n\treasoning, content := reasoning.SplitContent(response)\n\n\tfmt.Println(\"Reasoning:\", reasoning)  // \"First, I need to analyze the data. The pattern shows increasing values.\"\n\tfmt.Println(\"Content:\", content)      // \"Here's what I found: The trend is clearly upward.\"\n\nSee also:\n  - IsReasoningModel: Checks if a model supports reasoning\n  - DefaultIsReasoningModel: Provides the default reasoning model detection logic\n",
     "type": "package",
     "package": "reasoning",
     "external": true,
     "keywords": [
       "package",
+      "reasoning"
+    ]
+  },
+  {
+    "title": "GeminiCanDisable",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/reasoning#GeminiCanDisable",
+    "content": "GeminiCanDisable reports whether thinking can be turned off via\nthinkingBudget:0. Gemini 2.5 Flash/Flash-Lite and Gemma 4 can; Gemini 2.5 Pro\nand Gemini 3.x (budget:0 is ignored) cannot. Unclassified Google models are\ntreated as disablable (optimistic: attempt it, let the API be the backstop).\n",
+    "type": "function",
+    "package": "reasoning",
+    "signature": "GeminiCanDisable()",
+    "external": true,
+    "keywords": [
+      "function",
+      "GeminiCanDisable",
+      "reasoning"
+    ]
+  },
+  {
+    "title": "GeminiSupportsThinking",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/reasoning#GeminiSupportsThinking",
+    "content": "GeminiSupportsThinking reports whether the model belongs to a Google thinking\nfamily: Gemini 2.5, Gemini 3.x, or Gemma 4.\n",
+    "type": "function",
+    "package": "reasoning",
+    "signature": "GeminiSupportsThinking()",
+    "external": true,
+    "keywords": [
+      "function",
+      "GeminiSupportsThinking",
+      "reasoning"
+    ]
+  },
+  {
+    "title": "GeminiUsesThinkingLevel",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/reasoning#GeminiUsesThinkingLevel",
+    "content": "GeminiUsesThinkingLevel reports whether the model uses the qualitative\nthinking_level control (Gemini 3.x), where thinking_budget is deprecated,\ninstead of a token budget. Gemini 3 also recommends running at temperature 1.0.\n",
+    "type": "function",
+    "package": "reasoning",
+    "signature": "GeminiUsesThinkingLevel()",
+    "external": true,
+    "keywords": [
+      "function",
+      "GeminiUsesThinkingLevel",
+      "reasoning"
+    ]
+  },
+  {
+    "title": "geminiKnownNonThinking",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/reasoning#geminiKnownNonThinking",
+    "content": "geminiKnownNonThinking reports whether the model is a pre-thinking Gemini/Gemma\ngeneration that never thinks (Gemini 1.x/2.0, Gemma 1–3), so it takes no thinking\ncontrol at all. Unclassified names are NOT matched, staying optimistic so a\nfuture thinking model is not wrongly treated as non-thinking.\n",
+    "type": "function",
+    "package": "reasoning",
+    "signature": "geminiKnownNonThinking()",
+    "external": true,
+    "keywords": [
+      "function",
+      "geminiKnownNonThinking",
+      "reasoning"
+    ]
+  },
+  {
+    "title": "isClaudeModel",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/reasoning#isClaudeModel",
+    "content": "",
+    "type": "function",
+    "package": "reasoning",
+    "signature": "isClaudeModel()",
+    "external": true,
+    "keywords": [
+      "function",
+      "isClaudeModel",
+      "reasoning"
+    ]
+  },
+  {
+    "title": "openAIMandatoryReasoning",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/reasoning#openAIMandatoryReasoning",
+    "content": "openAIMandatoryReasoning reports the OpenAI reasoning families that cannot be\nhard-disabled (their effort floor is minimal/low). GPT-5.x and unknowns are\ntreated as disablable and left to the API to reject if wrong.\n",
+    "type": "function",
+    "package": "reasoning",
+    "signature": "openAIMandatoryReasoning()",
+    "external": true,
+    "keywords": [
+      "function",
+      "openAIMandatoryReasoning",
+      "reasoning"
+    ]
+  },
+  {
+    "title": "ErrReasoningOffUnsupported",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/reasoning#ErrReasoningOffUnsupported",
+    "content": "ErrReasoningOffUnsupported is returned when reasoning is explicitly disabled\n(WithReasoningDisabled) on a model whose thinking cannot be turned off.\n",
+    "type": "type",
+    "package": "reasoning",
+    "signature": "type ErrReasoningOffUnsupported",
+    "external": true,
+    "keywords": [
+      "type",
+      "ErrReasoningOffUnsupported",
+      "reasoning"
+    ]
+  },
+  {
+    "title": "ErrReasoningOffUnsupported.Error",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/reasoning#ErrReasoningOffUnsupported.Error",
+    "content": "",
+    "type": "method",
+    "package": "reasoning",
+    "signature": "Error()",
+    "external": true,
+    "keywords": [
+      "method",
+      "Error",
+      "ErrReasoningOffUnsupported",
+      "reasoning"
+    ]
+  },
+  {
+    "title": "OffWire",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/reasoning#OffWire",
+    "content": "OffWire is how a provider expresses \"thinking off\" for a given model. It is the\nsingle decision point shared by every adapter, keyed off the same model tables\nthe enable path uses, so Off and On can never classify a model differently.\n",
+    "type": "type",
+    "package": "reasoning",
+    "signature": "type OffWire",
+    "external": true,
+    "keywords": [
+      "type",
+      "OffWire",
+      "reasoning"
+    ]
+  },
+  {
+    "title": "Provider",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/reasoning#Provider",
+    "content": "Provider identifies the calling provider so ResolveOff can pick the right\ndisable wire for a model. It is passed by the adapter, which always knows it.\n",
+    "type": "type",
+    "package": "reasoning",
+    "signature": "type Provider",
+    "external": true,
+    "keywords": [
+      "type",
+      "Provider",
+      "reasoning"
+    ]
+  },
+  {
+    "title": "OpenAIReasoningCaps",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/reasoning#OpenAIReasoningCaps",
+    "content": "OpenAIReasoningCaps is a best-effort static projection of which reasoning\nefforts an OpenAI model accepts, so callers avoid sending a value the API would\nreject with a 400. It asserts only documented, non-default constraints; every\nother model returns Known=false and is treated optimistically (send as\nrequested, let the API be the arbiter), preserving prior pass-through behavior.\n",
+    "type": "type",
+    "package": "reasoning",
+    "signature": "type OpenAIReasoningCaps",
+    "external": true,
+    "keywords": [
+      "type",
+      "OpenAIReasoningCaps",
+      "reasoning"
+    ]
+  },
+  {
+    "title": "OpenAIReasoningCaps.ClampEffort",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/reasoning#OpenAIReasoningCaps.ClampEffort",
+    "content": "ClampEffort lowers a requested effort to what the model accepts: an effort\nabove the model's ceiling drops to the ceiling, and a model that accepts a\nsingle effort (e.g. GPT-5 Pro accepts only \"high\") pins to it. Unknown models\nand the empty effort are returned unchanged.\n",
+    "type": "method",
+    "package": "reasoning",
+    "signature": "ClampEffort()",
+    "external": true,
+    "keywords": [
+      "method",
+      "ClampEffort",
+      "OpenAIReasoningCaps",
       "reasoning"
     ]
   },
@@ -19273,6 +20647,48 @@
       "Split",
       "chunkContentSplitter",
       "reasoning"
+    ]
+  },
+  {
+    "title": "RegisterReasoningSupport",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms#RegisterReasoningSupport",
+    "content": "RegisterReasoningSupport registers a UI hint for models this build does not\nclassify (a proxy alias, or a model newer than this build). A model whose\nstring contains pattern reports info from ReasoningSupportFor.\n\nScope: this affects ONLY the ReasoningSupportFor hint, not the wire path. The\nenable/disable resolvers (reasoning.ResolveOff, reasoning.ResolveClaudeAdaptive,\neffort clamping) live in the lower-level reasoning package, which cannot read\nthis registry, so a registered model still travels the optimistic pass-through\npath on the wire and the provider API remains the final arbiter.\n",
+    "type": "function",
+    "package": "llms",
+    "signature": "RegisterReasoningSupport()",
+    "external": true,
+    "keywords": [
+      "function",
+      "RegisterReasoningSupport",
+      "llms"
+    ]
+  },
+  {
+    "title": "boolPtr",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms#boolPtr",
+    "content": "",
+    "type": "function",
+    "package": "llms",
+    "signature": "boolPtr()",
+    "external": true,
+    "keywords": [
+      "function",
+      "boolPtr",
+      "llms"
+    ]
+  },
+  {
+    "title": "ReasoningSupport",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms#ReasoningSupport",
+    "content": "ReasoningSupport describes which reasoning controls a model accepts, as a HINT\nfor building a UI. It is a best-effort static projection, never authoritative:\nan unrecognized model returns Known=false so the UI shows all controls and the\nprovider API (an HTTP 400) is the ultimate arbiter. The table asserts only\nKNOWN facts; it never fabricates a capability it cannot back — unknown effort\ntiers and default state are left nil rather than guessed.\n",
+    "type": "type",
+    "package": "llms",
+    "signature": "type ReasoningSupport",
+    "external": true,
+    "keywords": [
+      "type",
+      "ReasoningSupport",
+      "llms"
     ]
   },
   {
@@ -19470,6 +20886,262 @@
       "String",
       "ToolCall",
       "streaming"
+    ]
+  },
+  {
+    "title": "compileStructuredOutputSchema",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms#compileStructuredOutputSchema",
+    "content": "compileStructuredOutputSchema compiles a raw JSON Schema document (Draft 2020-12\nwithout an explicit $schema) purely to surface compile errors. It mirrors the\ncompiler the response path uses so both accept the exact same schemas.\n",
+    "type": "function",
+    "package": "llms",
+    "signature": "compileStructuredOutputSchema()",
+    "external": true,
+    "keywords": [
+      "function",
+      "compileStructuredOutputSchema",
+      "llms"
+    ]
+  },
+  {
+    "title": "isValidStructuredOutputName",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms#isValidStructuredOutputName",
+    "content": "isValidStructuredOutputName reports whether name satisfies the OpenAI schema-name\nrule, the strictest across the supported providers.\n",
+    "type": "function",
+    "package": "llms",
+    "signature": "isValidStructuredOutputName()",
+    "external": true,
+    "keywords": [
+      "function",
+      "isValidStructuredOutputName",
+      "llms"
+    ]
+  },
+  {
+    "title": "ErrStructuredOutputConflict",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms#ErrStructuredOutputConflict",
+    "content": "ErrStructuredOutputConflict reports that structured output cannot be combined\nwith another setting already present on the request (a client-level response\nformat, message prefilling, a conflicting response MIME type, and so on).\n",
+    "type": "type",
+    "package": "llms",
+    "signature": "type ErrStructuredOutputConflict",
+    "external": true,
+    "keywords": [
+      "type",
+      "ErrStructuredOutputConflict",
+      "llms"
+    ]
+  },
+  {
+    "title": "ErrStructuredOutputConflict.Error",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms#ErrStructuredOutputConflict.Error",
+    "content": "",
+    "type": "method",
+    "package": "llms",
+    "signature": "Error()",
+    "external": true,
+    "keywords": [
+      "method",
+      "Error",
+      "ErrStructuredOutputConflict",
+      "llms"
+    ]
+  },
+  {
+    "title": "ErrStructuredOutputUnsupported",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms#ErrStructuredOutputUnsupported",
+    "content": "ErrStructuredOutputUnsupported reports that a model or provider path is KNOWN not\nto accept schema-constrained output. Adapters return it only for documented\ngaps; an unrecognized model is passed through so the provider API is the final\narbiter, never this local table.\n",
+    "type": "type",
+    "package": "llms",
+    "signature": "type ErrStructuredOutputUnsupported",
+    "external": true,
+    "keywords": [
+      "type",
+      "ErrStructuredOutputUnsupported",
+      "llms"
+    ]
+  },
+  {
+    "title": "ErrStructuredOutputUnsupported.Error",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms#ErrStructuredOutputUnsupported.Error",
+    "content": "",
+    "type": "method",
+    "package": "llms",
+    "signature": "Error()",
+    "external": true,
+    "keywords": [
+      "method",
+      "Error",
+      "ErrStructuredOutputUnsupported",
+      "llms"
+    ]
+  },
+  {
+    "title": "ErrStructuredOutputValidation",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms#ErrStructuredOutputValidation",
+    "content": "ErrStructuredOutputValidation is returned when a normal-final response is not a\nsingle JSON value valid against the requested schema. It carries the provider,\nmodel, choice index and stop reason for diagnostics and unwraps to the concrete\ncause; it deliberately does not embed the whole model output in its message.\n",
+    "type": "type",
+    "package": "llms",
+    "signature": "type ErrStructuredOutputValidation",
+    "external": true,
+    "keywords": [
+      "type",
+      "ErrStructuredOutputValidation",
+      "llms"
+    ]
+  },
+  {
+    "title": "ErrStructuredOutputValidation.Error",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms#ErrStructuredOutputValidation.Error",
+    "content": "",
+    "type": "method",
+    "package": "llms",
+    "signature": "Error()",
+    "external": true,
+    "keywords": [
+      "method",
+      "Error",
+      "ErrStructuredOutputValidation",
+      "llms"
+    ]
+  },
+  {
+    "title": "ErrStructuredOutputValidation.Unwrap",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms#ErrStructuredOutputValidation.Unwrap",
+    "content": "",
+    "type": "method",
+    "package": "llms",
+    "signature": "Unwrap()",
+    "external": true,
+    "keywords": [
+      "method",
+      "Unwrap",
+      "ErrStructuredOutputValidation",
+      "llms"
+    ]
+  },
+  {
+    "title": "StructuredOutputConfig",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms#StructuredOutputConfig",
+    "content": "StructuredOutputConfig requests provider-native, schema-constrained output for a\nsingle call. Schema is the raw JSON Schema (Draft 2020-12) document, kept\nverbatim: the SDK never rewrites it (no injected required, additionalProperties\nor stripped constraints). Name identifies the schema — mandatory for OpenAI,\noptional for the other providers. Build it through WithStructuredOutput rather\nthan by hand so JSONMode and the schema copy stay consistent.\n",
+    "type": "type",
+    "package": "llms",
+    "signature": "type StructuredOutputConfig",
+    "external": true,
+    "keywords": [
+      "type",
+      "StructuredOutputConfig",
+      "llms"
+    ]
+  },
+  {
+    "title": "StructuredOutputConfig.Clone",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms#StructuredOutputConfig.Clone",
+    "content": "Clone returns a deep copy whose Schema owns its bytes, so a caller mutating the\noriginal []byte after building an option cannot alter the stored configuration.\n",
+    "type": "method",
+    "package": "llms",
+    "signature": "Clone()",
+    "external": true,
+    "keywords": [
+      "method",
+      "Clone",
+      "StructuredOutputConfig",
+      "llms"
+    ]
+  },
+  {
+    "title": "package structuredoutput",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/structuredoutput",
+    "content": "Package structuredoutput compiles a JSON Schema and validates a model's final\ntext response against it, backing the provider-neutral llms.WithStructuredOutput\ncontract.\n\nIt is kept separate from the base llms package so that package does not depend on\nan external JSON Schema library: this package imports llms (for the typed\nllms.ErrStructuredOutputValidation), llms does not import this package, and\nprovider adapters may import both without an import cycle.\n\nValidate compiles a schema (JSON Schema Draft 2020-12, via\ngithub.com/santhosh-tekuri/jsonschema/v6) and checks that the response text is\nexactly one JSON value (trailing text or a second value is rejected) matching it.\nNumbers decode with json.Number so large integers survive; enum/const stay\ncase-sensitive. Failures are wrapped in *llms.ErrStructuredOutputValidation with\nthe provider, model, choice index and stop reason.\n\nAdapters call it only for a normal-final response; refusals, tool-use turns and\ntruncated/blocked responses are never validated as final JSON.\n",
+    "type": "package",
+    "package": "structuredoutput",
+    "external": true,
+    "keywords": [
+      "package",
+      "structuredoutput"
+    ]
+  },
+  {
+    "title": "RequireClosedObjects",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/structuredoutput#RequireClosedObjects",
+    "content": "RequireClosedObjects verifies that every object node in the schema explicitly\nsets additionalProperties:false. Anthropic and Amazon Bedrock structured outputs\nreject an object schema that omits it (a ValidationException 400), and this is\nreliably detectable locally, so it is turned into a typed configuration error\nbefore the request is sent instead of an opaque provider 4xx. It wraps\nllms.ErrStructuredOutputConfig and does not otherwise constrain the schema.\n",
+    "type": "function",
+    "package": "structuredoutput",
+    "signature": "RequireClosedObjects()",
+    "external": true,
+    "keywords": [
+      "function",
+      "RequireClosedObjects",
+      "structuredoutput"
+    ]
+  },
+  {
+    "title": "requireClosed",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/structuredoutput#requireClosed",
+    "content": "",
+    "type": "function",
+    "package": "structuredoutput",
+    "signature": "requireClosed()",
+    "external": true,
+    "keywords": [
+      "function",
+      "requireClosed",
+      "structuredoutput"
+    ]
+  },
+  {
+    "title": "Validate",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/structuredoutput#Validate",
+    "content": "Validate compiles schema and validates text, wrapping any failure in a typed\n*llms.ErrStructuredOutputValidation that carries provider/model/choice/stopReason\nand unwraps to the concrete cause. Callers pass the ORIGINAL schema so validation\nreflects exactly what the user asked for, not a provider-transformed variant.\n",
+    "type": "function",
+    "package": "structuredoutput",
+    "signature": "Validate()",
+    "external": true,
+    "keywords": [
+      "function",
+      "Validate",
+      "structuredoutput"
+    ]
+  },
+  {
+    "title": "wrap",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/structuredoutput#wrap",
+    "content": "",
+    "type": "function",
+    "package": "structuredoutput",
+    "signature": "wrap()",
+    "external": true,
+    "keywords": [
+      "function",
+      "wrap",
+      "structuredoutput"
+    ]
+  },
+  {
+    "title": "Compiled",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/structuredoutput#Compiled",
+    "content": "Compiled is a schema compiled once so multiple choices of one response reuse it.\n",
+    "type": "type",
+    "package": "structuredoutput",
+    "signature": "type Compiled",
+    "external": true,
+    "keywords": [
+      "type",
+      "Compiled",
+      "structuredoutput"
+    ]
+  },
+  {
+    "title": "Compiled.ValidateText",
+    "url": "https://pkg.go.dev/github.com/vxcontrol/langchaingo/llms/structuredoutput#Compiled.ValidateText",
+    "content": "ValidateText parses text as exactly one JSON value (trailing text or a second\nvalue is rejected) and validates it against the compiled schema. Numbers decode\nvia json.Number so large integers are not degraded to float64 before validation.\n",
+    "type": "method",
+    "package": "structuredoutput",
+    "signature": "ValidateText()",
+    "external": true,
+    "keywords": [
+      "method",
+      "ValidateText",
+      "Compiled",
+      "structuredoutput"
     ]
   },
   {

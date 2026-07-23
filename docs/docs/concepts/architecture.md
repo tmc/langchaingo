@@ -116,9 +116,11 @@ response, err := llm.GenerateContent(ctx, messages,
 Use Go's concurrency features for streaming and parallel processing:
 
 ```go
-// Streaming responses
-response, err := llm.GenerateContent(ctx, messages, 
-    llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {
+// Streaming responses. The callback receives a streaming.Chunk
+// (import "github.com/vxcontrol/langchaingo/llms/streaming"); resultChan is a
+// chan streaming.Chunk.
+response, err := llm.GenerateContent(ctx, messages,
+    llms.WithStreamingFunc(func(ctx context.Context, chunk streaming.Chunk) error {
         select {
         case resultChan <- chunk:
         case <-ctx.Done():
@@ -320,19 +322,31 @@ func (t *CustomTool) Call(ctx context.Context, input string) (string, error) {
 ```
 
 ### Custom memory
-Implement the `Memory` interface:
+Implement the `schema.Memory` interface (`GetMemoryKey`, `MemoryVariables`, `LoadMemoryVariables`, `SaveContext`, `Clear`):
 
 ```go
 type CustomMemory struct {
-    storage map[string][]MessageContent
+    storage map[string]any
 }
 
-func (m *CustomMemory) ChatHistory(ctx context.Context) schema.ChatMessageHistory {
-    // Return chat history implementation
-}
+func (m *CustomMemory) GetMemoryKey(ctx context.Context) string { return "history" }
 
 func (m *CustomMemory) MemoryVariables(ctx context.Context) []string {
     return []string{"history"}
+}
+
+func (m *CustomMemory) LoadMemoryVariables(ctx context.Context, inputs map[string]any) (map[string]any, error) {
+    return map[string]any{"history": m.storage["history"]}, nil
+}
+
+func (m *CustomMemory) SaveContext(ctx context.Context, inputs, outputs map[string]any) error {
+    // Persist the latest turn.
+    return nil
+}
+
+func (m *CustomMemory) Clear(ctx context.Context) error {
+    m.storage = map[string]any{}
+    return nil
 }
 ```
 
@@ -435,60 +449,46 @@ For internal testing of HTTP-based LLM providers, LangChainGo uses [httprr](http
 
 #### Setting up httprr
 
+`httprr.OpenForTest` opens (or creates) a recording under `testdata/` and registers
+its own cleanup, so there is no manual stop. Skip the test automatically when there
+is neither a recording nor real credentials, and wire the replay client into the
+provider with `WithHTTPClient(rr.Client())`:
+
 ```go
 func TestOpenAIWithRecording(t *testing.T) {
-    // Start httprr recorder
-    recorder := httprr.New("testdata/openai_recording")
-    defer recorder.Stop()
-    
-    // Configure HTTP client to use recorder
-    client := &http.Client{
-        Transport: recorder,
+    // Skip when there is no recording AND no real key to record one.
+    httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OPENAI_API_KEY")
+
+    // Opens testdata/<TestName>.httprr; t.Cleanup handles closing.
+    rr := httprr.OpenForTest(t, http.DefaultTransport)
+
+    opts := []openai.Option{openai.WithHTTPClient(rr.Client())}
+    // Use a fake token on replay; the real key only when recording.
+    if rr.Recording() {
+        opts = append(opts, openai.WithToken(os.Getenv("OPENAI_API_KEY")))
+    } else {
+        opts = append(opts, openai.WithToken("fake-api-key-for-testing"))
     }
-    
-    // Create LLM with custom client
-    llm, err := openai.New(
-        openai.WithHTTPClient(client),
-        openai.WithToken("test-token"), // Will be redacted in recording
-    )
+
+    llm, err := openai.New(opts...)
     require.NoError(t, err)
-    
-    // Make actual API call (recorded on first run, replayed on subsequent runs)
+
+    // Recorded on first run (with -httprecord), replayed afterwards.
     response, err := llm.GenerateContent(context.Background(), []llms.MessageContent{
         llms.TextParts(llms.ChatMessageTypeHuman, "Hello, world!"),
     })
     require.NoError(t, err)
     require.NotEmpty(t, response.Choices[0].Content)
 }
-
-// Testing with identical requests (e.g., cache testing)
-func TestCachingWithIdenticalRequests(t *testing.T) {
-    recorder := httprr.New("testdata/cache_test")
-    defer recorder.Stop()
-    
-    llm, err := openai.New(
-        openai.WithHTTPClient(&http.Client{Transport: recorder}),
-    )
-    require.NoError(t, err)
-    
-    // Make identical requests - each will be recorded with its unique response
-    for i := 0; i < 3; i++ {
-        response, err := llm.GenerateContent(context.Background(), []llms.MessageContent{
-            llms.TextParts(llms.ChatMessageTypeHuman, "Same question"),
-        })
-        require.NoError(t, err)
-        // Each replay will return responses in the same order they were recorded
-    }
-}
 ```
 
 #### Recording guidelines
 
-1. **Initial Recording**: Run tests with real API credentials to create recordings
-2. **Sensitive Data**: httprr automatically redacts common sensitive headers
+1. **Initial Recording**: Run tests with real API credentials and the `-httprecord=.` flag to create recordings
+2. **Sensitive Data**: httprr scrubs common sensitive headers (e.g. `Authorization`, API keys) before writing
 3. **Deterministic Tests**: Recordings ensure consistent test results across environments
-4. **Version Control**: Commit recording files for team consistency
-5. **Identical Requests**: When recording multiple identical requests (e.g., for cache testing), httprr preserves each response in order and replays them sequentially using a circular buffer
+4. **Version Control**: Commit the `testdata/*.httprr` files for team consistency
+5. **Identical Requests**: When multiple identical requests are recorded (e.g. for cache testing), httprr preserves each response in order and replays them sequentially using a circular buffer
 
 #### Contributing with httprr
 
@@ -497,20 +497,16 @@ When contributing to LangChainGo's internal tests:
 1. **Use httprr for new LLM providers**:
    ```go
    func TestNewProvider(t *testing.T) {
-       recorder := httprr.New("testdata/newprovider_test")
-       defer recorder.Stop()
-       
-       // Test implementation
+       httprr.SkipIfNoCredentialsAndRecordingMissing(t, "PROVIDER_API_KEY")
+       rr := httprr.OpenForTest(t, http.DefaultTransport)
+       // Wire rr.Client() into the provider and run the test.
    }
    ```
 
-2. **Update recordings when APIs change**:
+2. **Record or update recordings when APIs change** (the `-httprecord` value is a regexp matching the trace files to (re)record):
    ```bash
-   # Delete old recordings
-   rm testdata/provider_test.httprr
-   
-   # Re-run tests with real credentials
-   PROVIDER_API_KEY=real_key go test
+   # Record/refresh matching recordings against the real API
+   PROVIDER_API_KEY=real_key go test ./llms/provider/ -httprecord=.
    ```
 
 3. **Verify recordings are committed**:

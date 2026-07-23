@@ -182,7 +182,7 @@ if err != nil {
 }
 
 // Use with any LLM
-response, err := llm.GenerateFromSingle(ctx, promptValue.String())
+response, err := llms.GenerateFromSinglePrompt(ctx, llm, promptValue.String())
 ```
 
 ### Template validation

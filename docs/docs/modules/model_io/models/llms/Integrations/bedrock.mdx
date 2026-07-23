@@ -1,0 +1,44 @@
+---
+sidebar_label: AWS Bedrock
+---
+
+import CodeBlock from "@theme/CodeBlock";
+import ExampleBedrock from "@examples/bedrock-provider-example/main.go";
+
+# AWS Bedrock
+
+[Amazon Bedrock](https://aws.amazon.com/bedrock/) exposes foundation models from
+several vendors (Anthropic Claude, Meta Llama, Amazon Titan and Nova, and others)
+behind one API. The `llms/bedrock` package talks to it through the AWS SDK.
+
+## Prerequisites
+
+- AWS credentials with Bedrock access, resolved the standard AWS way (environment
+  variables such as `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` / `AWS_REGION`, a
+  shared profile, or an IAM role).
+- Access enabled for the specific model IDs you intend to call, in your region.
+
+## Setup
+
+```go
+llm, err := bedrock.New(
+    bedrock.WithModel(bedrock.ModelAnthropicClaudeSonnet5),
+)
+```
+
+If no model is set, the client defaults to Claude Haiku 4.5. Model IDs are available
+as constants in the package (see `models_list.go`), or pass any Bedrock model ID
+string. For non-Anthropic models whose provider cannot be inferred from the ID, set
+it explicitly with `bedrock.WithModelProvider`.
+
+Useful options:
+
+- `bedrock.WithConverseAPI()` — use the unified Converse API (required for tool use,
+  structured output, and reasoning on supported models).
+- `bedrock.WithAutomaticCaching()` — enable Anthropic prompt caching on supported
+  Claude models.
+- `bedrock.WithClient(...)` — supply a preconfigured `*bedrockruntime.Client`.
+
+## Example
+
+<CodeBlock language="go">{ExampleBedrock}</CodeBlock>

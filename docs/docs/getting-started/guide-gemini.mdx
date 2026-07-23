@@ -1,0 +1,73 @@
+---
+sidebar_position: 6
+---
+
+import CodeBlock from "@theme/CodeBlock";
+import ExampleGemini from "@examples/googleai-completion-example/googleai-completion-example.go";
+
+# Quickstart: LangChainGo with Google Gemini
+
+Get started by running your first program with LangChainGo and [Google Gemini](https://ai.google.dev/). Gemini models offer large context windows, native multimodality, and configurable "thinking" on the newer generations.
+
+## Prerequisites
+
+1. **Google AI API Key**: Create an API key at [Google AI Studio](https://ai.google.dev/).
+2. **Go**: [Download and install Go](https://go.dev/doc/install).
+
+## Setup
+
+Before interacting with the Gemini API, you need to set up your API key as an environment variable.
+
+### Linux/macOS (bash/zsh)
+```bash
+export GOOGLE_API_KEY="your_google_api_key_here"
+```
+
+### Windows (Command Prompt)
+```cmd
+set GOOGLE_API_KEY=your_google_api_key_here
+```
+
+### Windows (PowerShell)
+```powershell
+$env:GOOGLE_API_KEY="your_google_api_key_here"
+```
+
+For permanent setup, add the environment variable to your shell's profile file (`~/.bashrc`, `~/.zshrc`, etc.) or system environment variables on Windows.
+
+## Steps
+
+1. **Set up your Google AI API Key**: Follow the setup instructions above to configure your API key.
+
+2. **Run the example**: Execute the following command:
+
+```shell
+go run github.com/vxcontrol/langchaingo/examples/googleai-completion-example@main-vxcontrol
+```
+
+You should see output naming the second person to walk on the Moon (Buzz Aldrin).
+
+Congratulations! You have successfully built and executed your first LangChainGo LLM-backed program using Google Gemini's cloud-based inference.
+
+## Selecting a model
+
+The `googleai` client reads the API key from the `GOOGLE_API_KEY` environment variable. Pass it explicitly with `googleai.WithAPIKey`, and choose a model with `googleai.WithDefaultModel`:
+
+```go
+llm, err := googleai.New(ctx,
+    googleai.WithAPIKey(os.Getenv("GOOGLE_API_KEY")),
+    googleai.WithDefaultModel("gemini-2.5-flash"),
+)
+```
+
+## Thinking, structured output, and Vertex AI
+
+- **Thinking**: on thinking-capable Gemini models, control reasoning per call with `llms.WithReasoning` (Gemini 3.x maps effort to a thinking level; 2.5 uses a token budget). `llms.WithReasoningDisabled()` turns thinking off where the model allows it.
+- **Structured output**: request schema-constrained JSON with `llms.WithStructuredOutput` — see the [googleai-structured-output-example](https://github.com/vxcontrol/langchaingo/tree/main-vxcontrol/examples/googleai-structured-output-example).
+- **Vertex AI**: to run Gemini through Google Cloud Vertex AI instead of the AI Studio endpoint, use the `llms/googleai/vertex` package with `vertex.New(ctx, googleai.WithCloudProject(...), googleai.WithCloudLocation(...))`.
+
+See [Configure LLM Providers](../how-to/configure-llm-providers.md) for the full set of options.
+
+Here is the entire program (from [googleai-completion-example](https://github.com/vxcontrol/langchaingo/blob/main-vxcontrol/examples/googleai-completion-example/googleai-completion-example.go)):
+
+<CodeBlock language="go">{ExampleGemini}</CodeBlock>
