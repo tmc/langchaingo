@@ -9,6 +9,8 @@ require (
 	github.com/gage-technologies/mistral-go v1.1.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/pkoukk/tiktoken-go v0.1.8 // indirect
+	github.com/santhosh-tekuri/jsonschema/v6 v6.0.2 // indirect
+	golang.org/x/text v0.30.0 // indirect
 )
 
 replace github.com/vxcontrol/langchaingo => ../..

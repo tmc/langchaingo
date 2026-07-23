@@ -36,6 +36,7 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pkoukk/tiktoken-go v0.1.8 // indirect
 	github.com/rs/zerolog v1.34.0 // indirect
+	github.com/santhosh-tekuri/jsonschema/v6 v6.0.2 // indirect
 	github.com/weaviate/weaviate v1.30.20 // indirect
 	github.com/weaviate/weaviate-go-client/v5 v5.0.2 // indirect
 	go.mongodb.org/mongo-driver v1.17.3 // indirect
