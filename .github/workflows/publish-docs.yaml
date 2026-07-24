@@ -31,7 +31,7 @@ jobs:
 
       - uses: pnpm/action-setup@v2
         with:
-          version: latest
+          version: 10.34.5
 
       - uses: actions/setup-node@v3
         with:
