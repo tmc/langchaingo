@@ -12,6 +12,8 @@ func TestClaudeReasoningKindFor(t *testing.T) {
 		{"claude-opus-4-7", ClaudeReasoningAdaptiveOnly},
 		{"claude-opus-4-8", ClaudeReasoningAdaptiveOnly},
 		{"us.anthropic.claude-opus-4-8", ClaudeReasoningAdaptiveOnly},
+		{"claude-opus-5", ClaudeReasoningAdaptiveOnly},
+		{"us.anthropic.claude-opus-5", ClaudeReasoningAdaptiveOnly},
 		{"claude-sonnet-5", ClaudeReasoningAdaptiveOnly},
 		{"us.anthropic.claude-sonnet-5", ClaudeReasoningAdaptiveOnly},
 		{"claude-fable-5", ClaudeReasoningAdaptiveOnly},
@@ -49,6 +51,7 @@ func TestResolveClaudeAdaptive(t *testing.T) {
 		// Adaptive-only: budget preference upgraded to adaptive (M1/M2/H1b).
 		{"claude-sonnet-5", false, true, "budget on T1 upgrades"},
 		{"claude-sonnet-5", true, true, "adaptive on T1 stays"},
+		{"claude-opus-5", false, true, "budget on Opus 5 upgrades"},
 		// Budget-only: adaptive preference downgraded to budget (M3).
 		{"claude-haiku-4-5", true, false, "adaptive on T3 downgrades"},
 		{"claude-haiku-4-5", false, false, "budget on T3 stays"},
@@ -74,6 +77,7 @@ func TestClaudeSupportsStructuredOutput(t *testing.T) {
 		want  bool
 	}{
 		{"claude-sonnet-5", true},
+		{"claude-opus-5", true},
 		{"claude-opus-4-5", true},
 		{"claude-haiku-4-5", true},
 		{"us.anthropic.claude-sonnet-4-5-v1:0", true},
@@ -90,6 +94,33 @@ func TestClaudeSupportsStructuredOutput(t *testing.T) {
 	}
 }
 
+// TestClaudeThinkingDefaultAndAlwaysOn locks Opus 5's distinguishing trait: it
+// joins Sonnet 5 in defaulting to thinking on (unlike Opus 4.8, which defaults
+// off), yet — unlike Fable 5 / Mythos 5 — it still accepts an explicit disable.
+func TestClaudeThinkingDefaultAndAlwaysOn(t *testing.T) {
+	t.Parallel()
+	cases := []struct {
+		model      string
+		defaultOn  bool
+		alwaysOn   bool
+		reasonNote string
+	}{
+		{"claude-opus-5", true, false, "defaults on, still disablable"},
+		{"claude-sonnet-5", true, false, "defaults on, still disablable"},
+		{"claude-opus-4-8", false, false, "defaults off"},
+		{"claude-fable-5", true, true, "always on, cannot disable"},
+		{"claude-mythos-5", true, true, "always on, cannot disable"},
+	}
+	for _, tc := range cases {
+		if got := ClaudeThinkingDefaultsOn(tc.model); got != tc.defaultOn {
+			t.Errorf("ClaudeThinkingDefaultsOn(%q) = %v, want %v (%s)", tc.model, got, tc.defaultOn, tc.reasonNote)
+		}
+		if got := ClaudeThinkingAlwaysOn(tc.model); got != tc.alwaysOn {
+			t.Errorf("ClaudeThinkingAlwaysOn(%q) = %v, want %v (%s)", tc.model, got, tc.alwaysOn, tc.reasonNote)
+		}
+	}
+}
+
 func TestClaudeRejectsSampling(t *testing.T) {
 	t.Parallel()
 	cases := []struct {
@@ -97,6 +128,7 @@ func TestClaudeRejectsSampling(t *testing.T) {
 		want  bool
 	}{
 		{"claude-sonnet-5", true},
+		{"claude-opus-5", true},
 		{"us.anthropic.claude-opus-4-8", true},
 		{"claude-opus-4-6", false},
 		{"claude-sonnet-4-5", false},

@@ -13,6 +13,8 @@ func TestResolveOff(t *testing.T) {
 		{"us.anthropic.claude-mythos-5", ProviderBedrock, OffUnsupported},
 		{"claude-sonnet-5", ProviderAnthropic, OffDisableClaude},          // on by default, disablable on Anthropic
 		{"us.anthropic.claude-sonnet-5", ProviderBedrock, OffUnsupported}, // always on on Bedrock, not disablable
+		{"claude-opus-5", ProviderAnthropic, OffDisableClaude},            // on by default, disablable on Anthropic
+		{"us.anthropic.claude-opus-5", ProviderBedrock, OffUnsupported},   // always on on Bedrock, not disablable
 		{"claude-opus-4-8", ProviderAnthropic, OffOmit},                   // off by default
 		{"claude-sonnet-4-5", ProviderBedrock, OffOmit},                   // off by default
 		{"claude-3-5-haiku", ProviderAnthropic, OffOmit},                  // no thinking

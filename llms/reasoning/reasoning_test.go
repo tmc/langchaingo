@@ -751,6 +751,8 @@ func TestIsReasoningModel(t *testing.T) { //nolint:funlen
 		{"tongyi-deepresearch-30b-a3b", true},
 
 		// OpenRouter catalog additions (matched by the distinctive model-name part)
+		{"claude-opus-5", true},
+		{"anthropic/claude-opus-5", true},
 		{"claude-sonnet-5", true},
 		{"claude-fable-5", true},
 		{"claude-mythos-5", true},

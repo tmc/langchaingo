@@ -924,6 +924,7 @@ func (c *ConverseClient) supportsReasoning(modelID string) bool {
 	reasoningModels := []string{
 		"anthropic.claude-fable-5",
 		"anthropic.claude-sonnet-5",
+		"anthropic.claude-opus-5",
 		"anthropic.claude-opus-4-",
 		"anthropic.claude-sonnet-4-",
 		"anthropic.claude-haiku-4-",

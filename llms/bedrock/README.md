@@ -187,13 +187,13 @@ if err != nil {
 ### Models Supporting Reasoning
 
 **Converse API**:
-- Claude: Fable 5, Opus 4.8/4.7/4.6/4.5, Sonnet 5/4.6/4.5, Haiku 4.5
+- Claude: Fable 5, Opus 5/4.8/4.7/4.6/4.5, Sonnet 5/4.6/4.5, Haiku 4.5
 - DeepSeek R1
 - OpenAI GPT OSS (120B, 20B)
 - Moonshot Kimi K2-Thinking
 
 **Legacy API** (InvokeModel):
-- Claude: Opus 4.8/4.7/4.6/4.5, Sonnet 5/4.6/4.5, Haiku 4.5
+- Claude: Opus 5/4.8/4.7/4.6/4.5, Sonnet 5/4.6/4.5, Haiku 4.5
 
 **How the wire shape is resolved**
 
@@ -201,9 +201,12 @@ Claude thinking is not a single flag — the generation resolves adaptive vs. bu
 thinking from the model via the shared `llms/reasoning` capability tables (the same
 source of truth used by the first-party Anthropic provider):
 
-- **Adaptive-only** (Opus 4.7/4.8, Sonnet 5, Fable 5): `thinking.type=adaptive` +
-  `output_config.effort`; budget thinking and sampling params are rejected. On
-  Bedrock these are always-on and cannot be disabled.
+- **Adaptive-only** (Opus 4.7/4.8/5, Sonnet 5, Fable 5): `thinking.type=adaptive` +
+  `output_config.effort`; budget thinking and sampling params are rejected. Opus 5,
+  Sonnet 5, and Fable 5 think by default (Opus 5 is a breaking change from Opus 4.8,
+  which defaults off); on Bedrock a default-on model cannot be explicitly disabled
+  (always-on there), while Opus 4.7/4.8 default off, so omitting thinking already
+  yields off.
 - **Adaptive + budget** (Opus 4.6, Sonnet 4.6): either mechanism; caller preference honored.
 - **Budget-only** (Opus 4.5, Sonnet 4.5, Haiku 4.5): `thinking.type=enabled` +
   `budget_tokens`; Opus 4.5 also honors `output_config.effort`.
@@ -752,7 +755,7 @@ for the exact model IDs.
 | Provider | Tool Calling | Reasoning | Streaming | Multimodal | Caching | Structured Output |
 |----------|-------------|-----------|-----------|------------|---------|-------------------|
 | Claude Fable 5 | ✅ | ✅ (always-on) | ✅ | ✅ | ✅ | ✅ |
-| Claude Opus 4.8/4.7/4.6/4.5 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Claude Opus 5/4.8/4.7/4.6/4.5 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Claude Sonnet 5/4.6/4.5 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Claude Haiku 4.5 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Nova 2/Pro/Lite/Micro | ✅ | ❌ | ✅ | ✅ | ❌ | Converse native* |

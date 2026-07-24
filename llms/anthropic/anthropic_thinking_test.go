@@ -146,6 +146,62 @@ func TestAnthropic_ReasoningDisabledRealAPI(t *testing.T) {
 	}
 }
 
+// TestAnthropic_Opus5RealAPI verifies the real backend accepts Claude Opus 5's
+// adaptive-thinking wire shape and its explicit disable — the wire shapes the
+// unit tests (TestAnthropic_Opus5AdaptiveOnlyDefaultOnWire) only assert we
+// construct correctly. Requires ANTHROPIC_API_KEY.
+func TestAnthropic_Opus5RealAPI(t *testing.T) {
+	t.Parallel()
+
+	t.Run("adaptive reasoning answers correctly", func(t *testing.T) {
+		t.Parallel()
+		llm := newHTTPRRClient(t, anthropic.WithModel("claude-opus-5"))
+
+		messages := []llms.MessageContent{
+			{
+				Role:  llms.ChatMessageTypeHuman,
+				Parts: []llms.ContentPart{llms.TextPart("Solve: If x + 5 = 12, what is x?")},
+			},
+		}
+
+		resp, err := llm.GenerateContent(t.Context(), messages,
+			llms.WithAdaptiveReasoning(llms.ReasoningHigh),
+			llms.WithMaxTokens(4096),
+		)
+		require.NoError(t, err)
+
+		choice := resp.Choices[0]
+		assert.Contains(t, choice.Content, "7")
+		if choice.Reasoning != nil {
+			assert.NotEmpty(t, choice.Reasoning.Signature, "a returned thinking block must carry its signature")
+		}
+	})
+
+	t.Run("explicit disable runs without thinking", func(t *testing.T) {
+		t.Parallel()
+		llm := newHTTPRRClient(t, anthropic.WithModel("claude-opus-5"))
+
+		messages := []llms.MessageContent{
+			{
+				Role:  llms.ChatMessageTypeHuman,
+				Parts: []llms.ContentPart{llms.TextPart("Reply with just the word: ready")},
+			},
+		}
+
+		resp, err := llm.GenerateContent(t.Context(), messages,
+			llms.WithReasoningDisabled(),
+			llms.WithMaxTokens(64),
+		)
+		require.NoError(t, err)
+
+		choice := resp.Choices[0]
+		assert.NotEmpty(t, choice.Content)
+		if choice.Reasoning != nil {
+			assert.Empty(t, choice.Reasoning.Content, "disabled thinking must not return reasoning content")
+		}
+	})
+}
+
 // TestAnthropic_TextResponseWithThinking tests text response with thinking and roundtrip
 func TestAnthropic_TextResponseWithThinking(t *testing.T) {
 	t.Parallel()
@@ -623,6 +679,49 @@ func TestAnthropic_ModelAwareThinkingResolution(t *testing.T) {
 			llms.WithModel("claude-sonnet-4-5"),
 			llms.WithTemperature(0.7), llms.WithMaxTokens(64))
 		assert.EqualValues(t, 0.7, p["temperature"], "budget-capable model keeps temperature")
+	})
+}
+
+// TestAnthropic_Opus5AdaptiveOnlyDefaultOnWire locks Claude Opus 5's wire shape:
+// adaptive-only (like Opus 4.7/4.8) but thinking on by default (like Sonnet 5,
+// unlike Opus 4.8, which defaults off) — and, unlike Fable 5/Mythos 5, it still
+// accepts an explicit disable.
+func TestAnthropic_Opus5AdaptiveOnlyDefaultOnWire(t *testing.T) {
+	t.Parallel()
+
+	t.Run("budget request upgrades to adaptive and drops sampling params", func(t *testing.T) {
+		t.Parallel()
+		p, _ := captureMessagesRequestModel(t, "claude-opus-5",
+			llms.WithReasoning(llms.ReasoningMedium, 0),
+			llms.WithTemperature(0.7), llms.WithTopP(0.9), llms.WithMaxTokens(4096))
+		th, _ := p["thinking"].(map[string]any)
+		assert.Equal(t, "adaptive", th["type"], "budget request must upgrade to adaptive on an adaptive-only model")
+		_, hasBudget := th["budget_tokens"]
+		assert.False(t, hasBudget, "upgraded adaptive must not carry a budget")
+		_, hasTemp := p["temperature"]
+		assert.False(t, hasTemp, "Opus 5 must drop temperature")
+		_, hasTopP := p["top_p"]
+		assert.False(t, hasTopP, "Opus 5 must drop top_p")
+	})
+
+	t.Run("thinking on by default is still explicitly disablable", func(t *testing.T) {
+		t.Parallel()
+		p, _ := captureMessagesRequestModel(t, "claude-opus-5",
+			llms.WithReasoningDisabled(), llms.WithMaxTokens(64))
+		th, _ := p["thinking"].(map[string]any)
+		assert.Equal(t, "disabled", th["type"], "Opus 5 defaults on but must accept an explicit disable")
+	})
+
+	t.Run("sampling dropped even without reasoning requested", func(t *testing.T) {
+		t.Parallel()
+		p, _ := captureMessagesRequestModel(t, "claude-opus-5",
+			llms.WithTemperature(0.7), llms.WithTopP(0.9), llms.WithMaxTokens(64))
+		_, hasThinking := p["thinking"]
+		assert.False(t, hasThinking, "no reasoning explicitly requested")
+		_, hasTemp := p["temperature"]
+		assert.False(t, hasTemp, "adaptive-only Opus 5 drops temperature even without an explicit thinking request")
+		_, hasTopP := p["top_p"]
+		assert.False(t, hasTopP, "adaptive-only Opus 5 drops top_p even without an explicit thinking request")
 	})
 }
 

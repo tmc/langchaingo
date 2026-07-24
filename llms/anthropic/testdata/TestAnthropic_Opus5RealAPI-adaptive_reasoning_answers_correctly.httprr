@@ -1,0 +1,37 @@
+httprr trace v1
+450 2300
+POST https://api.anthropic.com/v1/messages HTTP/1.1
+Host: api.anthropic.com
+User-Agent: langchaingo-httprr
+Content-Length: 230
+Anthropic-Version: 2023-06-01
+Content-Type: application/json
+X-Api-Key: test-api-key
+
+{"model":"claude-opus-5","messages":[{"role":"user","content":[{"type":"text","text":"Solve: If x + 5 = 12, what is x?"}]}],"max_tokens":4096,"thinking":{"type":"adaptive","display":"summarized"},"output_config":{"effort":"high"}}HTTP/2.0 200 OK
+Content-Length: 1152
+Anthropic-Organization-Id: 1904456a-cd64-476c-9cc8-db00cdf9d232
+Anthropic-Ratelimit-Input-Tokens-Limit: 10000000
+Anthropic-Ratelimit-Input-Tokens-Remaining: 10000000
+Anthropic-Ratelimit-Input-Tokens-Reset: 2026-07-24T22:22:04Z
+Anthropic-Ratelimit-Output-Tokens-Limit: 2000000
+Anthropic-Ratelimit-Output-Tokens-Remaining: 2000000
+Anthropic-Ratelimit-Output-Tokens-Reset: 2026-07-24T22:22:06Z
+Anthropic-Ratelimit-Requests-Limit: 10000
+Anthropic-Ratelimit-Requests-Remaining: 9996
+Anthropic-Ratelimit-Requests-Reset: 2026-07-24T22:22:03Z
+Anthropic-Ratelimit-Tokens-Limit: 12000000
+Anthropic-Ratelimit-Tokens-Remaining: 12000000
+Anthropic-Ratelimit-Tokens-Reset: 2026-07-24T22:22:04Z
+Cf-Cache-Status: DYNAMIC
+Content-Security-Policy: default-src 'none'; frame-ancestors 'none'
+Content-Type: application/json
+Date: Fri, 24 Jul 2026 22:22:06 GMT
+Request-Id: req_011CdMfQdyon7F6domQsLmQa
+Server: cloudflare
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+Traceresponse: 00-7ef6c2ada5fb39ea83d2a3a201736b14-9216204ed5f5651a-01
+Vary: Accept-Encoding
+X-Robots-Tag: none
+
+{"model":"claude-opus-5","id":"msg_011CdMfQetsW9ZNDxPVNNcYq","type":"message","role":"assistant","content":[{"type":"thinking","thinking":"I'm setting x to 7.","signature":"CAIS+AEKhwEIEBgCKkCXdfqxobAfmqVlxWjKUiA6dxpXcPqKTMxHmXSkynyNEHoR6klR5YlqPWgEbCEsLAAaPtSooG8ZrW6ia0w1OpBIMg1jbGF1ZGUtb3B1cy01OAFCCHRoaW5raW5nWiQxOTA0NDU2YS1jZDY0LTQ3NmMtOWNjOC1kYjAwY2RmOWQyMzISDBEunk84g+B2GDmFFxoMNVsQox6i3JkKdpXYIjCxN3M0xrki5V4yIq9jO7mgzO+//axKyA8hoEvF6BiAlPFAH5Z6j5sBFAkcQAJ5aRcqHhCvnR2olbH6V2yckbZHnzcwgpW09edk8ms1/C9vxRgB"},{"type":"text","text":"## Solving for x\n\n**Equation:** x + 5 = 12\n\n**Step 1:** Subtract 5 from both sides to isolate x.\n\n$$x + 5 - 5 = 12 - 5$$\n\n**Step 2:** Simplify.\n\n$$x = 7$$\n\n**Check:** Substitute back into the original equation: 7 + 5 = 12 ✓\n\n**Answer: x = 7**"}],"stop_reason":"end_turn","stop_sequence":null,"stop_details":null,"usage":{"input_tokens":24,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":144,"output_tokens_details":{"thinking_tokens":11},"service_tier":"standard","inference_geo":"global"}}

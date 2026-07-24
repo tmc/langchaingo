@@ -58,6 +58,19 @@ func TestReasoningSupportFor(t *testing.T) { //nolint:funlen // table-driven tes
 		eq(t, "CannotDisable(Bedrock)", bedrock.CannotDisable, true)
 	})
 
+	t.Run("Opus 5 defaults on but is disablable, like Sonnet 5 unlike Opus 4.8", func(t *testing.T) {
+		s := ReasoningSupportFor("claude-opus-5", reasoning.ProviderAnthropic)
+		eq(t, "Known", s.Known, true)
+		eq(t, "CannotDisable", s.CannotDisable, false)
+		eq(t, "RejectsSampling", s.RejectsSampling, true)
+		if s.DefaultOn == nil || !*s.DefaultOn {
+			t.Errorf("Opus 5 DefaultOn = %v, want true", s.DefaultOn)
+		}
+		// Provider-aware, same rule as Sonnet 5: not disablable on Bedrock.
+		bedrock := ReasoningSupportFor("us.anthropic.claude-opus-5", reasoning.ProviderBedrock)
+		eq(t, "CannotDisable(Bedrock)", bedrock.CannotDisable, true)
+	})
+
 	t.Run("OpenAI o-series cannot disable", func(t *testing.T) {
 		s := ReasoningSupportFor("o3-mini", reasoning.ProviderOpenAI)
 		eq(t, "Supported", s.Supported, true)

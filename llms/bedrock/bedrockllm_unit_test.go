@@ -287,6 +287,11 @@ func TestSupportsCaching(t *testing.T) {
 			expected: true,
 		},
 		{
+			name:     "Claude Opus 5 supports caching",
+			modelID:  ModelAnthropicClaudeOpus5,
+			expected: true,
+		},
+		{
 			name:     "Claude Fable 5 supports caching",
 			modelID:  ModelAnthropicClaudeFable5,
 			expected: true,

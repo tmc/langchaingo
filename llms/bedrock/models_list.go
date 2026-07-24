@@ -43,6 +43,15 @@ const (
 	// Languages: English, French, Modern Standard Arabic, Mandarin Chinese, Hindi, Spanish, Portuguese, Korean, Japanese, German, Russian, Polish, and other languages.
 	ModelAnthropicClaudeFable5 = "us.anthropic.claude-fable-5"
 
+	// Claude Opus 5 is Anthropic's model for complex agentic coding and enterprise work, succeeding
+	// Opus 4.8. Adaptive thinking is on by default (a breaking change from Opus 4.8, which defaulted
+	// off) but, unlike Fable 5/Mythos 5, it still accepts an explicit disable. Supports adaptive
+	// thinking only: budget thinking and sampling params are rejected.
+	//
+	// Max tokens: 1M
+	// Languages: English, French, Modern Standard Arabic, Mandarin Chinese, Hindi, Spanish, Portuguese, Korean, Japanese, German, Russian, Polish, and other languages.
+	ModelAnthropicClaudeOpus5 = "us.anthropic.claude-opus-5"
+
 	// Claude Opus 4.8 is Anthropic's most capable Opus-tier model — highly autonomous, state-of-the-art
 	// on long-horizon agentic work, knowledge work, and memory, with clearer and warmer writing.
 	// Supports adaptive thinking only: budget thinking and sampling params are rejected.

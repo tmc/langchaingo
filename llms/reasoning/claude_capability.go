@@ -15,9 +15,9 @@ const (
 	// (the caller's requested mechanism is sent unchanged), preserving prior
 	// behavior so an unclassified model never regresses.
 	ClaudeReasoningUnknown ClaudeReasoningKind = iota
-	// ClaudeReasoningAdaptiveOnly is the newest generation (Opus 4.7/4.8, Sonnet
-	// 5, Fable 5, Mythos 5): it accepts thinking.type=adaptive + output_config
-	// only, and rejects budget_tokens and temperature/top_p with a 400.
+	// ClaudeReasoningAdaptiveOnly is the newest generation (Opus 4.7/4.8/5,
+	// Sonnet 5, Fable 5, Mythos 5): it accepts thinking.type=adaptive +
+	// output_config only, and rejects budget_tokens and temperature/top_p with a 400.
 	ClaudeReasoningAdaptiveOnly
 	// ClaudeReasoningAdaptiveAndBudget is the transitional generation (Opus 4.6,
 	// Sonnet 4.6): it accepts both adaptive and budget thinking and permits
@@ -35,7 +35,7 @@ const (
 // set when it launches; anything absent is treated as ClaudeReasoningUnknown.
 var (
 	adaptiveOnlyClaude = []string{
-		"claude-opus-4-7", "claude-opus-4-8",
+		"claude-opus-4-7", "claude-opus-4-8", "claude-opus-5",
 		"claude-sonnet-5", "claude-fable-5", "claude-mythos-5",
 	}
 	dualClaude = []string{
@@ -73,10 +73,15 @@ func ClaudeSupportsThinking(model string) bool {
 
 // alwaysOnClaude models think unconditionally and reject an explicit disable.
 // defaultOnClaude models think when thinking is omitted (so forcing them off
-// needs an explicit disable, not just omission).
+// needs an explicit disable, not just omission). Opus 5 and Sonnet 5 default to
+// thinking on — a breaking change from Opus 4.8, which defaults off — but,
+// unlike Fable 5 / Mythos 5, they still accept an explicit disable (subject to
+// the API's own effort ceiling: Anthropic rejects thinking.disabled combined
+// with effort xhigh/max on Opus 5, a constraint this package does not model
+// because this SDK never sends effort alongside a disable request).
 var (
 	alwaysOnClaude  = []string{"claude-fable-5", "claude-mythos-5"}
-	defaultOnClaude = []string{"claude-sonnet-5", "claude-fable-5", "claude-mythos-5"}
+	defaultOnClaude = []string{"claude-opus-5", "claude-sonnet-5", "claude-fable-5", "claude-mythos-5"}
 )
 
 // ClaudeThinkingAlwaysOn reports whether the model's thinking cannot be disabled

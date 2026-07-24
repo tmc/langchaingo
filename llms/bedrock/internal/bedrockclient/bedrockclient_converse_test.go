@@ -217,6 +217,7 @@ func TestConverseClient_ModelDetection(t *testing.T) {
 	// Test reasoning support
 	assert.True(t, client.supportsReasoning("us.anthropic.claude-fable-5-v1:0"))
 	assert.True(t, client.supportsReasoning("us.anthropic.claude-sonnet-5-v1:0"))
+	assert.True(t, client.supportsReasoning("us.anthropic.claude-opus-5-v1:0"))
 	assert.True(t, client.supportsReasoning("us.anthropic.claude-opus-4-8-v1:0"))
 	assert.True(t, client.supportsReasoning("us.anthropic.claude-opus-4-7-v1:0"))
 	assert.True(t, client.supportsReasoning("us.anthropic.claude-opus-4-6-v1:0"))

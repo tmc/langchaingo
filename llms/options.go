@@ -73,7 +73,7 @@ type ReasoningConfig struct {
 	// Adaptive expresses a preference for adaptive thinking (thinking.type=adaptive
 	// plus output_config.effort instead of a token budget). Effort sets the level;
 	// Tokens is ignored. For Claude the wire mechanism is resolved from the model,
-	// not this flag: an adaptive-only generation (Opus 4.7+, Sonnet 5, Fable 5)
+	// not this flag: an adaptive-only generation (Opus 4.7/4.8/5, Sonnet 5, Fable 5)
 	// always uses adaptive and drops sampling params it rejects, a budget-only
 	// generation always uses budget thinking, and this preference is honored on
 	// models that support both. Providers without adaptive support fall back to
