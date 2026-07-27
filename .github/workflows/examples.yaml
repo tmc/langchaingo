@@ -45,4 +45,4 @@ jobs:
           cd examples/${{ matrix.example }}
           echo "Building ${{ matrix.example }}"
           go mod tidy
-          go build -o /dev/null .
+          go build ./...
