@@ -310,10 +310,10 @@ func TestClient_GenerateChatWithThink(t *testing.T) {
 			},
 		},
 		Stream: false,
+		Think:  boolPtr(true), // Enable reasoning mode (top-level per Ollama API)
 		Options: Options{
 			Temperature: 0.0,
 			NumPredict:  100,
-			Think:       true, // Enable reasoning mode
 		},
 	}
 
@@ -332,28 +332,63 @@ func TestClient_GenerateChatWithThink(t *testing.T) {
 	// This test verifies that the parameter is properly serialized
 }
 
-func TestOptionsJSONMarshalWithThink(t *testing.T) {
-	// Test that the think parameter is properly marshaled to JSON
-	opts := Options{
-		Temperature: 0.5,
-		Think:       true,
-	}
+func TestChatRequestJSONMarshalWithThink(t *testing.T) {
+	// The Ollama API defines "think" as a top-level field of the chat request,
+	// not as part of "options". See https://github.com/tmc/langchaingo/issues/1514.
+	t.Run("think true is top-level", func(t *testing.T) {
+		req := ChatRequest{
+			Model: "qwen3",
+			Think: boolPtr(true),
+			Options: Options{
+				Temperature: 0.5,
+			},
+		}
 
-	data, err := json.Marshal(opts)
-	require.NoError(t, err)
+		data, err := json.Marshal(req)
+		require.NoError(t, err)
 
-	// Check that the JSON contains the think field
-	var result map[string]interface{}
-	err = json.Unmarshal(data, &result)
-	require.NoError(t, err)
+		var result map[string]any
+		require.NoError(t, json.Unmarshal(data, &result))
 
-	// Verify think field exists and is true
-	think, exists := result["think"]
-	assert.True(t, exists, "think field should exist in JSON")
-	assert.Equal(t, true, think, "think field should be true")
+		think, exists := result["think"]
+		assert.True(t, exists, "think field should exist at the top level")
+		assert.Equal(t, true, think, "think field should be true")
 
-	// Verify temperature field for completeness
-	temp, exists := result["temperature"]
-	assert.True(t, exists, "temperature field should exist in JSON")
-	assert.Equal(t, float64(0.5), temp, "temperature should be 0.5")
+		// think must not leak into the nested options object.
+		opts, ok := result["options"].(map[string]any)
+		require.True(t, ok, "options object should be present")
+		_, thinkInOptions := opts["think"]
+		assert.False(t, thinkInOptions, "think must not be nested inside options")
+	})
+
+	t.Run("think false is preserved", func(t *testing.T) {
+		// A plain bool with omitempty would drop false; the pointer keeps it so
+		// callers can explicitly disable thinking on models that think by default.
+		req := ChatRequest{Model: "qwen3", Think: boolPtr(false)}
+
+		data, err := json.Marshal(req)
+		require.NoError(t, err)
+
+		var result map[string]any
+		require.NoError(t, json.Unmarshal(data, &result))
+
+		think, exists := result["think"]
+		assert.True(t, exists, "explicit false think field should be preserved")
+		assert.Equal(t, false, think, "think field should be false")
+	})
+
+	t.Run("think unset is omitted", func(t *testing.T) {
+		req := ChatRequest{Model: "qwen3"}
+
+		data, err := json.Marshal(req)
+		require.NoError(t, err)
+
+		var result map[string]any
+		require.NoError(t, json.Unmarshal(data, &result))
+
+		_, exists := result["think"]
+		assert.False(t, exists, "unset think field should be omitted")
+	})
 }
+
+func boolPtr(b bool) *bool { return &b }

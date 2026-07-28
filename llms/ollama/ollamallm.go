@@ -146,21 +146,18 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	// Get our ollamaOptions from llms.CallOptions
 	ollamaOptions := makeOllamaOptionsFromOptions(o.options.ollamaOptions, opts)
 
-	// Handle thinking mode if specified via metadata
-	if opts.Metadata != nil {
-		if config, ok := opts.Metadata["thinking_config"].(*llms.ThinkingConfig); ok {
-			if config.Mode != llms.ThinkingModeNone && o.SupportsReasoning() {
-				// Enable thinking for models that support it
-				ollamaOptions.Think = true
-			}
-		}
-	}
+	// Resolve the reasoning-mode flag. It is sent as a top-level field per the
+	// Ollama API (not inside options), and uses a pointer so an explicit false
+	// (disable thinking) is distinguishable from "unset".
+	think := resolveThink(o.options.think, opts)
+
 	req := &ollamaclient.ChatRequest{
 		Model:    model,
 		Format:   format,
 		Messages: chatMsgs,
 		Options:  ollamaOptions,
 		Stream:   opts.StreamingFunc != nil,
+		Think:    think,
 	}
 
 	keepAlive := o.options.keepAlive
@@ -231,7 +228,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 
 	// Note: Ollama may include thinking in the main content when Think mode is enabled
 	// Future versions may provide separate thinking content
-	if ollamaOptions.Think && o.SupportsReasoning() {
+	if think != nil && *think && o.SupportsReasoning() {
 		genInfo["ThinkingEnabled"] = true
 	}
 
@@ -319,17 +316,21 @@ func makeOllamaOptionsFromOptions(ollamaOptions ollamaclient.Options, opts llms.
 	ollamaOptions.FrequencyPenalty = float32(opts.FrequencyPenalty)
 	ollamaOptions.PresencePenalty = float32(opts.PresencePenalty)
 
-	// Extract thinking configuration for models that support it
+	return ollamaOptions
+}
+
+// resolveThink determines the value of the top-level Ollama "think" field.
+// Per-call thinking configuration (via WithThinkingMode / the "thinking_config"
+// metadata) takes precedence over the client-level WithThink option. A nil
+// result omits the field entirely, leaving the server default in place.
+func resolveThink(clientThink *bool, opts llms.CallOptions) *bool {
 	if opts.Metadata != nil {
 		if config, ok := opts.Metadata["thinking_config"].(*llms.ThinkingConfig); ok {
-			// Enable thinking mode if not explicitly disabled
-			if config.Mode != llms.ThinkingModeNone {
-				ollamaOptions.Think = true
-			}
+			think := config.Mode != llms.ThinkingModeNone
+			return &think
 		}
 	}
-
-	return ollamaOptions
+	return clientThink
 }
 
 // pullModelIfNeeded pulls the model if it's not already available.

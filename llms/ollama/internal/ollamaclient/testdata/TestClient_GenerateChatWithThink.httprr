@@ -7,7 +7,7 @@ Content-Length: 167
 Accept: application/x-ndjson
 Content-Type: application/json
 
-{"model":"gemma3:1b","messages":[{"role":"user","content":"What is 2+2? Show your reasoning."}],"format":"","options":{"num_predict":100,"temperature":0,"think":true}}HTTP/1.1 200 OK
+{"model":"gemma3:1b","messages":[{"role":"user","content":"What is 2+2? Show your reasoning."}],"format":"","think":true,"options":{"num_predict":100,"temperature":0}}HTTP/1.1 200 OK
 Transfer-Encoding: chunked
 Content-Type: application/x-ndjson
 Date: Wed, 20 Aug 2025 13:48:26 GMT

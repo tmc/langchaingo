@@ -20,6 +20,9 @@ type options struct {
 	keepAlive           string
 	pullModel           bool
 	pullTimeout         time.Duration
+	// think is the reasoning-mode flag sent as a top-level field to the Ollama
+	// API. A nil pointer leaves it unset so an explicit false is distinguishable.
+	think *bool
 }
 
 type Option func(*options)
@@ -268,11 +271,14 @@ func WithPredictPenalizeNewline(val bool) Option {
 	}
 }
 
-// WithThink enables reasoning mode for models that support it (Ollama 0.9.0+).
-// When enabled, the model will show its internal reasoning process.
+// WithThink enables or disables reasoning mode for models that support it
+// (Ollama 0.9.0+). When enabled, the model will show its internal reasoning
+// process. Passing false explicitly disables thinking for models (such as
+// qwen3 or deepseek-r1) that think by default. The flag is sent as a top-level
+// field to the Ollama API.
 func WithThink(val bool) Option {
 	return func(opts *options) {
-		opts.ollamaOptions.Think = val
+		opts.think = &val
 	}
 }
 

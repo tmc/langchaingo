@@ -34,6 +34,10 @@ type GenerateRequest struct {
 	Context   []int  `json:"context,omitempty"`
 	Stream    *bool  `json:"stream"`
 	KeepAlive string `json:"keep_alive,omitempty"`
+	// Think enables reasoning mode (Ollama 0.9.0+). It is a top-level field per
+	// the Ollama API, not part of Options. A nil pointer omits the field, so an
+	// explicit false (disable thinking) is distinguishable from "unset".
+	Think *bool `json:"think,omitempty"`
 
 	Options Options `json:"options"`
 }
@@ -52,6 +56,10 @@ type ChatRequest struct {
 	Stream    bool       `json:"stream,omitempty"`
 	Format    string     `json:"format"`
 	KeepAlive string     `json:"keep_alive,omitempty"`
+	// Think enables reasoning mode (Ollama 0.9.0+). It is a top-level field per
+	// the Ollama API, not part of Options. A nil pointer omits the field, so an
+	// explicit false (disable thinking) is distinguishable from "unset".
+	Think *bool `json:"think,omitempty"`
 
 	Options Options `json:"options"`
 }
@@ -167,7 +175,6 @@ type Options struct {
 	MirostatEta      float32 `json:"mirostat_eta,omitempty"`
 	TopP             float32 `json:"top_p,omitempty"`
 	PenalizeNewline  bool    `json:"penalize_newline,omitempty"`
-	Think            bool    `json:"think,omitempty"` // Ollama 0.9.0+ reasoning mode
 }
 
 type PullRequest struct {
