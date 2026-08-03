@@ -1,0 +1,34 @@
+httprr trace v1
+375 1629
+POST https://api.x.ai/v1/chat/completions HTTP/1.1
+Host: api.x.ai
+User-Agent: langchaingo-httprr
+Content-Length: 185
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"grok-4.5","messages":[{"role":"user","content":"What is the factorial of 5? Show your work. Think before you answer."}],"max_completion_tokens":8192,"reasoning_effort":"high"}HTTP/2.0 200 OK
+Content-Length: 784
+Access-Control-Allow-Origin: *
+Access-Control-Expose-Headers: *
+Cf-Cache-Status: DYNAMIC
+Content-Type: application/json
+Date: Mon, 03 Aug 2026 20:11:02 GMT
+Server: cloudflare
+Server-Timing: cfCacheStatus;desc="DYNAMIC"
+Server-Timing: cfEdge;dur=187,cfOrigin;dur=2501
+Strict-Transport-Security: max-age=31536000
+Traceparent: 00-a4554f295082c2b0a7d9acf701972666-4d3039d40000b0ef-01
+Vary: origin, access-control-request-method, access-control-request-headers
+X-Data-Retention: general
+X-Metrics-E2e-Ms: 2480.2
+X-Metrics-Mean-Itl-Ms: 12.3
+X-Metrics-Ttft-Ms: 536.7
+X-Ratelimit-Limit-Requests: 7200
+X-Ratelimit-Limit-Tokens: 50000000
+X-Ratelimit-Remaining-Requests: 7197
+X-Ratelimit-Remaining-Tokens: 49998680
+X-Request-Id: 0b28ad71-283c-90e0-a1e2-7c92b0590ef0
+X-Zero-Data-Retention: false
+
+{"id":"0b28ad71-283c-90e0-a1e2-7c92b0590ef0","object":"chat.completion","created":1785787860,"model":"grok-4.5","choices":[{"index":0,"message":{"role":"assistant","content":"5! = 5 × 4 × 3 × 2 × 1 = 120","reasoning_content":"The question is: \"What is the factorial of 5? Show your work. Think before you answer.\"\n","refusal":null},"finish_reason":"stop"}],"usage":{"prompt_tokens":223,"completion_tokens":20,"total_tokens":366,"prompt_tokens_details":{"text_tokens":223,"audio_tokens":0,"image_tokens":0,"cached_tokens":128},"completion_tokens_details":{"reasoning_tokens":123,"audio_tokens":0,"accepted_prediction_tokens":0,"rejected_prediction_tokens":0},"num_sources_used":0,"cost_in_usd_ticks":10864000},"system_fingerprint":"fp_a39489019fa99b6e","service_tier":"default"}

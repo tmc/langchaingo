@@ -1,0 +1,89 @@
+httprr trace v1
+690 8424
+POST https://api.x.ai/v1/chat/completions HTTP/1.1
+Host: api.x.ai
+User-Agent: langchaingo-httprr
+Content-Length: 500
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"grok-4.5","messages":[{"role":"user","content":"What is the weather like in Boston, MA?"}],"stream":true,"tools":[{"type":"function","function":{"name":"getCurrentWeather","description":"Get the current weather in a given location","parameters":{"type":"object","properties":{"location":{"type":"string","description":"The city and state, e.g. San Francisco, CA"},"unit":{"type":"string","enum":["celsius","fahrenheit"]}},"required":["location"]}}}],"stream_options":{"include_usage":true}}HTTP/2.0 200 OK
+Content-Length: 7634
+Access-Control-Allow-Origin: *
+Access-Control-Expose-Headers: *
+Cache-Control: no-cache
+Cf-Cache-Status: DYNAMIC
+Content-Type: text/event-stream
+Date: Mon, 03 Aug 2026 20:11:47 GMT
+Server: cloudflare
+Server-Timing: cfCacheStatus;desc="DYNAMIC"
+Server-Timing: cfEdge;dur=174,cfOrigin;dur=236
+Strict-Transport-Security: max-age=31536000
+Traceparent: 00-885a268fc8853e39f54f0057652b7a2c-6540ca5b00004522-01
+Vary: origin, access-control-request-method, access-control-request-headers
+X-Data-Retention: general
+X-Ratelimit-Limit-Requests: 7200
+X-Ratelimit-Limit-Tokens: 50000000
+X-Ratelimit-Remaining-Requests: 7200
+X-Ratelimit-Remaining-Tokens: 50000000
+X-Request-Id: 7f65a7f9-d1ad-9fd6-8e7a-3df9c57b3d67
+X-Zero-Data-Retention: false
+
+data: {"id":"7f65a7f9-d1ad-9fd6-8e7a-3df9c57b3d67","object":"chat.completion.chunk","created":1785787907,"model":"grok-4.5","choices":[{"index":0,"delta":{"reasoning_content":"The","role":"assistant"}}],"system_fingerprint":"fp_a39489019fa99b6e","service_tier":"default"}
+
+data: {"id":"7f65a7f9-d1ad-9fd6-8e7a-3df9c57b3d67","object":"chat.completion.chunk","created":1785787907,"model":"grok-4.5","choices":[{"index":0,"delta":{"reasoning_content":" user"}}],"system_fingerprint":"fp_a39489019fa99b6e","service_tier":"default"}
+
+data: {"id":"7f65a7f9-d1ad-9fd6-8e7a-3df9c57b3d67","object":"chat.completion.chunk","created":1785787907,"model":"grok-4.5","choices":[{"index":0,"delta":{"reasoning_content":" wants"}}],"system_fingerprint":"fp_a39489019fa99b6e","service_tier":"default"}
+
+data: {"id":"7f65a7f9-d1ad-9fd6-8e7a-3df9c57b3d67","object":"chat.completion.chunk","created":1785787907,"model":"grok-4.5","choices":[{"index":0,"delta":{"reasoning_content":" to"}}],"system_fingerprint":"fp_a39489019fa99b6e","service_tier":"default"}
+
+data: {"id":"7f65a7f9-d1ad-9fd6-8e7a-3df9c57b3d67","object":"chat.completion.chunk","created":1785787907,"model":"grok-4.5","choices":[{"index":0,"delta":{"reasoning_content":" know"}}],"system_fingerprint":"fp_a39489019fa99b6e","service_tier":"default"}
+
+data: {"id":"7f65a7f9-d1ad-9fd6-8e7a-3df9c57b3d67","object":"chat.completion.chunk","created":1785787907,"model":"grok-4.5","choices":[{"index":0,"delta":{"reasoning_content":" the"}}],"system_fingerprint":"fp_a39489019fa99b6e","service_tier":"default"}
+
+data: {"id":"7f65a7f9-d1ad-9fd6-8e7a-3df9c57b3d67","object":"chat.completion.chunk","created":1785787907,"model":"grok-4.5","choices":[{"index":0,"delta":{"reasoning_content":" weather"}}],"system_fingerprint":"fp_a39489019fa99b6e","service_tier":"default"}
+
+data: {"id":"7f65a7f9-d1ad-9fd6-8e7a-3df9c57b3d67","object":"chat.completion.chunk","created":1785787907,"model":"grok-4.5","choices":[{"index":0,"delta":{"reasoning_content":" in"}}],"system_fingerprint":"fp_a39489019fa99b6e","service_tier":"default"}
+
+data: {"id":"7f65a7f9-d1ad-9fd6-8e7a-3df9c57b3d67","object":"chat.completion.chunk","created":1785787907,"model":"grok-4.5","choices":[{"index":0,"delta":{"reasoning_content":" Boston"}}],"system_fingerprint":"fp_a39489019fa99b6e","service_tier":"default"}
+
+data: {"id":"7f65a7f9-d1ad-9fd6-8e7a-3df9c57b3d67","object":"chat.completion.chunk","created":1785787907,"model":"grok-4.5","choices":[{"index":0,"delta":{"reasoning_content":","}}],"system_fingerprint":"fp_a39489019fa99b6e","service_tier":"default"}
+
+data: {"id":"7f65a7f9-d1ad-9fd6-8e7a-3df9c57b3d67","object":"chat.completion.chunk","created":1785787907,"model":"grok-4.5","choices":[{"index":0,"delta":{"reasoning_content":" MA"}}],"system_fingerprint":"fp_a39489019fa99b6e","service_tier":"default"}
+
+data: {"id":"7f65a7f9-d1ad-9fd6-8e7a-3df9c57b3d67","object":"chat.completion.chunk","created":1785787907,"model":"grok-4.5","choices":[{"index":0,"delta":{"reasoning_content":"."}}],"system_fingerprint":"fp_a39489019fa99b6e","service_tier":"default"}
+
+data: {"id":"7f65a7f9-d1ad-9fd6-8e7a-3df9c57b3d67","object":"chat.completion.chunk","created":1785787907,"model":"grok-4.5","choices":[{"index":0,"delta":{"reasoning_content":" I"}}],"system_fingerprint":"fp_a39489019fa99b6e","service_tier":"default"}
+
+data: {"id":"7f65a7f9-d1ad-9fd6-8e7a-3df9c57b3d67","object":"chat.completion.chunk","created":1785787907,"model":"grok-4.5","choices":[{"index":0,"delta":{"reasoning_content":" have"}}],"system_fingerprint":"fp_a39489019fa99b6e","service_tier":"default"}
+
+data: {"id":"7f65a7f9-d1ad-9fd6-8e7a-3df9c57b3d67","object":"chat.completion.chunk","created":1785787907,"model":"grok-4.5","choices":[{"index":0,"delta":{"reasoning_content":" the"}}],"system_fingerprint":"fp_a39489019fa99b6e","service_tier":"default"}
+
+data: {"id":"7f65a7f9-d1ad-9fd6-8e7a-3df9c57b3d67","object":"chat.completion.chunk","created":1785787907,"model":"grok-4.5","choices":[{"index":0,"delta":{"reasoning_content":" get"}}],"system_fingerprint":"fp_a39489019fa99b6e","service_tier":"default"}
+
+data: {"id":"7f65a7f9-d1ad-9fd6-8e7a-3df9c57b3d67","object":"chat.completion.chunk","created":1785787907,"model":"grok-4.5","choices":[{"index":0,"delta":{"reasoning_content":"Current"}}],"system_fingerprint":"fp_a39489019fa99b6e","service_tier":"default"}
+
+data: {"id":"7f65a7f9-d1ad-9fd6-8e7a-3df9c57b3d67","object":"chat.completion.chunk","created":1785787907,"model":"grok-4.5","choices":[{"index":0,"delta":{"reasoning_content":"Weather"}}],"system_fingerprint":"fp_a39489019fa99b6e","service_tier":"default"}
+
+data: {"id":"7f65a7f9-d1ad-9fd6-8e7a-3df9c57b3d67","object":"chat.completion.chunk","created":1785787907,"model":"grok-4.5","choices":[{"index":0,"delta":{"reasoning_content":" tool"}}],"system_fingerprint":"fp_a39489019fa99b6e","service_tier":"default"}
+
+data: {"id":"7f65a7f9-d1ad-9fd6-8e7a-3df9c57b3d67","object":"chat.completion.chunk","created":1785787907,"model":"grok-4.5","choices":[{"index":0,"delta":{"reasoning_content":"."}}],"system_fingerprint":"fp_a39489019fa99b6e","service_tier":"default"}
+
+data: {"id":"7f65a7f9-d1ad-9fd6-8e7a-3df9c57b3d67","object":"chat.completion.chunk","created":1785787907,"model":"grok-4.5","choices":[{"index":0,"delta":{"reasoning_content":" I"}}],"system_fingerprint":"fp_a39489019fa99b6e","service_tier":"default"}
+
+data: {"id":"7f65a7f9-d1ad-9fd6-8e7a-3df9c57b3d67","object":"chat.completion.chunk","created":1785787908,"model":"grok-4.5","choices":[{"index":0,"delta":{"reasoning_content":" should"}}],"system_fingerprint":"fp_a39489019fa99b6e","service_tier":"default"}
+
+data: {"id":"7f65a7f9-d1ad-9fd6-8e7a-3df9c57b3d67","object":"chat.completion.chunk","created":1785787908,"model":"grok-4.5","choices":[{"index":0,"delta":{"reasoning_content":" use"}}],"system_fingerprint":"fp_a39489019fa99b6e","service_tier":"default"}
+
+data: {"id":"7f65a7f9-d1ad-9fd6-8e7a-3df9c57b3d67","object":"chat.completion.chunk","created":1785787908,"model":"grok-4.5","choices":[{"index":0,"delta":{"reasoning_content":" that"}}],"system_fingerprint":"fp_a39489019fa99b6e","service_tier":"default"}
+
+data: {"id":"7f65a7f9-d1ad-9fd6-8e7a-3df9c57b3d67","object":"chat.completion.chunk","created":1785787908,"model":"grok-4.5","choices":[{"index":0,"delta":{"reasoning_content":"."}}],"system_fingerprint":"fp_a39489019fa99b6e","service_tier":"default"}
+
+data: {"id":"7f65a7f9-d1ad-9fd6-8e7a-3df9c57b3d67","object":"chat.completion.chunk","created":1785787908,"model":"grok-4.5","choices":[{"index":0,"delta":{"tool_calls":[{"id":"call-c9fb0be8-f98b-4ae6-bb02-30cc74f74c7c-0","function":{"name":"getCurrentWeather","arguments":"{\"location\":\"Boston, MA\"}"},"index":0,"type":"function"}]}}],"system_fingerprint":"fp_a39489019fa99b6e","service_tier":"default"}
+
+data: {"id":"7f65a7f9-d1ad-9fd6-8e7a-3df9c57b3d67","object":"chat.completion.chunk","created":1785787908,"model":"grok-4.5","choices":[{"index":0,"delta":{},"finish_reason":"tool_calls"}],"system_fingerprint":"fp_a39489019fa99b6e","service_tier":"default"}
+
+data: {"id":"7f65a7f9-d1ad-9fd6-8e7a-3df9c57b3d67","object":"chat.completion.chunk","created":1785787908,"model":"grok-4.5","choices":[],"usage":{"prompt_tokens":335,"completion_tokens":14,"total_tokens":374,"prompt_tokens_details":{"text_tokens":335,"audio_tokens":0,"image_tokens":0,"cached_tokens":128},"completion_tokens_details":{"reasoning_tokens":25,"audio_tokens":0,"accepted_prediction_tokens":0,"rejected_prediction_tokens":0},"num_sources_used":0,"cost_in_usd_ticks":6864000},"system_fingerprint":"fp_a39489019fa99b6e","service_tier":"default"}
+
+data: [DONE]
+

@@ -1,0 +1,34 @@
+httprr trace v1
+636 1783
+POST https://api.x.ai/v1/chat/completions HTTP/1.1
+Host: api.x.ai
+User-Agent: langchaingo-httprr
+Content-Length: 446
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"grok-4.5","messages":[{"role":"user","content":"What is the weather like in Boston, MA?"}],"tools":[{"type":"function","function":{"name":"getCurrentWeather","description":"Get the current weather in a given location","parameters":{"type":"object","properties":{"location":{"type":"string","description":"The city and state, e.g. San Francisco, CA"},"unit":{"type":"string","enum":["celsius","fahrenheit"]}},"required":["location"]}}}]}HTTP/2.0 200 OK
+Content-Length: 938
+Access-Control-Allow-Origin: *
+Access-Control-Expose-Headers: *
+Cf-Cache-Status: DYNAMIC
+Content-Type: application/json
+Date: Mon, 03 Aug 2026 20:11:48 GMT
+Server: cloudflare
+Server-Timing: cfCacheStatus;desc="DYNAMIC"
+Server-Timing: cfEdge;dur=142,cfOrigin;dur=1073
+Strict-Transport-Security: max-age=31536000
+Traceparent: 00-1e67e6489ada8a173eff3edb8defc5b4-07ddc6140000ab11-01
+Vary: origin, access-control-request-method, access-control-request-headers
+X-Data-Retention: general
+X-Metrics-E2e-Ms: 1058.0
+X-Metrics-Mean-Itl-Ms: 14.2
+X-Metrics-Ttft-Ms: 390.0
+X-Ratelimit-Limit-Requests: 7200
+X-Ratelimit-Limit-Tokens: 50000000
+X-Ratelimit-Remaining-Requests: 7200
+X-Ratelimit-Remaining-Tokens: 50000000
+X-Request-Id: baabbf64-6194-95c6-96d5-105d6d37326b
+X-Zero-Data-Retention: false
+
+{"id":"baabbf64-6194-95c6-96d5-105d6d37326b","object":"chat.completion","created":1785787907,"model":"grok-4.5","choices":[{"index":0,"message":{"role":"assistant","content":"","reasoning_content":"The user wants to know the weather in Boston, MA. I have the getCurrentWeather tool. I should use that.","tool_calls":[{"id":"call-caaca1c4-e0d2-468a-a7ff-d10ac7a89fc5-0","function":{"name":"getCurrentWeather","arguments":"{\"location\":\"Boston, MA\"}"},"type":"function"}],"refusal":null},"finish_reason":"tool_calls"}],"usage":{"prompt_tokens":335,"completion_tokens":14,"total_tokens":374,"prompt_tokens_details":{"text_tokens":335,"audio_tokens":0,"image_tokens":0,"cached_tokens":128},"completion_tokens_details":{"reasoning_tokens":25,"audio_tokens":0,"accepted_prediction_tokens":0,"rejected_prediction_tokens":0},"num_sources_used":0,"cost_in_usd_ticks":6864000},"system_fingerprint":"fp_a39489019fa99b6e","service_tier":"default"}

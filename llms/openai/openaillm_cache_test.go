@@ -950,3 +950,304 @@ func TestOpenAI_ImplicitCaching_Conversation_Streaming_Reasoning(t *testing.T) {
 	assert.Greater(t, r2Reasoning, 0, "Request 2 (conversation streaming reasoning) should return reasoning")
 	assert.NotEmpty(t, s2.String(), "Streamed content should not be empty")
 }
+
+// ============================================================================
+// XAI (GROK) PROVIDER TESTS
+// ============================================================================
+//
+// xAI grok-4.x models speak the OpenAI-compatible /chat/completions API and
+// this file documents (and tests) the provider-specific quirks that are not
+// already covered by the shared test matrix in multicontent_test.go:
+//
+//  1. REASONING IS ALWAYS ON:
+//     - grok-4.5 / grok-4.3 always reason; reasoning_effort defaults to "high"
+//       when omitted and cannot be disabled.
+//     - reasoning_effort accepts "low" / "medium" / "high" and is sent as a
+//       top-level field (this library's legacy, non-modern reasoning format),
+//       matching xAI's Chat Completions convention.
+//     - The response message carries reasoning_content and usage exposes
+//       completion_tokens_details.reasoning_tokens, same shape as OpenAI's
+//       o-series / DeepSeek, so no provider-specific parsing is required.
+//
+//  2. IMPLICIT PROMPT CACHING:
+//     - Automatic for all models, no configuration required.
+//     - Reported via usage.prompt_tokens_details.cached_tokens, the exact
+//       same field OpenAI uses, so the existing GenerationInfo mapping in
+//       openaillm.go ("PromptCachedTokens") already works unmodified.
+//     - Works across turns as long as the message prefix is unchanged
+//       (including tool calls and their responses).
+//
+//  3. SAMPLING RESTRICTIONS ON REASONING MODELS:
+//     - presence_penalty, frequency_penalty and stop are rejected by the API
+//       when used together with a reasoning model.
+//
+// ============================================================================
+
+// TestXAI_ImplicitCaching_IdenticalRequests tests that xAI's automatic prompt
+// caching reports cached tokens on an identical follow-up request, and that
+// the always-on reasoning of grok-4.5 surfaces reasoning tokens even without
+// an explicit reasoning effort option.
+func TestXAI_ImplicitCaching_IdenticalRequests(t *testing.T) {
+	t.Parallel()
+
+	llm := newTestXAIClient(t, WithModel("grok-4.5"))
+
+	// Marker: change to "v2", "v3" etc. if re-recording.
+	marker := "XAIIdentical-v1 "
+	largeContext := strings.Repeat(marker+"Go is a statically typed, compiled programming language. ", 200)
+
+	msgs := []llms.MessageContent{
+		{Role: llms.ChatMessageTypeSystem, Parts: []llms.ContentPart{llms.TextPart(largeContext)}},
+		{Role: llms.ChatMessageTypeHuman, Parts: []llms.ContentPart{llms.TextPart("Say 'hello'")}},
+	}
+
+	// Request 1: Initial request - establishes cache.
+	r1, err := llm.GenerateContent(t.Context(), msgs, llms.WithMaxTokens(4096))
+	require.NoError(t, err)
+	require.NotEmpty(t, r1.Choices)
+
+	choice1 := r1.Choices[0]
+	c1 := 0
+	if ct, ok := choice1.GenerationInfo["PromptCachedTokens"].(int); ok {
+		c1 = ct
+	}
+	rr1 := 0
+	if r, ok := choice1.GenerationInfo["ReasoningTokens"].(int); ok {
+		rr1 = r
+	}
+
+	// xAI reports a small non-zero baseline of cached_tokens even on a brand
+	// new prompt (a fixed, provider-side chat-template/tooling preamble that is
+	// cached across all callers), so request 1 is only a baseline, not a hard
+	// zero; the real assertion is that request 2 caches strictly more once our
+	// own large context is also reused.
+	t.Logf("Request 1 baseline cached tokens: %d", c1)
+	assert.Greater(t, rr1, 0, "grok-4.5 reasons by default and should report reasoning tokens")
+
+	// Wait for cache to be established (only in recording mode).
+	if os.Getenv("HTTPRR_RECORD") != "" {
+		t.Log("Waiting 40 seconds for xAI to establish cache...")
+		time.Sleep(40 * time.Second)
+	}
+
+	// Request 2: IDENTICAL to request 1 - should hit cache.
+	r2, err := llm.GenerateContent(t.Context(), msgs, llms.WithMaxTokens(4096))
+	require.NoError(t, err)
+	require.NotEmpty(t, r2.Choices)
+
+	choice2 := r2.Choices[0]
+	c2 := 0
+	if ct, ok := choice2.GenerationInfo["PromptCachedTokens"].(int); ok {
+		c2 = ct
+	}
+
+	// Assert: Request 2 MUST cache strictly more than the fixed baseline, since
+	// our large repeated context should now be served from cache too.
+	assert.Greater(t, c2, c1, "Request 2 (identical) must cache more than the baseline")
+	assert.NotEmpty(t, r1.Choices[0].Content, "Response 1 content should not be empty")
+	assert.NotEmpty(t, r2.Choices[0].Content, "Response 2 content should not be empty")
+}
+
+// TestXAI_ImplicitCaching_Streaming tests that implicit prompt caching and
+// reasoning content streaming both work correctly together for grok-4.5.
+func TestXAI_ImplicitCaching_Streaming(t *testing.T) {
+	t.Parallel()
+
+	llm := newTestXAIClient(t, WithModel("grok-4.5"))
+
+	// Marker: change to "v2", "v3" etc. if re-recording.
+	marker := "XAIStream-v1 "
+	largeContext := strings.Repeat(marker+"Rust is a systems programming language focused on safety. ", 200)
+
+	msgs := []llms.MessageContent{
+		{Role: llms.ChatMessageTypeSystem, Parts: []llms.ContentPart{llms.TextPart(largeContext)}},
+		{Role: llms.ChatMessageTypeHuman, Parts: []llms.ContentPart{llms.TextPart("What is 9 + 10?")}},
+	}
+
+	streamFunc := func(content, reasoningContent *strings.Builder) llms.CallOption {
+		return llms.WithStreamingFunc(func(_ context.Context, chunk streaming.Chunk) error {
+			switch chunk.Type {
+			case streaming.ChunkTypeText:
+				content.WriteString(chunk.Content)
+			case streaming.ChunkTypeReasoning:
+				if chunk.Reasoning != nil {
+					reasoningContent.WriteString(chunk.Reasoning.Content)
+				}
+			default:
+			}
+			return nil
+		})
+	}
+
+	// Request 1: Initial streaming request - establishes cache.
+	var s1, r1Reasoning strings.Builder
+	r1, err := llm.GenerateContent(t.Context(), msgs, llms.WithMaxTokens(4096), streamFunc(&s1, &r1Reasoning))
+	require.NoError(t, err)
+	require.NotEmpty(t, r1.Choices)
+
+	choice1 := r1.Choices[0]
+	c1 := 0
+	if ct, ok := choice1.GenerationInfo["PromptCachedTokens"].(int); ok {
+		c1 = ct
+	}
+	rr1 := 0
+	if r, ok := choice1.GenerationInfo["ReasoningTokens"].(int); ok {
+		rr1 = r
+	}
+
+	// See TestXAI_ImplicitCaching_IdenticalRequests for why request 1 is only a
+	// baseline (xAI caches a fixed provider-side preamble even on a new prompt).
+	t.Logf("Request 1 baseline cached tokens: %d", c1)
+	assert.Contains(t, choice1.Content, "19", "Response should contain the answer 19")
+	assert.Greater(t, rr1, 0, "Request 1 (streaming) should return reasoning tokens")
+	assert.NotEmpty(t, s1.String(), "Streamed content should not be empty")
+
+	// Wait for cache to be established (only in recording mode).
+	if os.Getenv("HTTPRR_RECORD") != "" {
+		t.Log("Waiting 40 seconds for xAI to establish cache...")
+		time.Sleep(40 * time.Second)
+	}
+
+	// Request 2: IDENTICAL streaming request - should hit cache.
+	var s2, r2Reasoning strings.Builder
+	r2, err := llm.GenerateContent(t.Context(), msgs, llms.WithMaxTokens(4096), streamFunc(&s2, &r2Reasoning))
+	require.NoError(t, err)
+	require.NotEmpty(t, r2.Choices)
+
+	choice2 := r2.Choices[0]
+	c2 := 0
+	if ct, ok := choice2.GenerationInfo["PromptCachedTokens"].(int); ok {
+		c2 = ct
+	}
+
+	assert.Greater(t, c2, c1, "Request 2 (identical streaming) must cache more than the baseline")
+	assert.Contains(t, choice2.Content, "19", "Response should contain the answer 19")
+	assert.NotEmpty(t, s2.String(), "Streamed content should not be empty")
+}
+
+// TestXAI_ImplicitCaching_Conversation_WithTools tests multi-turn caching for a
+// conversation that includes tool calls, on grok-4.3. The cache prefix must
+// keep growing (and reporting cached tokens) as long as earlier turns are only
+// appended to, never rewritten - including the assistant's tool call and the
+// tool's response.
+func TestXAI_ImplicitCaching_Conversation_WithTools(t *testing.T) { //nolint:funlen
+	t.Parallel()
+
+	llm := newTestXAIClient(t, WithModel("grok-4.3"))
+
+	// Marker: change to "v2", "v3" etc. if re-recording.
+	marker := "XAIConvTools-v1 "
+	largeContext := marker + strings.Repeat("You are a helpful assistant with access to a weather tool. ", 200)
+
+	tools := []llms.Tool{
+		{
+			Type: "function",
+			Function: &llms.FunctionDefinition{
+				Name:        "get_temperature",
+				Description: "Get the current temperature for a location",
+				Parameters: map[string]any{
+					"type": "object",
+					"properties": map[string]any{
+						"location": map[string]any{
+							"type":        "string",
+							"description": "The city name, e.g. Boston",
+						},
+					},
+					"required": []string{"location"},
+				},
+			},
+		},
+	}
+
+	// Request 1: User asks for temperature - the model should call get_temperature.
+	msgs := []llms.MessageContent{ //nolint:prealloc // grows via append as the conversation continues below
+		{Role: llms.ChatMessageTypeSystem, Parts: []llms.ContentPart{llms.TextPart(largeContext)}},
+		{Role: llms.ChatMessageTypeHuman, Parts: []llms.ContentPart{llms.TextPart("What's the temperature in Boston?")}},
+	}
+
+	r1, err := llm.GenerateContent(t.Context(), msgs, llms.WithTools(tools), llms.WithMaxTokens(1024))
+	require.NoError(t, err)
+	require.NotEmpty(t, r1.Choices)
+
+	choice1 := r1.Choices[0]
+	c1 := 0
+	if ct, ok := choice1.GenerationInfo["PromptCachedTokens"].(int); ok {
+		c1 = ct
+	}
+	rr1 := 0
+	if r, ok := choice1.GenerationInfo["ReasoningTokens"].(int); ok {
+		rr1 = r
+	}
+
+	// See TestXAI_ImplicitCaching_IdenticalRequests for why request 1 is only a
+	// baseline (xAI caches a fixed provider-side preamble even on a new prompt).
+	t.Logf("Request 1 baseline cached tokens: %d", c1)
+	assert.Greater(t, rr1, 0, "Request 1 (reasoning with tools) should return reasoning tokens")
+	require.NotEmpty(t, choice1.ToolCalls, "Request 1 should have tool calls")
+	assert.Equal(t, "get_temperature", choice1.ToolCalls[0].FunctionCall.Name)
+
+	// Wait for cache to be established (only in recording mode).
+	if os.Getenv("HTTPRR_RECORD") != "" {
+		t.Log("Waiting 40 seconds for xAI to establish cache...")
+		time.Sleep(40 * time.Second)
+	}
+
+	// Request 2: Add the tool call and its response, then continue the conversation.
+	msgs = append(msgs,
+		llms.MessageContent{
+			Role:  llms.ChatMessageTypeAI,
+			Parts: []llms.ContentPart{choice1.ToolCalls[0]},
+		},
+		llms.MessageContent{
+			Role: llms.ChatMessageTypeTool,
+			Parts: []llms.ContentPart{
+				llms.ToolCallResponse{
+					ToolCallID: choice1.ToolCalls[0].ID,
+					Name:       choice1.ToolCalls[0].FunctionCall.Name,
+					Content:    `{"temperature": 72, "unit": "fahrenheit"}`,
+				},
+			},
+		},
+		llms.MessageContent{
+			Role:  llms.ChatMessageTypeHuman,
+			Parts: []llms.ContentPart{llms.TextPart("Is that comfortable for a walk?")},
+		},
+	)
+
+	r2, err := llm.GenerateContent(t.Context(), msgs, llms.WithTools(tools), llms.WithMaxTokens(1024))
+	require.NoError(t, err)
+	require.NotEmpty(t, r2.Choices)
+
+	choice2 := r2.Choices[0]
+	c2 := 0
+	if ct, ok := choice2.GenerationInfo["PromptCachedTokens"].(int); ok {
+		c2 = ct
+	}
+	rr2 := 0
+	if r, ok := choice2.GenerationInfo["ReasoningTokens"].(int); ok {
+		rr2 = r
+	}
+
+	// Assert: Request 2 must cache more than the baseline from the unchanged
+	// [system, user1] prefix now being reused.
+	assert.Greater(t, c2, c1, "Request 2 (appended tool call/response) must cache more than the baseline")
+	assert.Greater(t, rr2, 0, "Request 2 (reasoning with tools) should return reasoning tokens")
+	assert.NotEmpty(t, choice2.Content, "Response 2 should have content")
+}
+
+// TestXAI_ReasoningModel_RejectsPenalties documents (and pins) that grok-4.5
+// rejects presence_penalty when used together with reasoning, as documented
+// by xAI: "presencePenalty, frequencyPenalty, and stop cannot be used with
+// reasoning models. Requests that include them return an error."
+func TestXAI_ReasoningModel_RejectsPenalties(t *testing.T) {
+	t.Parallel()
+
+	llm := newTestXAIClient(t, WithModel("grok-4.5"))
+
+	msgs := []llms.MessageContent{
+		{Role: llms.ChatMessageTypeHuman, Parts: []llms.ContentPart{llms.TextPart("Say hi")}},
+	}
+
+	_, err := llm.GenerateContent(t.Context(), msgs, llms.WithMaxTokens(256), llms.WithPresencePenalty(0.5))
+	require.Error(t, err, "xAI must reject presence_penalty combined with a reasoning model")
+}

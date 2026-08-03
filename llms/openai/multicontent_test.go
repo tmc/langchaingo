@@ -130,6 +130,35 @@ func newTestMoonshotClient(t *testing.T, opts ...Option) *LLM {
 	return llm
 }
 
+func newTestXAIClient(t *testing.T, opts ...Option) *LLM {
+	t.Helper()
+
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "XAI_API_KEY")
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+
+	// Configure xAI client based on recording vs replay mode
+	clientOpts := []Option{
+		WithBaseURL("https://api.x.ai/v1"),
+		WithHTTPClient(rr.Client()),
+	}
+
+	// Only add fake token when NOT recording (i.e., during replay)
+	if !rr.Recording() {
+		clientOpts = append(clientOpts, WithToken("fake-api-key-for-testing"))
+	} else {
+		clientOpts = append(clientOpts, WithToken(os.Getenv("XAI_API_KEY")))
+	}
+
+	// Add any additional options passed to the function
+	clientOpts = append(clientOpts, opts...)
+
+	t.Logf("Creating xAI client with recording=%v", rr.Recording())
+	llm, err := New(clientOpts...)
+	require.NoError(t, err)
+	return llm
+}
+
 type testEnv struct {
 	name string
 	init func(t *testing.T, opts ...Option) *LLM
@@ -175,6 +204,11 @@ func getCompletionTests() []testEnv {
 			init: newTestDeepSeekClient,
 			opts: []Option{WithModel("deepseek-reasoner")},
 		},
+		{
+			name: "xai-grok-4.5",
+			init: newTestXAIClient,
+			opts: []Option{WithModel("grok-4.5")},
+		},
 	}
 	for _, model := range openRouterModels {
 		tests = append(tests, testEnv{
@@ -186,7 +220,7 @@ func getCompletionTests() []testEnv {
 	return tests
 }
 
-func getReasoningTests() []testEnv {
+func getReasoningTests() []testEnv { //nolint:funlen // a flat catalog of per-model reasoning test entries
 	var openRouterModels = []string{ //nolint:gofumpt
 		"anthropic/claude-sonnet-4.5",
 		"anthropic/claude-3.7-sonnet:thinking",
@@ -232,6 +266,29 @@ func getReasoningTests() []testEnv {
 			name: "deepseek",
 			init: newTestDeepSeekClient,
 			opts: []Option{WithModel("deepseek-reasoner")},
+			rout: true,
+		},
+		{
+			// grok-4.5 reasons by default (reasoning cannot be disabled) and
+			// exposes reasoning_content on /chat/completions like DeepSeek does.
+			name: "xai-grok-4.5-high",
+			init: newTestXAIClient,
+			opts: []Option{WithModel("grok-4.5")},
+			ropt: llms.WithReasoning(llms.ReasoningHigh, 0),
+			rout: true,
+		},
+		{
+			name: "xai-grok-4.5-low",
+			init: newTestXAIClient,
+			opts: []Option{WithModel("grok-4.5")},
+			ropt: llms.WithReasoning(llms.ReasoningLow, 0),
+			rout: true,
+		},
+		{
+			name: "xai-grok-4.3-medium",
+			init: newTestXAIClient,
+			opts: []Option{WithModel("grok-4.3")},
+			ropt: llms.WithReasoning(llms.ReasoningMedium, 0),
 			rout: true,
 		},
 	}
@@ -297,6 +354,13 @@ func getToolCallTests(multiToolCalls bool) []testEnv {
 			init: newTestDeepSeekClient,
 			opts: []Option{WithModel("deepseek-chat")},
 		},
+	}
+	if !multiToolCalls {
+		tests = append(tests, testEnv{
+			name: "xai-grok-4.5",
+			init: newTestXAIClient,
+			opts: []Option{WithModel("grok-4.5")},
+		})
 	}
 	for _, model := range openRouterModels {
 		tests = append(tests, testEnv{

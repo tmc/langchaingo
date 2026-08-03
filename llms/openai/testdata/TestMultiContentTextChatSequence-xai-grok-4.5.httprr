@@ -1,0 +1,34 @@
+httprr trace v1
+376 1810
+POST https://api.x.ai/v1/chat/completions HTTP/1.1
+Host: api.x.ai
+User-Agent: langchaingo-httprr
+Content-Length: 186
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"grok-4.5","messages":[{"role":"user","content":"Name some countries"},{"role":"assistant","content":"Spain and Lesotho"},{"role":"user","content":"Which if these is larger?"}]}HTTP/2.0 200 OK
+Content-Length: 965
+Access-Control-Allow-Origin: *
+Access-Control-Expose-Headers: *
+Cf-Cache-Status: DYNAMIC
+Content-Type: application/json
+Date: Mon, 03 Aug 2026 20:10:14 GMT
+Server: cloudflare
+Server-Timing: cfCacheStatus;desc="DYNAMIC"
+Server-Timing: cfEdge;dur=150,cfOrigin;dur=3296
+Strict-Transport-Security: max-age=31536000
+Traceparent: 00-0f7ddce74f2f21f5d4e45f517d2ddc18-a8e2b1db00004b33-01
+Vary: origin, access-control-request-method, access-control-request-headers
+X-Data-Retention: general
+X-Metrics-E2e-Ms: 3279.2
+X-Metrics-Mean-Itl-Ms: 13.8
+X-Metrics-Ttft-Ms: 296.1
+X-Ratelimit-Limit-Requests: 7200
+X-Ratelimit-Limit-Tokens: 50000000
+X-Ratelimit-Remaining-Requests: 7200
+X-Ratelimit-Remaining-Tokens: 50000000
+X-Request-Id: 1c8dde2b-46a3-9efe-8fa7-4db8fb250806
+X-Zero-Data-Retention: false
+
+{"id":"1c8dde2b-46a3-9efe-8fa7-4db8fb250806","object":"chat.completion","created":1785787811,"model":"grok-4.5","choices":[{"index":0,"message":{"role":"assistant","content":"**Spain** is larger than Lesotho (by both area and population).\n\n- **Area**: Spain ≈ 506,000 km²; Lesotho ≈ 30,000 km²  \n- **Population**: Spain ≈ 47–48 million; Lesotho ≈ 2 million","reasoning_content":"The user is asking \"Which if these is larger?\" referring to my previous response: \"Spain and Lesotho\".\n","refusal":null},"finish_reason":"stop"}],"usage":{"prompt_tokens":227,"completion_tokens":57,"total_tokens":397,"prompt_tokens_details":{"text_tokens":227,"audio_tokens":0,"image_tokens":0,"cached_tokens":128},"completion_tokens_details":{"reasoning_tokens":113,"audio_tokens":0,"accepted_prediction_tokens":0,"rejected_prediction_tokens":0},"num_sources_used":0,"cost_in_usd_ticks":12564000},"system_fingerprint":"fp_a39489019fa99b6e","service_tier":"default"}

@@ -1,0 +1,34 @@
+httprr trace v1
+344 1638
+POST https://api.x.ai/v1/chat/completions HTTP/1.1
+Host: api.x.ai
+User-Agent: langchaingo-httprr
+Content-Length: 154
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"grok-4.5","messages":[{"role":"user","content":[{"text":"I'm a pomeranian","type":"text"},{"text":"What kind of mammal am I?","type":"text"}]}]}HTTP/2.0 200 OK
+Content-Length: 793
+Access-Control-Allow-Origin: *
+Access-Control-Expose-Headers: *
+Cf-Cache-Status: DYNAMIC
+Content-Type: application/json
+Date: Mon, 03 Aug 2026 20:10:12 GMT
+Server: cloudflare
+Server-Timing: cfCacheStatus;desc="DYNAMIC"
+Server-Timing: cfEdge;dur=186,cfOrigin;dur=2001
+Strict-Transport-Security: max-age=31536000
+Traceparent: 00-eff7dc08339c19e751ab0e35a5bccf2c-9a18d7bc0000581e-01
+Vary: origin, access-control-request-method, access-control-request-headers
+X-Data-Retention: general
+X-Metrics-E2e-Ms: 1992.9
+X-Metrics-Mean-Itl-Ms: 15.1
+X-Metrics-Ttft-Ms: 322.4
+X-Ratelimit-Limit-Requests: 7200
+X-Ratelimit-Limit-Tokens: 50000000
+X-Ratelimit-Remaining-Requests: 7200
+X-Ratelimit-Remaining-Tokens: 50000000
+X-Request-Id: 440a9c6c-8327-9c58-bd9d-8dfe913c36e5
+X-Zero-Data-Retention: false
+
+{"id":"440a9c6c-8327-9c58-bd9d-8dfe913c36e5","object":"chat.completion","created":1785787811,"model":"grok-4.5","choices":[{"index":0,"message":{"role":"assistant","content":"You are a dog (specifically, a Pomeranian toy breed of domestic dog).","reasoning_content":"The question is: \"I'm a pomeranian What kind of mammal am I?\"\n","refusal":null},"finish_reason":"stop"}],"usage":{"prompt_tokens":218,"completion_tokens":16,"total_tokens":316,"prompt_tokens_details":{"text_tokens":218,"audio_tokens":0,"image_tokens":0,"cached_tokens":128},"completion_tokens_details":{"reasoning_tokens":82,"audio_tokens":0,"accepted_prediction_tokens":0,"rejected_prediction_tokens":0},"num_sources_used":0,"cost_in_usd_ticks":8064000},"system_fingerprint":"fp_a39489019fa99b6e","service_tier":"default"}
