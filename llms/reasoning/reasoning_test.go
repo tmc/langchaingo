@@ -453,7 +453,7 @@ Based on my analysis, this code is efficient.`
 func BenchmarkSplitContentLargeString(b *testing.B) {
 	var builder strings.Builder
 	for i := 0; i < 1000; i++ {
-		builder.WriteString(fmt.Sprintf("Text segment %d. ", i))
+		fmt.Fprintf(&builder, "Text segment %d. ", i)
 		if i == 500 {
 			builder.WriteString("<thinking>This is a reasoning block within a very large text. It should be extracted effectively even in large documents.</thinking> ") //nolint:lll
 		}

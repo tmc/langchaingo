@@ -616,16 +616,17 @@ func TestAnthropic_ConversationCaching(t *testing.T) { //nolint:funlen
 
 	// Turn 1: Initial conversation
 	t.Log("Turn 1: Initial user message")
-	messages1 := []llms.MessageContent{
-		{
+	messages1 := make([]llms.MessageContent, 0, 4)
+	messages1 = append(messages1,
+		llms.MessageContent{
 			Role:  llms.ChatMessageTypeSystem,
 			Parts: []llms.ContentPart{llms.TextPart(longSystem)},
 		},
-		{
+		llms.MessageContent{
 			Role:  llms.ChatMessageTypeHuman,
 			Parts: []llms.ContentPart{llms.TextPart("What is 2+2?")},
 		},
-	}
+	)
 
 	r1, err := llm.GenerateContent(t.Context(), messages1,
 		anthropic.WithPromptCaching(),

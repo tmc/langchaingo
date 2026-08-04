@@ -36,6 +36,14 @@ linters:
     gosec:
       excludes:
         - G115
+        # G703/G704: gosec's taint-analysis engine flags any function parameter
+        # of a matching type (e.g. a file path or URL string) as tainted based
+        # solely on its type, not on whether it actually originates from
+        # untrusted input. This produces widespread false positives in library
+        # code where callers pass in paths/URLs directly (see
+        # https://github.com/securego/gosec/issues/1500).
+        - G703
+        - G704
     exhaustive:
       default-signifies-exhaustive: true
   exclusions:
