@@ -4,7 +4,7 @@ This tutorial will guide you through building a simple chat application using La
 
 ## Step 1: Set Up Your Environment
 
-- Go 1.24+
+- Go 1.26.5+
 - OpenAI API key
 - Basic Go programming knowledge
 

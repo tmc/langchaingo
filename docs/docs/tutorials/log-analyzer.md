@@ -13,7 +13,7 @@ A CLI tool that:
 
 ## Prerequisites
 
-- Go 1.24+
+- Go 1.26.5+
 - LLM API key (OpenAI, Anthropic, etc.)
 - Sample log files to analyze
 

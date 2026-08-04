@@ -6,15 +6,15 @@
     "type": "doc",
     "keywords": [
       "architecture",
-      "only",
       "langchaingo",
-      "adoption",
       "package",
+      "only",
+      "adoption",
       "entire",
+      "management",
       "specific",
-      "explains",
-      "modular",
-      "adopt"
+      "templating?**",
+      "conversational"
     ]
   },
   {
@@ -23,16 +23,16 @@
     "content": "Concepts Understanding the fundamental concepts behind LangChainGo helps you build better applications. Core architecture LangChainGo is built around several key architectural principles: Framework design - **Interface-driven design**: Every major component is defined by interfaces for modularity and testability - **Component architecture**: Clear separation between models, chains, memory, agents, and tools - **Go-specific patterns**: Leverage Go's strengths like interfaces, goroutines, and expl...",
     "type": "doc",
     "keywords": [
+      "langchaingo",
       "concepts",
       "interfaces",
-      "langchaingo",
-      "architecture**",
-      "agents",
-      "behind",
-      "**go-specific",
-      "key",
-      "goroutines",
-      "major"
+      "architectural",
+      "framework",
+      "several",
+      "design**",
+      "major",
+      "leverage",
+      "like"
     ]
   },
   {
@@ -42,15 +42,15 @@
     "type": "doc",
     "keywords": [
       "documentation",
-      "guide",
       "tutorials",
+      "guide",
       "**purpose**",
-      "explain",
-      "our",
-      "ideas",
-      "background",
-      "theoretical",
-      "complexity"
+      "progressive",
+      "complete",
+      "main",
+      "real-world",
+      "help",
+      "langchaingo"
     ]
   },
   {
@@ -59,16 +59,16 @@
     "content": "Contributing to LangChainGo Thank you for your interest in contributing to LangChainGo! This guide helps you get started. Ways to contribute 1. Code contributions - **Bug fixes**: Help us squash bugs and improve stability - **New features**: Implement new LLM providers, tools, or chains - **Performance improvements**: Optimize existing code - **Tests**: Improve test coverage and add missing tests 2. Documentation contributions - **Tutorials**: Write step-by-step guides for common use cases - **H...",
     "type": "doc",
     "keywords": [
-      "contributions",
+      "code",
+      "contributing",
       "langchaingo",
       "improve",
-      "contributing",
-      "code",
-      "guide",
-      "test",
-      "helps",
+      "contributions",
+      "documentation",
       "common",
-      "**bug"
+      "squash",
+      "bugs",
+      "existing"
     ]
   },
   {
@@ -78,15 +78,15 @@
     "type": "doc",
     "keywords": [
       "anthropic",
-      "langchaingo",
       "api",
-      "import",
       "your",
-      "\"@examples/anthropic-completion-example/anthropic_completion_example.go\"",
-      "running",
+      "langchaingo",
+      "import",
+      "models",
       "console",
-      "retrieve",
-      "key"
+      "strong",
+      "modes",
+      "running"
     ]
   },
   {
@@ -99,12 +99,12 @@
       "chat",
       "expose",
       "language",
-      "interface",
-      "started",
       "langchain",
-      "messages\"",
-      "few",
-      "while"
+      "started",
+      "interface",
+      "installation",
+      "key",
+      "\"text"
     ]
   },
   {
@@ -115,14 +115,14 @@
     "keywords": [
       "gemini",
       "google",
+      "import",
       "langchaingo",
       "api",
-      "import",
-      "\"thinking\"",
+      "\"@examples/googleai-completion-example/googleai-completion-example.go\"",
+      "generations",
+      "studio",
       "codeblock",
-      "windows",
-      "**go**",
-      "install"
+      "windows"
     ]
   },
   {
@@ -131,16 +131,16 @@
     "content": "import CodeBlock from \"@theme/CodeBlock\"; import ExampleMistral from \"@examples/mistral-completion-example/mistral_completion_example.go\"; Quickstart: LangChainGo with Mistral Get started by running your first program with LangChainGo and the Mistral Platform. Prerequisites 1. **Mistral API Key**: Sign up on Mistral and retrieve your API key. 2. **Go**: Download and install Go. Setup Before interacting with the Mistral API, you need to set up your API key as an environment variable. Linux/macOS ...",
     "type": "doc",
     "keywords": [
-      "api",
       "mistral",
+      "api",
       "your",
+      "langchaingo",
       "key",
       "import",
-      "langchaingo",
-      "prerequisites",
-      "first",
       "running",
-      "**go**"
+      "interacting",
+      "codeblock",
+      "get"
     ]
   },
   {
@@ -150,15 +150,15 @@
     "type": "doc",
     "keywords": [
       "ollama",
-      "download",
-      "install",
+      "langchaingo",
       "import",
       "your",
-      "langchaingo",
-      "setup",
-      "local",
-      "locally",
-      "doesn't"
+      "install",
+      "download",
+      "\"@examples/ollama-completion-example/ollama_completion_example.go\"",
+      "quickstart",
+      "straightforward",
+      "requir"
     ]
   },
   {
@@ -169,14 +169,14 @@
     "keywords": [
       "openai",
       "api",
-      "langchaingo",
-      "your",
       "import",
-      "before",
-      "started",
+      "your",
+      "langchaingo",
+      "key**",
       "\"@theme/codeblock\"",
-      "expansive",
-      "running"
+      "renowned",
+      "setup",
+      "program"
     ]
   },
   {
@@ -189,11 +189,11 @@
       "basic",
       "model",
       "selection",
-      "configure",
-      "providers",
-      "openai",
       "how",
+      "llm",
       "different",
+      "providers",
+      "configure",
       "environment"
     ]
   },
@@ -206,13 +206,13 @@
       "how",
       "guides",
       "how-to",
-      "llms",
       "llm",
       "providers",
-      "practical",
+      "llms",
       "written",
-      "still",
-      "advanced"
+      "templat",
+      "prompts",
+      "questions"
     ]
   },
   {
@@ -224,13 +224,13 @@
       "language",
       "langchain",
       "model",
-      "_be",
       "langchaingo",
       "applications",
+      "_be",
       "framework",
-      "out",
-      "data-aware_",
-      "data"
+      "powerful",
+      "port/fork",
+      "believe"
     ]
   },
   {
@@ -240,13 +240,13 @@
     "type": "doc",
     "keywords": [
       "agents",
-      "import",
-      "doccardlist",
-      "\"@theme/doccardlist\"",
       "info",
       "conceptual",
       "guide",
-      "\u003cdoccardlist"
+      "\u003cdoccardlist",
+      "import",
+      "doccardlist",
+      "\"@theme/doccardlist\""
     ]
   },
   {
@@ -258,13 +258,13 @@
       "agents",
       "order",
       "import",
-      "observing",
+      "should",
+      "\"@theme/codeblock\"",
+      "through",
       "level",
-      "action",
-      "returning",
-      "correctly",
       "understa",
-      "extremely"
+      "returning",
+      "codeblock"
     ],
     "metadata": {
       "sidebar_label": "Getting Started"
@@ -276,16 +276,16 @@
     "content": "import CodeBlock from \"@theme/CodeBlock\"; import Example from \"@examples/mrkl-agent-example/mrkl_agent.go\"; import DocCardList from \"@theme/DocCardList\"; Agent Executors :::info Conceptual Guide ::: To make agents more powerful we need to make them iterative, ie. call the model multiple times until they arrive at the final answer. That's the job of the AgentExecutor. Example An example that initialize a MRKL (Modular Reasoning, Knowledge and Language, pronounced \"miracle\") agent executor. \u003cCodeB...",
     "type": "doc",
     "keywords": [
-      "import",
       "example",
+      "import",
       "agent",
       "make",
-      "job",
-      "knowledge",
-      "final",
-      "language",
-      "\"@examples/mrkl-agent-example/mrkl_agent.go\"",
-      "them"
+      "mrkl",
+      "initialize",
+      "iterative",
+      "info",
+      "executor",
+      "doccardlist"
     ]
   },
   {
@@ -296,14 +296,14 @@
     "keywords": [
       "agents",
       "which",
-      "agent",
       "tools",
-      "**tools**",
-      "components",
-      "system",
-      "language",
-      "conceptual",
-      "choose"
+      "agent",
+      "available",
+      "guides",
+      "•",
+      "make",
+      "models",
+      "allowing"
     ]
   },
   {
@@ -312,13 +312,13 @@
     "content": "import DocCardList from \"@theme/DocCardList\"; Tools :::info Conceptual Guide :::",
     "type": "doc",
     "keywords": [
-      "\"@theme/doccardlist\"",
-      "tools",
-      "info",
       "conceptual",
       "guide",
       "import",
-      "doccardlist"
+      "doccardlist",
+      "\"@theme/doccardlist\"",
+      "tools",
+      "info"
     ]
   },
   {
@@ -329,14 +329,14 @@
     "keywords": [
       "chains",
       "other",
-      "models",
       "import",
       "language",
-      "info",
-      "sources",
-      "built-in",
+      "models",
       "llm",
-      "standard"
+      "beyond",
+      "sources",
+      "powerful",
+      "langchaingo"
     ],
     "metadata": {
       "sidebar_label": "Chains"
@@ -349,15 +349,15 @@
     "type": "doc",
     "keywords": [
       "`llmchain`",
-      "import",
       "language",
+      "import",
       "llmchain",
+      "throughout",
+      "including",
+      "chains",
+      "`prompttemplate`",
       "model",
-      "model)",
-      "\"@theme/codeblock\"",
-      "construct",
-      "functionality",
-      "used"
+      "widely"
     ],
     "metadata": {
       "sidebar_label": "LLM Chain"
@@ -370,15 +370,15 @@
     "type": "doc",
     "keywords": [
       "document",
-      "loaders",
       "documents",
+      "loaders",
+      "loader",
       "implement",
       "create",
-      "loader",
-      "stores",
-      "struct",
-      "guide",
-      "onto"
+      "variety",
+      "import",
+      "easy",
+      "getting"
     ],
     "metadata": {
       "sidebar_label": "Document Loaders"
@@ -391,15 +391,15 @@
     "type": "doc",
     "keywords": [
       "data",
-      "query",
-      "documents",
-      "load",
       "many",
+      "load",
       "your",
+      "documents",
+      "query",
       "store",
-      "splitter",
-      "model's",
-      "info"
+      "split",
+      "loaders",
+      "conceptual"
     ]
   },
   {
@@ -409,15 +409,15 @@
     "type": "doc",
     "keywords": [
       "blockchain",
-      "details",
-      "could",
-      "mechanism",
+      "import",
+      "designed",
+      "reasons",
+      "smart",
       "ledger",
-      "using",
-      "concept",
-      "info",
+      "retrievers",
       "guide",
-      "doccardlist"
+      "realm",
+      "\"@theme/doccardlist\""
     ]
   },
   {
@@ -427,15 +427,15 @@
     "type": "doc",
     "keywords": [
       "splitters",
-      "texts",
-      "text",
-      "complex",
-      "such",
+      "specific",
       "more",
       "into",
-      "specific",
-      "used",
-      "paragraphs"
+      "text",
+      "texts",
+      "such",
+      "complex",
+      "processing",
+      "manageable"
     ],
     "metadata": {
       "sidebar_label": "Examples"
@@ -452,11 +452,11 @@
       "smaller",
       "chunks",
       "import",
-      "info",
+      "guide",
       "may",
-      "store",
-      "match",
-      "pass"
+      "info",
+      "splitter",
+      "also"
     ],
     "metadata": {
       "sidebar_label": "Text Splitters"
@@ -469,15 +469,15 @@
     "type": "doc",
     "keywords": [
       "vector",
-      "most",
       "embeddings",
       "import",
-      "stores",
-      "documents",
-      "particular",
       "query",
-      "conceptual",
-      "started"
+      "documents",
+      "stores",
+      "particular",
+      "most",
+      "database",
+      "optimized"
     ],
     "metadata": {
       "sidebar_label": "Vector Stores"
@@ -490,15 +490,15 @@
     "type": "doc",
     "keywords": [
       "pgvector",
-      "import",
       "distance",
+      "import",
       "search",
-      "examplepgvector",
-      "supports",
-      "see",
-      "instructions",
-      "ollama",
-      "\"@examples/pgvector-vectorstore-example/pgvector_vectorstore_example.go\""
+      "\"@theme/codeblock\"",
+      "neighbor",
+      "create",
+      "based",
+      "(openai",
+      "started"
     ],
     "metadata": {
       "sidebar_label": "pgvector"
@@ -528,15 +528,15 @@
     "type": "doc",
     "keywords": [
       "memory",
-      "context",
       "langchaingo",
+      "context",
       "interactions",
-      "management**",
-      "several",
-      "capabilities",
-      "**state",
-      "•",
-      "sophisticated"
+      "retrieve",
+      "guides",
+      "state",
+      "across",
+      "**context",
+      "conceptual"
     ],
     "metadata": {
       "sidebar_label": "Memory"
@@ -551,11 +551,11 @@
       "model",
       "package",
       "using",
-      "input",
       "output",
-      "many",
-      "often",
-      "sent",
+      "input",
+      "i/o",
+      "\u003cdoccardlist",
+      "needs",
       "doing",
       "simple"
     ],
@@ -571,14 +571,14 @@
     "keywords": [
       "models",
       "chat",
-      "interface",
       "expose",
+      "interface",
       "language",
       "import",
-      "while",
-      "than",
-      "getting",
-      "conceptual"
+      "out\"",
+      "text",
+      "different",
+      "started"
     ],
     "metadata": {
       "sidebar_label": "Chat Models"
@@ -592,14 +592,14 @@
     "keywords": [
       "provider",
       "chat",
-      "model\"",
-      "|----------|---------|-------------|",
+      "code",
+      "`anthropic.new()`",
+      "identical",
+      "providers",
+      "gemini",
+      "constructor",
       "every",
-      "same",
-      "`llms/openai`",
-      "`generatecontent`",
-      "`llms/goo",
-      "integrations"
+      "same"
     ],
     "metadata": {
       "sidebar_label": "Integrations"
@@ -612,15 +612,15 @@
     "type": "doc",
     "keywords": [
       "import",
-      "example",
-      "used",
       "embeddings",
+      "used",
+      "example",
       "representation",
       "numerical",
-      "conceptual",
-      "dig",
-      "codeblock",
-      "guide"
+      "getting",
+      "useful",
+      "\"@examples/vertex-embedding-example/vertex-embedding-example.go\"",
+      "documents"
     ],
     "metadata": {
       "sidebar_label": "Embeddings"
@@ -633,15 +633,15 @@
     "type": "doc",
     "keywords": [
       "client",
-      "embeddings",
       "get",
+      "embeddings",
       "llm",
-      "`newembedder(client)`",
-      "codeblock",
+      "`embeddings.embedderclient`",
+      "wrap",
       "langchaingo",
-      "pattern",
-      "texts)`",
-      "`embedquery(ctx"
+      "`embeddings.newembedder`",
+      "`embedder`",
+      "import"
     ],
     "metadata": {
       "sidebar_label": "Integrations"
@@ -655,14 +655,14 @@
     "keywords": [
       "models",
       "langchain",
-      "text-based",
       "provides",
-      "input",
-      "chat",
       "language",
+      "text-based",
       "output",
-      "import",
-      "conceptual"
+      "chat",
+      "input",
+      "cha",
+      "rather"
     ],
     "metadata": {
       "sidebar_label": "Models"
@@ -674,16 +674,16 @@
     "content": "import CodeBlock from \"@theme/CodeBlock\"; import ExampleAnthropic from \"@examples/anthropic-completion-example/anthropic_completion_example.go\"; Anthropic Anthropic's Claude models support long context, tool use, and extended (\"thinking\") reasoning through the `llms/anthropic` package. Setup Set your API key in the `ANTHROPIC_API_KEY` environment variable, or pass it explicitly: Extended thinking is controlled per call with the provider-neutral reasoning options (`llms.WithReasoning`, `llms.With...",
     "type": "doc",
     "keywords": [
-      "extended",
-      "reasoning",
       "import",
-      "\"@examples/anthropic-completion-example/anthropic_completion_example.go\"",
-      "controlled",
-      "(`llms.withreasoning`",
-      "setup",
-      "`anthropic_api_key`",
-      "key",
-      "environment"
+      "reasoning",
+      "extended",
+      "variable",
+      "codeblock",
+      "`llms.with",
+      "exampleanthropic",
+      "call",
+      "provider-neutral",
+      "pass"
     ],
     "metadata": {
       "sidebar_label": "Anthropic"
@@ -699,12 +699,12 @@
       "bedrock",
       "amazon",
       "import",
-      "foundation",
-      "standard",
-      "examplebedrock",
+      "models",
       "\"@examples/bedrock-provider-example/main.go\"",
-      "titan",
-      "models"
+      "examplebedrock",
+      "behind",
+      "others)",
+      "`llms/bedrock`"
     ],
     "metadata": {
       "sidebar_label": "AWS Bedrock"
@@ -717,15 +717,15 @@
     "type": "doc",
     "keywords": [
       "package",
-      "`fake`",
-      "fake",
       "overview",
+      "fake",
+      "`fake`",
+      "language",
       "your",
       "example",
-      "language",
-      "here",
-      "offers",
-      "creates"
+      "installed",
+      "usage",
+      "demonstrating"
     ],
     "metadata": {
       "sidebar_label": "Fake LLM"
@@ -739,14 +739,14 @@
     "keywords": [
       "google",
       "gemini",
-      "studio",
       "through",
       "import",
-      "package",
-      "pass",
+      "studio",
       "explicitly",
-      "create",
-      "calls"
+      "\"@examples/googleai-completion-example/googleai-completion-example.go\"",
+      "\"@theme/codeblock\"",
+      "examplegoogleai",
+      "`googleai.new`"
     ],
     "metadata": {
       "sidebar_label": "Google Gemini"
@@ -759,15 +759,15 @@
     "type": "doc",
     "keywords": [
       "groq",
-      "import",
       "package",
       "openai-compatible",
       "api",
-      "machine",
-      "—",
-      "models",
-      "groq's",
-      "prerequisites"
+      "import",
+      "low",
+      "(version",
+      "required",
+      "examplegroq",
+      "\"@examples/groq-completion-example/groq_completion_example.go\""
     ],
     "metadata": {
       "sidebar_label": "Groq"
@@ -780,15 +780,15 @@
     "type": "doc",
     "keywords": [
       "hugging",
-      "face",
-      "models",
-      "overview",
       "import",
-      "including",
-      "langchaingo",
-      "leverage",
-      "\"@examples/huggingface-llm-example/huggingface_example.go\"",
-      "guidance"
+      "models",
+      "face",
+      "overview",
+      "developers",
+      "machine",
+      "integrating",
+      "language",
+      "\"@examples/huggingface-llm-example/huggingface_example.go\""
     ],
     "metadata": {
       "sidebar_label": "Hugging Face"
@@ -802,14 +802,14 @@
     "keywords": [
       "mistral",
       "how",
-      "models",
-      "different",
       "import",
+      "different",
       "example",
-      "spectrum",
-      "goes",
-      "wrapper",
-      "power"
+      "models",
+      "\"@examples/mistral-completion-example/mistral_completion_example.go\"",
+      "over",
+      "api",
+      "(https://mistral.ai)"
     ],
     "metadata": {
       "sidebar_label": "Mistral"
@@ -824,13 +824,13 @@
       "ollama",
       "import",
       "pull",
-      "package",
-      "talks",
-      "api",
-      "required",
-      "e.g",
-      "option",
-      "runs"
+      "wired",
+      "locally",
+      "(or",
+      "llama2`",
+      "schema-constrained",
+      "`format`",
+      "option"
     ],
     "metadata": {
       "sidebar_label": "Ollama"
@@ -843,15 +843,15 @@
     "type": "doc",
     "keywords": [
       "openai",
-      "key",
-      "models",
-      "different",
       "import",
-      "initializing",
-      "offers",
-      "there",
+      "key",
+      "different",
+      "models",
+      "levels",
+      "\"@theme/codeblock\"",
       "set",
-      "two"
+      "exampleopenai",
+      "goes"
     ],
     "metadata": {
       "sidebar_label": "OpenAI"
@@ -865,14 +865,14 @@
     "keywords": [
       "vertex",
       "import",
-      "google",
+      "variaic",
+      "project",
       "llm",
-      "`google_cloud_project`",
-      "environment",
-      "variable",
-      "creating",
+      "need",
+      "when",
       "codeblock",
-      "set"
+      "google",
+      "variable"
     ],
     "metadata": {
       "sidebar_label": "Vertex AI"
@@ -886,14 +886,14 @@
     "keywords": [
       "llms",
       "interface",
-      "provides",
       "langchain",
       "import",
-      "many",
-      "different",
-      "rather",
-      "own",
-      "modern"
+      "provides",
+      "language",
+      "\"@theme/doccardlist\"",
+      "recommended",
+      "\"@theme/codeblock\"",
+      "interacting"
     ],
     "metadata": {
       "sidebar_label": "LLMs"
@@ -907,14 +907,14 @@
     "keywords": [
       "output",
       "parsers",
-      "text",
       "language",
-      "back",
-      "parser",
+      "text",
+      "must",
+      "there",
       "structured",
-      "information",
-      "structs",
-      "methods"
+      "guide",
+      "conceptual",
+      "may"
     ],
     "metadata": {
       "sidebar_label": "Output Parsers"
@@ -927,15 +927,15 @@
     "type": "doc",
     "keywords": [
       "prompts",
-      "import",
-      "template",
-      "input",
-      "prompt",
-      "multiple",
       "templates",
-      "guide",
-      "formats**",
-      "refers"
+      "input",
+      "template",
+      "import",
+      "multiple",
+      "prompt",
+      "doccardlist",
+      "react",
+      "simplest"
     ],
     "metadata": {
       "sidebar_label": "Prompts"
@@ -948,15 +948,15 @@
     "type": "doc",
     "keywords": [
       "prompt",
-      "import",
       "template",
       "templates",
-      "core",
-      "effective",
-      "doccardlist",
-      "dynamically",
-      "powerful",
-      "multiple"
+      "import",
+      "guide",
+      "capabilities",
+      "built-in",
+      "formats",
+      "prompts",
+      "concepts"
     ],
     "metadata": {
       "sidebar_label": "Prompt templates"
@@ -970,14 +970,14 @@
     "keywords": [
       "values",
       "partial",
-      "template",
       "prompt",
-      "subset",
+      "template",
       "two",
-      "variables",
       "formatting",
       "string",
-      "before"
+      "variables",
+      "subset",
+      "ways"
     ],
     "metadata": {
       "sidebar_label": "Partial values"
@@ -986,37 +986,37 @@
   {
     "title": "Basic Chat App",
     "url": "/langchaingo/docs/tutorials/basic-chat-app",
-    "content": "Building a Basic Chat Application This tutorial will guide you through building a simple chat application using LangChainGo. Step 1: Set Up Your Environment - Go 1.24+ - OpenAI API key - Basic Go programming knowledge Step 1: Project setup Create a new Go module for your chat application: Install LangChainGo: Step 2: Configure Your API Key Set your OpenAI API key as an environment variable: Step 3: Create the Basic Chat Application Let's start with a simple chat application: Step 4: Add Interact...",
+    "content": "Building a Basic Chat Application This tutorial will guide you through building a simple chat application using LangChainGo. Step 1: Set Up Your Environment - Go 1.26.5+ - OpenAI API key - Basic Go programming knowledge Step 1: Project setup Create a new Go module for your chat application: Install LangChainGo: Step 2: Configure Your API Key Set your OpenAI API key as an environment variable: Step 3: Create the Basic Chat Application Let's start with a simple chat application: Step 4: Add Intera...",
     "type": "doc",
     "keywords": [
       "application",
       "step",
       "chat",
       "your",
-      "basic",
       "key",
+      "basic",
       "api",
-      "create",
-      "environment",
-      "set"
+      "set",
+      "simple",
+      "create"
     ]
   },
   {
     "title": "Code Reviewer",
     "url": "/langchaingo/docs/tutorials/code-reviewer",
-    "content": "Building an AI code reviewer Create an intelligent code review assistant that analyzes Go code for bugs, style issues, and performance improvements. What you'll build A CLI tool that: - Analyzes Go source files for potential issues - Suggests improvements and best practices - Integrates with git to review changed files - Provides explanations for its recommendations Prerequisites - Go 1.24+ - OpenAI or Anthropic API key - Git installed Step 1: Project setup Step 2: Core reviewer structure Create...",
+    "content": "Building an AI code reviewer Create an intelligent code review assistant that analyzes Go code for bugs, style issues, and performance improvements. What you'll build A CLI tool that: - Analyzes Go source files for potential issues - Suggests improvements and best practices - Integrates with git to review changed files - Provides explanations for its recommendations Prerequisites - Go 1.26.5+ - OpenAI or Anthropic API key - Git installed Step 1: Project setup Step 2: Core reviewer structure Crea...",
     "type": "doc",
     "keywords": [
       "code",
-      "review",
-      "files",
-      "issues",
-      "create",
-      "git",
-      "step",
+      "analyzes",
       "improvements",
+      "review",
+      "git",
+      "issues",
       "reviewer",
-      "analyzes"
+      "step",
+      "files",
+      "performance"
     ]
   },
   {
@@ -1027,50 +1027,50 @@
     "keywords": [
       "tutorials",
       "langchaingo",
-      "analyze",
       "these",
-      "learn",
+      "analyze",
       "applications",
-      "application",
+      "learn",
       "code",
-      "order",
-      "conversation"
+      "application",
+      "bugs",
+      "logs"
     ]
   },
   {
     "title": "Log Analyzer",
     "url": "/langchaingo/docs/tutorials/log-analyzer",
-    "content": "Building an intelligent log analyzer Create an AI-powered log analysis tool that identifies patterns, anomalies, and potential issues in application logs. What you'll build A CLI tool that: - Parses log files in various formats (JSON, structured text, etc.) - Identifies error patterns and anomalies - Summarizes log activity and trends - Suggests actions based on detected issues - Generates alerts for critical problems Prerequisites - Go 1.24+ - LLM API key (OpenAI, Anthropic, etc.) - Sample log ...",
+    "content": "Building an intelligent log analyzer Create an AI-powered log analysis tool that identifies patterns, anomalies, and potential issues in application logs. What you'll build A CLI tool that: - Parses log files in various formats (JSON, structured text, etc.) - Identifies error patterns and anomalies - Summarizes log activity and trends - Suggests actions based on detected issues - Generates alerts for critical problems Prerequisites - Go 1.26.5+ - LLM API key (OpenAI, Anthropic, etc.) - Sample lo...",
     "type": "doc",
     "keywords": [
       "log",
-      "patterns",
-      "issues",
-      "anomalies",
-      "etc.)",
       "identifies",
+      "issues",
+      "etc.)",
       "tool",
-      "building",
-      "analysis",
-      "intelligent"
+      "anomalies",
+      "patterns",
+      "trends",
+      "based",
+      "detected"
     ]
   },
   {
     "title": "Smart Documentation",
     "url": "/langchaingo/docs/tutorials/smart-documentation",
-    "content": "Building smart documentation generator Create an AI-powered tool that automatically generates and maintains technical documentation from your codebase. What you'll build A CLI tool that: - Analyzes Go code to understand structure and purpose - Generates comprehensive API documentation - Creates usage examples automatically - Updates documentation when code changes - Generates tutorials and guides from code patterns Prerequisites - Go 1.24+ - LLM API key - A Go project to document Step 1: Project...",
+    "content": "Building smart documentation generator Create an AI-powered tool that automatically generates and maintains technical documentation from your codebase. What you'll build A CLI tool that: - Analyzes Go code to understand structure and purpose - Generates comprehensive API documentation - Creates usage examples automatically - Updates documentation when code changes - Generates tutorials and guides from code patterns Prerequisites - Go 1.26.5+ - LLM API key - A Go project to document Step 1: Proje...",
     "type": "doc",
     "keywords": [
       "documentation",
-      "generates",
       "code",
-      "tool",
-      "automatically",
-      "project",
+      "generates",
       "api",
-      "what",
-      "when",
-      "guides"
+      "automatically",
+      "tool",
+      "building",
+      "patterns",
+      "1.26.5+",
+      "smart"
     ]
   },
   {

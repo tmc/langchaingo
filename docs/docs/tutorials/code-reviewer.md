@@ -12,7 +12,7 @@ A CLI tool that:
 
 ## Prerequisites
 
-- Go 1.24+
+- Go 1.26.5+
 - OpenAI or Anthropic API key
 - Git installed
 
