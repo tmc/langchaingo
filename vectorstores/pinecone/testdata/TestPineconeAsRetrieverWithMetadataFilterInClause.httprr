@@ -1,5 +1,5 @@
 httprr trace v1
-492 167983
+492 168049
 POST https://api.openai.com/v1/embeddings HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
@@ -11,20 +11,22 @@ Content-Type: application/json
 Content-Length: 167076
 Access-Control-Allow-Origin: *
 Access-Control-Expose-Headers: X-Request-ID
+Access-Control-Expose-Headers: CF-Ray
+Access-Control-Expose-Headers: CF-Ray
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Thu, 22 Jan 2026 20:18:52 GMT
+Date: Tue, 04 Aug 2026 10:43:52 GMT
 Openai-Model: text-embedding-ada-002-v2
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 139
+Openai-Processing-Ms: 151
 Openai-Project: proj_pf0r5emOzUBDExmxgmWVPVjK
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
-Via: envoy-router-58675c86cb-q89fp
+Via: envoy-router-6868bd775b-jwdnd
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 373
+X-Engine-Geography: EU
 X-Openai-Proxy-Wasm: v0.1
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 10000000
@@ -32,7 +34,7 @@ X-Ratelimit-Remaining-Requests: 9999
 X-Ratelimit-Remaining-Tokens: 9999941
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_192dc7c7a3ad475f9d6d08fe2ec3fbee
+X-Request-Id: req_3d4ea4f7dc774ed7848079de70ed4ed4
 
 {
   "object": "list",
@@ -7754,7 +7756,7 @@ X-Request-Id: req_192dc7c7a3ad475f9d6d08fe2ec3fbee
     "total_tokens": 55
   }
 }
-278 34394
+278 34466
 POST https://api.openai.com/v1/embeddings HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
@@ -7766,20 +7768,22 @@ Content-Type: application/json
 Content-Length: 33488
 Access-Control-Allow-Origin: *
 Access-Control-Expose-Headers: X-Request-ID
+Access-Control-Expose-Headers: CF-Ray
+Access-Control-Expose-Headers: CF-Ray
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Thu, 22 Jan 2026 20:19:09 GMT
+Date: Tue, 04 Aug 2026 10:44:06 GMT
 Openai-Model: text-embedding-ada-002-v2
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 136
+Openai-Processing-Ms: 175
 Openai-Project: proj_pf0r5emOzUBDExmxgmWVPVjK
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
-Via: envoy-router-66b64fd584-7mj6z
+Via: envoy-router-canary-659cfbdff-fjvrc
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 282
+X-Engine-Geography: EU
 X-Openai-Proxy-Wasm: v0.1
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 10000000
@@ -7787,7 +7791,7 @@ X-Ratelimit-Remaining-Requests: 9999
 X-Ratelimit-Remaining-Tokens: 9999991
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_cb0bba60e96f49f59a9e37e2113fdec4
+X-Request-Id: req_a1823c6a576c49d1a8517ffcccfe7f1b
 
 {
   "object": "list",
@@ -9341,7 +9345,7 @@ X-Request-Id: req_cb0bba60e96f49f59a9e37e2113fdec4
     "total_tokens": 9
   }
 }
-991 1710
+991 1752
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
@@ -9352,18 +9356,19 @@ Content-Type: application/json
 {"model":"gpt-4.1-nano","messages":[{"role":"user","content":"Use the following pieces of context to answer the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.\n\n\n\u003cdocument\u003e\n\u003ccontent\u003eThe color of the lamp beside the desk is black.\u003c/content\u003e\n\n\u003cmetadata\u003e\n\n\u003ckv key=\"location\"\u003ekitchen\u003c/kv\u003e\n\n\u003c/metadata\u003e\n\n\u003c/document\u003e\n\n\n\n\u003cdocument\u003e\n\u003ccontent\u003eThe color of the lamp beside the desk is orange.\u003c/content\u003e\n\n\u003cmetadata\u003e\n\n\u003ckv key=\"location\"\u003eoffice\u003c/kv\u003e\n\n\u003c/metadata\u003e\n\n\u003c/document\u003e\n\n\nQuestion: What color is the lamp in each room?\nHelpful Answer:"}]}HTTP/2.0 200 OK
 Content-Length: 911
 Access-Control-Expose-Headers: X-Request-ID
+Access-Control-Expose-Headers: CF-Ray
+Access-Control-Expose-Headers: CF-Ray
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Thu, 22 Jan 2026 20:19:12 GMT
+Date: Tue, 04 Aug 2026 10:44:09 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 381
+Openai-Processing-Ms: 461
 Openai-Project: proj_pf0r5emOzUBDExmxgmWVPVjK
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
 X-Content-Type-Options: nosniff
-X-Envoy-Upstream-Service-Time: 398
 X-Openai-Proxy-Wasm: v0.1
 X-Ratelimit-Limit-Requests: 30000
 X-Ratelimit-Limit-Tokens: 150000000
@@ -9371,12 +9376,12 @@ X-Ratelimit-Remaining-Requests: 29999
 X-Ratelimit-Remaining-Tokens: 149999865
 X-Ratelimit-Reset-Requests: 2ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_37f163d9bce54027ac146e35c73f0444
+X-Request-Id: req_8d30b2de67b64e77a958cd4ac8f40db0
 
 {
-  "id": "chatcmpl-D0vR1Sq6jaMtZaAe6xvE8aIUQ38Do",
+  "id": "chatcmpl-E96uukMEL9pGENSzYmLgZVGiurSFN",
   "object": "chat.completion",
-  "created": 1769113151,
+  "created": 1785840248,
   "model": "gpt-4.1-nano-2025-04-14",
   "choices": [
     {
@@ -9407,5 +9412,5 @@ X-Request-Id: req_37f163d9bce54027ac146e35c73f0444
     }
   },
   "service_tier": "default",
-  "system_fingerprint": "fp_fe84ea9799"
+  "system_fingerprint": "fp_28f6c54d57"
 }

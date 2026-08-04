@@ -5,16 +5,16 @@ Host: generativelanguage.googleapis.com
 User-Agent: langchaingo-httprr
 Content-Length: 767
 Content-Type: application/json
-X-Goog-Api-Client: google-genai-sdk/X.XX.X gl-go/go1.24.1
+X-Goog-Api-Client: google-genai-sdk/X.XX.X gl-go/go1.26.5
 X-Goog-Api-Key: test-api-key
 
 {"contents":[{"parts":[{"text":"Use the multiply function to calculate 7 times 9"}],"role":"user"}],"generationConfig":{"candidateCount":1,"maxOutputTokens":1024,"temperature":1,"topK":3,"topP":0.95},"safetySettings":[{"category":"HARM_CATEGORY_DANGEROUS_CONTENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HARASSMENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HATE_SPEECH","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_SEXUALLY_EXPLICIT","threshold":"BLOCK_NONE"}],"tools":[{"functionDeclarations":[{"description":"Multiply two numbers together","name":"multiply","parameters":{"properties":{"a":{"description":"First number","type":"NUMBER"},"b":{"description":"Second number","type":"NUMBER"}},"required":["a","b"],"type":"OBJECT"}}]}]}HTTP/2.0 200 OK
 Content-Length: 1182
 Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
 Content-Type: application/json; charset=UTF-8
-Date: Thu, 16 Jul 2026 19:43:10 GMT
+Date: Tue, 04 Aug 2026 09:53:54 GMT
 Server: scaffolding on HTTPServer2
-Server-Timing: gfet4t7; dur=1190
+Server-Timing: gfet4t7; dur=1031
 Vary: Origin
 Vary: X-Origin
 Vary: Referer
@@ -35,9 +35,9 @@ X-Xss-Protection: 0
                 "a": 7,
                 "b": 9
               },
-              "id": "9005xm0h"
+              "id": "n5u72jdq"
             },
-            "thoughtSignature": "EvUBCvIBARFNMg/J/7/TwNNZ7xuwsMmmgHPomKaF5CWOSExYFfIl3V+bDSSJXj2A8I/ACASutrw+XB6YcUkF3TcT5iCjxvGK585VLVA+Bih1/7lZvIiw7xexD5e18LARyqQrnFka8/G1vYL33ZMAzdWYJrGi6O2smgWlkZb9SNnJpqYhowpMW9/s0Qvrvn7Q86cslawzV9kwVFBfr9skQ9DCx4CXN3XQwun0w6/q8u3hxAgU4gw9KPwdvEVOVnobLhZYdNDv4jG7DgGvADWtgDVT09Sc1PU3iGSKrhzmF4voJ3TEj7jTC9rHvifhEJ6lBGOZlA8Rlis="
+            "thoughtSignature": "EvQBCvEBARFNMg+DspE09ruHIitzO7Rtj6iul3YH7KKQoEXyKfo7w8/KtUpPI1e21bLS4HXmejeLtRoHIXVdbNMws/7g0dM288dfRw9VeGqygB+ecVeBqKBvsS/V0TgoCDLQKN4jWA5VEY7g/04IpcwfaT9FX/knJtSwWzWI+ybxZ9HcdbeyrHGa2J8UVhdaWMPC0bN1+7xnlfFPv6YYN0eQpbZInobATWoCHDuPt5xcv/cXZZtckE99zJAf+RTvSr1sSJbFwQ6/t3MBNKyZQ48AZOarHbqcx9iw+wBWWrptT2o6/d/8Klx6KWBaYwK+TmVmDNEWdg=="
           }
         ],
         "role": "model"
@@ -50,35 +50,35 @@ X-Xss-Protection: 0
   "usageMetadata": {
     "promptTokenCount": 77,
     "candidatesTokenCount": 16,
-    "totalTokenCount": 153,
+    "totalTokenCount": 152,
     "promptTokensDetails": [
       {
         "modality": "TEXT",
         "tokenCount": 77
       }
     ],
-    "thoughtsTokenCount": 60,
+    "thoughtsTokenCount": 59,
     "serviceTier": "standard"
   },
   "modelVersion": "gemini-3-flash-preview",
-  "responseId": "TTRZaq3DDIaN28oPt5PJ0Q4"
+  "responseId": "sbZxas7nCYX7vdIPwL6goQ4"
 }
-1387 1217
+1387 1248
 POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent HTTP/1.1
 Host: generativelanguage.googleapis.com
 User-Agent: langchaingo-httprr
 Content-Length: 1060
 Content-Type: application/json
-X-Goog-Api-Client: google-genai-sdk/X.XX.X gl-go/go1.24.1
+X-Goog-Api-Client: google-genai-sdk/X.XX.X gl-go/go1.26.5
 X-Goog-Api-Key: test-api-key
 
-{"contents":[{"parts":[{"text":"Use the multiply function to calculate 7 times 9"}],"role":"user"},{"parts":[{"functionCall":{"args":{"a":7,"b":9},"id":"9005xm0h","name":"multiply"},"thoughtSignature":"EvUBCvIBARFNMg/J/7/TwNNZ7xuwsMmmgHPomKaF5CWOSExYFfIl3V+bDSSJXj2A8I/ACASutrw+XB6YcUkF3TcT5iCjxvGK585VLVA+Bih1/7lZvIiw7xexD5e18LARyqQrnFka8/G1vYL33ZMAzdWYJrGi6O2smgWlkZb9SNnJpqYhowpMW9/s0Qvrvn7Q86cslawzV9kwVFBfr9skQ9DCx4CXN3XQwun0w6/q8u3hxAgU4gw9KPwdvEVOVnobLhZYdNDv4jG7DgGvADWtgDVT09Sc1PU3iGSKrhzmF4voJ3TEj7jTC9rHvifhEJ6lBGOZlA8Rlis="}],"role":"model"},{"parts":[{"functionResponse":{"id":"9005xm0h","name":"multiply","response":{"response":"63"}}}],"role":"user"}],"generationConfig":{"candidateCount":1,"maxOutputTokens":512,"temperature":1,"topK":3,"topP":0.95},"safetySettings":[{"category":"HARM_CATEGORY_DANGEROUS_CONTENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HARASSMENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HATE_SPEECH","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_SEXUALLY_EXPLICIT","threshold":"BLOCK_NONE"}]}HTTP/2.0 200 OK
-Content-Length: 805
+{"contents":[{"parts":[{"text":"Use the multiply function to calculate 7 times 9"}],"role":"user"},{"parts":[{"functionCall":{"args":{"a":7,"b":9},"id":"n5u72jdq","name":"multiply"},"thoughtSignature":"EvQBCvEBARFNMg+DspE09ruHIitzO7Rtj6iul3YH7KKQoEXyKfo7w8/KtUpPI1e21bLS4HXmejeLtRoHIXVdbNMws/7g0dM288dfRw9VeGqygB+ecVeBqKBvsS/V0TgoCDLQKN4jWA5VEY7g/04IpcwfaT9FX/knJtSwWzWI+ybxZ9HcdbeyrHGa2J8UVhdaWMPC0bN1+7xnlfFPv6YYN0eQpbZInobATWoCHDuPt5xcv/cXZZtckE99zJAf+RTvSr1sSJbFwQ6/t3MBNKyZQ48AZOarHbqcx9iw+wBWWrptT2o6/d/8Klx6KWBaYwK+TmVmDNEWdg=="}],"role":"model"},{"parts":[{"functionResponse":{"id":"n5u72jdq","name":"multiply","response":{"response":"63"}}}],"role":"user"}],"generationConfig":{"candidateCount":1,"maxOutputTokens":512,"temperature":1,"topK":3,"topP":0.95},"safetySettings":[{"category":"HARM_CATEGORY_DANGEROUS_CONTENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HARASSMENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HATE_SPEECH","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_SEXUALLY_EXPLICIT","threshold":"BLOCK_NONE"}]}HTTP/2.0 200 OK
+Content-Length: 837
 Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
 Content-Type: application/json; charset=UTF-8
-Date: Thu, 16 Jul 2026 19:43:12 GMT
+Date: Tue, 04 Aug 2026 09:53:56 GMT
 Server: scaffolding on HTTPServer2
-Server-Timing: gfet4t7; dur=1072
+Server-Timing: gfet4t7; dur=895
 Vary: Origin
 Vary: X-Origin
 Vary: Referer
@@ -94,7 +94,7 @@ X-Xss-Protection: 0
         "parts": [
           {
             "text": "7 times 9 is 63.",
-            "thoughtSignature": "En0KewERTTIPhqdOHSOvVK4ZvhYC57xkx3o3a2+ZyVFMAnwbnYZxOGgotPu49srFrSaU31rOWAtQsTm19IlHHamAm8U/Jq1pzWGQlrp+rKBKg2VntUm4tT/FwF+SWaMs2mWd6g3GAbiX9FuVzT5xATSCiJzt7oqVSq23P0+eZg=="
+            "thoughtSignature": "EpUBCpIBARFNMg/PzoIAosIygeTzoXuHN+zT31drCpHa2EhrfyUpQS/FuJX7tSIRiq3oYuOokD4RQOeqrNZ20vMmrniVQSXPkcqJCBvKoWAVabCfTb6v8io9tsY0nh/Wc7thvY+c8zz7b5Mp48v6fd1JiQvMpWl/PR1Bu8qLL7sKhBwV1kONu9kfG8EwIyga7eXGa31u6gQ="
           }
         ],
         "role": "model"
@@ -104,18 +104,18 @@ X-Xss-Protection: 0
     }
   ],
   "usageMetadata": {
-    "promptTokenCount": 101,
+    "promptTokenCount": 100,
     "candidatesTokenCount": 9,
-    "totalTokenCount": 129,
+    "totalTokenCount": 134,
     "promptTokensDetails": [
       {
         "modality": "TEXT",
-        "tokenCount": 101
+        "tokenCount": 100
       }
     ],
-    "thoughtsTokenCount": 19,
+    "thoughtsTokenCount": 25,
     "serviceTier": "standard"
   },
   "modelVersion": "gemini-3-flash-preview",
-  "responseId": "TzRZarH3GoDWxN8PyvG7iQs"
+  "responseId": "s7ZxaqKwD7ayxN8PysrSgA4"
 }

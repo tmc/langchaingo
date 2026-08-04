@@ -217,7 +217,8 @@ func DefaultIsReasoningModel(model string) bool { //nolint:funlen // a flat cata
 
 	// X-AI Grok reasoning models
 	if strings.HasPrefix(modelLower, "grok-3-mini") ||
-		strings.HasPrefix(modelLower, "grok-4") ||
+		(strings.HasPrefix(modelLower, "grok-4") && !strings.HasSuffix(modelLower, "-non-reasoning")) ||
+		(strings.HasPrefix(modelLower, "grok-5") && !strings.HasSuffix(modelLower, "-non-reasoning")) ||
 		strings.HasPrefix(modelLower, "grok-build") ||
 		strings.Contains(modelLower, "grok-code-fast") {
 		return true

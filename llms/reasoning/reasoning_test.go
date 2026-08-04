@@ -689,7 +689,16 @@ func TestIsReasoningModel(t *testing.T) { //nolint:funlen
 		{"grok-4-fast", true},
 		{"grok-4.1-fast", true},
 		{"grok-code-fast-1", true},
+		{"grok-4.5", true},
+		{"grok-build-0.1", true},
+		{"grok-4.3", true},
+		{"grok-4.20-multi-agent-0309", true},
+		{"grok-4.20-0309-reasoning", true},
+		{"grok-4.20-0309-non-reasoning", false},
 		{"x-ai/grok-4", true},
+		{"x-ai/grok-4.3", true},
+		{"x-ai/grok-4.5", true},
+		{"x-ai/grok-4.20-0309-non-reasoning", false},
 
 		// Z-AI GLM reasoning models (Zhipu AI)
 		{"glm-4.5", true},

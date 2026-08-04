@@ -1,20 +1,20 @@
 httprr trace v1
-1034 1540
+1034 1525
 POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent HTTP/1.1
 Host: generativelanguage.googleapis.com
 User-Agent: langchaingo-httprr
 Content-Length: 714
 Content-Type: application/json
-X-Goog-Api-Client: google-genai-sdk/X.XX.X gl-go/go1.24.1
+X-Goog-Api-Client: google-genai-sdk/X.XX.X gl-go/go1.26.5
 X-Goog-Api-Key: test-api-key
 
 {"contents":[{"parts":[{"text":"What is 15 * 7?"}],"role":"user"}],"generationConfig":{"candidateCount":1,"maxOutputTokens":2048,"temperature":0.5,"topK":3,"topP":0.95},"safetySettings":[{"category":"HARM_CATEGORY_DANGEROUS_CONTENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HARASSMENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HATE_SPEECH","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_SEXUALLY_EXPLICIT","threshold":"BLOCK_NONE"}],"tools":[{"functionDeclarations":[{"description":"Perform a calculation","name":"calculate","parameters":{"properties":{"expression":{"description":"Mathematical expression to evaluate","type":"STRING"}},"required":["expression"],"type":"OBJECT"}}]}]}HTTP/2.0 200 OK
-Content-Length: 1128
+Content-Length: 1113
 Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
 Content-Type: application/json; charset=UTF-8
-Date: Tue, 14 Jul 2026 08:30:49 GMT
+Date: Tue, 04 Aug 2026 09:55:50 GMT
 Server: scaffolding on HTTPServer2
-Server-Timing: gfet4t7; dur=617
+Server-Timing: gfet4t7; dur=597
 Vary: Origin
 Vary: X-Origin
 Vary: Referer
@@ -35,7 +35,7 @@ X-Xss-Protection: 0
                 "expression": "15 * 7"
               }
             },
-            "thoughtSignature": "Cu8BARFNMg+Ac7oeUCEfxd3opB71CRpn0+3n95U0i/bIV+O1gMsDTiMvqrWpC4FFvuZK5rqZlW1KPaCPGgcIL2P7CjJAM5cpbU1atVWVeGIwqzZGT04/QvKu2cQTkG4K93SkAi5S/9QYgkjqups6ho0cWV+YyhxFmDzsWnqXf1XKN+yOeC5b5s23TGQy7TmuVSu4u4X9FE39+urN6wpUOamJldBgfAwRP1u0cDCIhE94MJLUpbOhfwdhN6kr2jHvlz7EgZLgNeDnZb6Zuf8KwQ1B5tivvtq4kACz/43ZAV73xcTXOSUiSGiTVqi6EjIa0mA="
+            "thoughtSignature": "CuIBARFNMg/pKWv3NyazbTfEpK0X8t+c+q97CtZ0zr20l0JIbl383+kQVEQoVWPsOQzrJorIERbVwpjZ44p/uDqxDM+wVALz5BdHph711En36/TyV64FkX09GhfMvqinOa6LJm4amlNDC5BebJv03i+KfcKJfBdBF5ZsEKhO6oHkkU/NcVK9QF6Id5sddxs7DOtP8EN/pylFtFVlhFZKcaMmbsuh9Sr/YDk03FWHtnjtpaAjyuAB2hdLpcGuH71bsTHi2AYJcUWWvGT2xBhWVD9ySytCSVqfWcc48kx8eSVrM4j8Uw=="
           }
         ],
         "role": "model"
@@ -48,35 +48,35 @@ X-Xss-Protection: 0
   "usageMetadata": {
     "promptTokenCount": 46,
     "candidatesTokenCount": 17,
-    "totalTokenCount": 110,
+    "totalTokenCount": 108,
     "promptTokensDetails": [
       {
         "modality": "TEXT",
         "tokenCount": 46
       }
     ],
-    "thoughtsTokenCount": 47,
+    "thoughtsTokenCount": 45,
     "serviceTier": "standard"
   },
   "modelVersion": "gemini-2.5-flash",
-  "responseId": "ufNVaozNBa73xN8Pz4ireA"
+  "responseId": "JrdxarbnE7Gc28oP6s-V2A4"
 }
-1575 965
+1559 967
 POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent HTTP/1.1
 Host: generativelanguage.googleapis.com
 User-Agent: langchaingo-httprr
-Content-Length: 1254
+Content-Length: 1238
 Content-Type: application/json
-X-Goog-Api-Client: google-genai-sdk/X.XX.X gl-go/go1.24.1
+X-Goog-Api-Client: google-genai-sdk/X.XX.X gl-go/go1.26.5
 X-Goog-Api-Key: test-api-key
 
-{"contents":[{"parts":[{"text":"What is 15 * 7?"}],"role":"user"},{"parts":[{"functionCall":{"args":{"expression":"15 * 7"},"name":"calculate"},"thoughtSignature":"Cu8BARFNMg+Ac7oeUCEfxd3opB71CRpn0+3n95U0i/bIV+O1gMsDTiMvqrWpC4FFvuZK5rqZlW1KPaCPGgcIL2P7CjJAM5cpbU1atVWVeGIwqzZGT04/QvKu2cQTkG4K93SkAi5S/9QYgkjqups6ho0cWV+YyhxFmDzsWnqXf1XKN+yOeC5b5s23TGQy7TmuVSu4u4X9FE39+urN6wpUOamJldBgfAwRP1u0cDCIhE94MJLUpbOhfwdhN6kr2jHvlz7EgZLgNeDnZb6Zuf8KwQ1B5tivvtq4kACz/43ZAV73xcTXOSUiSGiTVqi6EjIa0mA="}],"role":"model"},{"parts":[{"functionResponse":{"name":"calculate","response":{"response":"105"}}}],"role":"user"}],"generationConfig":{"candidateCount":1,"maxOutputTokens":2048,"temperature":0.5,"topK":3,"topP":0.95},"safetySettings":[{"category":"HARM_CATEGORY_DANGEROUS_CONTENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HARASSMENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HATE_SPEECH","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_SEXUALLY_EXPLICIT","threshold":"BLOCK_NONE"}],"tools":[{"functionDeclarations":[{"description":"Perform a calculation","name":"calculate","parameters":{"properties":{"expression":{"description":"Mathematical expression to evaluate","type":"STRING"}},"required":["expression"],"type":"OBJECT"}}]}]}HTTP/2.0 200 OK
-Content-Length: 554
+{"contents":[{"parts":[{"text":"What is 15 * 7?"}],"role":"user"},{"parts":[{"functionCall":{"args":{"expression":"15 * 7"},"name":"calculate"},"thoughtSignature":"CuIBARFNMg/pKWv3NyazbTfEpK0X8t+c+q97CtZ0zr20l0JIbl383+kQVEQoVWPsOQzrJorIERbVwpjZ44p/uDqxDM+wVALz5BdHph711En36/TyV64FkX09GhfMvqinOa6LJm4amlNDC5BebJv03i+KfcKJfBdBF5ZsEKhO6oHkkU/NcVK9QF6Id5sddxs7DOtP8EN/pylFtFVlhFZKcaMmbsuh9Sr/YDk03FWHtnjtpaAjyuAB2hdLpcGuH71bsTHi2AYJcUWWvGT2xBhWVD9ySytCSVqfWcc48kx8eSVrM4j8Uw=="}],"role":"model"},{"parts":[{"functionResponse":{"name":"calculate","response":{"response":"105"}}}],"role":"user"}],"generationConfig":{"candidateCount":1,"maxOutputTokens":2048,"temperature":0.5,"topK":3,"topP":0.95},"safetySettings":[{"category":"HARM_CATEGORY_DANGEROUS_CONTENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HARASSMENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HATE_SPEECH","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_SEXUALLY_EXPLICIT","threshold":"BLOCK_NONE"}],"tools":[{"functionDeclarations":[{"description":"Perform a calculation","name":"calculate","parameters":{"properties":{"expression":{"description":"Mathematical expression to evaluate","type":"STRING"}},"required":["expression"],"type":"OBJECT"}}]}]}HTTP/2.0 200 OK
+Content-Length: 556
 Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
 Content-Type: application/json; charset=UTF-8
-Date: Tue, 14 Jul 2026 08:30:51 GMT
+Date: Tue, 04 Aug 2026 09:55:52 GMT
 Server: scaffolding on HTTPServer2
-Server-Timing: gfet4t7; dur=628
+Server-Timing: gfet4t7; dur=357
 Vary: Origin
 Vary: X-Origin
 Vary: Referer
@@ -91,7 +91,7 @@ X-Xss-Protection: 0
       "content": {
         "parts": [
           {
-            "text": "15 * 7 = 105"
+            "text": "15 * 7 = 105."
           }
         ],
         "role": "model"
@@ -102,8 +102,8 @@ X-Xss-Protection: 0
   ],
   "usageMetadata": {
     "promptTokenCount": 78,
-    "candidatesTokenCount": 10,
-    "totalTokenCount": 88,
+    "candidatesTokenCount": 11,
+    "totalTokenCount": 89,
     "promptTokensDetails": [
       {
         "modality": "TEXT",
@@ -113,5 +113,5 @@ X-Xss-Protection: 0
     "serviceTier": "standard"
   },
   "modelVersion": "gemini-2.5-flash",
-  "responseId": "uvNVav6VMYXfxs0P6eaICA"
+  "responseId": "J7dxasHqO7KbvdIPvJjWgA4"
 }

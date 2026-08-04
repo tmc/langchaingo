@@ -1,5 +1,5 @@
 httprr trace v1
-441 168032
+441 168128
 POST https://api.openai.com/v1/embeddings HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
@@ -11,19 +11,22 @@ Content-Type: application/json
 Content-Length: 167155
 Access-Control-Allow-Origin: *
 Access-Control-Expose-Headers: X-Request-ID
+Access-Control-Expose-Headers: CF-Ray
+Access-Control-Expose-Headers: CF-Ray
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Tue, 27 Jan 2026 13:06:40 GMT
+Date: Tue, 04 Aug 2026 10:43:29 GMT
 Openai-Model: text-embedding-ada-002-v2
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 72
+Openai-Processing-Ms: 146
 Openai-Project: proj_pf0r5emOzUBDExmxgmWVPVjK
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
-Via: envoy-router-canary-6dfb78cfb4-pm6gf
+Via: envoy-router-6868bd775b-sq58h
 X-Content-Type-Options: nosniff
+X-Engine-Geography: EU
 X-Openai-Proxy-Wasm: v0.1
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 10000000
@@ -31,7 +34,7 @@ X-Ratelimit-Remaining-Requests: 9999
 X-Ratelimit-Remaining-Tokens: 9999954
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_4aed5493a5244fc2acd8b0ed4dbfb8f0
+X-Request-Id: req_2a57143182644fe6ab0750774d4622c6
 
 {
   "object": "list",
@@ -7753,7 +7756,7 @@ X-Request-Id: req_4aed5493a5244fc2acd8b0ed4dbfb8f0
     "total_tokens": 46
   }
 }
-299 34395
+299 34497
 POST https://api.openai.com/v1/embeddings HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
@@ -7765,19 +7768,22 @@ Content-Type: application/json
 Content-Length: 33526
 Access-Control-Allow-Origin: *
 Access-Control-Expose-Headers: X-Request-ID
+Access-Control-Expose-Headers: CF-Ray
+Access-Control-Expose-Headers: CF-Ray
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Tue, 27 Jan 2026 13:06:55 GMT
+Date: Tue, 04 Aug 2026 10:43:43 GMT
 Openai-Model: text-embedding-ada-002-v2
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 46
+Openai-Processing-Ms: 76
 Openai-Project: proj_pf0r5emOzUBDExmxgmWVPVjK
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
-Via: envoy-router-77d7f54964-z4hfh
+Via: envoy-router-78b795c79f-vzmw5
 X-Content-Type-Options: nosniff
+X-Engine-Geography: EU
 X-Openai-Proxy-Wasm: v0.1
 X-Ratelimit-Limit-Requests: 10000
 X-Ratelimit-Limit-Tokens: 10000000
@@ -7785,7 +7791,7 @@ X-Ratelimit-Remaining-Requests: 9999
 X-Ratelimit-Remaining-Tokens: 9999986
 X-Ratelimit-Reset-Requests: 6ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_b51947872fc34d39b85902d655692071
+X-Request-Id: req_84619f4b06894879bd2f4129295d2eec
 
 {
   "object": "list",
@@ -9339,7 +9345,7 @@ X-Request-Id: req_b51947872fc34d39b85902d655692071
     "total_tokens": 12
   }
 }
-1051 1647
+1051 1725
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
@@ -9347,15 +9353,17 @@ Content-Length: 849
 Authorization: Bearer test-api-key
 Content-Type: application/json
 
-{"model":"gpt-4.1-nano","messages":[{"role":"user","content":"Use the following pieces of context to answer the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.\n\n\n\u003cdocument\u003e\n\u003ccontent\u003eThe color of the desk is orange.\u003c/content\u003e\n\n\u003c/document\u003e\n\n\n\n\u003cdocument\u003e\n\u003ccontent\u003eThe color of the lamp beside the desk is black.\u003c/content\u003e\n\n\u003c/document\u003e\n\n\n\n\u003cdocument\u003e\n\u003ccontent\u003eThe color of the chair beside the desk is beige.\u003c/content\u003e\n\n\u003c/document\u003e\n\n\n\n\u003cdocument\u003e\n\u003ccontent\u003eThe color of the house is blue.\u003c/content\u003e\n\n\u003c/document\u003e\n\n\nQuestion: What colors is each piece of furniture next to the desk?\nHelpful Answer:"}]}HTTP/2.0 200 OK
+{"model":"gpt-4.1-nano","messages":[{"role":"user","content":"Use the following pieces of context to answer the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.\n\n\n\u003cdocument\u003e\n\u003ccontent\u003eThe color of the desk is orange.\u003c/content\u003e\n\n\u003c/document\u003e\n\n\n\n\u003cdocument\u003e\n\u003ccontent\u003eThe color of the house is blue.\u003c/content\u003e\n\n\u003c/document\u003e\n\n\n\n\u003cdocument\u003e\n\u003ccontent\u003eThe color of the lamp beside the desk is black.\u003c/content\u003e\n\n\u003c/document\u003e\n\n\n\n\u003cdocument\u003e\n\u003ccontent\u003eThe color of the chair beside the desk is beige.\u003c/content\u003e\n\n\u003c/document\u003e\n\n\nQuestion: What colors is each piece of furniture next to the desk?\nHelpful Answer:"}]}HTTP/2.0 200 OK
 Content-Length: 884
 Access-Control-Expose-Headers: X-Request-ID
+Access-Control-Expose-Headers: CF-Ray
+Access-Control-Expose-Headers: CF-Ray
 Alt-Svc: h3=":443"; ma=86400
 Cf-Cache-Status: DYNAMIC
 Content-Type: application/json
-Date: Tue, 27 Jan 2026 13:06:58 GMT
+Date: Tue, 04 Aug 2026 10:43:46 GMT
 Openai-Organization: lcgo-tst
-Openai-Processing-Ms: 334
+Openai-Processing-Ms: 399
 Openai-Project: proj_pf0r5emOzUBDExmxgmWVPVjK
 Openai-Version: 2020-10-01
 Server: cloudflare
@@ -9368,12 +9376,12 @@ X-Ratelimit-Remaining-Requests: 29999
 X-Ratelimit-Remaining-Tokens: 149999850
 X-Ratelimit-Reset-Requests: 2ms
 X-Ratelimit-Reset-Tokens: 0s
-X-Request-Id: req_6a908ef6ec9742b392fcdbd32841b1b6
+X-Request-Id: req_6e767c9c888540338dd240a6a257dca9
 
 {
-  "id": "chatcmpl-D2d4TYDNsmt9IaJlJrUHHl24j8dfX",
+  "id": "chatcmpl-E96uYlcCSTv3ROvwdYKuigYXAIMbt",
   "object": "chat.completion",
-  "created": 1769519217,
+  "created": 1785840226,
   "model": "gpt-4.1-nano-2025-04-14",
   "choices": [
     {
@@ -9404,5 +9412,5 @@ X-Request-Id: req_6a908ef6ec9742b392fcdbd32841b1b6
     }
   },
   "service_tier": "default",
-  "system_fingerprint": "fp_fe84ea9799"
+  "system_fingerprint": "fp_92a3cedc90"
 }

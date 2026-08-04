@@ -175,7 +175,7 @@ func WithRunnerNumGPU(num int) Option {
 // Only relevant when you have multiple GPUs and NumGPU > 1 (default: 0, first GPU).
 func WithRunnerMainGPU(num int) Option {
 	return func(opts *options) {
-		opts.ollamaOptions.MainGPU = num
+		opts.ollamaOptions.MainGPU = &num
 	}
 }
 

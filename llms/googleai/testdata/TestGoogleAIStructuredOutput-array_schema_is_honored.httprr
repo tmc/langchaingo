@@ -5,16 +5,16 @@ Host: generativelanguage.googleapis.com
 User-Agent: langchaingo-httprr
 Content-Length: 640
 Content-Type: application/json
-X-Goog-Api-Client: google-genai-sdk/X.XX.X gl-go/go1.24.1
+X-Goog-Api-Client: google-genai-sdk/X.XX.X gl-go/go1.26.5
 X-Goog-Api-Key: test-api-key
 
 {"contents":[{"parts":[{"text":"List three primary colors."}],"role":"user"}],"generationConfig":{"candidateCount":1,"maxOutputTokens":2048,"responseJsonSchema":{"properties":{"colors":{"items":{"type":"string"},"type":"array"}},"required":["colors"],"type":"object"},"responseMimeType":"application/json","temperature":0.5,"topK":3,"topP":0.95},"safetySettings":[{"category":"HARM_CATEGORY_DANGEROUS_CONTENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HARASSMENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HATE_SPEECH","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_SEXUALLY_EXPLICIT","threshold":"BLOCK_NONE"}]}HTTP/2.0 200 OK
 Content-Length: 612
 Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
 Content-Type: application/json; charset=UTF-8
-Date: Fri, 17 Jul 2026 00:35:13 GMT
+Date: Tue, 04 Aug 2026 09:55:25 GMT
 Server: scaffolding on HTTPServer2
-Server-Timing: gfet4t7; dur=765
+Server-Timing: gfet4t7; dur=735
 Vary: Origin
 Vary: X-Origin
 Vary: Referer
@@ -41,16 +41,16 @@ X-Xss-Protection: 0
   "usageMetadata": {
     "promptTokenCount": 6,
     "candidatesTokenCount": 9,
-    "totalTokenCount": 74,
+    "totalTokenCount": 83,
     "promptTokensDetails": [
       {
         "modality": "TEXT",
         "tokenCount": 6
       }
     ],
-    "thoughtsTokenCount": 59,
+    "thoughtsTokenCount": 68,
     "serviceTier": "standard"
   },
   "modelVersion": "gemini-2.5-flash",
-  "responseId": "wHhZasn8K5_VvdIP-Mv_-A8"
+  "responseId": "DLdxavn-H9jaxs0Pha-S0A0"
 }

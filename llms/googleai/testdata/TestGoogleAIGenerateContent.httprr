@@ -5,16 +5,16 @@ Host: generativelanguage.googleapis.com
 User-Agent: langchaingo-httprr
 Content-Length: 478
 Content-Type: application/json
-X-Goog-Api-Client: google-genai-sdk/X.XX.X gl-go/go1.24.1
+X-Goog-Api-Client: google-genai-sdk/X.XX.X gl-go/go1.26.5
 X-Goog-Api-Key: test-api-key
 
 {"contents":[{"parts":[{"text":"What is the capital of France?"}],"role":"user"}],"generationConfig":{"candidateCount":1,"maxOutputTokens":2048,"temperature":0.5,"topK":3,"topP":0.95},"safetySettings":[{"category":"HARM_CATEGORY_DANGEROUS_CONTENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HARASSMENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HATE_SPEECH","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_SEXUALLY_EXPLICIT","threshold":"BLOCK_NONE"}]}HTTP/2.0 200 OK
 Content-Length: 605
 Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
 Content-Type: application/json; charset=UTF-8
-Date: Tue, 14 Jul 2026 08:29:33 GMT
+Date: Tue, 04 Aug 2026 09:54:57 GMT
 Server: scaffolding on HTTPServer2
-Server-Timing: gfet4t7; dur=807
+Server-Timing: gfet4t7; dur=710
 Vary: Origin
 Vary: X-Origin
 Vary: Referer
@@ -41,16 +41,16 @@ X-Xss-Protection: 0
   "usageMetadata": {
     "promptTokenCount": 8,
     "candidatesTokenCount": 8,
-    "totalTokenCount": 43,
+    "totalTokenCount": 31,
     "promptTokensDetails": [
       {
         "modality": "TEXT",
         "tokenCount": 8
       }
     ],
-    "thoughtsTokenCount": 27,
+    "thoughtsTokenCount": 15,
     "serviceTier": "standard"
   },
   "modelVersion": "gemini-2.5-flash",
-  "responseId": "bfNVatjuDcLknsEPgbKM6A4"
+  "responseId": "8bZxatCBGYqBxs0Ptt7msAg"
 }

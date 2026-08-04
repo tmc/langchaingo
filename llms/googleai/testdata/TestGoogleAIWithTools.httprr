@@ -1,20 +1,20 @@
 httprr trace v1
-1052 1553
+1052 1598
 POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent HTTP/1.1
 Host: generativelanguage.googleapis.com
 User-Agent: langchaingo-httprr
 Content-Length: 732
 Content-Type: application/json
-X-Goog-Api-Client: google-genai-sdk/X.XX.X gl-go/go1.24.1
+X-Goog-Api-Client: google-genai-sdk/X.XX.X gl-go/go1.26.5
 X-Goog-Api-Key: test-api-key
 
 {"contents":[{"parts":[{"text":"What's the weather in New York?"}],"role":"user"}],"generationConfig":{"candidateCount":1,"maxOutputTokens":2048,"temperature":0.5,"topK":3,"topP":0.95},"safetySettings":[{"category":"HARM_CATEGORY_DANGEROUS_CONTENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HARASSMENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HATE_SPEECH","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_SEXUALLY_EXPLICIT","threshold":"BLOCK_NONE"}],"tools":[{"functionDeclarations":[{"description":"Get the weather for a location","name":"getWeather","parameters":{"properties":{"location":{"description":"The location to get weather for","type":"STRING"}},"required":["location"],"type":"OBJECT"}}]}]}HTTP/2.0 200 OK
-Content-Length: 1141
+Content-Length: 1186
 Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
 Content-Type: application/json; charset=UTF-8
-Date: Tue, 14 Jul 2026 08:30:10 GMT
+Date: Tue, 04 Aug 2026 09:55:17 GMT
 Server: scaffolding on HTTPServer2
-Server-Timing: gfet4t7; dur=630
+Server-Timing: gfet4t7; dur=643
 Vary: Origin
 Vary: X-Origin
 Vary: Referer
@@ -35,7 +35,7 @@ X-Xss-Protection: 0
                 "location": "New York"
               }
             },
-            "thoughtSignature": "CvgBARFNMg9WOphw85wL3e0yzCO7h6fFwviK0+QJL5ndMT89PeF+j+VZw/FEmoZ4rGLPC3xuxbVIF+yAOcLtancheteNGJDmvo/hC5jb8lykegRWHL+74F2WTx+KdcylQj2YX61fpBBwts2PHqjqa/Zj+GF6q77wrgLZQTeWGPhgO2/1cno4wbUuY5npNuaqC7CjTnDSq75VEHZI5q+frv08rhfsucoeYOY+4ucZDI5pMyqWnddlMt+gJUeyKw/KspmsFETOn6VYPV6cuL+W41NKoB0cjES4Ij3Xvv24Js3K/r3KhLglI3R7Qi18PCArk1UgJQ3hblShpfg="
+            "thoughtSignature": "CpkCARFNMg9/hG7OqVs1G3hR3sZyO4TKCZROXYIIc4PLMYUpYfk67GTVzbcvtWmNpLvDyijmC2IrIcjaZZ8h/T01+prznI2rSy/us2vmCxEa3D2eEq47Cof/Dj2b5KBFq5FK27fW/xnpltFF/zO2lref455zib6RxynO4gsqhatjFWJzcutCr/DB42xJ0gs9ISxmVzHaH7OhOfEhmpWc2wWM4lO7hsEtUKti9/L/ZXgUzvcL6aIt+eiQDDgT5rVv5XdQC98+T7srZchN13GSzlQkYVnLzZlgigT0b1rLWaKy7H3Gusvu1dMIsuQpZw07QRvm0lGpUJdrTXQ09pOeN93VjnAjNYdyo7HtNTfNpAF4s9Y9QWC3NR3EoNc="
           }
         ],
         "role": "model"
@@ -48,16 +48,16 @@ X-Xss-Protection: 0
   "usageMetadata": {
     "promptTokenCount": 51,
     "candidatesTokenCount": 15,
-    "totalTokenCount": 116,
+    "totalTokenCount": 125,
     "promptTokensDetails": [
       {
         "modality": "TEXT",
         "tokenCount": 51
       }
     ],
-    "thoughtsTokenCount": 50,
+    "thoughtsTokenCount": 59,
     "serviceTier": "standard"
   },
   "modelVersion": "gemini-2.5-flash",
-  "responseId": "kfNVapbGKq73xN8Pz4ireA"
+  "responseId": "BbdxarXfF_3-vdIPhd69oQ8"
 }
