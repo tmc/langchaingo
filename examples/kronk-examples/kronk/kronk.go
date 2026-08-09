@@ -26,52 +26,31 @@ import (
 	"github.com/ardanlabs/kronk/sdk/tools/models"
 )
 
-// Config configures a kronk [Client].
-type Config struct {
-	// ModelSource is the GGUF model to download. It may be a HuggingFace URL,
-	// a canonical "provider/modelID", or a bare model id.
-	// Example: "unsloth/Qwen3-0.6B-Q8_0".
-	ModelSource string
-
-	// SystemPrompt is an optional system prompt prepended to every chat.
-	// A system message in the request overrides this for that call.
-	SystemPrompt string
-
-	// LibVersion overrides the llama.cpp library version to install. When
-	// empty, defaults.LibVersion("") is used (which respects the
-	// KRONK_LIB_VERSION environment variable).
-	LibVersion string
-
-	// AutoTune enables hardware-aware configuration analysis before loading
-	// the model. Recommended for most use cases.
-	AutoTune bool
-
-	// InstallTimeout is the deadline for downloading libraries and the model.
-	// Defaults to 25 minutes.
-	InstallTimeout time.Duration
-
-	// MaxTokens is the maximum number of tokens to generate per response.
-	// Defaults to 2048.
-	MaxTokens int
-
-	// Temperature controls sampling randomness (0–1). Defaults to 0.7.
-	Temperature float64
-}
-
 // Client is the kronk abstraction. It wraps a kronk SDK instance and exposes
 // a small, consistent chat API shared by all kronk examples. It also
 // implements the [llms.Model] interface so it can be passed to langchaingo
 // utilities like [llms.GenerateFromSinglePrompt].
 type Client struct {
 	krn *kronksdk.Kronk
-	cfg Config
 }
 
-// New installs the required libraries and model, initializes the kronk
-// backend, loads the model, and returns a ready-to-use [Client]. The first
-// call may take several minutes while it downloads llama.cpp and the model.
-func New(ctx context.Context, cfg Config) (*Client, error) {
-	mp, err := installSystem(cfg)
+// New installs the required libraries and model, initializes the Kronk
+// backend, loads the model, and returns a ready-to-use [Client]. ModelSource
+// may be a HuggingFace URL, a canonical "provider/modelID", or a bare model ID.
+func New(ctx context.Context, modelSource string, opts ...Option) (*Client, error) {
+	cfg := options{
+		installTimeout: 25 * time.Minute,
+		logger:         kronksdk.FmtLogger,
+	}
+	for _, opt := range opts {
+		opt(&cfg)
+	}
+
+	if modelSource == "" {
+		return nil, fmt.Errorf("kronk: model is required")
+	}
+
+	mp, err := installSystem(ctx, modelSource, cfg)
 	if err != nil {
 		return nil, fmt.Errorf("kronk: install system: %w", err)
 	}
@@ -80,19 +59,17 @@ func New(ctx context.Context, cfg Config) (*Client, error) {
 		return nil, fmt.Errorf("kronk: init backend: %w", err)
 	}
 
-	opts := []model.Option{
-		model.WithModelFiles(mp.ModelFiles),
-	}
-	if cfg.AutoTune {
-		opts = append(opts, model.WithAutoTune(true))
-	}
+	modelOpts := append([]model.Option{}, cfg.modelOptions...)
+	modelOpts = append(modelOpts, model.WithModelFiles(mp.ModelFiles))
 
-	krn, err := kronksdk.New(opts...)
+	krn, err := kronksdk.NewWithContext(ctx, modelOpts...)
 	if err != nil {
 		return nil, fmt.Errorf("kronk: create model: %w", err)
 	}
 
-	return &Client{krn: krn, cfg: cfg}, nil
+	client := Client{krn: krn}
+
+	return &client, nil
 }
 
 // Unload closes the loaded model and frees its resources. Call this only when
@@ -167,7 +144,7 @@ func (c *Client) GenerateContent(ctx context.Context, messages []llms.MessageCon
 		opt(&opts)
 	}
 
-	docs, err := messageContentToDocs(c.cfg.SystemPrompt, messages)
+	docs, err := messageContentToDocs(messages)
 	if err != nil {
 		return nil, err
 	}
@@ -249,43 +226,42 @@ func (c *Client) generateContentStream(ctx context.Context, d model.D, opts llms
 // applyOptions maps relevant [llms.CallOptions] fields onto the kronk
 // [model.D] request map.
 func (c *Client) applyOptions(d model.D, opts llms.CallOptions) model.D {
-	maxTokens := opts.MaxTokens
-	if maxTokens == 0 {
-		maxTokens = c.cfg.MaxTokens
+	if opts.MaxTokens != 0 {
+		d["max_tokens"] = opts.MaxTokens
 	}
-	if maxTokens == 0 {
-		maxTokens = 2048
-	}
-	d["max_tokens"] = maxTokens
 
-	temp := opts.Temperature
-	if temp == 0 {
-		temp = c.cfg.Temperature
+	if opts.Temperature != 0 {
+		d["temperature"] = opts.Temperature
 	}
-	if temp > 0 {
-		d["temperature"] = temp
+	if opts.TopK != 0 {
+		d["top_k"] = opts.TopK
+	}
+	if opts.TopP != 0 {
+		d["top_p"] = opts.TopP
+	}
+	if opts.Seed != 0 {
+		d["seed"] = opts.Seed
+	}
+	if len(opts.StopWords) > 0 {
+		d["stop"] = opts.StopWords
+	}
+	if opts.RepetitionPenalty != 0 {
+		d["repeat_penalty"] = opts.RepetitionPenalty
+	}
+	if opts.FrequencyPenalty != 0 {
+		d["frequency_penalty"] = opts.FrequencyPenalty
+	}
+	if opts.PresencePenalty != 0 {
+		d["presence_penalty"] = opts.PresencePenalty
 	}
 
 	return d
 }
 
 // messageContentToDocs converts langchaingo [llms.MessageContent] messages
-// into kronk [model.D] documents, prepending a default system prompt when
-// configured and no system message is present.
-func messageContentToDocs(systemPrompt string, messages []llms.MessageContent) ([]model.D, error) {
+// into kronk [model.D] documents.
+func messageContentToDocs(messages []llms.MessageContent) ([]model.D, error) {
 	docs := model.DocumentArray()
-
-	hasSystem := false
-	for _, mc := range messages {
-		if mc.Role == llms.ChatMessageTypeSystem {
-			hasSystem = true
-			break
-		}
-	}
-
-	if systemPrompt != "" && !hasSystem {
-		docs = append(docs, model.TextMessage(model.RoleSystem, systemPrompt))
-	}
 
 	for _, mc := range messages {
 		role, err := chatMessageTypeToRole(mc.Role)
@@ -354,16 +330,11 @@ func chatResponseToContentResponse(resp model.ChatResponse) *llms.ContentRespons
 
 // installSystem downloads and installs the llama.cpp libraries and the
 // configured model, returning the on-disk model path.
-func installSystem(cfg Config) (models.Path, error) {
-	timeout := cfg.InstallTimeout
-	if timeout == 0 {
-		timeout = 25 * time.Minute
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+func installSystem(ctx context.Context, modelSource string, cfg options) (models.Path, error) {
+	ctx, cancel := context.WithTimeout(ctx, cfg.installTimeout)
 	defer cancel()
 
-	libVersion := cfg.LibVersion
+	libVersion := cfg.libVersion
 	if libVersion == "" {
 		libVersion = defaults.LibVersion("")
 	}
@@ -373,7 +344,7 @@ func installSystem(cfg Config) (models.Path, error) {
 		return models.Path{}, err
 	}
 
-	if _, err := lb.Download(ctx, kronksdk.FmtLogger); err != nil {
+	if _, err := lb.Download(ctx, cfg.logger); err != nil {
 		return models.Path{}, fmt.Errorf("unable to install llama.cpp: %w", err)
 	}
 
@@ -382,7 +353,7 @@ func installSystem(cfg Config) (models.Path, error) {
 		return models.Path{}, fmt.Errorf("unable to init models: %w", err)
 	}
 
-	mp, err := mdls.Download(ctx, kronksdk.FmtLogger, cfg.ModelSource)
+	mp, err := mdls.Download(ctx, cfg.logger, modelSource)
 	if err != nil {
 		return models.Path{}, fmt.Errorf("unable to install model: %w", err)
 	}

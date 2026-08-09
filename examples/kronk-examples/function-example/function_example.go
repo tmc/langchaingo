@@ -37,10 +37,11 @@ func main() {
 	}
 
 	fmt.Println("Initializing kronk (first run downloads libraries and model)...")
-	client, err := kronk.New(context.Background(), kronk.Config{
-		ModelSource: modelSource,
-		AutoTune:    true,
-	})
+	client, err := kronk.New(
+		context.Background(),
+		modelSource,
+		kronk.WithAutoTune(true),
+	)
 	if err != nil {
 		log.Fatalf("create kronk client: %v", err)
 	}

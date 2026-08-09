@@ -56,10 +56,11 @@ func main() {
 
 	fmt.Println("Initializing kronk embedding model...")
 
-	client, err := kronk.New(context.Background(), kronk.Config{
-		ModelSource: "ggml-org/embeddinggemma-300m-qat-Q8_0",
-		AutoTune:    true,
-	})
+	client, err := kronk.New(
+		context.Background(),
+		"ggml-org/embeddinggemma-300m-qat-Q8_0",
+		kronk.WithAutoTune(true),
+	)
 	if err != nil {
 		log.Fatalf("failed to create kronk client: %v", err)
 	}

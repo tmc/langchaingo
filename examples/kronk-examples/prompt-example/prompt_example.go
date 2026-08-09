@@ -29,14 +29,12 @@ var (
 func main() {
 	flag.Parse()
 
-	cfg := kronk.Config{
-		ModelSource:  *flagModel,
-		SystemPrompt: "You are a concise, friendly assistant.",
-		AutoTune:     true,
-	}
-
 	fmt.Println("Initializing kronk (first run downloads libraries and model)...")
-	client, err := kronk.New(context.Background(), cfg)
+	client, err := kronk.New(
+		context.Background(),
+		*flagModel,
+		kronk.WithAutoTune(true),
+	)
 	if err != nil {
 		log.Fatalf("create kronk client: %v", err)
 	}

@@ -34,14 +34,12 @@ var flagModel = flag.String("model", "unsloth/Qwen3-0.6B-Q8_0", "GGUF model sour
 func main() {
 	flag.Parse()
 
-	cfg := kronk.Config{
-		ModelSource:  *flagModel,
-		SystemPrompt: "You are a concise, friendly assistant. Answer clearly and keep responses brief.",
-		AutoTune:     true,
-	}
-
 	fmt.Println("Initializing kronk (first run downloads libraries and model)...")
-	client, err := kronk.New(context.Background(), cfg)
+	client, err := kronk.New(
+		context.Background(),
+		*flagModel,
+		kronk.WithAutoTune(true),
+	)
 	if err != nil {
 		log.Fatalf("create kronk client: %v", err)
 	}
@@ -64,10 +62,11 @@ func main() {
 func chat(client *kronk.Client) error {
 	reader := bufio.NewReader(os.Stdin)
 
-	// messages holds the running conversation history. The system prompt is
-	// injected by the kronk abstraction (via Config.SystemPrompt), so we only
-	// track user and AI messages here.
-	var messages []llms.MessageContent
+	// messages holds the running conversation history, including the system
+	// prompt supplied to the model with every turn.
+	messages := []llms.MessageContent{
+		llms.TextParts(llms.ChatMessageTypeSystem, "You are a concise, friendly assistant. Answer clearly and keep responses brief."),
+	}
 
 	fmt.Println("\nChat ready. Type your message and press Enter. Type 'quit' to exit.")
 
