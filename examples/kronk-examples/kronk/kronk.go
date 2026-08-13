@@ -4,18 +4,24 @@
 // every kronk example can share the same surface without duplicating setup
 // boilerplate.
 //
-// Client implements the [llms.Model] interface so it can be used anywhere a
-// langchaingo model is expected, including [llms.GenerateFromSinglePrompt].
+// Client implements the [llms.Model] interface, including text and media
+// messages, native tool calls, streaming, reasoning content, and JSON output.
 // It also implements [embeddings.EmbedderClient] so it can be used with
 // [embeddings.NewEmbedder] for vector store and similarity search examples.
 package kronk
 
 import (
 	"context"
+	"encoding/base64"
+	"encoding/json"
+	"errors"
 	"fmt"
+	"maps"
+	"slices"
 	"strings"
 	"time"
 
+	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/llms"
 
@@ -31,7 +37,8 @@ import (
 // implements the [llms.Model] interface so it can be passed to langchaingo
 // utilities like [llms.GenerateFromSinglePrompt].
 type Client struct {
-	krn *kronksdk.Kronk
+	krn       *kronksdk.Kronk
+	callbacks callbacks.Handler
 }
 
 // New installs the required libraries and model, initializes the Kronk
@@ -67,7 +74,10 @@ func New(ctx context.Context, modelSource string, opts ...Option) (*Client, erro
 		return nil, fmt.Errorf("kronk: create model: %w", err)
 	}
 
-	client := Client{krn: krn}
+	client := Client{
+		krn:       krn,
+		callbacks: cfg.callbacks,
+	}
 
 	return &client, nil
 }
@@ -132,13 +142,32 @@ var _ llms.Model = (*Client)(nil)
 // Compile-time check that Client implements embeddings.EmbedderClient.
 var _ embeddings.EmbedderClient = (*Client)(nil)
 
+// Compile-time check that Client exposes its callback handler.
+var _ callbacks.HandlerHaver = (*Client)(nil)
+
+// GetCallbackHandler returns the configured LangChainGo callback handler.
+func (c *Client) GetCallbackHandler() callbacks.Handler {
+	return c.callbacks
+}
+
 // GenerateContent implements the [llms.Model] interface. It converts
 // langchaingo [llms.MessageContent] messages into kronk model documents,
 // calls the kronk backend, and returns a [llms.ContentResponse].
 //
 // When [llms.WithStreamingFunc] is provided in options, the response is
 // streamed token-by-token to the streaming function.
-func (c *Client) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) {
+func (c *Client) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (response *llms.ContentResponse, err error) {
+	if c.callbacks != nil {
+		c.callbacks.HandleLLMGenerateContentStart(ctx, messages)
+		defer func() {
+			if err != nil {
+				c.callbacks.HandleLLMError(ctx, err)
+				return
+			}
+			c.callbacks.HandleLLMGenerateContentEnd(ctx, response)
+		}()
+	}
+
 	opts := llms.CallOptions{}
 	for _, opt := range options {
 		opt(&opts)
@@ -149,12 +178,15 @@ func (c *Client) GenerateContent(ctx context.Context, messages []llms.MessageCon
 		return nil, err
 	}
 
-	d := c.applyOptions(model.D{
+	d, err := applyOptions(model.D{
 		"messages": docs,
 	}, opts)
+	if err != nil {
+		return nil, err
+	}
 
 	// Streaming path: forward each chunk to the caller's StreamingFunc.
-	if opts.StreamingFunc != nil {
+	if opts.StreamingFunc != nil || opts.StreamingReasoningFunc != nil {
 		return c.generateContentStream(ctx, d, opts)
 	}
 
@@ -183,20 +215,38 @@ func (c *Client) Call(ctx context.Context, prompt string, options ...llms.CallOp
 }
 
 func (c *Client) generateContentStream(ctx context.Context, d model.D, opts llms.CallOptions) (*llms.ContentResponse, error) {
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
+	d["stream_options"] = model.D{"include_usage": true}
 	ch, err := c.krn.ChatStreaming(ctx, d)
 	if err != nil {
 		return nil, fmt.Errorf("kronk: generate content stream: %w", err)
 	}
 
+	return c.processContentStream(ctx, ch, opts)
+}
+
+func (c *Client) processContentStream(ctx context.Context, ch <-chan model.ChatResponse, opts llms.CallOptions) (*llms.ContentResponse, error) {
 	var content strings.Builder
+	var reasoning strings.Builder
+	var finishReason string
+	var usage *model.Usage
+	toolCalls := map[int]*llms.ToolCall{}
 	for resp := range ch {
+		if resp.Usage != nil {
+			usage = resp.Usage
+		}
 		if len(resp.Choices) == 0 {
 			continue
 		}
 
 		choice := resp.Choices[0]
+		if reason := choice.FinishReason(); reason != "" {
+			finishReason = reason
+		}
 
-		if choice.FinishReason() == model.FinishReasonError {
+		if finishReason == model.FinishReasonError {
 			errMsg := "unknown error"
 			if choice.Delta != nil && choice.Delta.Content != "" {
 				errMsg = choice.Delta.Content
@@ -208,24 +258,70 @@ func (c *Client) generateContentStream(ctx context.Context, d model.D, opts llms
 
 		if choice.Delta != nil && choice.Delta.Content != "" {
 			content.WriteString(choice.Delta.Content)
-			if err := opts.StreamingFunc(ctx, []byte(choice.Delta.Content)); err != nil {
-				return &llms.ContentResponse{
-					Choices: []*llms.ContentChoice{{Content: content.String()}},
-				}, err
+			if c.callbacks != nil {
+				c.callbacks.HandleStreamingFunc(ctx, []byte(choice.Delta.Content))
+			}
+			if opts.StreamingFunc != nil {
+				if err := opts.StreamingFunc(ctx, []byte(choice.Delta.Content)); err != nil {
+					return &llms.ContentResponse{
+						Choices: []*llms.ContentChoice{{Content: content.String(), ReasoningContent: reasoning.String()}},
+					}, err
+				}
+			}
+		}
+		if choice.Delta != nil && choice.Delta.Reasoning != "" {
+			reasoning.WriteString(choice.Delta.Reasoning)
+			if opts.StreamingReasoningFunc != nil {
+				if err := opts.StreamingReasoningFunc(ctx, []byte(choice.Delta.Reasoning), nil); err != nil {
+					return &llms.ContentResponse{
+						Choices: []*llms.ContentChoice{{Content: content.String(), ReasoningContent: reasoning.String()}},
+					}, err
+				}
+			}
+		}
+		if choice.Delta != nil {
+			for _, delta := range choice.Delta.ToolCallDeltas {
+				call := toolCalls[delta.Index]
+				if call == nil {
+					call = &llms.ToolCall{FunctionCall: &llms.FunctionCall{}}
+					toolCalls[delta.Index] = call
+				}
+				if delta.ID != "" {
+					call.ID = delta.ID
+				}
+				if delta.Type != "" {
+					call.Type = delta.Type
+				}
+				if delta.Function.Name != "" {
+					call.FunctionCall.Name = delta.Function.Name
+				}
+				call.FunctionCall.Arguments += delta.Function.Arguments
 			}
 		}
 	}
+	if finishReason == "" {
+		return &llms.ContentResponse{
+			Choices: []*llms.ContentChoice{{Content: content.String(), ReasoningContent: reasoning.String()}},
+		}, errors.New("kronk: response stream ended without a finish reason")
+	}
 
-	return &llms.ContentResponse{
-		Choices: []*llms.ContentChoice{
-			{Content: content.String(), StopReason: model.FinishReasonStop},
-		},
-	}, nil
+	choice := &llms.ContentChoice{
+		Content:          content.String(),
+		ReasoningContent: reasoning.String(),
+		StopReason:       finishReason,
+		GenerationInfo:   usageGenerationInfo(usage),
+		ToolCalls:        orderedToolCalls(toolCalls),
+	}
+	if len(choice.ToolCalls) > 0 {
+		choice.FuncCall = choice.ToolCalls[0].FunctionCall
+	}
+
+	return &llms.ContentResponse{Choices: []*llms.ContentChoice{choice}}, nil
 }
 
 // applyOptions maps relevant [llms.CallOptions] fields onto the kronk
 // [model.D] request map.
-func (c *Client) applyOptions(d model.D, opts llms.CallOptions) model.D {
+func applyOptions(d model.D, opts llms.CallOptions) (model.D, error) {
 	if opts.MaxTokens != 0 {
 		d["max_tokens"] = opts.MaxTokens
 	}
@@ -254,8 +350,42 @@ func (c *Client) applyOptions(d model.D, opts llms.CallOptions) model.D {
 	if opts.PresencePenalty != 0 {
 		d["presence_penalty"] = opts.PresencePenalty
 	}
+	if opts.N != 0 {
+		d["n"] = opts.N
+	} else if opts.CandidateCount != 0 {
+		d["n"] = opts.CandidateCount
+	}
+	if opts.JSONMode || opts.ResponseMIMEType == "application/json" {
+		d["response_format"] = model.D{"type": "json_object"}
+	} else if opts.ResponseMIMEType != "" && opts.ResponseMIMEType != "text/plain" {
+		return nil, fmt.Errorf("kronk: response MIME type %q is not supported", opts.ResponseMIMEType)
+	}
 
-	return d
+	tools := opts.Tools
+	if len(tools) == 0 && len(opts.Functions) > 0 {
+		tools = make([]llms.Tool, len(opts.Functions))
+		for i := range opts.Functions {
+			tools[i] = llms.Tool{Type: "function", Function: &opts.Functions[i]}
+		}
+	}
+	if len(tools) > 0 {
+		toolDocs, err := toolDocuments(tools)
+		if err != nil {
+			return nil, err
+		}
+		d["tools"] = toolDocs
+	}
+	if opts.ToolChoice != nil {
+		choice, err := modelValue(opts.ToolChoice)
+		if err != nil {
+			return nil, fmt.Errorf("kronk: tool choice: %w", err)
+		}
+		d["tool_choice"] = choice
+	} else if opts.FunctionCallBehavior != "" {
+		d["tool_choice"] = string(opts.FunctionCallBehavior)
+	}
+
+	return d, nil
 }
 
 // messageContentToDocs converts langchaingo [llms.MessageContent] messages
@@ -269,15 +399,62 @@ func messageContentToDocs(messages []llms.MessageContent) ([]model.D, error) {
 			return nil, err
 		}
 
-		// Concatenate all text parts; ignore non-text parts for this
-		// text-only abstraction.
-		var text strings.Builder
+		doc := model.D{"role": role}
+		var content []model.D
+		var toolCalls []model.D
 		for _, part := range mc.Parts {
-			if tc, ok := part.(llms.TextContent); ok {
-				text.WriteString(tc.Text)
+			switch p := part.(type) {
+			case llms.TextContent:
+				content = append(content, model.D{"type": "text", "text": p.Text})
+			case llms.ImageURLContent:
+				if strings.HasPrefix(p.URL, "http://") || strings.HasPrefix(p.URL, "https://") {
+					return nil, errors.New("kronk: remote media URLs are not supported; use a data URL or BinaryPart")
+				}
+				content = append(content, model.D{
+					"type":      "image_url",
+					"image_url": model.D{"url": p.URL},
+				})
+			case llms.BinaryContent:
+				mediaPart, err := binaryContentPart(p)
+				if err != nil {
+					return nil, err
+				}
+				content = append(content, mediaPart)
+			case llms.ToolCall:
+				if p.FunctionCall == nil {
+					return nil, errors.New("kronk: tool call is missing its function")
+				}
+				toolCalls = append(toolCalls, model.D{
+					"id":   p.ID,
+					"type": p.Type,
+					"function": model.D{
+						"name":      p.FunctionCall.Name,
+						"arguments": p.FunctionCall.Arguments,
+					},
+				})
+			case llms.ToolCallResponse:
+				if len(mc.Parts) != 1 {
+					return nil, errors.New("kronk: tool response must be the only message part")
+				}
+				doc["tool_call_id"] = p.ToolCallID
+				doc["name"] = p.Name
+				doc["content"] = p.Content
+			default:
+				return nil, fmt.Errorf("kronk: content part type %T is not supported", part)
 			}
 		}
-		docs = append(docs, model.TextMessage(role, text.String()))
+
+		if _, exists := doc["content"]; !exists && len(content) > 0 {
+			if len(content) == 1 && content[0]["type"] == "text" {
+				doc["content"] = content[0]["text"]
+			} else {
+				doc["content"] = content
+			}
+		}
+		if len(toolCalls) > 0 {
+			doc["tool_calls"] = toolCalls
+		}
+		docs = append(docs, doc)
 	}
 
 	return docs, nil
@@ -312,18 +489,141 @@ func chatResponseToContentResponse(resp model.ChatResponse) *llms.ContentRespons
 	if choice.Message != nil {
 		cc.Content = choice.Message.Content
 		cc.ReasoningContent = choice.Message.Reasoning
-	}
-
-	if resp.Usage != nil {
-		cc.GenerationInfo = map[string]any{
-			"prompt_tokens":     resp.Usage.PromptTokens,
-			"completion_tokens": resp.Usage.CompletionTokens,
-			"total_tokens":      resp.Usage.TotalTokens,
+		cc.ToolCalls = toolCallsToLangChain(choice.Message.ToolCalls)
+		if len(cc.ToolCalls) > 0 {
+			cc.FuncCall = cc.ToolCalls[0].FunctionCall
 		}
 	}
 
+	cc.GenerationInfo = usageGenerationInfo(resp.Usage)
+
 	cr.Choices = []*llms.ContentChoice{cc}
 	return cr
+}
+
+func binaryContentPart(content llms.BinaryContent) (model.D, error) {
+	mediaType, _, ok := strings.Cut(content.MIMEType, "/")
+	if !ok {
+		return nil, fmt.Errorf("kronk: invalid media MIME type %q", content.MIMEType)
+	}
+
+	data := "data:" + content.MIMEType + ";base64," + base64.StdEncoding.EncodeToString(content.Data)
+	switch mediaType {
+	case "image":
+		return model.D{"type": "image_url", "image_url": model.D{"url": data}}, nil
+	case "video":
+		return model.D{"type": "video_url", "video_url": model.D{"url": data}}, nil
+	case "audio":
+		return model.D{"type": "input_audio", "input_audio": model.D{"data": data}}, nil
+	default:
+		return nil, fmt.Errorf("kronk: unsupported media MIME type %q", content.MIMEType)
+	}
+}
+
+func toolDocuments(tools []llms.Tool) ([]model.D, error) {
+	docs := make([]model.D, len(tools))
+	for i, tool := range tools {
+		if tool.Function == nil {
+			return nil, fmt.Errorf("kronk: tool %d is missing its function", i)
+		}
+
+		value, err := modelValue(tool.Function.Parameters)
+		if err != nil {
+			return nil, fmt.Errorf("kronk: tool %q parameters: %w", tool.Function.Name, err)
+		}
+
+		toolType := tool.Type
+		if toolType == "" {
+			toolType = "function"
+		}
+		function := model.D{
+			"name":        tool.Function.Name,
+			"description": tool.Function.Description,
+			"parameters":  value,
+		}
+		if tool.Function.Strict {
+			function["strict"] = true
+		}
+		docs[i] = model.D{
+			"type":     toolType,
+			"function": function,
+		}
+	}
+
+	return docs, nil
+}
+
+func modelValue(value any) (any, error) {
+	data, err := json.Marshal(value)
+	if err != nil {
+		return nil, err
+	}
+
+	var decoded any
+	if err := json.Unmarshal(data, &decoded); err != nil {
+		return nil, err
+	}
+
+	return modelValueFromJSON(decoded), nil
+}
+
+func modelValueFromJSON(value any) any {
+	switch value := value.(type) {
+	case map[string]any:
+		d := make(model.D, len(value))
+		for key, item := range value {
+			d[key] = modelValueFromJSON(item)
+		}
+		return d
+	case []any:
+		items := make([]any, len(value))
+		for i, item := range value {
+			items[i] = modelValueFromJSON(item)
+		}
+		return items
+	default:
+		return value
+	}
+}
+
+func toolCallsToLangChain(toolCalls []model.ResponseToolCall) []llms.ToolCall {
+	result := make([]llms.ToolCall, len(toolCalls))
+	for i, toolCall := range toolCalls {
+		arguments, _ := json.Marshal(map[string]any(toolCall.Function.Arguments))
+		result[i] = llms.ToolCall{
+			ID:   toolCall.ID,
+			Type: toolCall.Type,
+			FunctionCall: &llms.FunctionCall{
+				Name:      toolCall.Function.Name,
+				Arguments: string(arguments),
+			},
+		}
+	}
+	return result
+}
+
+func orderedToolCalls(toolCalls map[int]*llms.ToolCall) []llms.ToolCall {
+	result := make([]llms.ToolCall, 0, len(toolCalls))
+	for _, index := range slices.Sorted(maps.Keys(toolCalls)) {
+		result = append(result, *toolCalls[index])
+	}
+	return result
+}
+
+func usageGenerationInfo(usage *model.Usage) map[string]any {
+	if usage == nil {
+		return nil
+	}
+
+	return map[string]any{
+		"prompt_tokens":          usage.PromptTokens,
+		"completion_tokens":      usage.CompletionTokens,
+		"total_tokens":           usage.TotalTokens,
+		"reasoning_tokens":       usage.CompletionTokensDetails.ReasoningTokens,
+		"cached_tokens":          usage.PromptTokensDetails.CachedTokens,
+		"tokens_per_second":      usage.TokensPerSecond,
+		"time_to_first_token_ms": usage.TimeToFirstTokenMS,
+	}
 }
 
 // -----------------------------------------------------------------------------

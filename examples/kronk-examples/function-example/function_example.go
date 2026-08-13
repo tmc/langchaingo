@@ -1,25 +1,23 @@
-// tool_call_example demonstrates tool calling using the kronk abstraction
-// layer. It uses prompt engineering to inject tool definitions into the
-// system message and parses the model's JSON response to determine which
-// tool to call — the same approach as the ollama-functions-example, but
-// running a local GGUF model via llama.cpp through kronk.
+// function_example demonstrates tool calling using the kronk abstraction
+// layer. It passes native LangChainGo tool definitions to a local GGUF model,
+// executes the requested tool, and returns the result for a final answer.
 //
 // The first time you run this program the system will download and install
 // the llama.cpp libraries and the model. Subsequent runs load from disk.
 //
 // Run from this directory:
 //
-//	go run tool_call_example.go
+//	go run function_example.go
 package main
 
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"log"
 	"os"
-	"slices"
 	"time"
 
 	"github.com/tmc/langchaingo/examples/kronk-examples/kronk"
@@ -30,7 +28,12 @@ var flagVerbose = flag.Bool("v", false, "verbose mode")
 
 func main() {
 	flag.Parse()
+	if err := run(); err != nil {
+		log.Fatal(err)
+	}
+}
 
+func run() error {
 	modelSource := "unsloth/Qwen3-0.6B-Q8_0"
 	if v := os.Getenv("KRONK_TEST_MODEL"); v != "" {
 		modelSource = v
@@ -43,7 +46,7 @@ func main() {
 		kronk.WithAutoTune(true),
 	)
 	if err != nil {
-		log.Fatalf("create kronk client: %v", err)
+		return fmt.Errorf("create kronk client: %w", err)
 	}
 
 	defer func() {
@@ -53,118 +56,88 @@ func main() {
 		}
 	}()
 
-	var msgs []llms.MessageContent
-
-	// system message defines the available tools.
-	msgs = append(msgs, llms.TextParts(llms.ChatMessageTypeSystem, systemMessage()))
-	msgs = append(msgs, llms.TextParts(llms.ChatMessageTypeHuman, "What's the weather like in Beijing?"))
-
-	for retries := 3; retries > 0; retries-- {
-		ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
-
-		resp, err := client.GenerateContent(ctx, msgs)
-		cancel()
-		if err != nil {
-			log.Fatalf("generate content: %v", err)
-		}
-
-		choice1 := resp.Choices[0]
-		msgs = append(msgs, llms.TextParts(llms.ChatMessageTypeAI, choice1.Content))
-
-		if c := unmarshalCall(choice1.Content); c != nil {
-			log.Printf("Call: %v", c.Tool)
-			if *flagVerbose {
-				log.Printf("Call: %v (raw: %v)", c.Tool, choice1.Content)
-			}
-			msg, cont := dispatchCall(c)
-			if !cont {
-				break
-			}
-			msgs = append(msgs, msg)
-		} else {
-			// The model didn't respond with a function call, let it try again.
-			log.Printf("Not a call: %v", choice1.Content)
-			msgs = append(msgs, llms.TextParts(llms.ChatMessageTypeHuman, "Sorry, I don't understand. Please try again."))
-		}
-
+	messages := []llms.MessageContent{
+		llms.TextParts(llms.ChatMessageTypeSystem, "Use the available tool to answer weather questions."),
+		llms.TextParts(llms.ChatMessageTypeHuman, "What's the weather like in Beijing?"),
 	}
-}
 
-// Call is the JSON structure we expect the model to respond with when it
-// wants to invoke a tool.
-type Call struct {
-	Tool  string         `json:"tool"`
-	Input map[string]any `json:"tool_input"`
-}
+	ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
+	resp, err := client.GenerateContent(ctx, messages,
+		llms.WithTools(tools),
+		llms.WithToolChoice("required"),
+		llms.WithStreamingFunc(func(context.Context, []byte) error { return nil }),
+	)
+	cancel()
+	if err != nil {
+		return fmt.Errorf("generate tool call: %w", err)
+	}
+	if len(resp.Choices) == 0 || len(resp.Choices[0].ToolCalls) == 0 {
+		return errors.New("model returned no tool calls")
+	}
 
-func unmarshalCall(input string) *Call {
-	var c Call
-	if err := json.Unmarshal([]byte(input), &c); err == nil && c.Tool != "" {
-		return &c
+	choice := resp.Choices[0]
+	assistantParts := make([]llms.ContentPart, 0, len(choice.ToolCalls)+1)
+	if choice.Content != "" {
+		assistantParts = append(assistantParts, llms.TextPart(choice.Content))
+	}
+	for _, toolCall := range choice.ToolCalls {
+		assistantParts = append(assistantParts, toolCall)
+	}
+	messages = append(messages, llms.MessageContent{Role: llms.ChatMessageTypeAI, Parts: assistantParts})
+
+	for _, toolCall := range choice.ToolCalls {
+		log.Printf("Call: %s(%s)", toolCall.FunctionCall.Name, toolCall.FunctionCall.Arguments)
+		result, err := dispatchCall(toolCall)
+		if err != nil {
+			return err
+		}
+		messages = append(messages, llms.MessageContent{
+			Role: llms.ChatMessageTypeTool,
+			Parts: []llms.ContentPart{llms.ToolCallResponse{
+				ToolCallID: toolCall.ID,
+				Name:       toolCall.FunctionCall.Name,
+				Content:    result,
+			}},
+		})
+	}
+
+	ctx, cancel = context.WithTimeout(context.Background(), 120*time.Second)
+	resp, err = client.GenerateContent(ctx, messages,
+		llms.WithTools(tools),
+		llms.WithToolChoice("none"),
+	)
+	cancel()
+	if err != nil {
+		return fmt.Errorf("generate final answer: %w", err)
+	}
+	if len(resp.Choices) == 0 || resp.Choices[0].Content == "" {
+		return errors.New("model returned an empty final answer")
+	}
+
+	log.Printf("Final response: %s", resp.Choices[0].Content)
+	if *flagVerbose {
+		log.Printf("Generation info: %#v", resp.Choices[0].GenerationInfo)
 	}
 	return nil
 }
 
-func dispatchCall(c *Call) (llms.MessageContent, bool) {
-	if !validTool(c.Tool) {
-		log.Printf("invalid function call: %#v, prompting model to try again", c)
-		return llms.TextParts(llms.ChatMessageTypeHuman,
-			"Tool does not exist, please try again."), true
+func dispatchCall(call llms.ToolCall) (string, error) {
+	if call.FunctionCall == nil || call.FunctionCall.Name != "getCurrentWeather" {
+		return "", fmt.Errorf("unsupported tool call %#v", call.FunctionCall)
 	}
 
-	switch c.Tool {
-	case "getCurrentWeather":
-		loc, ok := c.Input["location"].(string)
-		if !ok {
-			log.Fatal("invalid input")
-		}
-		unit, ok := c.Input["unit"].(string)
-		if !ok {
-			log.Fatal("invalid input")
-		}
-
-		weather, err := getCurrentWeather(loc, unit)
-		if err != nil {
-			log.Fatal(err)
-		}
-		return llms.TextParts(llms.ChatMessageTypeHuman, weather), true
-	case "finalResponse":
-		resp, ok := c.Input["response"].(string)
-		if !ok {
-			log.Fatal("invalid input")
-		}
-
-		log.Printf("Final response: %v", resp)
-		return llms.MessageContent{}, false
-	default:
-		panic("unreachable")
+	var input struct {
+		Location string `json:"location"`
+		Unit     string `json:"unit"`
 	}
-}
-
-func validTool(name string) bool {
-	var valid []string
-	for _, v := range functions {
-		valid = append(valid, v.Name)
+	if err := json.Unmarshal([]byte(call.FunctionCall.Arguments), &input); err != nil {
+		return "", fmt.Errorf("decode getCurrentWeather arguments: %w", err)
 	}
-	return slices.Contains(valid, name)
-}
-
-func systemMessage() string {
-	bs, err := json.Marshal(functions)
-	if err != nil {
-		log.Fatal(err)
+	if input.Location == "" || input.Unit == "" {
+		return "", errors.New("getCurrentWeather requires location and unit")
 	}
 
-	return fmt.Sprintf(`You have access to the following tools:
-
-%s
-
-To use a tool, respond with a JSON object with the following structure: 
-{
-	"tool": <name of the called tool>,
-	"tool_input": <parameters for the tool matching the above JSON schema>
-}
-`, string(bs))
+	return getCurrentWeather(input.Location, input.Unit)
 }
 
 func getCurrentWeather(location string, unit string) (string, error) {
@@ -185,11 +158,13 @@ func getCurrentWeather(location string, unit string) (string, error) {
 	return string(b), nil
 }
 
-var functions = []llms.FunctionDefinition{
+var tools = []llms.Tool{
 	{
-		Name:        "getCurrentWeather",
-		Description: "Get the current weather in a given location",
-		Parameters: json.RawMessage(`{
+		Type: "function",
+		Function: &llms.FunctionDefinition{
+			Name:        "getCurrentWeather",
+			Description: "Get the current weather in a given location",
+			Parameters: json.RawMessage(`{
 			"type": "object", 
 			"properties": {
 				"location": {"type": "string", "description": "The city and state, e.g. San Francisco, CA"}, 
@@ -197,16 +172,6 @@ var functions = []llms.FunctionDefinition{
 			}, 
 			"required": ["location", "unit"]
 		}`),
-	},
-	{
-		Name:        "finalResponse",
-		Description: "Provide the final response to the user query",
-		Parameters: json.RawMessage(`{
-			"type": "object", 
-			"properties": {
-				"response": {"type": "string", "description": "The final response to the user query"}
-			}, 
-			"required": ["response"]
-		}`),
+		},
 	},
 }

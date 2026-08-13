@@ -61,5 +61,8 @@ func main() {
 	if err != nil {
 		log.Fatalf("generate content: %v", err)
 	}
-	_ = completion
+	if len(completion.Choices) > 0 {
+		fmt.Printf("\n\nStop reason: %s\n", completion.Choices[0].StopReason)
+		fmt.Printf("Usage: %#v\n", completion.Choices[0].GenerationInfo)
+	}
 }

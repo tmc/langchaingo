@@ -11,13 +11,14 @@
 //
 //	export MONGODB_URI="mongodb+srv://..."
 //
-// Run the example like this from the root of the project:
+// Run the example from this directory:
 //
-//	$ make example-mongovector-kronk
+//	go run mongovector_example.go
 package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -92,9 +93,27 @@ func main() {
 		}
 	}()
 
-	coll := mongoClient.Database(databaseName).Collection(collectionName)
+	setupCtx, setupCancel := context.WithTimeout(context.Background(), 5*time.Minute)
+	defer setupCancel()
 
-	if ok, _ := searchIndexExists(context.Background(), coll, indexName); !ok {
+	db := mongoClient.Database(databaseName)
+	names, err := db.ListCollectionNames(setupCtx, bson.D{{Key: "name", Value: collectionName}})
+	if err != nil {
+		log.Fatalf("failed to list collections: %v", err)
+	}
+	if len(names) == 0 {
+		if err := db.CreateCollection(setupCtx, collectionName); err != nil {
+			log.Fatalf("failed to create vector store collection: %v", err)
+		}
+	}
+
+	coll := db.Collection(collectionName)
+
+	indexExists, indexQueryable, err := searchIndexStatus(setupCtx, coll, indexName)
+	if err != nil {
+		log.Fatalf("failed to inspect vector search index: %v", err)
+	}
+	if !indexExists {
 		fields := []vectorField{
 			{
 				Type:          "vector",
@@ -112,15 +131,13 @@ func main() {
 			},
 		}
 
-		// Create the vectorstore collection.
-		err = mongoClient.Database(databaseName).CreateCollection(context.Background(), collectionName)
-		if err != nil {
-			log.Fatalf("failed to create vector store collection: %v", err)
-		}
-
-		_, err = createVectorSearchIndex(context.Background(), coll, indexName, fields...)
+		_, err = createVectorSearchIndex(setupCtx, coll, indexName, fields...)
 		if err != nil {
 			log.Fatalf("failed to create index: %v", err)
+		}
+	} else if !indexQueryable {
+		if err := waitForSearchIndex(setupCtx, coll, indexName); err != nil {
+			log.Fatalf("failed waiting for index: %v", err)
 		}
 	}
 
@@ -256,52 +273,61 @@ func createVectorSearchIndex(
 		return "", fmt.Errorf("failed to create the search index: %w", err)
 	}
 
-	// Await the creation of the index.
-	var doc bson.Raw
-	for doc == nil {
-		cursor, err := view.List(ctx, options.SearchIndexes().SetName(searchName))
-		if err != nil {
-			return "", fmt.Errorf("failed to list search indexes: %w", err)
-		}
-
-		if !cursor.Next(ctx) {
-			break
-		}
-
-		name := cursor.Current.Lookup("name").StringValue()
-		queryable := cursor.Current.Lookup("queryable").Boolean()
-		if name == searchName && queryable {
-			doc = cursor.Current
-		} else {
-			time.Sleep(5 * time.Second)
-		}
+	if err := waitForSearchIndex(ctx, coll, searchName); err != nil {
+		return "", err
 	}
 
 	return searchName, nil
 }
 
-// searchIndexExists checks if the search index exists and is queryable.
-func searchIndexExists(ctx context.Context, coll *mongo.Collection, idx string) (bool, error) {
+// waitForSearchIndex blocks until the named search index is queryable.
+func waitForSearchIndex(ctx context.Context, coll *mongo.Collection, idx string) error {
+	ticker := time.NewTicker(5 * time.Second)
+	defer ticker.Stop()
+
+	for {
+		exists, queryable, err := searchIndexStatus(ctx, coll, idx)
+		if err != nil {
+			return err
+		}
+		if exists && queryable {
+			return nil
+		}
+
+		select {
+		case <-ctx.Done():
+			return fmt.Errorf("waiting for search index %q: %w", idx, ctx.Err())
+		case <-ticker.C:
+		}
+	}
+}
+
+// searchIndexStatus reports whether the search index exists and is queryable.
+func searchIndexStatus(ctx context.Context, coll *mongo.Collection, idx string) (exists bool, queryable bool, err error) {
 	view := coll.SearchIndexes()
 
 	siOpts := options.SearchIndexes().SetName(idx).SetType("vectorSearch")
 	cursor, err := view.List(ctx, siOpts)
 	if err != nil {
-		return false, fmt.Errorf("failed to list search indexes: %w", err)
+		return false, false, fmt.Errorf("failed to list search indexes: %w", err)
 	}
+	defer func() {
+		err = errors.Join(err, cursor.Close(ctx))
+	}()
 
-	if cursor == nil {
-		return false, nil
-	}
-
-	if cursor.Current == nil {
-		if ok := cursor.Next(ctx); !ok {
-			return false, nil
+	if !cursor.Next(ctx) {
+		if err := cursor.Err(); err != nil {
+			return false, false, fmt.Errorf("read search indexes: %w", err)
 		}
+		return false, false, nil
 	}
 
-	name := cursor.Current.Lookup("name").StringValue()
-	queryable := cursor.Current.Lookup("queryable").Boolean()
+	name, ok := cursor.Current.Lookup("name").StringValueOK()
+	if !ok || name != idx {
+		return false, false, nil
+	}
 
-	return name == idx && queryable, nil
+	queryable, _ = cursor.Current.Lookup("queryable").BooleanOK()
+
+	return true, queryable, nil
 }

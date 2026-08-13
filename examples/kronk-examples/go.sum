@@ -36,8 +36,8 @@ github.com/Microsoft/go-winio v0.6.2 h1:F2VQgta7ecxGYO8k3ZZz3RS8fVIXVxONVUPlNERo
 github.com/Microsoft/go-winio v0.6.2/go.mod h1:yd8OoFMLzJbo9gZq8j5qaps8bJ9aShtEA8Ipt1oGCvU=
 github.com/ardanlabs/jinja v1.5.0 h1:OkNpmq9fXiCDRHMLCsd+VO/uk8L/tVwNJE+yA3JAhhM=
 github.com/ardanlabs/jinja v1.5.0/go.mod h1:aXXzlJfjA+T3XNKA/YT5ZtDq2VJxt5a5siZ8cl9B35Q=
-github.com/ardanlabs/kronk v1.30.5 h1:qqD1jy1RDNqXlW1v/CI+Y+fTxa/x6uKL2KSKWqQffJA=
-github.com/ardanlabs/kronk v1.30.5/go.mod h1:WTapTPkYiS30xhrTeC359H3iMCBDMqzJJu9anGbuJ+U=
+github.com/ardanlabs/kronk v1.30.8 h1:MOGh/21FVan1p/m1TNYzdxyw5TEoL3mQoVj28V6t3kE=
+github.com/ardanlabs/kronk v1.30.8/go.mod h1:gbG7Ya33lZRWo36mwICzY1vGfTd3HCxomQMAAUKpZzU=
 github.com/aws/aws-sdk-go-v2 v1.43.4 h1:b9FTvbRwy+JCsfp2Wp6wV/KbOx3Aj7nkoFb2cRX0IhE=
 github.com/aws/aws-sdk-go-v2 v1.43.4/go.mod h1:70vwSy16txshwG+g55WkpgPKDIByzHI8ccBsOteo3bQ=
 github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.7.16 h1:aiuaKlDweRC5qExJondpWjOgyzMHpofpwspGXUtwn4c=

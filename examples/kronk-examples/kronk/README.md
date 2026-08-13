@@ -8,6 +8,16 @@ A thin wrapper over the [ardanlabs/kronk](https://github.com/ardanlabs/kronk) SD
 - Downloads the configured GGUF model from HuggingFace
 - Initializes the kronk backend and loads the model
 - Implements LangChainGo's `llms.Model` and `embeddings.EmbedderClient`
+- Supports native tool calls and multi-turn tool results
+- Supports text, image, audio, and video message parts with compatible models
+- Streams normal and reasoning content and returns token/performance usage
+- Maps LangChainGo JSON mode to Kronk's grammar-constrained JSON output
+- Integrates with LangChainGo callback handlers
+
+Media messages require a compatible multimodal model and projection file.
+`llms.BinaryPart` supports image, audio, and video MIME types. Kronk requires
+base64 media data, so `llms.ImageURLPart` must contain a data URL rather than a
+remote HTTP URL.
 
 ## Usage
 
@@ -44,6 +54,11 @@ response, err := client.GenerateContent(ctx, messages,
 )
 ```
 
+Native tools use the standard LangChainGo `llms.WithTools` and
+`llms.WithToolChoice` options. Append returned `llms.ToolCall` values to an AI
+message, execute them, and append each result as an `llms.ToolCallResponse` in
+a tool message. See `../function-example` for a complete round trip.
+
 ## API
 
 | Method | Description |
@@ -59,3 +74,10 @@ LangChainGo call options map `MaxTokens`, `Temperature`, `TopK`,
 `TopP`, `Seed`, `StopWords`, `RepetitionPenalty`, `FrequencyPenalty`, and
 `PresencePenalty` to Kronk sampling parameters. Kronk-specific sampling
 defaults can also be set at load time with `kronk.WithDefaultParams`.
+Because LangChainGo call options do not distinguish an omitted numeric value
+from an explicit zero, configure zero-valued sampling defaults (such as greedy
+temperature) with `kronk.WithDefaultParams`.
+
+Additional supported call options include `llms.WithTools`,
+`llms.WithToolChoice`, `llms.WithJSONMode`, `llms.WithResponseMIMEType`,
+`llms.WithStreamingFunc`, and `llms.WithStreamingReasoningFunc`.

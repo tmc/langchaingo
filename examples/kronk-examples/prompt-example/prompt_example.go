@@ -1,4 +1,4 @@
-// chat_example demonstrates a minimal chat session built on the kronk
+// prompt_example demonstrates a minimal chat session built on the kronk
 // abstraction layer. It uses llms.GenerateFromSinglePrompt to ask a single
 // question to a local GGUF model running via llama.cpp.
 //
@@ -7,7 +7,7 @@
 //
 // Run from this directory:
 //
-//	go run chat_example.go
+//	go run prompt_example.go
 package main
 
 import (

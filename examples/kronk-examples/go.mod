@@ -3,7 +3,7 @@ module github.com/tmc/langchaingo/examples/kronk-examples
 go 1.26.0
 
 require (
-	github.com/ardanlabs/kronk v1.30.5
+	github.com/ardanlabs/kronk v1.30.8
 	github.com/tmc/langchaingo v0.1.14
 	go.mongodb.org/mongo-driver/v2 v2.0.0
 )

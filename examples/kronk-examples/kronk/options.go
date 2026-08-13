@@ -3,6 +3,8 @@ package kronk
 import (
 	"time"
 
+	"github.com/tmc/langchaingo/callbacks"
+
 	kronksdk "github.com/ardanlabs/kronk/sdk/kronk"
 	"github.com/ardanlabs/kronk/sdk/kronk/model"
 )
@@ -18,6 +20,7 @@ type options struct {
 	libVersion     string
 	installTimeout time.Duration
 	logger         Logger
+	callbacks      callbacks.Handler
 }
 
 // WithLibVersion configures the llama.cpp library version to install.
@@ -38,6 +41,13 @@ func WithInstallTimeout(v time.Duration) Option {
 func WithLogger(v Logger) Option {
 	return func(o *options) {
 		o.logger = v
+	}
+}
+
+// WithCallbackHandler configures LangChainGo lifecycle callbacks.
+func WithCallbackHandler(v callbacks.Handler) Option {
+	return func(o *options) {
+		o.callbacks = v
 	}
 }
 
