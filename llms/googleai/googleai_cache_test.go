@@ -1,6 +1,7 @@
 package googleai
 
 import (
+	"cmp"
 	"context"
 	"net/http"
 	"os"
@@ -86,7 +87,7 @@ func TestGoogleAI_ExplicitCaching(t *testing.T) { //nolint:funlen
 
 	// Create caching helper with httprr client
 	helper, err := NewCachingHelper(ctx,
-		WithAPIKey(apiKey),
+		WithAPIKey(cmp.Or(apiKey, "test-api-key")),
 		WithRest(),
 		WithHTTPClient(rr.Client()),
 	)
@@ -141,7 +142,7 @@ You should always consider the following aspects in your reviews:
 
 	// Use the cached content in a request
 	client, err := New(ctx,
-		WithAPIKey(apiKey),
+		WithAPIKey(cmp.Or(apiKey, "test-api-key")),
 		WithRest(),
 		WithHTTPClient(rr.Client()),
 	)
@@ -212,7 +213,7 @@ func TestGoogleAI_ImplicitCaching(t *testing.T) {
 
 	ctx := t.Context()
 	client, err := New(ctx,
-		WithAPIKey(apiKey),
+		WithAPIKey(cmp.Or(apiKey, "test-api-key")),
 		WithRest(),
 		WithHTTPClient(rr.Client()),
 	)
@@ -302,7 +303,7 @@ func TestGoogleAI_ImplicitCaching_Streaming(t *testing.T) { //nolint:funlen
 
 	ctx := t.Context()
 	client, err := New(ctx,
-		WithAPIKey(apiKey),
+		WithAPIKey(cmp.Or(apiKey, "test-api-key")),
 		WithRest(),
 		WithHTTPClient(rr.Client()),
 	)
@@ -419,7 +420,7 @@ func TestGoogleAI_ImplicitCaching_ConversationContinuation(t *testing.T) { //nol
 
 	ctx := t.Context()
 	client, err := New(ctx,
-		WithAPIKey(apiKey),
+		WithAPIKey(cmp.Or(apiKey, "test-api-key")),
 		WithRest(),
 		WithHTTPClient(rr.Client()),
 	)
@@ -566,7 +567,7 @@ func TestGoogleAI_ImplicitCaching_ConversationContinuation_Streaming(t *testing.
 
 	ctx := t.Context()
 	client, err := New(ctx,
-		WithAPIKey(apiKey),
+		WithAPIKey(cmp.Or(apiKey, "test-api-key")),
 		WithRest(),
 		WithHTTPClient(rr.Client()),
 	)
