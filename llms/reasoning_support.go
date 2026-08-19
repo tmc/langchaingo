@@ -80,8 +80,6 @@ func lookupReasoningOverride(model string) (ReasoningSupport, bool) {
 	return ReasoningSupport{}, false
 }
 
-// claudeCannotDisable reports whether thinking stays on whatever the caller asks.
-// Only the Anthropic adapter emits thinking:{type:"disabled"}.
 func claudeCannotDisable(model string, p reasoning.Provider) bool {
 	switch reasoning.ResolveOff(model, p) {
 	case reasoning.OffUnsupported:

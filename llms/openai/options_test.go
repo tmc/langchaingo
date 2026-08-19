@@ -373,8 +373,6 @@ func TestQwenSamplingReachesWireVerbatim(t *testing.T) { //nolint:funlen // thre
 // default the client substitutes on the wire — not off an empty model. Otherwise
 // WithReasoningDisabled() on a zero-config client is a silent no-op.
 func TestZeroConfigReasoningDisabledUsesDefaultModel(t *testing.T) {
-	// Ensure no ambient model is configured so the client falls through to the
-	// package default (cannot use t.Parallel with t.Setenv).
 	t.Setenv("OPENAI_MODEL", "")
 
 	const completion = `{"id":"x","object":"chat.completion","created":1,"model":"m",` +
@@ -409,8 +407,6 @@ func TestZeroConfigReasoningDisabledUsesDefaultModel(t *testing.T) {
 }
 
 func TestZeroConfigTemperaturePinUsesDefaultModel(t *testing.T) {
-	// Ensure no ambient model is configured so the client falls through to the
-	// package default (cannot use t.Parallel with t.Setenv).
 	t.Setenv("OPENAI_MODEL", "")
 
 	const completion = `{"id":"x","object":"chat.completion","created":1,"model":"m",` +
@@ -440,22 +436,18 @@ func TestZeroConfigTemperaturePinUsesDefaultModel(t *testing.T) {
 		return body
 	}
 
-	// The package default is a reasoning model, so the pin must apply even though
-	// no model was named on the call or the client.
 	zeroConfig := capture(t)
 	if !strings.Contains(zeroConfig, `"temperature":1`) {
 		t.Errorf("zero-config must pin temperature for %s, got body: %s",
 			openaiclient.DefaultChatModel, zeroConfig)
 	}
 
-	// Naming the same model explicitly cannot change the outcome.
 	explicit := capture(t, WithModel(openaiclient.DefaultChatModel))
 	if !strings.Contains(explicit, `"temperature":1`) {
 		t.Errorf("explicit %s must pin temperature too, got body: %s",
 			openaiclient.DefaultChatModel, explicit)
 	}
 
-	// A non-reasoning model keeps the caller's temperature.
 	plain := capture(t, WithModel("gpt-4.1-mini"))
 	if !strings.Contains(plain, `"temperature":0.2`) {
 		t.Errorf("a non-reasoning model must keep the caller temperature, got body: %s", plain)

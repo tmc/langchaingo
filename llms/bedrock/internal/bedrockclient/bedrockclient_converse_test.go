@@ -1010,7 +1010,6 @@ func TestConverseClient_AdaptiveEffortDerivedFromMaxTokens(t *testing.T) {
 		},
 	}, nil)
 
-	// An adaptive-only model with a token budget but no explicit effort.
 	input := &ConverseInput{
 		ModelID:         "us.anthropic.claude-sonnet-5",
 		Messages:        []Message{{Role: llms.ChatMessageTypeHuman, Content: "Hello", Type: "text"}},

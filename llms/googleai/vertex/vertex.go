@@ -78,8 +78,7 @@ func (g *Vertex) GenerateContent(
 		opt(&opts)
 	}
 
-	// The pinned vertexai SDK has no thinking config, so an explicit disable can
-	// never reach the wire.
+	// The pinned vertexai SDK has no thinking config: a disable cannot reach the wire.
 	if opts.Reasoning.ResolveMode() == llms.ReasoningOff {
 		return nil, &reasoning.ErrReasoningOffUnsupported{Model: opts.GetModel()}
 	}

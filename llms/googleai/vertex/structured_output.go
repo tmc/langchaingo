@@ -56,8 +56,7 @@ func applyVertexResponseFormat(model *genai.GenerativeModel, opts *llms.CallOpti
 }
 
 // validateVertexStructuredOutput validates each normal-final (FinishReasonStop)
-// candidate against the original schema. Other finish reasons, and tool turns,
-// keep their prior semantics and are not validated as final JSON.
+// candidate against the original schema.
 func validateVertexStructuredOutput(opts *llms.CallOptions, resp *llms.ContentResponse) error {
 	so := opts.StructuredOutput
 	if so == nil || resp == nil {

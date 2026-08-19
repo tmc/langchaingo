@@ -1002,8 +1002,6 @@ func TestAnthropic_InterleavedThinkingBetaHeader(t *testing.T) {
 	})
 }
 
-// captureAssistantReplay returns the content blocks the adapter built for the
-// assistant turn of the replayed history.
 func captureAssistantReplay(t *testing.T, parts []llms.ContentPart) []any {
 	t.Helper()
 

@@ -1060,7 +1060,6 @@ func TestResolveTemperature(t *testing.T) {
 	assert.Equal(t, 0.5, resolveTemperature("gemini-2.5-flash", sdkDefault))
 	assert.Equal(t, 0.5, resolveTemperature("gemini-2.5-pro", sdkDefault))
 
-	// A temperature the caller configured wins on every model.
 	configured := DefaultOptions()
 	WithDefaultTemperature(0.2)(&configured)
 	assert.Equal(t, 0.2, resolveTemperature("gemini-3.1-pro", configured))

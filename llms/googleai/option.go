@@ -29,8 +29,8 @@ type Options struct {
 
 	ClientOptions []option.ClientOption
 
-	// temperatureFromCaller is set by WithDefaultTemperature, not by writing
-	// DefaultTemperature directly.
+	// Set by WithDefaultTemperature; writing DefaultTemperature directly leaves
+	// it false and lets the Gemini 3 recommendation win.
 	temperatureFromCaller bool
 }
 

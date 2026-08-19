@@ -1,6 +1,9 @@
 package reasoning
 
-import "testing"
+import (
+	"slices"
+	"testing"
+)
 
 func TestClaudeReasoningKindFor(t *testing.T) {
 	t.Parallel()
@@ -34,6 +37,26 @@ func TestClaudeReasoningKindFor(t *testing.T) {
 	for _, tc := range cases {
 		if got := ClaudeReasoningKindFor(tc.model); got != tc.want {
 			t.Errorf("ClaudeReasoningKindFor(%q) = %d, want %d", tc.model, got, tc.want)
+		}
+	}
+}
+
+func TestClaudeEffortsFor(t *testing.T) {
+	t.Parallel()
+	cases := []struct {
+		model string
+		want  []string
+	}{
+		{"claude-opus-5", []string{"low", "medium", "high", "xhigh", "max"}},
+		{"us.anthropic.claude-opus-4-7", []string{"low", "medium", "high", "xhigh", "max"}},
+		{"claude-opus-4-6", []string{"low", "medium", "high", "max"}},
+		{"claude-sonnet-4-6", []string{"low", "medium", "high", "max"}},
+		{"claude-opus-4-5-20251101", []string{"low", "medium", "high"}},
+		{"gpt-5.5", nil},
+	}
+	for _, tc := range cases {
+		if got := ClaudeEffortsFor(tc.model); !slices.Equal(got, tc.want) {
+			t.Errorf("ClaudeEffortsFor(%q) = %v, want %v", tc.model, got, tc.want)
 		}
 	}
 }

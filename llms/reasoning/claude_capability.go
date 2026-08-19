@@ -99,8 +99,7 @@ func ClaudeThinkingDefaultsOn(model string) bool {
 	return containsAny(strings.ToLower(model), defaultOnClaude)
 }
 
-// claudeEffortsByKind lists the effort levels each generation accepts. The sets
-// are not nested: the dual generation takes max but not xhigh.
+// claudeEffortsByKind lists the effort levels each generation accepts.
 var claudeEffortsByKind = map[ClaudeReasoningKind][]string{
 	ClaudeReasoningAdaptiveOnly:      {"low", "medium", "high", "xhigh", "max"},
 	ClaudeReasoningAdaptiveAndBudget: {"low", "medium", "high", "max"},

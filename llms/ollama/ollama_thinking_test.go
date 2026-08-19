@@ -12,7 +12,6 @@ import (
 	"github.com/vxcontrol/langchaingo/llms/streaming"
 )
 
-// newThinkingServerClient serves the given lines as an NDJSON chat response.
 func newThinkingServerClient(t *testing.T, lines ...string) *LLM {
 	t.Helper()
 

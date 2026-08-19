@@ -62,8 +62,6 @@ type errorMessage struct {
 
 const maxErrorBodyBytes = 2048
 
-// statusError turns a non-200 response into an error carrying the provider's
-// own explanation, quoting the raw body when it is not OpenAI-shaped.
 func statusError(statusCode int, body io.Reader) error {
 	msg := fmt.Sprintf("API returned unexpected status code: %d", statusCode)
 
