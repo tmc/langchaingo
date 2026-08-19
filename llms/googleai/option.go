@@ -28,6 +28,10 @@ type Options struct {
 	HTTPClient            *http.Client
 
 	ClientOptions []option.ClientOption
+
+	// temperatureFromCaller is set by WithDefaultTemperature, not by writing
+	// DefaultTemperature directly.
+	temperatureFromCaller bool
 }
 
 func DefaultOptions() Options {
@@ -179,10 +183,12 @@ func WithDefaultMaxTokens(maxTokens int) Option {
 	}
 }
 
-// WithDefaultTemperature sets the maximum token count for the model.
+// WithDefaultTemperature sets the sampling temperature used when a call does not
+// set one of its own.
 func WithDefaultTemperature(defaultTemperature float64) Option {
 	return func(opts *Options) {
 		opts.DefaultTemperature = defaultTemperature
+		opts.temperatureFromCaller = true
 	}
 }
 

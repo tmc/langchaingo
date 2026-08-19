@@ -1052,11 +1052,23 @@ var productionGeminiModels = []struct {
 
 func TestResolveTemperature(t *testing.T) {
 	t.Parallel()
+
+	sdkDefault := Options{DefaultTemperature: 0.5}
 	// Gemini 3 defaults to 1.0; everything else keeps the SDK default (0.5 here).
-	assert.Equal(t, 1.0, resolveTemperature("gemini-3.1-pro", 0.5))
-	assert.Equal(t, 1.0, resolveTemperature("gemini-3-flash", 0.5))
-	assert.Equal(t, 0.5, resolveTemperature("gemini-2.5-flash", 0.5))
-	assert.Equal(t, 0.5, resolveTemperature("gemini-2.5-pro", 0.5))
+	assert.Equal(t, 1.0, resolveTemperature("gemini-3.1-pro", sdkDefault))
+	assert.Equal(t, 1.0, resolveTemperature("gemini-3-flash", sdkDefault))
+	assert.Equal(t, 0.5, resolveTemperature("gemini-2.5-flash", sdkDefault))
+	assert.Equal(t, 0.5, resolveTemperature("gemini-2.5-pro", sdkDefault))
+
+	// A temperature the caller configured wins on every model.
+	configured := DefaultOptions()
+	WithDefaultTemperature(0.2)(&configured)
+	assert.Equal(t, 0.2, resolveTemperature("gemini-3.1-pro", configured))
+	assert.Equal(t, 0.2, resolveTemperature("gemini-2.5-flash", configured))
+
+	sameAsDefault := DefaultOptions()
+	WithDefaultTemperature(0.5)(&sameAsDefault)
+	assert.Equal(t, 0.5, resolveTemperature("gemini-3-flash", sameAsDefault))
 }
 
 func TestResolveThinkingConfig(t *testing.T) {

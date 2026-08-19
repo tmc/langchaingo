@@ -958,3 +958,75 @@ func TestGenerateContentKeepsPartialResponseWhenStreamingFuncFails(t *testing.T)
 	require.NotNil(t, resp)
 	require.Equal(t, "partial answer", resp.Choices[0].Content)
 }
+
+type captureTransport struct {
+	body []byte
+	resp string
+}
+
+func (t *captureTransport) RoundTrip(r *http.Request) (*http.Response, error) {
+	if r.Body != nil {
+		t.body, _ = io.ReadAll(r.Body)
+	}
+	return &http.Response{
+		StatusCode: http.StatusOK,
+		Header:     http.Header{"Content-Type": []string{"application/json"}},
+		Body:       io.NopCloser(strings.NewReader(t.resp)),
+	}, nil
+}
+
+func TestConfiguredDefaultTemperatureReachesTheWire(t *testing.T) {
+	t.Parallel()
+
+	for _, tc := range []struct {
+		name  string
+		opts  []Option
+		want  float64
+		model string
+	}{
+		{name: "gemini-3 without a configured default", model: "gemini-3-flash", want: 1.0},
+		{
+			name:  "gemini-3 with a configured default",
+			model: "gemini-3-flash",
+			opts:  []Option{WithDefaultTemperature(0.2)},
+			want:  0.2,
+		},
+		{
+			name:  "gemini-2.5 with a configured default",
+			model: "gemini-2.5-flash",
+			opts:  []Option{WithDefaultTemperature(0.2)},
+			want:  0.2,
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			rt := &captureTransport{
+				resp: `{"candidates":[{"content":{"parts":[{"text":"ok"}],"role":"model"},` +
+					`"finishReason":"STOP","index":0}]}`,
+			}
+			opts := append([]Option{
+				WithAPIKey("test-api-key"),
+				WithRest(),
+				WithDefaultModel(tc.model),
+				WithHTTPClient(&http.Client{Transport: rt}),
+			}, tc.opts...)
+
+			llm, err := New(t.Context(), opts...)
+			require.NoError(t, err)
+
+			_, err = llm.GenerateContent(t.Context(),
+				[]llms.MessageContent{llms.TextParts(llms.ChatMessageTypeHuman, "hi")})
+			require.NoError(t, err)
+
+			var payload struct {
+				GenerationConfig struct {
+					Temperature *float64 `json:"temperature"`
+				} `json:"generationConfig"`
+			}
+			require.NoError(t, json.Unmarshal(rt.body, &payload))
+			require.NotNil(t, payload.GenerationConfig.Temperature)
+			require.InDelta(t, tc.want, *payload.GenerationConfig.Temperature, 1e-6)
+		})
+	}
+}
