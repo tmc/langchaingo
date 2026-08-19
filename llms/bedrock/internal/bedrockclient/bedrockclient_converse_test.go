@@ -992,3 +992,44 @@ func TestConvertMessages_MultipleToolCallVariants(t *testing.T) {
 		})
 	}
 }
+
+func TestConverseClient_AdaptiveEffortDerivedFromMaxTokens(t *testing.T) {
+	mockClient := &MockBedrockRuntimeClient{}
+	client := NewConverseClient(mockClient)
+
+	var capturedInput *bedrockruntime.ConverseInput
+	mockClient.On("Converse", mock.Anything, mock.MatchedBy(func(input *bedrockruntime.ConverseInput) bool {
+		capturedInput = input
+		return true
+	}), mock.Anything).Return(&bedrockruntime.ConverseOutput{
+		Output: &types.ConverseOutputMemberMessage{
+			Value: types.Message{
+				Role:    types.ConversationRoleAssistant,
+				Content: []types.ContentBlock{&types.ContentBlockMemberText{Value: "ok"}},
+			},
+		},
+	}, nil)
+
+	// An adaptive-only model with a token budget but no explicit effort.
+	input := &ConverseInput{
+		ModelID:         "us.anthropic.claude-sonnet-5",
+		Messages:        []Message{{Role: llms.ChatMessageTypeHuman, Content: "Hello", Type: "text"}},
+		MaxTokens:       ptr(32000),
+		ReasoningConfig: &llms.ReasoningConfig{Mode: llms.ReasoningOn, Tokens: 3000},
+	}
+
+	_, err := client.CreateCompletionConverse(t.Context(), input)
+	assert.NoError(t, err)
+
+	if !assert.NotNil(t, capturedInput.AdditionalModelRequestFields) {
+		return
+	}
+	raw, err := capturedInput.AdditionalModelRequestFields.MarshalSmithyDocument()
+	assert.NoError(t, err)
+	var fields map[string]any
+	assert.NoError(t, json.Unmarshal(raw, &fields))
+
+	outputConfig, _ := fields["output_config"].(map[string]any)
+	assert.Equal(t, string(llms.ReasoningLow), outputConfig["effort"],
+		"3000 of 32000 max tokens is a low effort; deriving from a hardcoded 0 would say high")
+}

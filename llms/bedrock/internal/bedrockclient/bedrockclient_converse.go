@@ -152,8 +152,12 @@ func (c *ConverseClient) buildConverseInput(input *ConverseInput) (*bedrockrunti
 	switch input.ReasoningConfig.ResolveMode() {
 	case llms.ReasoningOn:
 		additionalModelFields := converseAdditionalModelRequestFields{}
+		maxTokens := 0 // Use 0 to let it use default maxTokens
+		if input.MaxTokens != nil {
+			maxTokens = *input.MaxTokens
+		}
 		setAdaptive := func() {
-			effort := input.ReasoningConfig.GetEffort(0)
+			effort := input.ReasoningConfig.GetEffort(maxTokens)
 			additionalModelFields.Thinking = &converseThinkingPayload{Type: "adaptive", Display: "summarized"}
 			additionalModelFields.OutputConfig = &converseOutputConfig{Effort: string(effort)}
 			// Adaptive models reject sampling params.
@@ -161,10 +165,6 @@ func (c *ConverseClient) buildConverseInput(input *ConverseInput) (*bedrockrunti
 			inferenceConfig.TopP = nil
 		}
 		setBudget := func() {
-			maxTokens := 0 // Use 0 to let it use default maxTokens
-			if input.MaxTokens != nil {
-				maxTokens = *input.MaxTokens
-			}
 			if tokens := input.ReasoningConfig.GetTokens(maxTokens); tokens > 0 {
 				additionalModelFields.Thinking = &converseThinkingPayload{Type: "enabled", BudgetTokens: tokens}
 				// Budget thinking requires temperature=1.0 and rejects top_p.
