@@ -699,7 +699,10 @@ func WithPresencePenalty(presencePenalty float64) CallOption {
 
 // WithReasoning sets the reasoning configuration for the model call.
 // You can specify either the reasoning effort or the number of tokens to allocate for reasoning.
-// If both effort is ReasoningNone and tokens is 0, reasoning will be disabled.
+// If both effort is ReasoningNone and tokens is 0, the reasoning control is
+// omitted and the model's own default applies — on models that think by default
+// (claude-sonnet-5, claude-opus-5, gemini-2.5-flash) thinking stays on and is
+// billed. Use WithReasoningDisabled to force it off.
 // Note: Most LLM providers expect only one of these options to be set at a time.
 // Internally, the options may be converted between each other according to predefined rules.
 func WithReasoning(effort ReasoningEffort, tokens int) CallOption {
