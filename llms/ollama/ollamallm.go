@@ -364,12 +364,14 @@ func (o *LLM) handleChat(ctx context.Context, req *api.ChatRequest, opts llms.Ca
 	var (
 		resp              api.ChatResponse
 		streamedResponse  string
+		streamedThinking  string
 		streamedToolCalls []api.ToolCall
 	)
 
 	splitter := reasoning.NewChunkContentSplitter()
 	fn := func(response api.ChatResponse) error {
 		textContent, reasoningContent := splitter.Split(response.Message.Content)
+		reasoningContent += response.Message.Thinking
 		if opts.StreamingFunc != nil {
 			reasoning := &reasoning.ContentReasoning{Content: reasoningContent}
 			if err := streaming.CallWithReasoning(ctx, opts.StreamingFunc, reasoning); err != nil {
@@ -395,6 +397,7 @@ func (o *LLM) handleChat(ctx context.Context, req *api.ChatRequest, opts llms.Ca
 		if response.Message.Content != "" {
 			streamedResponse += response.Message.Content
 		}
+		streamedThinking += response.Message.Thinking
 		if len(response.Message.ToolCalls) > 0 {
 			streamedToolCalls = append(streamedToolCalls, response.Message.ToolCalls...)
 		}
@@ -404,6 +407,7 @@ func (o *LLM) handleChat(ctx context.Context, req *api.ChatRequest, opts llms.Ca
 			resp.Message = api.Message{
 				Role:      "assistant",
 				Content:   streamedResponse,
+				Thinking:  streamedThinking,
 				ToolCalls: streamedToolCalls,
 			}
 		}
@@ -416,11 +420,12 @@ func (o *LLM) handleChat(ctx context.Context, req *api.ChatRequest, opts llms.Ca
 
 // createContentResponse creates a LangChain content response from Ollama response.
 func (o *LLM) createContentResponse(resp api.ChatResponse) *llms.ContentResponse {
-	reasoning, content := reasoning.SplitContentWithReasoning(resp.Message.Content)
+	contentReasoning, content := reasoning.SplitContentWithReasoning(resp.Message.Content)
+	contentReasoning.Content += resp.Message.Thinking
 	choices := []*llms.ContentChoice{
 		{
 			Content:    content,
-			Reasoning:  reasoning,
+			Reasoning:  contentReasoning,
 			StopReason: resp.DoneReason,
 			GenerationInfo: map[string]any{
 				"CompletionTokens": resp.EvalCount,
