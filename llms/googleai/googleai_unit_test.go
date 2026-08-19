@@ -905,6 +905,22 @@ func TestValidateGoogleStructuredOutput(t *testing.T) {
 		}
 	})
 
+	t.Run("a tool turn is not a final answer", func(t *testing.T) {
+		t.Parallel()
+		err := validateGoogleStructuredOutput(opts, mk(&llms.ContentChoice{
+			Content:    "",
+			StopReason: stop,
+			ToolCalls: []llms.ToolCall{{
+				ID:           "call_1",
+				Type:         "function",
+				FunctionCall: &llms.FunctionCall{Name: "getWeather", Arguments: `{"city":"Paris"}`},
+			}},
+		}))
+		if err != nil {
+			t.Fatalf("a STOP turn carrying tool calls must not be validated as JSON: %v", err)
+		}
+	})
+
 	t.Run("MAX_TOKENS is skipped", func(t *testing.T) {
 		t.Parallel()
 		err := validateGoogleStructuredOutput(opts, mk(&llms.ContentChoice{Content: `{"answer"`, StopReason: maxTok}))

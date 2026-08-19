@@ -56,8 +56,8 @@ func applyVertexResponseFormat(model *genai.GenerativeModel, opts *llms.CallOpti
 }
 
 // validateVertexStructuredOutput validates each normal-final (FinishReasonStop)
-// candidate against the original schema. Other finish reasons keep their prior
-// semantics and are not validated as final JSON.
+// candidate against the original schema. Other finish reasons, and tool turns,
+// keep their prior semantics and are not validated as final JSON.
 func validateVertexStructuredOutput(opts *llms.CallOptions, resp *llms.ContentResponse) error {
 	so := opts.StructuredOutput
 	if so == nil || resp == nil {
@@ -66,7 +66,8 @@ func validateVertexStructuredOutput(opts *llms.CallOptions, resp *llms.ContentRe
 	model := opts.GetModel()
 	stop := genai.FinishReasonStop.String()
 	for i, choice := range resp.Choices {
-		if choice.StopReason != stop {
+		// Gemini reports a function call as STOP with no text.
+		if choice.StopReason != stop || len(choice.ToolCalls) > 0 {
 			continue
 		}
 		if err := structuredoutput.Validate(so.Schema, providerVertex, model, i, choice.StopReason, choice.Content); err != nil {

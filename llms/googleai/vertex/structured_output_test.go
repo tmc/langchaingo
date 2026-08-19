@@ -233,4 +233,17 @@ func TestValidateVertexStructuredOutput(t *testing.T) {
 	if !errors.As(err, &ve) {
 		t.Errorf("invalid STOP must fail typed: %v", err)
 	}
+
+	toolTurn := &llms.ContentChoice{
+		Content:    "",
+		StopReason: stop,
+		ToolCalls: []llms.ToolCall{{
+			ID:           "call_1",
+			Type:         "function",
+			FunctionCall: &llms.FunctionCall{Name: "getWeather", Arguments: `{"city":"Paris"}`},
+		}},
+	}
+	if err := validateVertexStructuredOutput(opts, &llms.ContentResponse{Choices: []*llms.ContentChoice{toolTurn}}); err != nil {
+		t.Errorf("a STOP turn carrying tool calls must not be validated as JSON: %v", err)
+	}
 }
