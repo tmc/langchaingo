@@ -21,6 +21,7 @@ import (
 	"cloud.google.com/go/vertexai/genai"
 	"github.com/vxcontrol/langchaingo/internal/imageutil"
 	"github.com/vxcontrol/langchaingo/llms"
+	"github.com/vxcontrol/langchaingo/llms/reasoning"
 	"google.golang.org/api/iterator"
 )
 
@@ -75,6 +76,12 @@ func (g *Vertex) GenerateContent(
 	}
 	for _, opt := range options {
 		opt(&opts)
+	}
+
+	// The pinned vertexai SDK has no thinking config, so an explicit disable can
+	// never reach the wire.
+	if opts.Reasoning.ResolveMode() == llms.ReasoningOff {
+		return nil, &reasoning.ErrReasoningOffUnsupported{Model: opts.GetModel()}
 	}
 
 	model := g.client.GenerativeModel(opts.GetModel())

@@ -2,10 +2,12 @@ package vertex
 
 import (
 	"encoding/json"
+	"errors"
 	"strings"
 	"testing"
 
 	"github.com/vxcontrol/langchaingo/llms"
+	"github.com/vxcontrol/langchaingo/llms/reasoning"
 
 	"cloud.google.com/go/vertexai/genai"
 )
@@ -718,4 +720,19 @@ func TestMergeStreamCandidateCarriesFinishReasonOnContentlessChunk(t *testing.T)
 // Test that Vertex implements llms.Model interface
 func TestVertexImplementsModel(t *testing.T) {
 	var _ llms.Model = &Vertex{}
+}
+
+func TestVertexRejectsExplicitReasoningOff(t *testing.T) {
+	t.Parallel()
+
+	llm := &Vertex{}
+	_, err := llm.GenerateContent(t.Context(),
+		[]llms.MessageContent{llms.TextParts(llms.ChatMessageTypeHuman, "hi")},
+		llms.WithReasoningDisabled(),
+	)
+
+	var unsupported *reasoning.ErrReasoningOffUnsupported
+	if !errors.As(err, &unsupported) {
+		t.Fatalf("err = %v, want ErrReasoningOffUnsupported", err)
+	}
 }
