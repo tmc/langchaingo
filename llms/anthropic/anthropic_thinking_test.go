@@ -1049,10 +1049,39 @@ func thinkingBlocks(blocks []any) []map[string]any {
 	return out
 }
 
+func TestAnthropic_OmittedThinkingResponseKeepsSignature(t *testing.T) {
+	t.Parallel()
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"id":"m","type":"message","role":"assistant","model":"claude-sonnet-5",` +
+			`"content":[{"type":"thinking","thinking":"","signature":"sig-only"},{"type":"text","text":"ok"}],` +
+			`"stop_reason":"end_turn","usage":{"input_tokens":1,"output_tokens":1}}`))
+	}))
+	t.Cleanup(srv.Close)
+
+	llm, err := anthropic.New(
+		anthropic.WithToken("test-key"),
+		anthropic.WithBaseURL(srv.URL),
+		anthropic.WithModel("claude-sonnet-5"),
+	)
+	require.NoError(t, err)
+
+	resp, err := llm.GenerateContent(t.Context(), []llms.MessageContent{
+		{Role: llms.ChatMessageTypeHuman, Parts: []llms.ContentPart{llms.TextPart("hi")}},
+	})
+	require.NoError(t, err)
+	require.Len(t, resp.Choices, 1)
+	require.NotNil(t, resp.Choices[0].Reasoning,
+		"a block with an empty thinking field still carries the signature the next turn must replay")
+	require.Equal(t, "sig-only", string(resp.Choices[0].Reasoning.Signature))
+	require.Empty(t, resp.Choices[0].Reasoning.Content)
+}
+
 func TestAnthropic_ThinkingReplayNeverOmitsRequiredField(t *testing.T) {
 	t.Parallel()
 
-	t.Run("signature without text emits no thinking block", func(t *testing.T) {
+	t.Run("a block carrying only a signature keeps the required field", func(t *testing.T) {
 		t.Parallel()
 
 		blocks := captureAssistantReplay(t, []llms.ContentPart{
@@ -1062,11 +1091,15 @@ func TestAnthropic_ThinkingReplayNeverOmitsRequiredField(t *testing.T) {
 			},
 		})
 
-		require.Empty(t, thinkingBlocks(blocks),
-			"a thinking block without the required thinking field must not be sent")
+		emitted := thinkingBlocks(blocks)
+		require.Len(t, emitted, 1)
+		require.Contains(t, emitted[0], "thinking",
+			"the thinking field is required even when the model returned no text for it")
+		require.Equal(t, "", emitted[0]["thinking"])
+		require.Equal(t, "sig-only", emitted[0]["signature"])
 	})
 
-	t.Run("text-bearing part is used when an earlier part carries only a signature", func(t *testing.T) {
+	t.Run("every thinking block of the turn is replayed in order", func(t *testing.T) {
 		t.Parallel()
 
 		blocks := captureAssistantReplay(t, []llms.ContentPart{
@@ -1080,8 +1113,15 @@ func TestAnthropic_ThinkingReplayNeverOmitsRequiredField(t *testing.T) {
 		})
 
 		emitted := thinkingBlocks(blocks)
-		require.Len(t, emitted, 1)
-		require.Equal(t, "real thinking", emitted[0]["thinking"])
+		require.Len(t, emitted, 2)
+		require.Equal(t, "", emitted[0]["thinking"])
+		require.Equal(t, "sig-only", emitted[0]["signature"])
+		require.Equal(t, "real thinking", emitted[1]["thinking"])
+
+		require.Len(t, blocks, 3)
+		last, ok := blocks[2].(map[string]any)
+		require.True(t, ok)
+		require.Equal(t, "text", last["type"])
 	})
 
 	t.Run("thinking text always reaches the wire", func(t *testing.T) {

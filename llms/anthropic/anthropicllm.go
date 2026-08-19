@@ -367,7 +367,7 @@ func processAnthropicResponse(result *anthropicclient.MessageResponsePayload) (*
 
 	// Create reasoning object
 	var contentReasoning *reasoning.ContentReasoning
-	if reasoningContent.Len() > 0 {
+	if reasoningContent.Len() > 0 || len(signature) > 0 {
 		contentReasoning = &reasoning.ContentReasoning{
 			Content:   reasoningContent.String(),
 			Signature: signature,
@@ -802,12 +802,9 @@ func handleAIMessage(msg llms.MessageContent) (anthropicclient.ChatMessage, erro
 		Content: []anthropicclient.Content{},
 	}
 
-	// The API requires the thinking block to lead the assistant turn, before any
-	// text or tool_use. Emit it first regardless of where the caller placed the
-	// reasoning-bearing part among msg.Parts.
 	for _, part := range msg.Parts {
 		p, ok := part.(llms.TextContent)
-		if !ok || p.Reasoning == nil || len(p.Reasoning.Content) == 0 {
+		if !ok || p.Reasoning.IsEmpty() {
 			continue
 		}
 		thinkingBlock := &anthropicclient.ThinkingContent{
@@ -818,7 +815,6 @@ func handleAIMessage(msg llms.MessageContent) (anthropicclient.ChatMessage, erro
 			thinkingBlock.Signature = string(p.Reasoning.Signature)
 		}
 		message.Content = append(message.Content, thinkingBlock)
-		break // one thinking block per assistant turn
 	}
 
 	for _, part := range msg.Parts {
