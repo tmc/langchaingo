@@ -407,3 +407,57 @@ func TestZeroConfigReasoningDisabledUsesDefaultModel(t *testing.T) {
 			openaiclient.DefaultChatModel, body)
 	}
 }
+
+func TestZeroConfigTemperaturePinUsesDefaultModel(t *testing.T) {
+	// Ensure no ambient model is configured so the client falls through to the
+	// package default (cannot use t.Parallel with t.Setenv).
+	t.Setenv("OPENAI_MODEL", "")
+
+	const completion = `{"id":"x","object":"chat.completion","created":1,"model":"m",` +
+		`"choices":[{"index":0,"message":{"role":"assistant","content":"ok"},"finish_reason":"stop"}],` +
+		`"usage":{"prompt_tokens":1,"completion_tokens":1,"total_tokens":2}}`
+
+	capture := func(t *testing.T, opts ...Option) string {
+		t.Helper()
+		var body string
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			b, _ := io.ReadAll(r.Body)
+			body = string(b)
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = io.WriteString(w, completion)
+		}))
+		defer srv.Close()
+
+		llm, err := New(append([]Option{WithBaseURL(srv.URL), WithToken("test")}, opts...)...)
+		if err != nil {
+			t.Fatalf("New() error: %v", err)
+		}
+		if _, err := llm.GenerateContent(context.Background(),
+			[]llms.MessageContent{llms.TextParts(llms.ChatMessageTypeHuman, "hi")},
+			llms.WithTemperature(0.2)); err != nil {
+			t.Fatalf("GenerateContent() error: %v", err)
+		}
+		return body
+	}
+
+	// The package default is a reasoning model, so the pin must apply even though
+	// no model was named on the call or the client.
+	zeroConfig := capture(t)
+	if !strings.Contains(zeroConfig, `"temperature":1`) {
+		t.Errorf("zero-config must pin temperature for %s, got body: %s",
+			openaiclient.DefaultChatModel, zeroConfig)
+	}
+
+	// Naming the same model explicitly cannot change the outcome.
+	explicit := capture(t, WithModel(openaiclient.DefaultChatModel))
+	if !strings.Contains(explicit, `"temperature":1`) {
+		t.Errorf("explicit %s must pin temperature too, got body: %s",
+			openaiclient.DefaultChatModel, explicit)
+	}
+
+	// A non-reasoning model keeps the caller's temperature.
+	plain := capture(t, WithModel("gpt-4.1-mini"))
+	if !strings.Contains(plain, `"temperature":0.2`) {
+		t.Errorf("a non-reasoning model must keep the caller temperature, got body: %s", plain)
+	}
+}

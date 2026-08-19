@@ -259,8 +259,9 @@ func (o *LLM) createChatRequest(chatMsgs []*ChatMessage, opts llms.CallOptions) 
 	}
 
 	// set temperature to 1.0 for reasoning models, unless reasoning is explicitly
-	// disabled (the model then runs as a plain completion honoring the caller's temp)
-	if reasoning.IsReasoningModel(opts.GetModel()) && !opts.Reasoning.IsDisabled() {
+	// disabled (the model then runs as a plain completion honoring the caller's temp).
+	// A caller who set no temperature keeps none: the model's own default is 1.0.
+	if opts.Temperature != nil && reasoning.IsReasoningModel(o.effectiveModel(opts)) && !opts.Reasoning.IsDisabled() {
 		temperature := 1.0
 		req.Temperature = &temperature
 	}
