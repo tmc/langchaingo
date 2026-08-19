@@ -192,7 +192,7 @@ func (g *GoogleAI) GenerateContent(
 		response, err = g.generateFromMessages(ctx, opts.GetModel(), messages, config, &opts)
 	}
 	if err != nil {
-		return nil, err
+		return response, err
 	}
 
 	// When structured output was requested, validate each normal-final candidate

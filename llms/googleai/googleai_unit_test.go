@@ -1,15 +1,20 @@
 package googleai
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
+	"io"
+	"net/http"
 	"strings"
 	"testing"
 
 	"github.com/vxcontrol/langchaingo/llms"
+	"github.com/vxcontrol/langchaingo/llms/streaming"
 	"google.golang.org/genai"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNew(t *testing.T) {
@@ -919,4 +924,37 @@ func TestValidateGoogleStructuredOutput(t *testing.T) {
 			t.Fatalf("want validation error at choice 1, got %v", err)
 		}
 	})
+}
+
+type stubStreamTransport struct{ body string }
+
+func (t stubStreamTransport) RoundTrip(*http.Request) (*http.Response, error) {
+	return &http.Response{
+		StatusCode: http.StatusOK,
+		Header:     http.Header{"Content-Type": []string{"text/event-stream"}},
+		Body:       io.NopCloser(strings.NewReader(t.body)),
+	}, nil
+}
+
+func TestGenerateContentKeepsPartialResponseWhenStreamingFuncFails(t *testing.T) {
+	t.Parallel()
+
+	chunk := `{"candidates":[{"content":{"parts":[{"text":"partial answer"}],` +
+		`"role":"model"},"finishReason":"STOP","index":0}]}`
+	llm, err := New(t.Context(),
+		WithAPIKey("test-api-key"),
+		WithRest(),
+		WithHTTPClient(&http.Client{Transport: stubStreamTransport{body: "data: " + chunk + "\n\n"}}),
+	)
+	require.NoError(t, err)
+
+	errAbort := errors.New("caller stopped the stream")
+	resp, err := llm.GenerateContent(t.Context(),
+		[]llms.MessageContent{llms.TextParts(llms.ChatMessageTypeHuman, "hi")},
+		llms.WithStreamingFunc(func(context.Context, streaming.Chunk) error { return errAbort }),
+	)
+
+	require.ErrorIs(t, err, errAbort)
+	require.NotNil(t, resp)
+	require.Equal(t, "partial answer", resp.Choices[0].Content)
 }
