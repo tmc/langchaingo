@@ -63,6 +63,19 @@ func lookupReasoningOverride(model string) (ReasoningSupport, bool) {
 	return ReasoningSupport{}, false
 }
 
+// claudeCannotDisable reports whether thinking stays on whatever the caller asks.
+// Only the Anthropic adapter emits thinking:{type:"disabled"}.
+func claudeCannotDisable(model string, p reasoning.Provider) bool {
+	switch reasoning.ResolveOff(model, p) {
+	case reasoning.OffUnsupported:
+		return true
+	case reasoning.OffDisableClaude:
+		return p != reasoning.ProviderAnthropic
+	default:
+		return false
+	}
+}
+
 func boolPtr(b bool) *bool { return &b }
 
 // ReasoningSupportFor returns the reasoning-control hint for a model on a
@@ -81,7 +94,7 @@ func ReasoningSupportFor(model string, p reasoning.Provider) ReasoningSupport {
 			// Derive from the same resolver the wire uses so the hint tracks
 			// provider differences (e.g. Sonnet 5 is disablable on Anthropic but
 			// always on, hence not disablable, on Bedrock).
-			CannotDisable:   reasoning.ResolveOff(model, p) == reasoning.OffUnsupported,
+			CannotDisable:   claudeCannotDisable(model, p),
 			RejectsSampling: reasoning.ClaudeRejectsSampling(model),
 			Efforts:         claudeEfforts(reasoning.ClaudeReasoningKindFor(model)),
 			DefaultOn:       boolPtr(reasoning.ClaudeThinkingDefaultsOn(model)),

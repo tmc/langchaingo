@@ -56,6 +56,8 @@ func TestReasoningSupportFor(t *testing.T) { //nolint:funlen // table-driven tes
 		eq(t, "CannotDisable(Anthropic)", anthropic.CannotDisable, false)
 		bedrock := ReasoningSupportFor("us.anthropic.claude-sonnet-5", reasoning.ProviderBedrock)
 		eq(t, "CannotDisable(Bedrock)", bedrock.CannotDisable, true)
+		gateway := ReasoningSupportFor("anthropic/claude-sonnet-5", reasoning.ProviderOpenAI)
+		eq(t, "CannotDisable(OpenAI gateway)", gateway.CannotDisable, true)
 	})
 
 	t.Run("Opus 5 defaults on but is disablable, like Sonnet 5 unlike Opus 4.8", func(t *testing.T) {
