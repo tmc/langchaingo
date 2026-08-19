@@ -19,12 +19,11 @@ const (
 	// behavior so an unclassified model never regresses.
 	ClaudeReasoningUnknown ClaudeReasoningKind = iota
 	// ClaudeReasoningAdaptiveOnly is the newest generation (Opus 4.7/4.8/5,
-	// Sonnet 5, Fable 5, Mythos 5): it accepts thinking.type=adaptive +
-	// output_config only, and rejects budget_tokens and temperature/top_p with a 400.
+	// Sonnet 5, Fable 5, Mythos 5): it accepts thinking.type=adaptive and
+	// rejects budget_tokens with a 400.
 	ClaudeReasoningAdaptiveOnly
-	// ClaudeReasoningAdaptiveAndBudget is the transitional generation (Opus 4.6,
-	// Sonnet 4.6): it accepts both adaptive and budget thinking and permits
-	// sampling params.
+	// ClaudeReasoningAdaptiveAndBudget accepts both adaptive and budget thinking
+	// (Opus 4.6, Sonnet 4.6, Mythos Preview).
 	ClaudeReasoningAdaptiveAndBudget
 	// ClaudeReasoningBudgetOnly is the extended-thinking generation before
 	// adaptive existed (Opus 4.5, Sonnet 4.5, Haiku 4.5): it accepts
@@ -42,7 +41,7 @@ var (
 		"claude-sonnet-5", "claude-fable-5", "claude-mythos-5",
 	}
 	dualClaude = []string{
-		"claude-opus-4-6", "claude-sonnet-4-6",
+		"claude-opus-4-6", "claude-sonnet-4-6", "claude-mythos-preview",
 	}
 	budgetOnlyClaude = []string{
 		"claude-opus-4-5",
@@ -83,8 +82,11 @@ func ClaudeSupportsThinking(model string) bool {
 // with effort xhigh/max on Opus 5, a constraint this package does not model
 // because this SDK never sends effort alongside a disable request).
 var (
-	alwaysOnClaude  = []string{"claude-fable-5", "claude-mythos-5"}
-	defaultOnClaude = []string{"claude-opus-5", "claude-sonnet-5", "claude-fable-5", "claude-mythos-5"}
+	alwaysOnClaude  = []string{"claude-fable-5", "claude-mythos-5", "claude-mythos-preview"}
+	defaultOnClaude = []string{
+		"claude-opus-5", "claude-sonnet-5",
+		"claude-fable-5", "claude-mythos-5", "claude-mythos-preview",
+	}
 )
 
 // ClaudeThinkingAlwaysOn reports whether the model's thinking cannot be disabled
@@ -115,7 +117,7 @@ func ClaudeEffortsFor(model string) []string {
 // budgetEffortClaude are budget-thinking models that also accept an effort
 // output_config alongside manual thinking (introduced with Opus 4.5). Newer
 // generations use adaptive thinking, where effort is always available.
-var budgetEffortClaude = []string{"claude-opus-4-5"}
+var budgetEffortClaude = []string{"claude-opus-4-5", "claude-mythos-preview"}
 
 // ClaudeSupportsEffortWithBudget reports whether the model accepts
 // output_config.effort together with manual (budget) thinking, so the effort is
@@ -191,11 +193,18 @@ func ClaudePredatesAdaptive(model string) bool {
 	return containsAny(strings.ToLower(model), preAdaptiveClaude)
 }
 
+// rejectsSamplingClaude models reject a non-default temperature, top_p or
+// top_k on every request, whether or not thinking is requested.
+var rejectsSamplingClaude = []string{
+	"claude-fable-5", "claude-mythos-5", "claude-mythos-preview",
+	"claude-opus-5", "claude-opus-4-8", "claude-opus-4-7", "claude-sonnet-5",
+}
+
 // ClaudeRejectsSampling reports whether the model rejects temperature/top_p
-// outright (true only for the adaptive-only generation), so sampling params
-// must be dropped even when no thinking is requested.
+// outright, so sampling params must be dropped even when no thinking is
+// requested.
 func ClaudeRejectsSampling(model string) bool {
-	return ClaudeReasoningKindFor(model) == ClaudeReasoningAdaptiveOnly
+	return containsAny(strings.ToLower(model), rejectsSamplingClaude)
 }
 
 func containsAny(s string, subs []string) bool {

@@ -24,6 +24,7 @@ func TestClaudeReasoningKindFor(t *testing.T) {
 		// Dual (T2).
 		{"claude-opus-4-6", ClaudeReasoningAdaptiveAndBudget},
 		{"us.anthropic.claude-sonnet-4-6", ClaudeReasoningAdaptiveAndBudget},
+		{"claude-mythos-preview", ClaudeReasoningAdaptiveAndBudget},
 		// Budget-only (T3).
 		{"claude-opus-4-5-20251101", ClaudeReasoningBudgetOnly},
 		{"claude-sonnet-4-5-20250929", ClaudeReasoningBudgetOnly},
@@ -51,6 +52,7 @@ func TestClaudeEffortsFor(t *testing.T) {
 		{"us.anthropic.claude-opus-4-7", []string{"low", "medium", "high", "xhigh", "max"}},
 		{"claude-opus-4-6", []string{"low", "medium", "high", "max"}},
 		{"claude-sonnet-4-6", []string{"low", "medium", "high", "max"}},
+		{"claude-mythos-preview", []string{"low", "medium", "high", "max"}},
 		{"claude-opus-4-5-20251101", []string{"low", "medium", "high"}},
 		{"gpt-5.5", nil},
 	}
@@ -133,6 +135,7 @@ func TestClaudeThinkingDefaultAndAlwaysOn(t *testing.T) {
 		{"claude-opus-4-8", false, false, "defaults off"},
 		{"claude-fable-5", true, true, "always on, cannot disable"},
 		{"claude-mythos-5", true, true, "always on, cannot disable"},
+		{"claude-mythos-preview", true, true, "always on, cannot disable"},
 	}
 	for _, tc := range cases {
 		if got := ClaudeThinkingDefaultsOn(tc.model); got != tc.defaultOn {
@@ -153,6 +156,7 @@ func TestClaudeRejectsSampling(t *testing.T) {
 		{"claude-sonnet-5", true},
 		{"claude-opus-5", true},
 		{"us.anthropic.claude-opus-4-8", true},
+		{"claude-mythos-preview", true},
 		{"claude-opus-4-6", false},
 		{"claude-sonnet-4-5", false},
 		{"claude-3-5-haiku", false},
@@ -161,6 +165,25 @@ func TestClaudeRejectsSampling(t *testing.T) {
 	for _, tc := range cases {
 		if got := ClaudeRejectsSampling(tc.model); got != tc.want {
 			t.Errorf("ClaudeRejectsSampling(%q) = %v, want %v", tc.model, got, tc.want)
+		}
+	}
+}
+
+func TestClaudeSupportsEffortWithBudget(t *testing.T) {
+	t.Parallel()
+	cases := []struct {
+		model string
+		want  bool
+	}{
+		{"claude-opus-4-5-20251101", true},
+		{"claude-mythos-preview", true},
+		{"claude-sonnet-4-5", false},
+		{"claude-haiku-4-5", false},
+		{"claude-sonnet-5", false},
+	}
+	for _, tc := range cases {
+		if got := ClaudeSupportsEffortWithBudget(tc.model); got != tc.want {
+			t.Errorf("ClaudeSupportsEffortWithBudget(%q) = %v, want %v", tc.model, got, tc.want)
 		}
 	}
 }
