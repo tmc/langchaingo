@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -40,6 +41,15 @@ func newCloudTestClient(t *testing.T) *LLM {
 
 	// Check for required credentials and skip if not available
 	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "OLLAMA_API_KEY")
+
+	home, err := os.UserHomeDir()
+	if err != nil {
+		t.Skipf("no home directory to read the Ollama signing key from: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(home, ".ollama", "id_ed25519")); err != nil {
+		t.Skip("no ~/.ollama/id_ed25519: the client signs every ollama.com request before " +
+			"the httprr transport runs, so the recordings cannot be replayed without it")
+	}
 
 	// Set up httprr for recording/replaying HTTP interactions
 	rr := httprr.OpenForTest(t, httputil.DefaultTransport)
