@@ -141,7 +141,7 @@ func (g *Vertex) GenerateContent(
 		response, err = generateFromMessages(ctx, model, messages, &opts)
 	}
 	if err != nil {
-		return nil, err
+		return response, err
 	}
 
 	// When structured output was requested, validate each normal-final candidate
@@ -368,6 +368,7 @@ func convertAndStreamFromIterator(
 	candidate := &genai.Candidate{
 		Content: &genai.Content{},
 	}
+	var streamErr error
 DoStream:
 	for {
 		resp, err := iter.Next()
@@ -390,13 +391,18 @@ DoStream:
 		for _, part := range respCandidate.Content.Parts {
 			if text, ok := part.(genai.Text); ok {
 				if err := streaming.CallWithText(ctx, opts.StreamingFunc, string(text)); err != nil {
+					streamErr = err
 					break DoStream
 				}
 			}
 		}
 	}
 	mresp := iter.MergedResponse()
-	return convertCandidates([]*genai.Candidate{candidate}, mresp.UsageMetadata)
+	resp, err := convertCandidates([]*genai.Candidate{candidate}, mresp.UsageMetadata)
+	if err != nil {
+		return nil, err
+	}
+	return resp, streamErr
 }
 
 // mergeStreamCandidate folds one streamed candidate into the accumulator. It
