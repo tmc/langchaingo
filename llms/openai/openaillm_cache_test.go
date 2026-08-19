@@ -1249,5 +1249,6 @@ func TestXAI_ReasoningModel_RejectsPenalties(t *testing.T) {
 	}
 
 	_, err := llm.GenerateContent(t.Context(), msgs, llms.WithMaxTokens(256), llms.WithPresencePenalty(0.5))
-	require.Error(t, err, "xAI must reject presence_penalty combined with a reasoning model")
+	require.ErrorContains(t, err, "400",
+		"xAI must reject presence_penalty combined with a reasoning model")
 }
