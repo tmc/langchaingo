@@ -161,9 +161,11 @@ func ResolveClaudeAdaptive(model string, adaptivePreferred bool) bool {
 // adaptive request on them must not be forwarded as thinking.type=adaptive, which
 // these models reject with a 400.
 var preAdaptiveClaude = []string{
-	"claude-2", "claude-instant",
+	"claude-2", "claude-v2",
+	"claude-instant",
 	"claude-3", // claude-3, claude-3-5, claude-3-7 all predate adaptive
 	"claude-opus-4-1",
+	"claude-opus-4-20", "claude-sonnet-4-20",
 }
 
 // ClaudePredatesAdaptive reports whether the model is a known pre-adaptive Claude

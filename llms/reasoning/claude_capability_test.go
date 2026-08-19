@@ -141,3 +141,34 @@ func TestClaudeRejectsSampling(t *testing.T) {
 		}
 	}
 }
+
+func TestClaudePredatesAdaptive(t *testing.T) {
+	t.Parallel()
+	cases := []struct {
+		model string
+		want  bool
+	}{
+		{"claude-2.1", true},
+		{"anthropic.claude-v2", true},
+		{"anthropic.claude-v2:1", true},
+		{"anthropic.claude-instant-v1", true},
+		{"claude-3-5-haiku", true},
+		{"claude-3-7-sonnet-20250219", true},
+		{"claude-opus-4-1-20250805", true},
+		{"claude-opus-4-20250514", true},
+		{"us.anthropic.claude-sonnet-4-20250514-v1:0", true},
+		{"claude-opus-4-5", false},
+		{"claude-sonnet-4-5", false},
+		{"claude-haiku-4-5", false},
+		{"claude-opus-4-6", false},
+		{"claude-sonnet-4-6", false},
+		{"claude-opus-4-8", false},
+		{"claude-sonnet-5", false},
+		{"us.anthropic.claude-fable-5", false},
+	}
+	for _, tc := range cases {
+		if got := ClaudePredatesAdaptive(tc.model); got != tc.want {
+			t.Errorf("ClaudePredatesAdaptive(%q) = %v, want %v", tc.model, got, tc.want)
+		}
+	}
+}
