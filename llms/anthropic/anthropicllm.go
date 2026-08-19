@@ -964,8 +964,6 @@ func applyAnthropicStructuredOutput(
 	return cfg, nil
 }
 
-// anthropicHasAssistantPrefill reports whether the last message is an assistant
-// turn, i.e. a prefilled response, which Anthropic rejects with structured output.
 func anthropicHasAssistantPrefill(messages []llms.MessageContent) bool {
 	if len(messages) == 0 {
 		return false
