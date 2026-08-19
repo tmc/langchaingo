@@ -36,14 +36,6 @@ linters:
     gosec:
       excludes:
         - G115
-        # G703/G704: gosec's taint-analysis engine flags any function parameter
-        # of a matching type (e.g. a file path or URL string) as tainted based
-        # solely on its type, not on whether it actually originates from
-        # untrusted input. This produces widespread false positives in library
-        # code where callers pass in paths/URLs directly (see
-        # https://github.com/securego/gosec/issues/1500).
-        - G703
-        - G704
     exhaustive:
       default-signifies-exhaustive: true
   exclusions:
@@ -53,6 +45,24 @@ linters:
       - common-false-positives
       - legacy
       - std-error-handling
+    rules:
+      # The stub is a proxy: forwarding the request it received is its purpose.
+      - path: httputil/transport_test\.go
+        linters:
+          - gosec
+        text: G704
+      # url.Parse taints the helper, but what reaches os.Open is the name
+      # os.CreateTemp chose, which the URL cannot influence.
+      - path: documentloaders/whisper\.go
+        linters:
+          - gosec
+        text: G703
+      # Fetching the endpoint its caller configured is what this client does;
+      # a url.URL parameter is a taint source by declaration.
+      - path: vectorstores/qdrant/rest\.go
+        linters:
+          - gosec
+        text: G704
     paths:
       - internal
       - vectorstores/bedrockknowledgebases
