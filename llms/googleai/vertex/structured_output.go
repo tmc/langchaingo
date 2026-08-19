@@ -65,7 +65,6 @@ func validateVertexStructuredOutput(opts *llms.CallOptions, resp *llms.ContentRe
 	model := opts.GetModel()
 	stop := genai.FinishReasonStop.String()
 	for i, choice := range resp.Choices {
-		// Gemini reports a function call as STOP with no text.
 		if choice.StopReason != stop || len(choice.ToolCalls) > 0 {
 			continue
 		}

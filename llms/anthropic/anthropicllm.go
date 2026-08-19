@@ -265,10 +265,6 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 		}
 	}
 
-	// Thinking constrains sampling params: the API rejects temperature and top_p
-	// together, and requires temperature=1.0 with budget thinking. So pin
-	// temperature and drop top_p for budget; drop both for adaptive (which
-	// rejects sampling params outright).
 	temperature, topP, maxTokens := opts.Temperature, opts.TopP, opts.GetMaxTokens()
 	switch {
 	case thinking != nil && thinking.Type == "adaptive":
@@ -283,7 +279,6 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 		temperature = nil
 		topP = nil
 	case reasoning.ClaudeMutuallyExclusiveSampling(model) && temperature != nil && topP != nil:
-		// Haiku 4.5 rejects temperature and top_p together; keep temperature.
 		topP = nil
 	}
 

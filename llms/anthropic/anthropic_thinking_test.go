@@ -907,8 +907,6 @@ func TestAnthropic_BudgetThinkingRequest(t *testing.T) {
 	assert.EqualValues(t, 4096, payload["max_tokens"]) // max(budget*2, maxTokens)
 }
 
-// Haiku 4.5 rejects temperature and top_p together; without thinking the SDK must
-// send at most one (keeping temperature) rather than both.
 func TestAnthropic_Haiku45MutuallyExclusiveSampling(t *testing.T) {
 	t.Parallel()
 
@@ -923,8 +921,6 @@ func TestAnthropic_Haiku45MutuallyExclusiveSampling(t *testing.T) {
 	assert.False(t, hasTopP, "Haiku 4.5 must not send top_p together with temperature")
 }
 
-// Opus 4.5 uses budget thinking but also honors effort, so the budget path must
-// carry output_config.effort instead of dropping it.
 func TestAnthropic_BudgetEffortForOpus45(t *testing.T) {
 	t.Parallel()
 

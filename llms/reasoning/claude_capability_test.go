@@ -11,7 +11,7 @@ func TestClaudeReasoningKindFor(t *testing.T) {
 		model string
 		want  ClaudeReasoningKind
 	}{
-		// Adaptive-only (T1), first-party and Bedrock forms.
+		// Adaptive-only, first-party and Bedrock forms.
 		{"claude-opus-4-7", ClaudeReasoningAdaptiveOnly},
 		{"claude-opus-4-8", ClaudeReasoningAdaptiveOnly},
 		{"us.anthropic.claude-opus-4-8", ClaudeReasoningAdaptiveOnly},
@@ -21,11 +21,11 @@ func TestClaudeReasoningKindFor(t *testing.T) {
 		{"us.anthropic.claude-sonnet-5", ClaudeReasoningAdaptiveOnly},
 		{"claude-fable-5", ClaudeReasoningAdaptiveOnly},
 		{"claude-mythos-5", ClaudeReasoningAdaptiveOnly},
-		// Dual (T2).
+		// Dual.
 		{"claude-opus-4-6", ClaudeReasoningAdaptiveAndBudget},
 		{"us.anthropic.claude-sonnet-4-6", ClaudeReasoningAdaptiveAndBudget},
 		{"claude-mythos-preview", ClaudeReasoningAdaptiveAndBudget},
-		// Budget-only (T3).
+		// Budget-only.
 		{"claude-opus-4-5-20251101", ClaudeReasoningBudgetOnly},
 		{"claude-sonnet-4-5-20250929", ClaudeReasoningBudgetOnly},
 		{"us.anthropic.claude-haiku-4-5-20251001-v1:0", ClaudeReasoningBudgetOnly},
@@ -73,11 +73,11 @@ func TestResolveClaudeAdaptive(t *testing.T) {
 		want      bool
 		note      string
 	}{
-		// Adaptive-only: budget preference upgraded to adaptive (M1/M2/H1b).
+		// Adaptive-only: budget preference upgraded to adaptive.
 		{"claude-sonnet-5", false, true, "budget on T1 upgrades"},
 		{"claude-sonnet-5", true, true, "adaptive on T1 stays"},
 		{"claude-opus-5", false, true, "budget on Opus 5 upgrades"},
-		// Budget-only: adaptive preference downgraded to budget (M3).
+		// Budget-only: adaptive preference downgraded to budget.
 		{"claude-haiku-4-5", true, false, "adaptive on T3 downgrades"},
 		{"claude-haiku-4-5", false, false, "budget on T3 stays"},
 		// Dual: caller preference honored both ways (unchanged).

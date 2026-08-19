@@ -256,7 +256,6 @@ func validateGoogleStructuredOutput(opts *llms.CallOptions, resp *llms.ContentRe
 	}
 	model := opts.GetModel()
 	for i, choice := range resp.Choices {
-		// Gemini reports a function call as STOP with no text.
 		if choice.StopReason != string(genai.FinishReasonStop) || len(choice.ToolCalls) > 0 {
 			continue
 		}
