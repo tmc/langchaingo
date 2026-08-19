@@ -15,6 +15,7 @@ import (
 	"github.com/vxcontrol/langchaingo/internal/httprr"
 	"github.com/vxcontrol/langchaingo/llms"
 	"github.com/vxcontrol/langchaingo/llms/anthropic"
+	"github.com/vxcontrol/langchaingo/llms/reasoning"
 	"github.com/vxcontrol/langchaingo/llms/streaming"
 )
 
@@ -998,5 +999,106 @@ func TestAnthropic_InterleavedThinkingBetaHeader(t *testing.T) {
 			llms.WithMaxTokens(4096),
 		)
 		assert.NotContains(t, header.Get("anthropic-beta"), "interleaved-thinking")
+	})
+}
+
+// captureAssistantReplay returns the content blocks the adapter built for the
+// assistant turn of the replayed history.
+func captureAssistantReplay(t *testing.T, parts []llms.ContentPart) []any {
+	t.Helper()
+
+	var body []byte
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		body, _ = io.ReadAll(r.Body)
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"id":"m","type":"message","role":"assistant","model":"claude-sonnet-5",` +
+			`"content":[{"type":"text","text":"ok"}],"stop_reason":"end_turn","usage":{"input_tokens":1,"output_tokens":1}}`))
+	}))
+	t.Cleanup(srv.Close)
+
+	llm, err := anthropic.New(
+		anthropic.WithToken("test-key"),
+		anthropic.WithBaseURL(srv.URL),
+		anthropic.WithModel("claude-sonnet-5"),
+	)
+	require.NoError(t, err)
+
+	messages := []llms.MessageContent{
+		{Role: llms.ChatMessageTypeHuman, Parts: []llms.ContentPart{llms.TextPart("hi")}},
+		{Role: llms.ChatMessageTypeAI, Parts: parts},
+		{Role: llms.ChatMessageTypeHuman, Parts: []llms.ContentPart{llms.TextPart("continue")}},
+	}
+	_, err = llm.GenerateContent(t.Context(), messages)
+	require.NoError(t, err)
+
+	var payload struct {
+		Messages []struct {
+			Content []any `json:"content"`
+		} `json:"messages"`
+	}
+	require.NoError(t, json.Unmarshal(body, &payload))
+	require.Len(t, payload.Messages, 3)
+	return payload.Messages[1].Content
+}
+
+func thinkingBlocks(blocks []any) []map[string]any {
+	var out []map[string]any
+	for _, b := range blocks {
+		if m, ok := b.(map[string]any); ok && m["type"] == "thinking" {
+			out = append(out, m)
+		}
+	}
+	return out
+}
+
+func TestAnthropic_ThinkingReplayNeverOmitsRequiredField(t *testing.T) {
+	t.Parallel()
+
+	t.Run("signature without text emits no thinking block", func(t *testing.T) {
+		t.Parallel()
+
+		blocks := captureAssistantReplay(t, []llms.ContentPart{
+			llms.TextContent{
+				Text:      "answer",
+				Reasoning: &reasoning.ContentReasoning{Signature: []byte("sig-only")},
+			},
+		})
+
+		require.Empty(t, thinkingBlocks(blocks),
+			"a thinking block without the required thinking field must not be sent")
+	})
+
+	t.Run("text-bearing part is used when an earlier part carries only a signature", func(t *testing.T) {
+		t.Parallel()
+
+		blocks := captureAssistantReplay(t, []llms.ContentPart{
+			llms.TextContent{
+				Reasoning: &reasoning.ContentReasoning{Signature: []byte("sig-only")},
+			},
+			llms.TextContent{
+				Text:      "answer",
+				Reasoning: &reasoning.ContentReasoning{Content: "real thinking", Signature: []byte("sig")},
+			},
+		})
+
+		emitted := thinkingBlocks(blocks)
+		require.Len(t, emitted, 1)
+		require.Equal(t, "real thinking", emitted[0]["thinking"])
+	})
+
+	t.Run("thinking text always reaches the wire", func(t *testing.T) {
+		t.Parallel()
+
+		blocks := captureAssistantReplay(t, []llms.ContentPart{
+			llms.TextContent{
+				Text:      "answer",
+				Reasoning: &reasoning.ContentReasoning{Content: "step one", Signature: []byte("sig")},
+			},
+		})
+
+		emitted := thinkingBlocks(blocks)
+		require.Len(t, emitted, 1)
+		require.Equal(t, "step one", emitted[0]["thinking"])
+		require.Equal(t, "sig", emitted[0]["signature"])
 	})
 }

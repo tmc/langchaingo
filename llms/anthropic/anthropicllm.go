@@ -367,7 +367,7 @@ func processAnthropicResponse(result *anthropicclient.MessageResponsePayload) (*
 
 	// Create reasoning object
 	var contentReasoning *reasoning.ContentReasoning
-	if reasoningContent.Len() > 0 || len(signature) > 0 {
+	if reasoningContent.Len() > 0 {
 		contentReasoning = &reasoning.ContentReasoning{
 			Content:   reasoningContent.String(),
 			Signature: signature,
@@ -807,19 +807,17 @@ func handleAIMessage(msg llms.MessageContent) (anthropicclient.ChatMessage, erro
 	// reasoning-bearing part among msg.Parts.
 	for _, part := range msg.Parts {
 		p, ok := part.(llms.TextContent)
-		if !ok || p.Reasoning == nil {
+		if !ok || p.Reasoning == nil || len(p.Reasoning.Content) == 0 {
 			continue
 		}
-		if len(p.Reasoning.Content) > 0 || len(p.Reasoning.Signature) > 0 {
-			thinkingBlock := &anthropicclient.ThinkingContent{
-				Type:     "thinking",
-				Thinking: p.Reasoning.Content,
-			}
-			if len(p.Reasoning.Signature) > 0 {
-				thinkingBlock.Signature = string(p.Reasoning.Signature)
-			}
-			message.Content = append(message.Content, thinkingBlock)
+		thinkingBlock := &anthropicclient.ThinkingContent{
+			Type:     "thinking",
+			Thinking: p.Reasoning.Content,
 		}
+		if len(p.Reasoning.Signature) > 0 {
+			thinkingBlock.Signature = string(p.Reasoning.Signature)
+		}
+		message.Content = append(message.Content, thinkingBlock)
 		break // one thinking block per assistant turn
 	}
 

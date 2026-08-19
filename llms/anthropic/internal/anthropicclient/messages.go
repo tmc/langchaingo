@@ -161,7 +161,7 @@ type ImageSource struct {
 
 type ThinkingContent struct {
 	Type      string `json:"type"`
-	Thinking  string `json:"thinking,omitempty"`
+	Thinking  string `json:"thinking"`
 	Signature string `json:"signature,omitempty"`
 }
 
