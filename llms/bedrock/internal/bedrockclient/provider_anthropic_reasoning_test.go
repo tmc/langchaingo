@@ -89,6 +89,24 @@ func TestApplyAnthropicReasoning_AdaptiveEmptyEffortDefaultsToHigh(t *testing.T)
 	assert.Equal(t, "high", input.OutputConfig.Effort)
 }
 
+func TestApplyAnthropicReasoning_BudgetEffortForOpus45(t *testing.T) {
+	t.Parallel()
+
+	input := anthropicTextGenerationInput{MaxTokens: 8000}
+	applyAnthropicReasoning(&input,
+		&llms.ReasoningConfig{Mode: llms.ReasoningOn, Effort: llms.ReasoningHigh},
+		"us.anthropic.claude-opus-4-5-20251101-v1:0", 8000)
+
+	fields := marshalAnthropicInput(t, input)
+
+	thinking, _ := fields["thinking"].(map[string]any)
+	assert.Equal(t, "enabled", thinking["type"], "Opus 4.5 is budget-only")
+
+	outputConfig, _ := fields["output_config"].(map[string]any)
+	assert.Equal(t, string(llms.ReasoningHigh), outputConfig["effort"],
+		"Opus 4.5 honors effort alongside a budget; the direct Anthropic path sends it too")
+}
+
 func TestApplyAnthropicReasoning_Budget(t *testing.T) {
 	t.Parallel()
 
@@ -111,7 +129,7 @@ func TestApplyAnthropicReasoning_Budget(t *testing.T) {
 	assert.False(t, hasDisplay, "budget thinking has no display field")
 
 	_, hasOutputConfig := fields["output_config"]
-	assert.False(t, hasOutputConfig, "budget thinking has no output_config")
+	assert.False(t, hasOutputConfig, "Opus 4.6 does not take an effort alongside a budget")
 
 	// Budget thinking pins temperature to 1.0 and drops top_p/top_k — the API
 	// rejects temperature != 1 and top_p/top_k with thinking enabled.

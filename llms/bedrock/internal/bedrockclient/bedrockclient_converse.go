@@ -167,6 +167,10 @@ func (c *ConverseClient) buildConverseInput(input *ConverseInput) (*bedrockrunti
 		setBudget := func() {
 			if tokens := input.ReasoningConfig.GetTokens(maxTokens); tokens > 0 {
 				additionalModelFields.Thinking = &converseThinkingPayload{Type: "enabled", BudgetTokens: tokens}
+				if reasoning.ClaudeSupportsEffortWithBudget(input.ModelID) {
+					effort := input.ReasoningConfig.GetEffort(maxTokens)
+					additionalModelFields.OutputConfig = &converseOutputConfig{Effort: string(effort)}
+				}
 				// Budget thinking requires temperature=1.0 and rejects top_p.
 				inferenceConfig.Temperature = aws.Float32(1.0)
 				inferenceConfig.TopP = nil

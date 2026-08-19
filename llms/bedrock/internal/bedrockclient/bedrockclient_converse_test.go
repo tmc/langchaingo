@@ -1033,3 +1033,45 @@ func TestConverseClient_AdaptiveEffortDerivedFromMaxTokens(t *testing.T) {
 	assert.Equal(t, string(llms.ReasoningLow), outputConfig["effort"],
 		"3000 of 32000 max tokens is a low effort; deriving from a hardcoded 0 would say high")
 }
+
+func TestConverseClient_BudgetEffortForOpus45(t *testing.T) {
+	mockClient := &MockBedrockRuntimeClient{}
+	client := NewConverseClient(mockClient)
+
+	var capturedInput *bedrockruntime.ConverseInput
+	mockClient.On("Converse", mock.Anything, mock.MatchedBy(func(input *bedrockruntime.ConverseInput) bool {
+		capturedInput = input
+		return true
+	}), mock.Anything).Return(&bedrockruntime.ConverseOutput{
+		Output: &types.ConverseOutputMemberMessage{
+			Value: types.Message{
+				Role:    types.ConversationRoleAssistant,
+				Content: []types.ContentBlock{&types.ContentBlockMemberText{Value: "ok"}},
+			},
+		},
+	}, nil)
+
+	input := &ConverseInput{
+		ModelID:         "us.anthropic.claude-opus-4-5-20251101-v1:0",
+		Messages:        []Message{{Role: llms.ChatMessageTypeHuman, Content: "Hello", Type: "text"}},
+		MaxTokens:       ptr(8000),
+		ReasoningConfig: &llms.ReasoningConfig{Mode: llms.ReasoningOn, Effort: llms.ReasoningHigh},
+	}
+
+	_, err := client.CreateCompletionConverse(t.Context(), input)
+	assert.NoError(t, err)
+
+	if !assert.NotNil(t, capturedInput.AdditionalModelRequestFields) {
+		return
+	}
+	raw, err := capturedInput.AdditionalModelRequestFields.MarshalSmithyDocument()
+	assert.NoError(t, err)
+	var fields map[string]any
+	assert.NoError(t, json.Unmarshal(raw, &fields))
+
+	thinking, _ := fields["thinking"].(map[string]any)
+	assert.Equal(t, "enabled", thinking["type"], "Opus 4.5 is budget-only")
+	outputConfig, _ := fields["output_config"].(map[string]any)
+	assert.Equal(t, string(llms.ReasoningHigh), outputConfig["effort"],
+		"Opus 4.5 honors effort alongside a budget; the direct Anthropic path sends it too")
+}
