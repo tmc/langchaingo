@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"strings"
+	"sync/atomic"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -1047,6 +1048,86 @@ func thinkingBlocks(blocks []any) []map[string]any {
 		}
 	}
 	return out
+}
+
+func TestAnthropic_ForcedToolChoiceWithBudgetThinking(t *testing.T) {
+	t.Parallel()
+
+	tools := []llms.Tool{{
+		Type: "function",
+		Function: &llms.FunctionDefinition{
+			Name:       "get_weather",
+			Parameters: map[string]any{"type": "object", "properties": map[string]any{}},
+		},
+	}}
+	messages := []llms.MessageContent{
+		{Role: llms.ChatMessageTypeHuman, Parts: []llms.ContentPart{llms.TextPart("weather?")}},
+	}
+
+	newLLM := func(t *testing.T, model string) (*anthropic.LLM, *atomic.Int32) {
+		t.Helper()
+		var hits atomic.Int32
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			hits.Add(1)
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`{"id":"m","type":"message","role":"assistant","model":"` + model + `",` +
+				`"content":[{"type":"text","text":"ok"}],"stop_reason":"end_turn",` +
+				`"usage":{"input_tokens":1,"output_tokens":1}}`))
+		}))
+		t.Cleanup(srv.Close)
+
+		llm, err := anthropic.New(
+			anthropic.WithToken("test-key"),
+			anthropic.WithBaseURL(srv.URL),
+			anthropic.WithModel(model),
+		)
+		require.NoError(t, err)
+		return llm, &hits
+	}
+
+	t.Run("budget thinking rejects a forced tool choice without a round trip", func(t *testing.T) {
+		t.Parallel()
+
+		llm, hits := newLLM(t, "claude-sonnet-4-5")
+		_, err := llm.GenerateContent(t.Context(), messages,
+			llms.WithReasoning(llms.ReasoningMedium, 0),
+			llms.WithTools(tools),
+			llms.WithToolChoice(map[string]any{"type": "any"}),
+		)
+
+		var conflict *anthropic.ErrForcedToolUseWithThinking
+		require.ErrorAs(t, err, &conflict)
+		require.Equal(t, "claude-sonnet-4-5", conflict.Model)
+		require.Zero(t, hits.Load(), "the request must not be sent")
+	})
+
+	t.Run("adaptive thinking allows a forced tool choice", func(t *testing.T) {
+		t.Parallel()
+
+		llm, hits := newLLM(t, "claude-sonnet-5")
+		_, err := llm.GenerateContent(t.Context(), messages,
+			llms.WithReasoning(llms.ReasoningMedium, 0),
+			llms.WithTools(tools),
+			llms.WithToolChoice(map[string]any{"type": "tool", "name": "get_weather"}),
+		)
+
+		require.NoError(t, err)
+		require.Equal(t, int32(1), hits.Load())
+	})
+
+	t.Run("budget thinking allows auto", func(t *testing.T) {
+		t.Parallel()
+
+		llm, hits := newLLM(t, "claude-sonnet-4-5")
+		_, err := llm.GenerateContent(t.Context(), messages,
+			llms.WithReasoning(llms.ReasoningMedium, 0),
+			llms.WithTools(tools),
+			llms.WithToolChoice(map[string]any{"type": "auto"}),
+		)
+
+		require.NoError(t, err)
+		require.Equal(t, int32(1), hits.Load())
+	})
 }
 
 func TestAnthropic_OmittedThinkingResponseKeepsSignature(t *testing.T) {

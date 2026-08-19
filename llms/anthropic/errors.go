@@ -1,6 +1,7 @@
 package anthropic
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/vxcontrol/langchaingo/llms"
@@ -77,4 +78,15 @@ func MapError(err error) error {
 	// Use the generic error mapper for unrecognized errors
 	mapper := llms.NewErrorMapper("anthropic")
 	return mapper.Map(err)
+}
+
+// ErrForcedToolUseWithThinking reports the documented gap that manual (budget)
+// thinking accepts only tool_choice "auto" or "none": forcing a tool with "any"
+// or a named tool is rejected. Adaptive thinking has no such limit.
+type ErrForcedToolUseWithThinking struct{ Model string }
+
+func (e *ErrForcedToolUseWithThinking) Error() string {
+	return fmt.Sprintf(
+		"anthropic: model %q runs manual thinking, which rejects a forced tool choice; use tool_choice auto or none",
+		e.Model)
 }

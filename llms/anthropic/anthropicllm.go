@@ -227,6 +227,10 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 		}
 	}
 
+	if thinking != nil && thinking.Type == "enabled" && forcesToolUse(opts.ToolChoice) {
+		return nil, &ErrForcedToolUseWithThinking{Model: model}
+	}
+
 	// Structured output rides in output_config.format, merged with any effort set
 	// above (the two are independent). The schema constrains the final text only.
 	if outputConfig, err = applyAnthropicStructuredOutput(opts, model, messages, outputConfig); err != nil {
@@ -794,6 +798,22 @@ func handleHumanMessage(msg llms.MessageContent) (anthropicclient.ChatMessage, e
 		Role:    RoleUser,
 		Content: contents,
 	}, nil
+}
+
+func forcesToolUse(choice any) bool {
+	forced := func(t string) bool { return t == "any" || t == "tool" }
+	switch c := choice.(type) {
+	case string:
+		return forced(c)
+	case llms.ToolChoice:
+		return forced(c.Type)
+	case *llms.ToolChoice:
+		return c != nil && forced(c.Type)
+	case map[string]any:
+		t, _ := c["type"].(string)
+		return forced(t)
+	}
+	return false
 }
 
 func handleAIMessage(msg llms.MessageContent) (anthropicclient.ChatMessage, error) {
