@@ -64,6 +64,32 @@ func TestConvertJSONSchemaToVertex(t *testing.T) { //nolint:funlen // table-driv
 		}
 	})
 
+	t.Run("both nullable spellings reach the schema", func(t *testing.T) {
+		t.Parallel()
+		for _, raw := range []string{
+			`{"type":["string","null"]}`,
+			`{"type":"string","nullable":true}`,
+		} {
+			schema, err := convertJSONSchemaToVertex(json.RawMessage(raw))
+			if err != nil {
+				t.Fatalf("%s: unexpected error: %v", raw, err)
+			}
+			if schema.Type != genai.TypeString {
+				t.Errorf("%s: type = %v, want string", raw, schema.Type)
+			}
+			if !schema.Nullable {
+				t.Errorf("%s: Nullable = false, want true", raw)
+			}
+		}
+	})
+
+	t.Run("nullable must be a boolean", func(t *testing.T) {
+		t.Parallel()
+		if _, err := convertJSONSchemaToVertex(json.RawMessage(`{"type":"string","nullable":"yes"}`)); err == nil {
+			t.Error("want an error for a non-boolean nullable, got nil")
+		}
+	})
+
 	t.Run("string constraints are preserved", func(t *testing.T) {
 		t.Parallel()
 		schema, err := convertJSONSchemaToVertex(json.RawMessage(`{"type":"string","minLength":2,"maxLength":8,"pattern":"^[a-z]+$"}`))

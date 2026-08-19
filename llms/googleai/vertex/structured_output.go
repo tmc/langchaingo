@@ -139,6 +139,14 @@ func convertVertexNode(node map[string]any) (*genai.Schema, error) { //nolint:fu
 	schema.Type = gt
 	schema.Nullable = nullable
 
+	if n, ok := node["nullable"]; ok {
+		b, ok := n.(bool)
+		if !ok {
+			return nil, unsupportedVertexSchema(`keyword "nullable" must be a boolean`)
+		}
+		schema.Nullable = schema.Nullable || b
+	}
+
 	if s, ok := node["description"].(string); ok {
 		schema.Description = s
 	}
