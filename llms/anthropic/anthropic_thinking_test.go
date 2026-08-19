@@ -897,11 +897,10 @@ func TestAnthropic_BudgetThinkingRequest(t *testing.T) {
 	_, hasDisplay := thinking["display"]
 	assert.False(t, hasDisplay, "budget thinking has no display field")
 
-	_, hasOutputConfig := payload["output_config"]
-	assert.False(t, hasOutputConfig, "budget thinking has no output_config")
+	outputConfig, _ := payload["output_config"].(map[string]any)
+	assert.Equal(t, "medium", outputConfig["effort"],
+		"Opus 4.6 accepts an effort alongside its budget")
 
-	// Budget thinking pins temperature to 1.0 and drops top_p — the API rejects
-	// temperature and top_p together.
 	assert.EqualValues(t, 1.0, payload["temperature"])
 	_, hasTopP := payload["top_p"]
 	assert.False(t, hasTopP, "budget thinking must drop top_p")

@@ -472,8 +472,9 @@ func TestConverseClient_BudgetReasoning(t *testing.T) {
 	assert.True(t, ok && budget > 0, "budget thinking must carry a positive token budget")
 	_, hasDisplay := thinking["display"]
 	assert.False(t, hasDisplay, "budget thinking has no display field")
-	_, hasOutputConfig := fields["output_config"]
-	assert.False(t, hasOutputConfig, "budget thinking has no output_config")
+	outputConfig, _ := fields["output_config"].(map[string]any)
+	assert.Equal(t, "medium", outputConfig["effort"],
+		"Opus 4.6 accepts an effort alongside its budget")
 
 	mockClient.AssertExpectations(t)
 }

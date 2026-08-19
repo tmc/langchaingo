@@ -177,6 +177,8 @@ func TestClaudeSupportsEffortWithBudget(t *testing.T) {
 	}{
 		{"claude-opus-4-5-20251101", true},
 		{"claude-mythos-preview", true},
+		{"claude-opus-4-6", true},
+		{"us.anthropic.claude-sonnet-4-6", true},
 		{"claude-sonnet-4-5", false},
 		{"claude-haiku-4-5", false},
 		{"claude-sonnet-5", false},

@@ -117,7 +117,10 @@ func ClaudeEffortsFor(model string) []string {
 // budgetEffortClaude are budget-thinking models that also accept an effort
 // output_config alongside manual thinking (introduced with Opus 4.5). Newer
 // generations use adaptive thinking, where effort is always available.
-var budgetEffortClaude = []string{"claude-opus-4-5", "claude-mythos-preview"}
+var budgetEffortClaude = []string{
+	"claude-opus-4-5", "claude-mythos-preview",
+	"claude-opus-4-6", "claude-sonnet-4-6",
+}
 
 // ClaudeSupportsEffortWithBudget reports whether the model accepts
 // output_config.effort together with manual (budget) thinking, so the effort is
