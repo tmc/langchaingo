@@ -89,6 +89,35 @@ func TestReasoningSupportFor(t *testing.T) { //nolint:funlen // table-driven tes
 		}
 	})
 
+	t.Run("an unclassified OpenAI model names no effort tiers", func(t *testing.T) {
+		s := ReasoningSupportFor("gpt-5.5", reasoning.ProviderOpenAI)
+		eq(t, "Supported", s.Supported, true)
+		if s.Efforts != nil {
+			t.Errorf("Efforts = %v, want nil: the tiers of gpt-5.5 are not classified", s.Efforts)
+		}
+	})
+
+	t.Run("mechanism follows the Claude generation", func(t *testing.T) {
+		cases := []struct {
+			model string
+			want  ReasoningMechanism
+		}{
+			{"claude-sonnet-5", ReasoningMechanismAdaptive},
+			{"us.anthropic.claude-opus-4-8", ReasoningMechanismAdaptive},
+			{"claude-opus-4-6", ReasoningMechanismAdaptiveAndBudget},
+			{"claude-sonnet-4-5", ReasoningMechanismBudget},
+			{"claude-haiku-4-5", ReasoningMechanismBudget},
+		}
+		for _, tc := range cases {
+			got := ReasoningSupportFor(tc.model, reasoning.ProviderAnthropic).Mechanism
+			if got != tc.want {
+				t.Errorf("Mechanism(%q) = %v, want %v", tc.model, got, tc.want)
+			}
+		}
+		eq(t, "gpt-5.5 Mechanism",
+			ReasoningSupportFor("gpt-5.5", reasoning.ProviderOpenAI).Mechanism, ReasoningMechanismUnknown)
+	})
+
 	t.Run("OpenAI effort set is model-dependent", func(t *testing.T) {
 		pro := ReasoningSupportFor("gpt-5-pro", reasoning.ProviderOpenAI)
 		eq(t, "gpt-5-pro Efforts len", len(pro.Efforts), 1)

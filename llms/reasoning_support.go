@@ -13,6 +13,20 @@ import (
 // provider API (an HTTP 400) is the ultimate arbiter. The table asserts only
 // KNOWN facts; it never fabricates a capability it cannot back — unknown effort
 // tiers and default state are left nil rather than guessed.
+// ReasoningMechanism describes how a model takes its thinking instruction.
+type ReasoningMechanism int
+
+const (
+	// ReasoningMechanismUnknown is a model whose mechanism this build does not classify.
+	ReasoningMechanismUnknown ReasoningMechanism = iota
+	// ReasoningMechanismAdaptive takes an effort level and decides how much to think.
+	ReasoningMechanismAdaptive
+	// ReasoningMechanismBudget takes a manual token budget.
+	ReasoningMechanismBudget
+	// ReasoningMechanismAdaptiveAndBudget accepts either mechanism.
+	ReasoningMechanismAdaptiveAndBudget
+)
+
 type ReasoningSupport struct {
 	// Supported reports whether the model reasons at all.
 	Supported bool
@@ -27,6 +41,9 @@ type ReasoningSupport struct {
 	RejectsSampling bool
 	// Efforts are the effort tiers worth offering; nil when unknown.
 	Efforts []ReasoningEffort
+	// Mechanism reports whether the model takes an effort level, a token budget
+	// or either; ReasoningMechanismUnknown when unclassified.
+	Mechanism ReasoningMechanism
 	// DefaultOn reports whether thinking runs when reasoning is unset; nil when unknown.
 	DefaultOn *bool
 }
@@ -97,15 +114,13 @@ func ReasoningSupportFor(model string, p reasoning.Provider) ReasoningSupport {
 			CannotDisable:   claudeCannotDisable(model, p),
 			RejectsSampling: reasoning.ClaudeRejectsSampling(model),
 			Efforts:         claudeEfforts(reasoning.ClaudeReasoningKindFor(model)),
+			Mechanism:       claudeMechanism(reasoning.ClaudeReasoningKindFor(model)),
 			DefaultOn:       boolPtr(reasoning.ClaudeThinkingDefaultsOn(model)),
 		}
 	}
 
 	if p == reasoning.ProviderOpenAI && reasoning.IsReasoningModel(model) {
-		// A classified model (e.g. GPT-5 Pro accepts only high, GPT-5.4 mini adds
-		// xhigh) advertises its own effort set; an unclassified one falls back to
-		// the conservative low/medium/high triple.
-		efforts := []ReasoningEffort{ReasoningLow, ReasoningMedium, ReasoningHigh}
+		var efforts []ReasoningEffort
 		if caps := reasoning.OpenAIReasoningCapsFor(model); caps.Known {
 			efforts = toReasoningEfforts(caps.Efforts)
 		}
@@ -143,6 +158,19 @@ func toReasoningEfforts(efforts []string) []ReasoningEffort {
 		out[i] = ReasoningEffort(e)
 	}
 	return out
+}
+
+func claudeMechanism(kind reasoning.ClaudeReasoningKind) ReasoningMechanism {
+	switch kind {
+	case reasoning.ClaudeReasoningAdaptiveOnly:
+		return ReasoningMechanismAdaptive
+	case reasoning.ClaudeReasoningBudgetOnly:
+		return ReasoningMechanismBudget
+	case reasoning.ClaudeReasoningAdaptiveAndBudget:
+		return ReasoningMechanismAdaptiveAndBudget
+	default:
+		return ReasoningMechanismUnknown
+	}
 }
 
 func claudeEfforts(kind reasoning.ClaudeReasoningKind) []ReasoningEffort {
