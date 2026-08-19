@@ -1,7 +1,12 @@
 package openaiclient
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io"
 
 	"github.com/vxcontrol/langchaingo/llms"
 	"github.com/vxcontrol/langchaingo/llms/streaming"
@@ -53,6 +58,30 @@ type errorMessage struct {
 		Message string `json:"message"`
 		Type    string `json:"type"`
 	} `json:"error"`
+}
+
+const maxErrorBodyBytes = 2048
+
+// statusError turns a non-200 response into an error carrying the provider's
+// own explanation, quoting the raw body when it is not OpenAI-shaped.
+func statusError(statusCode int, body io.Reader) error {
+	msg := fmt.Sprintf("API returned unexpected status code: %d", statusCode)
+
+	raw, err := io.ReadAll(io.LimitReader(body, maxErrorBodyBytes))
+	if err != nil {
+		return errors.New(msg) //nolint:err113 // the provider gave no readable body
+	}
+	raw = bytes.TrimSpace(raw)
+	if len(raw) == 0 {
+		return errors.New(msg) //nolint:err113 // the provider gave no readable body
+	}
+
+	var errResp errorMessage
+	if err := json.Unmarshal(raw, &errResp); err == nil && errResp.Error.Message != "" {
+		return fmt.Errorf("%s: %s", msg, errResp.Error.Message) //nolint:err113 // provider-supplied text
+	}
+
+	return fmt.Errorf("%s: %s", msg, raw) //nolint:err113 // provider-supplied text
 }
 
 func (c *Client) setCompletionDefaults(payload *CompletionRequest) {

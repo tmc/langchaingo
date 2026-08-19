@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -117,16 +116,7 @@ func (c *Client) CreateTTS(ctx context.Context, payload *TTSRequest) ([]byte, er
 	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
-		msg := fmt.Sprintf("API returned unexpected status code: %d", response.StatusCode)
-
-		// No need to check the error here: if it fails, we'll just return the
-		// status code.
-		var errResp errorMessage
-		if err := json.NewDecoder(response.Body).Decode(&errResp); err != nil {
-			return nil, errors.New(msg) // nolint:err113
-		}
-
-		return nil, fmt.Errorf("%s: %s", msg, errResp.Error.Message) // nolint:err113
+		return nil, statusError(response.StatusCode, response.Body)
 	}
 
 	responseData, err := io.ReadAll(response.Body)

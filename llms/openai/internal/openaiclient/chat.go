@@ -659,16 +659,7 @@ func (c *Client) createChat(ctx context.Context, payload *ChatRequest) (*ChatCom
 	defer r.Body.Close()
 
 	if r.StatusCode != http.StatusOK {
-		msg := fmt.Sprintf("API returned unexpected status code: %d", r.StatusCode)
-
-		// No need to check the error here: if it fails, we'll just return the
-		// status code.
-		var errResp errorMessage
-		if err := json.NewDecoder(r.Body).Decode(&errResp); err != nil {
-			return nil, errors.New(msg)
-		}
-
-		return nil, fmt.Errorf("%s: %s", msg, errResp.Error.Message)
+		return nil, statusError(r.StatusCode, r.Body)
 	}
 	if payload.Stream {
 		return parseStreamingChatResponse(ctx, r, payload)
