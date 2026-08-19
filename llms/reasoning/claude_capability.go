@@ -1,6 +1,9 @@
 package reasoning
 
-import "strings"
+import (
+	"slices"
+	"strings"
+)
 
 // ClaudeReasoningKind classifies how a Claude model accepts extended thinking.
 // It is the single source of truth for adaptive-vs-budget thinking and whether
@@ -94,6 +97,20 @@ func ClaudeThinkingAlwaysOn(model string) bool {
 // omitted, so disabling it requires an explicit disable rather than omission.
 func ClaudeThinkingDefaultsOn(model string) bool {
 	return containsAny(strings.ToLower(model), defaultOnClaude)
+}
+
+// claudeEffortsByKind lists the effort levels each generation accepts. The sets
+// are not nested: the dual generation takes max but not xhigh.
+var claudeEffortsByKind = map[ClaudeReasoningKind][]string{
+	ClaudeReasoningAdaptiveOnly:      {"low", "medium", "high", "xhigh", "max"},
+	ClaudeReasoningAdaptiveAndBudget: {"low", "medium", "high", "max"},
+	ClaudeReasoningBudgetOnly:        {"low", "medium", "high"},
+}
+
+// ClaudeEffortsFor returns the effort levels the model's generation accepts, or
+// nil for a model this package does not classify.
+func ClaudeEffortsFor(model string) []string {
+	return slices.Clone(claudeEffortsByKind[ClaudeReasoningKindFor(model)])
 }
 
 // budgetEffortClaude are budget-thinking models that also accept an effort

@@ -113,7 +113,7 @@ func ReasoningSupportFor(model string, p reasoning.Provider) ReasoningSupport {
 			// always on, hence not disablable, on Bedrock).
 			CannotDisable:   claudeCannotDisable(model, p),
 			RejectsSampling: reasoning.ClaudeRejectsSampling(model),
-			Efforts:         claudeEfforts(reasoning.ClaudeReasoningKindFor(model)),
+			Efforts:         toReasoningEfforts(reasoning.ClaudeEffortsFor(model)),
 			Mechanism:       claudeMechanism(reasoning.ClaudeReasoningKindFor(model)),
 			DefaultOn:       boolPtr(reasoning.ClaudeThinkingDefaultsOn(model)),
 		}
@@ -153,6 +153,9 @@ func ReasoningSupportFor(model string, p reasoning.Provider) ReasoningSupport {
 // toReasoningEfforts converts the resolver's raw effort strings to the public
 // ReasoningEffort type for UI hints.
 func toReasoningEfforts(efforts []string) []ReasoningEffort {
+	if len(efforts) == 0 {
+		return nil
+	}
 	out := make([]ReasoningEffort, len(efforts))
 	for i, e := range efforts {
 		out[i] = ReasoningEffort(e)
@@ -170,18 +173,5 @@ func claudeMechanism(kind reasoning.ClaudeReasoningKind) ReasoningMechanism {
 		return ReasoningMechanismAdaptiveAndBudget
 	default:
 		return ReasoningMechanismUnknown
-	}
-}
-
-func claudeEfforts(kind reasoning.ClaudeReasoningKind) []ReasoningEffort {
-	switch kind {
-	case reasoning.ClaudeReasoningAdaptiveOnly:
-		return []ReasoningEffort{ReasoningLow, ReasoningMedium, ReasoningHigh, ReasoningXHigh, ReasoningMax}
-	case reasoning.ClaudeReasoningAdaptiveAndBudget:
-		return []ReasoningEffort{ReasoningLow, ReasoningMedium, ReasoningHigh, ReasoningMax}
-	case reasoning.ClaudeReasoningBudgetOnly:
-		return []ReasoningEffort{ReasoningLow, ReasoningMedium, ReasoningHigh}
-	default:
-		return nil
 	}
 }
