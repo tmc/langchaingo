@@ -33,8 +33,9 @@ it explicitly with `bedrock.WithModelProvider`.
 
 Useful options:
 
-- `bedrock.WithConverseAPI()` — use the unified Converse API (required for tool use,
-  structured output, and reasoning on supported models).
+- `bedrock.WithConverseAPI()` — use the unified Converse API. Claude models support
+  tool use, structured output and reasoning on the default InvokeModel path as well;
+  for every other provider those features are only available through Converse.
 - `bedrock.WithAutomaticCaching()` — enable Anthropic prompt caching on supported
   Claude models.
 - `bedrock.WithClient(...)` — supply a preconfigured `*bedrockruntime.Client`.
