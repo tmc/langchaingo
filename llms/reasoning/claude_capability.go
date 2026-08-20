@@ -156,7 +156,11 @@ func ClaudeMutuallyExclusiveSampling(model string) bool {
 // legacyNoStructuredClaude are Claude generations known to predate structured
 // outputs (the output_config.format JSON Schema mode). A structured-output request
 // on them is rejected locally rather than sent for a guaranteed 4xx.
-var legacyNoStructuredClaude = []string{"claude-2", "claude-instant", "claude-3-", "claude-3."}
+var legacyNoStructuredClaude = []string{
+	"claude-2", "claude-instant",
+	"claude-3-", "claude-3.",
+	"claude-opus-4-1", "claude-opus-4-20", "claude-sonnet-4-20",
+}
 
 // ClaudeSupportsStructuredOutput reports whether the model can be asked for schema
 // constrained output. Known-legacy families are rejected; every current model and
