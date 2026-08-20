@@ -80,6 +80,16 @@ func MapError(err error) error {
 	return mapper.Map(err)
 }
 
+// ErrAssistantPrefillUnsupported reports that the model rejects a conversation
+// ending with an assistant turn.
+type ErrAssistantPrefillUnsupported struct{ Model string }
+
+func (e *ErrAssistantPrefillUnsupported) Error() string {
+	return fmt.Sprintf(
+		"anthropic: model %q does not support assistant message prefill; the conversation must end with a user message",
+		e.Model)
+}
+
 // ErrForcedToolUseWithThinking reports the documented gap that manual (budget)
 // thinking accepts only tool_choice "auto" or "none": forcing a tool with "any"
 // or a named tool is rejected. Adaptive thinking has no such limit.

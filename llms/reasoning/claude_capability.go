@@ -119,7 +119,7 @@ func ClaudeEffortsFor(model string) []string {
 // generations use adaptive thinking, where effort is always available.
 var budgetEffortClaude = []string{
 	"claude-opus-4-5", "claude-mythos-preview",
-	"claude-opus-4-6", "claude-sonnet-4-6",
+	"claude-opus-4-6", "claude-sonnet-4-6", "claude-mythos-preview",
 }
 
 // ClaudeSupportsEffortWithBudget reports whether the model accepts
@@ -127,6 +127,20 @@ var budgetEffortClaude = []string{
 // not lost on the budget path for models that honor it.
 func ClaudeSupportsEffortWithBudget(model string) bool {
 	return containsAny(strings.ToLower(model), budgetEffortClaude)
+}
+
+// noPrefillClaude models reject a conversation whose last message is an
+// assistant turn.
+var noPrefillClaude = []string{
+	"claude-opus-4-6", "claude-sonnet-4-6", "claude-mythos-preview",
+	"claude-opus-4-7", "claude-opus-4-8",
+	"claude-opus-5", "claude-sonnet-5", "claude-fable-5", "claude-mythos-5",
+}
+
+// ClaudeRejectsAssistantPrefill reports whether the model rejects a prefilled
+// assistant response outright, so the request must not be sent.
+func ClaudeRejectsAssistantPrefill(model string) bool {
+	return containsAny(strings.ToLower(model), noPrefillClaude)
 }
 
 // mutuallyExclusiveSamplingClaude models reject temperature and top_p set

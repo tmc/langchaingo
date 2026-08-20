@@ -1045,6 +1045,71 @@ func thinkingBlocks(blocks []any) []map[string]any {
 	return out
 }
 
+func TestAnthropic_AssistantPrefill(t *testing.T) {
+	t.Parallel()
+
+	prefilled := []llms.MessageContent{
+		{Role: llms.ChatMessageTypeHuman, Parts: []llms.ContentPart{llms.TextPart("hi")}},
+		{Role: llms.ChatMessageTypeAI, Parts: []llms.ContentPart{llms.TextPart("The answer is")}},
+	}
+
+	newLLM := func(t *testing.T, model string) (*anthropic.LLM, *atomic.Int32) {
+		t.Helper()
+		var hits atomic.Int32
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			hits.Add(1)
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`{"id":"m","type":"message","role":"assistant","model":"` + model + `",` +
+				`"content":[{"type":"text","text":"ok"}],"stop_reason":"end_turn",` +
+				`"usage":{"input_tokens":1,"output_tokens":1}}`))
+		}))
+		t.Cleanup(srv.Close)
+
+		llm, err := anthropic.New(
+			anthropic.WithToken("test-key"),
+			anthropic.WithBaseURL(srv.URL),
+			anthropic.WithModel(model),
+		)
+		require.NoError(t, err)
+		return llm, &hits
+	}
+
+	t.Run("rejected on 4.6 and later without a round trip", func(t *testing.T) {
+		t.Parallel()
+
+		llm, hits := newLLM(t, "claude-opus-4-6")
+		_, err := llm.GenerateContent(t.Context(), prefilled)
+
+		var unsupported *anthropic.ErrAssistantPrefillUnsupported
+		require.ErrorAs(t, err, &unsupported)
+		require.Equal(t, "claude-opus-4-6", unsupported.Model)
+		require.Zero(t, hits.Load(), "the request must not be sent")
+	})
+
+	t.Run("still allowed on the 4.5 generation", func(t *testing.T) {
+		t.Parallel()
+
+		llm, hits := newLLM(t, "claude-sonnet-4-5")
+		_, err := llm.GenerateContent(t.Context(), prefilled)
+
+		require.NoError(t, err)
+		require.Equal(t, int32(1), hits.Load())
+	})
+
+	t.Run("a trailing user turn is untouched on 4.6 and later", func(t *testing.T) {
+		t.Parallel()
+
+		llm, hits := newLLM(t, "claude-sonnet-5")
+		_, err := llm.GenerateContent(t.Context(), []llms.MessageContent{
+			{Role: llms.ChatMessageTypeAI, Parts: []llms.ContentPart{llms.TextPart("earlier turn")}},
+			{Role: llms.ChatMessageTypeHuman, Parts: []llms.ContentPart{llms.TextPart("and now?")}},
+		})
+
+		require.NoError(t, err)
+		require.Equal(t, int32(1), hits.Load())
+	})
+}
+
 func TestAnthropic_ForcedToolChoiceWithBudgetThinking(t *testing.T) {
 	t.Parallel()
 

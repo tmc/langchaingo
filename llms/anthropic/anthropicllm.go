@@ -231,6 +231,10 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 		return nil, &ErrForcedToolUseWithThinking{Model: model}
 	}
 
+	if reasoning.ClaudeRejectsAssistantPrefill(model) && anthropicHasAssistantPrefill(messages) {
+		return nil, &ErrAssistantPrefillUnsupported{Model: model}
+	}
+
 	// Structured output rides in output_config.format, merged with any effort set
 	// above (the two are independent). The schema constrains the final text only.
 	if outputConfig, err = applyAnthropicStructuredOutput(opts, model, messages, outputConfig); err != nil {

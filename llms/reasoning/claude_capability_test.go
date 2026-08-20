@@ -169,6 +169,31 @@ func TestClaudeRejectsSampling(t *testing.T) {
 	}
 }
 
+func TestClaudeRejectsAssistantPrefill(t *testing.T) {
+	t.Parallel()
+	cases := []struct {
+		model string
+		want  bool
+	}{
+		{"claude-opus-4-6", true},
+		{"us.anthropic.claude-sonnet-4-6", true},
+		{"claude-mythos-preview", true},
+		{"claude-opus-4-7", true},
+		{"claude-sonnet-5", true},
+		{"claude-fable-5", true},
+		{"claude-opus-4-5-20251101", false},
+		{"claude-sonnet-4-5", false},
+		{"claude-haiku-4-5", false},
+		{"claude-3-5-sonnet", false},
+		{"gpt-5.5", false},
+	}
+	for _, tc := range cases {
+		if got := ClaudeRejectsAssistantPrefill(tc.model); got != tc.want {
+			t.Errorf("ClaudeRejectsAssistantPrefill(%q) = %v, want %v", tc.model, got, tc.want)
+		}
+	}
+}
+
 func TestClaudeSupportsEffortWithBudget(t *testing.T) {
 	t.Parallel()
 	cases := []struct {
