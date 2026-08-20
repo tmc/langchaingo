@@ -2,6 +2,7 @@ package openai
 
 import (
 	"context"
+	"errors"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -9,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/vxcontrol/langchaingo/llms"
+	"github.com/vxcontrol/langchaingo/llms/reasoning"
 )
 
 // xhigh/max effort must reach the request body unchanged (not downgraded to
@@ -244,6 +246,60 @@ func TestReasoningEffortClampedPerModel(t *testing.T) {
 		body := capture(t, "gpt-5.7", llms.ReasoningMax)
 		if !strings.Contains(body, `"reasoning_effort":"max"`) {
 			t.Fatalf("unknown model must pass max through, got body: %s", body)
+		}
+	})
+}
+
+func TestReasoningDisabledForClaudeBehindOpenAITransport(t *testing.T) {
+	t.Parallel()
+
+	const completion = `{"id":"x","object":"chat.completion","created":1,"model":"m",` +
+		`"choices":[{"index":0,"message":{"role":"assistant","content":"ok"},"finish_reason":"stop"}],` +
+		`"usage":{"prompt_tokens":1,"completion_tokens":1,"total_tokens":2}}`
+
+	send := func(t *testing.T, model string) (string, error) {
+		t.Helper()
+		var body string
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			b, _ := io.ReadAll(r.Body)
+			body = string(b)
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = io.WriteString(w, completion)
+		}))
+		t.Cleanup(srv.Close)
+		llm, err := New(WithBaseURL(srv.URL), WithToken("test"), WithModel(model))
+		if err != nil {
+			t.Fatalf("New() error: %v", err)
+		}
+		_, genErr := llm.GenerateContent(context.Background(),
+			[]llms.MessageContent{llms.TextParts(llms.ChatMessageTypeHuman, "hi")},
+			llms.WithReasoningDisabled())
+		return body, genErr
+	}
+
+	t.Run("default-on Claude reports unsupported instead of a silent no-op", func(t *testing.T) {
+		body, err := send(t, "anthropic/claude-sonnet-5")
+		var unsupported *reasoning.ErrReasoningOffUnsupported
+		if !errors.As(err, &unsupported) {
+			t.Fatalf("want ErrReasoningOffUnsupported, got err=%v body=%s", err, body)
+		}
+	})
+
+	t.Run("always-on Claude still reports unsupported", func(t *testing.T) {
+		_, err := send(t, "anthropic/claude-fable-5")
+		var unsupported *reasoning.ErrReasoningOffUnsupported
+		if !errors.As(err, &unsupported) {
+			t.Fatalf("want ErrReasoningOffUnsupported, got %v", err)
+		}
+	})
+
+	t.Run("off-by-default Claude omits the field", func(t *testing.T) {
+		body, err := send(t, "anthropic/claude-opus-4-7")
+		if err != nil {
+			t.Fatalf("GenerateContent() error: %v", err)
+		}
+		if strings.Contains(body, "reasoning") {
+			t.Fatalf("a model that does not think by default needs no disable token, got body: %s", body)
 		}
 	})
 }

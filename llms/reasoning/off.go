@@ -59,7 +59,7 @@ func ResolveOff(model string, p Provider) OffWire {
 			// Only Anthropic-operated platforms accept thinking:{disabled} here. On
 			// Amazon Bedrock the adaptive-only default-on models (e.g. Sonnet 5) keep
 			// thinking always on, so a disable is rejected — report it as unsupported.
-			if p == ProviderBedrock {
+			if p == ProviderBedrock || p == ProviderOpenAI {
 				return OffUnsupported
 			}
 			return OffDisableClaude
