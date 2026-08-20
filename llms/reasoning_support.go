@@ -143,9 +143,9 @@ func ReasoningSupportFor(model string, p reasoning.Provider) ReasoningSupport {
 		}
 	}
 
-	// Unrecognized: optimistic. Supported best-guessed from the shared classifier;
-	// the UI shows all controls and the provider teaches via a 400.
-	return ReasoningSupport{Supported: reasoning.IsReasoningModel(model), Known: false}
+	// Unrecognized: optimistic. Known=false tells the UI to show all controls and
+	// let the provider teach via a 400.
+	return ReasoningSupport{Supported: reasoning.LikelyReasoningModel(model), Known: false}
 }
 
 // toReasoningEfforts converts the resolver's raw effort strings to the public

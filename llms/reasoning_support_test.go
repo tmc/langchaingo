@@ -6,6 +6,30 @@ import (
 	"github.com/vxcontrol/langchaingo/llms/reasoning"
 )
 
+func TestReasoningSupportForNewerGeneration(t *testing.T) {
+	t.Parallel()
+	cases := []struct {
+		model    string
+		provider reasoning.Provider
+		want     bool
+	}{
+		{"gpt-6", reasoning.ProviderOpenAI, true},
+		{"claude-opus-6", reasoning.ProviderAnthropic, true},
+		{"gemini-4-pro", reasoning.ProviderGoogleAI, true},
+		{"gpt-4o", reasoning.ProviderOpenAI, false},
+		{"claude-3-5-sonnet-latest", reasoning.ProviderAnthropic, false},
+	}
+	for _, tc := range cases {
+		s := ReasoningSupportFor(tc.model, tc.provider)
+		if s.Supported != tc.want {
+			t.Errorf("ReasoningSupportFor(%q).Supported = %v, want %v", tc.model, s.Supported, tc.want)
+		}
+		if s.Known {
+			t.Errorf("ReasoningSupportFor(%q).Known = true, want false: the tiers are a guess, not a fact", tc.model)
+		}
+	}
+}
+
 func TestReasoningSupportFor(t *testing.T) { //nolint:funlen // table-driven test
 	t.Parallel()
 
