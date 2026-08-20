@@ -1,6 +1,9 @@
 package reasoning
 
-import "testing"
+import (
+	"slices"
+	"testing"
+)
 
 func TestOpenAIReasoningCapsFor(t *testing.T) {
 	t.Parallel()
@@ -8,16 +11,25 @@ func TestOpenAIReasoningCapsFor(t *testing.T) {
 		model      string
 		known      bool
 		canDisable bool
-		ceiling    string // highest accepted effort, "" when unknown
+		efforts    []string
 	}{
-		{"gpt-5-pro", true, false, "high"},
-		{"o3-mini", true, false, "high"},
-		{"o1-preview", true, false, "high"},
-		{"gpt-5.4-mini", true, true, "xhigh"},
-		{"openai/gpt-5.4-mini", true, true, "xhigh"}, // proxy prefix stripped
-		{"gpt-5.6", false, false, ""},                // unclassified -> optimistic
-		{"gpt-5.5", false, false, ""},
-		{"gpt-4.1", false, false, ""},
+		{"gpt-5-pro", true, false, []string{"high"}},
+		{"o3-mini", true, false, []string{"low", "medium", "high", "xhigh"}},
+		{"o1-preview", true, false, []string{"low", "medium", "high", "xhigh"}},
+		{"o4-mini", true, false, []string{"low", "medium", "high", "xhigh"}},
+		{"gpt-5", true, false, []string{"minimal", "low", "medium", "high"}},
+		{"gpt-5-2025-08-07", true, false, []string{"minimal", "low", "medium", "high"}},
+		{"gpt-5-mini", true, false, []string{"minimal", "low", "medium", "high"}},
+		{"gpt-5-nano", true, false, []string{"minimal", "low", "medium", "high"}},
+		{"gpt-5.1", true, true, []string{"low", "medium", "high"}},
+		{"gpt-5.2", true, true, []string{"low", "medium", "high", "xhigh"}},
+		{"gpt-5.4", true, true, []string{"low", "medium", "high", "xhigh"}},
+		{"gpt-5.4-mini", true, true, []string{"low", "medium", "high", "xhigh"}},
+		{"openai/gpt-5.4-mini", true, true, []string{"low", "medium", "high", "xhigh"}}, // proxy prefix stripped
+		{"gpt-5.5", true, true, []string{"low", "medium", "high", "xhigh"}},
+		{"gpt-5.6-terra", true, true, []string{"low", "medium", "high", "xhigh"}},
+		{"gpt-5.7", false, false, nil}, // unclassified -> optimistic
+		{"gpt-4.1", false, false, nil},
 	}
 	for _, tc := range cases {
 		caps := OpenAIReasoningCapsFor(tc.model)
@@ -27,12 +39,8 @@ func TestOpenAIReasoningCapsFor(t *testing.T) {
 		if caps.Known && caps.CanDisable != tc.canDisable {
 			t.Errorf("%q CanDisable = %v, want %v", tc.model, caps.CanDisable, tc.canDisable)
 		}
-		ceiling := ""
-		if len(caps.Efforts) > 0 {
-			ceiling = caps.Efforts[len(caps.Efforts)-1]
-		}
-		if ceiling != tc.ceiling {
-			t.Errorf("%q ceiling = %q, want %q", tc.model, ceiling, tc.ceiling)
+		if !slices.Equal(caps.Efforts, tc.efforts) {
+			t.Errorf("%q Efforts = %v, want %v", tc.model, caps.Efforts, tc.efforts)
 		}
 	}
 }
@@ -48,19 +56,43 @@ func TestOpenAIReasoningCaps_ClampEffort(t *testing.T) {
 		{"gpt-5-pro", "low", "high"},
 		{"gpt-5-pro", "max", "high"},
 		{"gpt-5-pro", "high", "high"},
-		// GPT-5.4 mini caps at xhigh; max drops to xhigh, lower values pass.
+		{"o3", "xhigh", "xhigh"},
+		{"o4-mini", "max", "xhigh"},
+		{"gpt-5", "xhigh", "high"},
+		{"gpt-5-mini", "minimal", "minimal"},
+		{"gpt-5.1", "xhigh", "high"},
 		{"gpt-5.4-mini", "max", "xhigh"},
-		{"gpt-5.4-mini", "xhigh", "xhigh"},
+		{"gpt-5.6-terra", "xhigh", "xhigh"},
 		{"gpt-5.4-mini", "medium", "medium"},
 		// Unknown model: unchanged (optimistic).
-		{"gpt-5.6", "max", "max"},
-		{"gpt-5.5", "xhigh", "xhigh"},
+		{"gpt-5.7", "max", "max"},
 		// Empty effort untouched.
 		{"gpt-5-pro", "", ""},
 	}
 	for _, tc := range cases {
 		if got := OpenAIReasoningCapsFor(tc.model).ClampEffort(tc.effort); got != tc.want {
 			t.Errorf("ClampEffort(%q, %q) = %q, want %q", tc.model, tc.effort, got, tc.want)
+		}
+	}
+}
+
+func TestResolveOffOpenAIGeneration(t *testing.T) {
+	t.Parallel()
+	cases := []struct {
+		model string
+		want  OffWire
+	}{
+		{"gpt-5", OffUnsupported},
+		{"gpt-5-mini", OffUnsupported},
+		{"gpt-5-nano", OffUnsupported},
+		{"o3", OffUnsupported},
+		{"gpt-5.1", OffEffortNone},
+		{"gpt-5.4-mini", OffEffortNone},
+		{"gpt-5.6-terra", OffEffortNone},
+	}
+	for _, tc := range cases {
+		if got := ResolveOff(tc.model, ProviderOpenAI); got != tc.want {
+			t.Errorf("ResolveOff(%q) = %v, want %v", tc.model, got, tc.want)
 		}
 	}
 }

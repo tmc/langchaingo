@@ -226,8 +226,22 @@ func TestReasoningEffortClampedPerModel(t *testing.T) {
 		}
 	})
 
+	t.Run("o-series keeps xhigh", func(t *testing.T) {
+		body := capture(t, "o3", llms.ReasoningXHigh)
+		if !strings.Contains(body, `"reasoning_effort":"xhigh"`) {
+			t.Fatalf("o3 accepts xhigh and must not be downgraded, got body: %s", body)
+		}
+	})
+
+	t.Run("gpt-5 clamps xhigh to high", func(t *testing.T) {
+		body := capture(t, "gpt-5", llms.ReasoningXHigh)
+		if !strings.Contains(body, `"reasoning_effort":"high"`) {
+			t.Fatalf("gpt-5 tops out at high, got body: %s", body)
+		}
+	})
+
 	t.Run("unknown model passes max through", func(t *testing.T) {
-		body := capture(t, "gpt-5.6", llms.ReasoningMax)
+		body := capture(t, "gpt-5.7", llms.ReasoningMax)
 		if !strings.Contains(body, `"reasoning_effort":"max"`) {
 			t.Fatalf("unknown model must pass max through, got body: %s", body)
 		}

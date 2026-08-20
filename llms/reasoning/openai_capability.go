@@ -47,10 +47,10 @@ func (c OpenAIReasoningCaps) ClampEffort(effort string) string {
 	return effort
 }
 
-// OpenAIReasoningCapsFor classifies an OpenAI reasoning model. Only models with
-// documented constraints tighter than the general GPT-5 surface are listed;
-// anything else (including newer models) returns Known=false so the caller stays
-// optimistic.
+// OpenAIReasoningCapsFor classifies an OpenAI reasoning model by the effort set
+// its generation accepts on /chat/completions. A model outside the listed
+// generations (including newer ones) returns Known=false so the caller stays
+// optimistic and the API arbitrates.
 func OpenAIReasoningCapsFor(model string) OpenAIReasoningCaps {
 	m := strings.ToLower(model)
 	if idx := strings.LastIndex(m, "/"); idx != -1 {
@@ -61,12 +61,28 @@ func OpenAIReasoningCapsFor(model string) OpenAIReasoningCaps {
 		// GPT-5 Pro accepts only high and cannot be disabled.
 		return OpenAIReasoningCaps{Known: true, CanDisable: false, Efforts: []string{"high"}}
 	case openAIMandatoryReasoning(m):
-		// o-series floor is minimal/low with no hard off; expose low..high.
-		return OpenAIReasoningCaps{Known: true, CanDisable: false, Efforts: []string{"low", "medium", "high"}}
-	case strings.HasPrefix(m, "gpt-5.4-mini"):
-		// GPT-5.4 mini accepts none..xhigh but not max.
+		return OpenAIReasoningCaps{Known: true, CanDisable: false, Efforts: []string{"low", "medium", "high", "xhigh"}}
+	case openAIGPT5Base(m):
+		return OpenAIReasoningCaps{Known: true, CanDisable: false, Efforts: []string{"minimal", "low", "medium", "high"}}
+	case strings.HasPrefix(m, "gpt-5.1"):
+		return OpenAIReasoningCaps{Known: true, CanDisable: true, Efforts: []string{"low", "medium", "high"}}
+	case openAIXHighCeiling(m):
 		return OpenAIReasoningCaps{Known: true, CanDisable: true, Efforts: []string{"low", "medium", "high", "xhigh"}}
 	default:
 		return OpenAIReasoningCaps{Known: false}
 	}
+}
+
+func openAIGPT5Base(m string) bool {
+	return m == "gpt-5" || strings.HasPrefix(m, "gpt-5-20") ||
+		strings.HasPrefix(m, "gpt-5-mini") || strings.HasPrefix(m, "gpt-5-nano")
+}
+
+func openAIXHighCeiling(m string) bool {
+	for _, prefix := range []string{"gpt-5.2", "gpt-5.4", "gpt-5.5", "gpt-5.6"} {
+		if strings.HasPrefix(m, prefix) {
+			return true
+		}
+	}
+	return false
 }

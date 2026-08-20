@@ -1,6 +1,7 @@
 package llms
 
 import (
+	"slices"
 	"testing"
 
 	"github.com/vxcontrol/langchaingo/llms/reasoning"
@@ -114,10 +115,18 @@ func TestReasoningSupportFor(t *testing.T) { //nolint:funlen // table-driven tes
 	})
 
 	t.Run("an unclassified OpenAI model names no effort tiers", func(t *testing.T) {
-		s := ReasoningSupportFor("gpt-5.5", reasoning.ProviderOpenAI)
+		s := ReasoningSupportFor("gpt-5.7", reasoning.ProviderOpenAI)
 		eq(t, "Supported", s.Supported, true)
 		if s.Efforts != nil {
-			t.Errorf("Efforts = %v, want nil: the tiers of gpt-5.5 are not classified", s.Efforts)
+			t.Errorf("Efforts = %v, want nil: the tiers of gpt-5.7 are not classified", s.Efforts)
+		}
+	})
+
+	t.Run("a classified OpenAI generation names its effort tiers", func(t *testing.T) {
+		s := ReasoningSupportFor("gpt-5.5", reasoning.ProviderOpenAI)
+		want := []ReasoningEffort{"low", "medium", "high", "xhigh"}
+		if !slices.Equal(s.Efforts, want) {
+			t.Errorf("Efforts = %v, want %v", s.Efforts, want)
 		}
 	})
 
