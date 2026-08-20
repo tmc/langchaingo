@@ -8,20 +8,34 @@ import "strings"
 // model-string checks. Provider-wire specifics that need the genai types
 // (thinking_level mapping, the temperature value) stay in the googleai adapter.
 
+func hasFamily(model, family string) bool {
+	rest := model
+	for {
+		idx := strings.Index(rest, family)
+		if idx == -1 {
+			return false
+		}
+		rest = rest[idx+len(family):]
+		if rest == "" || rest[0] < '0' || rest[0] > '9' {
+			return true
+		}
+	}
+}
+
 // GeminiSupportsThinking reports whether the model belongs to a Google thinking
 // family: Gemini 2.5, Gemini 3.x, or Gemma 4.
 func GeminiSupportsThinking(model string) bool {
 	m := strings.ToLower(model)
-	return strings.Contains(m, "gemini-2.5") ||
-		strings.Contains(m, "gemini-3") ||
-		strings.Contains(m, "gemma-4")
+	return hasFamily(m, "gemini-2.5") ||
+		hasFamily(m, "gemini-3") ||
+		hasFamily(m, "gemma-4")
 }
 
 // GeminiUsesThinkingLevel reports whether the model uses the qualitative
 // thinking_level control (Gemini 3.x), where thinking_budget is deprecated,
 // instead of a token budget. Gemini 3 also recommends running at temperature 1.0.
 func GeminiUsesThinkingLevel(model string) bool {
-	return strings.Contains(strings.ToLower(model), "gemini-3")
+	return hasFamily(strings.ToLower(model), "gemini-3")
 }
 
 // geminiKnownNonThinking reports whether the model is a pre-thinking Gemini/Gemma
@@ -30,11 +44,11 @@ func GeminiUsesThinkingLevel(model string) bool {
 // future thinking model is not wrongly treated as non-thinking.
 func geminiKnownNonThinking(model string) bool {
 	m := strings.ToLower(model)
-	return strings.Contains(m, "gemini-1") ||
-		strings.Contains(m, "gemini-2.0") ||
-		strings.Contains(m, "gemma-1") ||
-		strings.Contains(m, "gemma-2") ||
-		strings.Contains(m, "gemma-3")
+	return hasFamily(m, "gemini-1") ||
+		hasFamily(m, "gemini-2.0") ||
+		hasFamily(m, "gemma-1") ||
+		hasFamily(m, "gemma-2") ||
+		hasFamily(m, "gemma-3")
 }
 
 // GeminiCanDisable reports whether thinking can be turned off via
@@ -43,10 +57,10 @@ func geminiKnownNonThinking(model string) bool {
 // treated as disablable (optimistic: attempt it, let the API be the backstop).
 func GeminiCanDisable(model string) bool {
 	m := strings.ToLower(model)
-	if strings.Contains(m, "gemini-3") {
+	if hasFamily(m, "gemini-3") {
 		return false
 	}
-	if strings.Contains(m, "gemini-2.5") && strings.Contains(m, "pro") {
+	if hasFamily(m, "gemini-2.5") && strings.Contains(m, "pro") {
 		return false
 	}
 	return true

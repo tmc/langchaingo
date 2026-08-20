@@ -67,3 +67,41 @@ func TestGeminiUsesThinkingLevel(t *testing.T) {
 		}
 	}
 }
+
+func TestGeminiFamilyBoundary(t *testing.T) {
+	t.Parallel()
+	cases := []struct {
+		model         string
+		nonThinking   bool
+		supportsThink bool
+		usesLevel     bool
+		off           OffWire
+	}{
+		{"gemini-1.0-pro", true, false, false, OffOmit},
+		{"gemini-1.5-pro", true, false, false, OffOmit},
+		{"gemini-10-pro", false, false, false, OffZeroBudget},
+		{"gemini-15-flash", false, false, false, OffZeroBudget},
+		{"gemini-2.0-flash", true, false, false, OffOmit},
+		{"gemini-20-flash", false, false, false, OffZeroBudget},
+		{"gemma-3-27b", true, false, false, OffOmit},
+		{"gemma-30b", false, false, false, OffZeroBudget},
+		{"gemini-3-pro", false, true, true, OffUnsupported},
+		{"gemini-30-pro", false, false, false, OffZeroBudget},
+		{"gemini-2.5-flash", false, true, false, OffZeroBudget},
+		{"gemini-25-flash", false, false, false, OffZeroBudget},
+	}
+	for _, tc := range cases {
+		if got := geminiKnownNonThinking(tc.model); got != tc.nonThinking {
+			t.Errorf("geminiKnownNonThinking(%q) = %v, want %v", tc.model, got, tc.nonThinking)
+		}
+		if got := GeminiSupportsThinking(tc.model); got != tc.supportsThink {
+			t.Errorf("GeminiSupportsThinking(%q) = %v, want %v", tc.model, got, tc.supportsThink)
+		}
+		if got := GeminiUsesThinkingLevel(tc.model); got != tc.usesLevel {
+			t.Errorf("GeminiUsesThinkingLevel(%q) = %v, want %v", tc.model, got, tc.usesLevel)
+		}
+		if got := ResolveOff(tc.model, ProviderGoogleAI); got != tc.off {
+			t.Errorf("ResolveOff(%q) = %v, want %v", tc.model, got, tc.off)
+		}
+	}
+}
