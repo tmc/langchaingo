@@ -119,7 +119,7 @@ func ClaudeEffortsFor(model string) []string {
 // generations use adaptive thinking, where effort is always available.
 var budgetEffortClaude = []string{
 	"claude-opus-4-5", "claude-mythos-preview",
-	"claude-opus-4-6", "claude-sonnet-4-6", "claude-mythos-preview",
+	"claude-opus-4-6", "claude-sonnet-4-6",
 }
 
 // ClaudeSupportsEffortWithBudget reports whether the model accepts
