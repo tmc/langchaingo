@@ -19,8 +19,8 @@ const (
 	// behavior so an unclassified model never regresses.
 	ClaudeReasoningUnknown ClaudeReasoningKind = iota
 	// ClaudeReasoningAdaptiveOnly is the newest generation (Opus 4.7/4.8/5,
-	// Sonnet 5, Fable 5, Mythos 5): it accepts thinking.type=adaptive and
-	// rejects budget_tokens with a 400.
+	// Sonnet 5, Fable 5, Mythos 5): it is sent thinking.type=adaptive and never
+	// budget_tokens.
 	ClaudeReasoningAdaptiveOnly
 	// ClaudeReasoningAdaptiveAndBudget accepts both adaptive and budget thinking
 	// (Opus 4.6, Sonnet 4.6, Mythos Preview).
@@ -227,8 +227,8 @@ func ClaudePredatesAdaptive(model string) bool {
 	return containsAny(strings.ToLower(model), preAdaptiveClaude)
 }
 
-// rejectsSamplingClaude models reject a non-default temperature, top_p or
-// top_k on every request, whether or not thinking is requested.
+// rejectsSamplingClaude models are sent no temperature, top_p or top_k on any
+// request, whether or not thinking is requested.
 var rejectsSamplingClaude = []string{
 	"claude-fable-5", "claude-mythos-5", "claude-mythos-preview",
 	"claude-opus-5", "claude-opus-4-8", "claude-opus-4-7", "claude-sonnet-5",

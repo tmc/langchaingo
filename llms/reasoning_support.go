@@ -145,7 +145,7 @@ func ReasoningSupportFor(model string, p reasoning.Provider) ReasoningSupport {
 	}
 
 	// Unrecognized: optimistic. Known=false tells the UI to show all controls and
-	// let the provider teach via a 400.
+	// leaves the provider as the arbiter.
 	return ReasoningSupport{Supported: reasoning.LikelyReasoningModel(model), Known: false}
 }
 
