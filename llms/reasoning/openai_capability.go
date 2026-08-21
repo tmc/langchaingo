@@ -86,3 +86,19 @@ func openAIXHighCeiling(m string) bool {
 	}
 	return false
 }
+
+// OpenAIAcceptsCustomTemperature reports whether a reasoning model takes a
+// temperature other than the default, so the caller's value is not overwritten
+// on a model that honors it.
+func OpenAIAcceptsCustomTemperature(model string) bool {
+	m := strings.ToLower(model)
+	if idx := strings.LastIndex(m, "/"); idx != -1 {
+		m = m[idx+1:]
+	}
+	for _, prefix := range []string{"gpt-5.1", "gpt-5.2", "gpt-5.4"} {
+		if strings.HasPrefix(m, prefix) {
+			return true
+		}
+	}
+	return false
+}

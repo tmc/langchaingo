@@ -436,16 +436,16 @@ func TestZeroConfigTemperaturePinUsesDefaultModel(t *testing.T) {
 		return body
 	}
 
-	zeroConfig := capture(t)
-	if !strings.Contains(zeroConfig, `"temperature":1`) {
-		t.Errorf("zero-config must pin temperature for %s, got body: %s",
-			openaiclient.DefaultChatModel, zeroConfig)
+	// The pin must read the client's model, which no per-call option supplies.
+	clientModel := capture(t, WithModel("gpt-5.5"))
+	if !strings.Contains(clientModel, `"temperature":1`) {
+		t.Errorf("gpt-5.5 only accepts the default temperature, got body: %s", clientModel)
 	}
 
-	explicit := capture(t, WithModel(openaiclient.DefaultChatModel))
-	if !strings.Contains(explicit, `"temperature":1`) {
-		t.Errorf("explicit %s must pin temperature too, got body: %s",
-			openaiclient.DefaultChatModel, explicit)
+	zeroConfig := capture(t)
+	if !strings.Contains(zeroConfig, `"temperature":0.2`) {
+		t.Errorf("%s takes the caller temperature, got body: %s",
+			openaiclient.DefaultChatModel, zeroConfig)
 	}
 
 	plain := capture(t, WithModel("gpt-4.1-mini"))

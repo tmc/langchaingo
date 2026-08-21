@@ -258,8 +258,9 @@ func (o *LLM) createChatRequest(chatMsgs []*ChatMessage, opts llms.CallOptions) 
 		req.SetResponseFormat(ResponseFormatJSON)
 	}
 
-	// set temperature to 1.0 for reasoning models, unless reasoning is explicitly disabled
-	if opts.Temperature != nil && reasoning.IsReasoningModel(o.effectiveModel(opts)) && !opts.Reasoning.IsDisabled() {
+	if model := o.effectiveModel(opts); opts.Temperature != nil &&
+		reasoning.IsReasoningModel(model) && !opts.Reasoning.IsDisabled() &&
+		!reasoning.OpenAIAcceptsCustomTemperature(model) {
 		temperature := 1.0
 		req.Temperature = &temperature
 	}
