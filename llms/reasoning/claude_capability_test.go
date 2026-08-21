@@ -254,3 +254,27 @@ func TestClaudePredatesAdaptive(t *testing.T) {
 		}
 	}
 }
+
+func TestClaudeMutuallyExclusiveSampling(t *testing.T) {
+	t.Parallel()
+	cases := []struct {
+		model string
+		want  bool
+	}{
+		{"claude-haiku-4-5-20251001", true},
+		{"claude-sonnet-4-5-20250929", true},
+		{"claude-opus-4-5-20251101", true},
+		{"claude-sonnet-4-6", true},
+		{"claude-opus-4-6", true},
+		{"us.anthropic.claude-opus-4-6-v1", true},
+		{"anthropic/claude-sonnet-4.5", true},
+		{"claude-opus-4-7", false},
+		{"claude-opus-5", false},
+		{"gpt-5.4-mini", false},
+	}
+	for _, tc := range cases {
+		if got := ClaudeMutuallyExclusiveSampling(tc.model); got != tc.want {
+			t.Errorf("ClaudeMutuallyExclusiveSampling(%q) = %v, want %v", tc.model, got, tc.want)
+		}
+	}
+}

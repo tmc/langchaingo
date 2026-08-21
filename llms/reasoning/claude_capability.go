@@ -152,7 +152,13 @@ func ClaudeRejectsAssistantPrefill(model string) bool {
 
 // mutuallyExclusiveSamplingClaude models reject temperature and top_p set
 // together (only one may be provided).
-var mutuallyExclusiveSamplingClaude = []string{"claude-haiku-4-5", "claude-haiku-4.5"}
+var mutuallyExclusiveSamplingClaude = []string{
+	"claude-haiku-4-5", "claude-haiku-4.5",
+	"claude-sonnet-4-5", "claude-sonnet-4.5",
+	"claude-opus-4-5", "claude-opus-4.5",
+	"claude-sonnet-4-6", "claude-sonnet-4.6",
+	"claude-opus-4-6", "claude-opus-4.6",
+}
 
 // ClaudeMutuallyExclusiveSampling reports whether the model returns a 400 when
 // temperature and top_p are set together, so the caller must send at most one.

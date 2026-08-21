@@ -89,7 +89,7 @@ func TestApplyAnthropicReasoning_AdaptiveEmptyEffortDefaultsToHigh(t *testing.T)
 	assert.Equal(t, "high", input.OutputConfig.Effort)
 }
 
-func TestApplyAnthropicReasoning_BudgetEffortForOpus45(t *testing.T) {
+func TestApplyAnthropicReasoning_NoBudgetEffortForOpus45OnBedrock(t *testing.T) {
 	t.Parallel()
 
 	input := anthropicTextGenerationInput{MaxTokens: 8000}
@@ -102,9 +102,8 @@ func TestApplyAnthropicReasoning_BudgetEffortForOpus45(t *testing.T) {
 	thinking, _ := fields["thinking"].(map[string]any)
 	assert.Equal(t, "enabled", thinking["type"], "Opus 4.5 is budget-only")
 
-	outputConfig, _ := fields["output_config"].(map[string]any)
-	assert.Equal(t, string(llms.ReasoningHigh), outputConfig["effort"],
-		"Opus 4.5 honors effort alongside a budget; the direct Anthropic path sends it too")
+	_, hasOutputConfig := fields["output_config"]
+	assert.False(t, hasOutputConfig, "Bedrock rejects output_config.effort on Opus 4.5")
 }
 
 func TestApplyAnthropicReasoning_Budget(t *testing.T) {
@@ -250,4 +249,25 @@ func TestApplyAnthropicReasoning_OffAlwaysOnErrors(t *testing.T) {
 	var offErr *reasoning.ErrReasoningOffUnsupported
 	require.ErrorAs(t, err, &offErr)
 	assert.Nil(t, input.Thinking)
+}
+
+func TestApplyAnthropicReasoning_DropsTopPWhenBothSamplingParamsSet(t *testing.T) {
+	t.Parallel()
+
+	for _, model := range []string{
+		"us.anthropic.claude-haiku-4-5-20251001-v1:0",
+		"us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+		"us.anthropic.claude-opus-4-5-20251101-v1:0",
+		"us.anthropic.claude-sonnet-4-6",
+		"us.anthropic.claude-opus-4-6-v1",
+	} {
+		t.Run(model, func(t *testing.T) {
+			input := anthropicTextGenerationInput{MaxTokens: 2048, Temperature: 0.5, TopP: 0.9}
+			require.NoError(t, applyAnthropicReasoning(&input, &llms.ReasoningConfig{}, model, 2048))
+			fields := marshalAnthropicInput(t, input)
+			_, hasTemp := fields["temperature"]
+			_, hasTopP := fields["top_p"]
+			assert.False(t, hasTemp && hasTopP, "both sampling params reached the wire: %v", fields)
+		})
+	}
 }

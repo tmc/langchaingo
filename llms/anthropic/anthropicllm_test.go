@@ -1,12 +1,14 @@
 package anthropic
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -759,4 +761,72 @@ func TestAnthropic_StructuredOutputResponseValidation(t *testing.T) {
 		var ve *llms.ErrStructuredOutputValidation
 		require.True(t, errors.As(err, &ve), "enum case mismatch must fail, got %v", err)
 	})
+}
+
+func TestSamplingParamsNeverBothOnTheWire(t *testing.T) {
+	t.Parallel()
+
+	const resp = `{"id":"x","type":"message","role":"assistant","model":"m",` +
+		`"content":[{"type":"text","text":"ok"}],"stop_reason":"end_turn",` +
+		`"usage":{"input_tokens":1,"output_tokens":1}}`
+
+	for _, model := range []string{
+		"claude-haiku-4-5-20251001",
+		"claude-sonnet-4-5-20250929",
+		"claude-opus-4-5-20251101",
+		"claude-sonnet-4-6",
+		"claude-opus-4-6",
+	} {
+		t.Run(model, func(t *testing.T) {
+			var body string
+			srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				b, _ := io.ReadAll(r.Body)
+				body = string(b)
+				w.Header().Set("Content-Type", "application/json")
+				_, _ = io.WriteString(w, resp)
+			}))
+			defer srv.Close()
+
+			llm, err := New(WithBaseURL(srv.URL), WithToken("t"), WithModel(model))
+			if err != nil {
+				t.Fatalf("New() error: %v", err)
+			}
+			if _, err := llm.GenerateContent(context.Background(),
+				[]llms.MessageContent{llms.TextParts(llms.ChatMessageTypeHuman, "hi")},
+				llms.WithTemperature(0.5), llms.WithTopP(0.9)); err != nil {
+				t.Fatalf("GenerateContent() error: %v", err)
+			}
+			if strings.Contains(body, `"temperature"`) && strings.Contains(body, `"top_p"`) {
+				t.Fatalf("both sampling params reached the wire: %s", body)
+			}
+		})
+	}
+}
+
+func TestBudgetEffortForOpus45OnTheAnthropicPath(t *testing.T) {
+	t.Parallel()
+
+	const resp = `{"id":"x","type":"message","role":"assistant","model":"m",` +
+		`"content":[{"type":"text","text":"ok"}],"stop_reason":"end_turn",` +
+		`"usage":{"input_tokens":1,"output_tokens":1}}`
+
+	var body string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		b, _ := io.ReadAll(r.Body)
+		body = string(b)
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = io.WriteString(w, resp)
+	}))
+	defer srv.Close()
+
+	llm, err := New(WithBaseURL(srv.URL), WithToken("t"), WithModel("claude-opus-4-5-20251101"))
+	require.NoError(t, err)
+	_, err = llm.GenerateContent(context.Background(),
+		[]llms.MessageContent{llms.TextParts(llms.ChatMessageTypeHuman, "hi")},
+		llms.WithReasoning(llms.ReasoningHigh, 0), llms.WithMaxTokens(8000))
+	require.NoError(t, err)
+
+	assert.Contains(t, body, `"type":"enabled"`, "Opus 4.5 is budget-only")
+	assert.Contains(t, body, `"output_config":{"effort":"high"}`,
+		"the first-party API takes the effort alongside a budget here")
 }

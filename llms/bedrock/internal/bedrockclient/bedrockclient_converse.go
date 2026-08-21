@@ -212,6 +212,10 @@ func (c *ConverseClient) buildConverseInput(input *ConverseInput) (*bedrockrunti
 		inferenceConfig.Temperature = nil
 		inferenceConfig.TopP = nil
 	}
+	if reasoning.ClaudeMutuallyExclusiveSampling(input.ModelID) &&
+		inferenceConfig.Temperature != nil && inferenceConfig.TopP != nil {
+		inferenceConfig.TopP = nil
+	}
 
 	// Native AWS structured output rides on the top-level OutputConfig.TextFormat,
 	// independent of the provider-specific reasoning fields above.

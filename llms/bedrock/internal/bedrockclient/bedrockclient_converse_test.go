@@ -10,6 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 	"github.com/vxcontrol/langchaingo/llms"
 	"github.com/vxcontrol/langchaingo/llms/reasoning"
 )
@@ -1034,7 +1035,7 @@ func TestConverseClient_AdaptiveEffortDerivedFromMaxTokens(t *testing.T) {
 		"3000 of 32000 max tokens is a low effort; deriving from a hardcoded 0 would say high")
 }
 
-func TestConverseClient_BudgetEffortForOpus45(t *testing.T) {
+func TestConverseClient_NoBudgetEffortForOpus45OnBedrock(t *testing.T) {
 	mockClient := &MockBedrockRuntimeClient{}
 	client := NewConverseClient(mockClient)
 
@@ -1071,7 +1072,32 @@ func TestConverseClient_BudgetEffortForOpus45(t *testing.T) {
 
 	thinking, _ := fields["thinking"].(map[string]any)
 	assert.Equal(t, "enabled", thinking["type"], "Opus 4.5 is budget-only")
-	outputConfig, _ := fields["output_config"].(map[string]any)
-	assert.Equal(t, string(llms.ReasoningHigh), outputConfig["effort"],
-		"Opus 4.5 honors effort alongside a budget; the direct Anthropic path sends it too")
+	_, hasOutputConfig := fields["output_config"]
+	assert.False(t, hasOutputConfig, "Bedrock rejects output_config.effort on Opus 4.5")
+}
+
+func TestConverseClient_DropsTopPWhenBothSamplingParamsSet(t *testing.T) {
+	for _, model := range []string{
+		"us.anthropic.claude-haiku-4-5-20251001-v1:0",
+		"us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+		"us.anthropic.claude-opus-4-5-20251101-v1:0",
+		"us.anthropic.claude-sonnet-4-6",
+		"us.anthropic.claude-opus-4-6-v1",
+	} {
+		t.Run(model, func(t *testing.T) {
+			client := NewConverseClient(&MockBedrockRuntimeClient{})
+			temp, topP := 0.5, 0.9
+			got, err := client.buildConverseInput(&ConverseInput{
+				ModelID:     model,
+				Messages:    []Message{{Role: llms.ChatMessageTypeHuman, Content: "hi", Type: "text"}},
+				Temperature: &temp,
+				TopP:        &topP,
+			})
+			require.NoError(t, err)
+			cfg := got.InferenceConfig
+			require.NotNil(t, cfg)
+			assert.False(t, cfg.Temperature != nil && cfg.TopP != nil,
+				"both sampling params reached the wire for %s", model)
+		})
+	}
 }

@@ -694,6 +694,9 @@ func applyAnthropicReasoning(
 		input.TopP = 0
 		input.TopK = 0
 	}
+	if reasoning.ClaudeMutuallyExclusiveSampling(modelID) && input.Temperature != 0 && input.TopP != 0 {
+		input.TopP = 0
+	}
 
 	switch cfg.ResolveMode() {
 	case llms.ReasoningDefault:
