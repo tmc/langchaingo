@@ -221,6 +221,7 @@ func generateStreamingContent(ctx context.Context, m *Model, callOptions *llms.C
 				chunkStr += choice.Delta.Content
 				langchainContentResponse.Choices[0].Content += choice.Delta.Content
 				langchainContentResponse.Choices[0].StopReason = string(choice.FinishReason)
+				langchainContentResponse.Choices[0].Truncated = llms.IsTruncated(string(choice.FinishReason))
 				if len(choice.Delta.ToolCalls) > 0 {
 					langchainContentResponse.Choices[0].FuncCall = (*llms.FunctionCall)(&choice.Delta.ToolCalls[0].Function)
 					for _, tool := range choice.Delta.ToolCalls {
@@ -241,6 +242,10 @@ func generateStreamingContent(ctx context.Context, m *Model, callOptions *llms.C
 		} else {
 			return langchainContentResponse, chatResChunk.Error
 		}
+	}
+
+	if err := llms.CheckTruncation(langchainContentResponse, *callOptions); err != nil {
+		return langchainContentResponse, err
 	}
 
 	return langchainContentResponse, nil
