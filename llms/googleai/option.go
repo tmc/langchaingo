@@ -41,7 +41,7 @@ func DefaultOptions() Options {
 		DefaultModel:          "gemini-2.5-flash",
 		DefaultEmbeddingModel: "gemini-embedding-001",
 		DefaultCandidateCount: 1,
-		DefaultMaxTokens:      2048,
+		DefaultMaxTokens:      llms.DefaultMaxTokens,
 		DefaultTemperature:    0.5,
 		DefaultTopK:           3,
 		DefaultTopP:           0.95,

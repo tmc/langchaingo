@@ -1,27 +1,31 @@
 httprr trace v1
-900 1001
+901 1181
 POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent HTTP/1.1
 Host: generativelanguage.googleapis.com
 User-Agent: langchaingo-httprr
-Content-Length: 580
+Content-Length: 581
 Content-Type: application/json
 X-Goog-Api-Client: google-genai-sdk/X.XX.X gl-go/go1.26.5
 X-Goog-Api-Key: test-api-key
 
-{"contents":[{"parts":[{"text":"My name is Alice"}],"role":"user"},{"parts":[{"text":"Nice to meet you, Alice!"}],"role":"model"},{"parts":[{"text":"What's my name?"}],"role":"user"}],"generationConfig":{"candidateCount":1,"maxOutputTokens":2048,"temperature":0.5,"topK":3,"topP":0.95},"safetySettings":[{"category":"HARM_CATEGORY_DANGEROUS_CONTENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HARASSMENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HATE_SPEECH","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_SEXUALLY_EXPLICIT","threshold":"BLOCK_NONE"}]}HTTP/2.0 200 OK
-Content-Length: 590
+{"contents":[{"parts":[{"text":"My name is Alice"}],"role":"user"},{"parts":[{"text":"Nice to meet you, Alice!"}],"role":"model"},{"parts":[{"text":"What's my name?"}],"role":"user"}],"generationConfig":{"candidateCount":1,"maxOutputTokens":16384,"temperature":0.5,"topK":3,"topP":0.95},"safetySettings":[{"category":"HARM_CATEGORY_DANGEROUS_CONTENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HARASSMENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HATE_SPEECH","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_SEXUALLY_EXPLICIT","threshold":"BLOCK_NONE"}]}HTTP/2.0 200 OK
+Content-Length: 591
 Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+Content-Security-Policy: frame-ancestors 'none'
 Content-Type: application/json; charset=UTF-8
-Date: Tue, 04 Aug 2026 09:54:59 GMT
-Server: scaffolding on HTTPServer2
-Server-Timing: gfet4t7; dur=485
-Vary: Origin
-Vary: X-Origin
-Vary: Referer
+Date: Fri, 21 Aug 2026 08:57:35 GMT
+Server: nginx
+Server-Timing: gfet4t7; dur=554
+Strict-Transport-Security: max-age=31536000
+Vary: Accept-Encoding
+Vary: Origin, X-Origin, Referer
 X-Content-Type-Options: nosniff
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
 X-Frame-Options: SAMEORIGIN
 X-Gemini-Service-Tier: standard
 X-Xss-Protection: 0
+X-Xss-Protection: 1; mode=block
 
 {
   "candidates": [
@@ -41,16 +45,16 @@ X-Xss-Protection: 0
   "usageMetadata": {
     "promptTokenCount": 20,
     "candidatesTokenCount": 5,
-    "totalTokenCount": 52,
+    "totalTokenCount": 47,
     "promptTokensDetails": [
       {
         "modality": "TEXT",
         "tokenCount": 20
       }
     ],
-    "thoughtsTokenCount": 27,
+    "thoughtsTokenCount": 22,
     "serviceTier": "standard"
   },
   "modelVersion": "gemini-2.5-flash",
-  "responseId": "87ZxaoCPA7OrxN8Px_6vCQ"
+  "responseId": "_hKIarjXJ4GnvdIP7O_z8QM"
 }

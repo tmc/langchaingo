@@ -1,27 +1,31 @@
 httprr trace v1
-979 1041
+980 1219
 POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent HTTP/1.1
 Host: generativelanguage.googleapis.com
 User-Agent: langchaingo-httprr
-Content-Length: 659
+Content-Length: 660
 Content-Type: application/json
 X-Goog-Api-Client: google-genai-sdk/X.XX.X gl-go/go1.26.5
 X-Goog-Api-Key: test-api-key
 
-{"contents":[{"parts":[{"text":"What is the capital of France?"}],"role":"user"}],"generationConfig":{"candidateCount":1,"maxOutputTokens":2048,"responseJsonSchema":{"properties":{"capital":{"type":"string"},"country":{"type":"string"}},"required":["country","capital"],"type":"object"},"responseMimeType":"application/json","temperature":0.5,"topK":3,"topP":0.95},"safetySettings":[{"category":"HARM_CATEGORY_DANGEROUS_CONTENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HARASSMENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HATE_SPEECH","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_SEXUALLY_EXPLICIT","threshold":"BLOCK_NONE"}]}HTTP/2.0 200 OK
-Content-Length: 630
+{"contents":[{"parts":[{"text":"What is the capital of France?"}],"role":"user"}],"generationConfig":{"candidateCount":1,"maxOutputTokens":16384,"responseJsonSchema":{"properties":{"capital":{"type":"string"},"country":{"type":"string"}},"required":["country","capital"],"type":"object"},"responseMimeType":"application/json","temperature":0.5,"topK":3,"topP":0.95},"safetySettings":[{"category":"HARM_CATEGORY_DANGEROUS_CONTENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HARASSMENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HATE_SPEECH","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_SEXUALLY_EXPLICIT","threshold":"BLOCK_NONE"}]}HTTP/2.0 200 OK
+Content-Length: 629
 Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+Content-Security-Policy: frame-ancestors 'none'
 Content-Type: application/json; charset=UTF-8
-Date: Tue, 04 Aug 2026 09:55:23 GMT
-Server: scaffolding on HTTPServer2
-Server-Timing: gfet4t7; dur=900
-Vary: Origin
-Vary: X-Origin
-Vary: Referer
+Date: Fri, 21 Aug 2026 08:57:56 GMT
+Server: nginx
+Server-Timing: gfet4t7; dur=828
+Strict-Transport-Security: max-age=31536000
+Vary: Accept-Encoding
+Vary: Origin, X-Origin, Referer
 X-Content-Type-Options: nosniff
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
 X-Frame-Options: SAMEORIGIN
 X-Gemini-Service-Tier: standard
 X-Xss-Protection: 0
+X-Xss-Protection: 1; mode=block
 
 {
   "candidates": [
@@ -41,16 +45,16 @@ X-Xss-Protection: 0
   "usageMetadata": {
     "promptTokenCount": 8,
     "candidatesTokenCount": 19,
-    "totalTokenCount": 107,
+    "totalTokenCount": 86,
     "promptTokensDetails": [
       {
         "modality": "TEXT",
         "tokenCount": 8
       }
     ],
-    "thoughtsTokenCount": 80,
+    "thoughtsTokenCount": 59,
     "serviceTier": "standard"
   },
   "modelVersion": "gemini-2.5-flash",
-  "responseId": "Crdxaq_5IavXxN8P5r-n-Q8"
+  "responseId": "ExOIaunhFJStvdIPhIPNqQc"
 }

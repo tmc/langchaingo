@@ -1,29 +1,30 @@
 httprr trace v1
-992 1209
+993 995
 POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?alt=sse HTTP/1.1
 Host: generativelanguage.googleapis.com
 User-Agent: langchaingo-httprr
-Content-Length: 658
+Content-Length: 659
 Content-Type: application/json
 X-Goog-Api-Client: google-genai-sdk/X.XX.X gl-go/go1.26.5
 X-Goog-Api-Key: test-api-key
 
-{"contents":[{"parts":[{"text":"What is the capital of Japan?"}],"role":"user"}],"generationConfig":{"candidateCount":1,"maxOutputTokens":2048,"responseJsonSchema":{"properties":{"capital":{"type":"string"},"country":{"type":"string"}},"required":["country","capital"],"type":"object"},"responseMimeType":"application/json","temperature":0.5,"topK":3,"topP":0.95},"safetySettings":[{"category":"HARM_CATEGORY_DANGEROUS_CONTENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HARASSMENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HATE_SPEECH","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_SEXUALLY_EXPLICIT","threshold":"BLOCK_NONE"}]}HTTP/2.0 200 OK
-Content-Length: 812
+{"contents":[{"parts":[{"text":"What is the capital of Japan?"}],"role":"user"}],"generationConfig":{"candidateCount":1,"maxOutputTokens":16384,"responseJsonSchema":{"properties":{"capital":{"type":"string"},"country":{"type":"string"}},"required":["country","capital"],"type":"object"},"responseMimeType":"application/json","temperature":0.5,"topK":3,"topP":0.95},"safetySettings":[{"category":"HARM_CATEGORY_DANGEROUS_CONTENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HARASSMENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HATE_SPEECH","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_SEXUALLY_EXPLICIT","threshold":"BLOCK_NONE"}]}HTTP/2.0 200 OK
+Content-Length: 442
 Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
 Content-Disposition: attachment
+Content-Security-Policy: frame-ancestors 'none'
 Content-Type: text/event-stream
-Date: Tue, 04 Aug 2026 09:55:26 GMT
-Server: scaffolding on HTTPServer2
-Server-Timing: gfet4t7; dur=715
-Vary: Origin
-Vary: X-Origin
-Vary: Referer
+Date: Fri, 21 Aug 2026 08:58:00 GMT
+Server: nginx
+Server-Timing: gfet4t7; dur=933
+Strict-Transport-Security: max-age=31536000
+Vary: Origin, X-Origin, Referer
+X-Content-Type-Options: nosniff
 X-Content-Type-Options: nosniff
 X-Frame-Options: SAMEORIGIN
+X-Frame-Options: SAMEORIGIN
 X-Xss-Protection: 0
+X-Xss-Protection: 1; mode=block
 
-data: {"candidates": [{"content": {"parts": [{"text": "{\"capital\": \"Tokyo"}],"role": "model"},"index": 0}],"usageMetadata": {"promptTokenCount": 8,"candidatesTokenCount": 5,"totalTokenCount": 64,"promptTokensDetails": [{"modality": "TEXT","tokenCount": 8}],"thoughtsTokenCount": 51,"serviceTier": "standard"},"modelVersion": "gemini-2.5-flash","responseId": "Drdxaq3tE8iOvdIPgsDH2A4"}
-
-data: {"candidates": [{"content": {"parts": [{"text": "\", \"country\": \"Japan\"}"}],"role": "model"},"finishReason": "STOP","index": 0}],"usageMetadata": {"promptTokenCount": 8,"candidatesTokenCount": 12,"totalTokenCount": 71,"promptTokensDetails": [{"modality": "TEXT","tokenCount": 8}],"thoughtsTokenCount": 51,"serviceTier": "standard"},"modelVersion": "gemini-2.5-flash","responseId": "Drdxaq3tE8iOvdIPgsDH2A4"}
+data: {"candidates": [{"content": {"parts": [{"text": "{\"capital\": \"Tokyo\", \"country\": \"Japan\"}"}],"role": "model"},"finishReason": "STOP","index": 0}],"usageMetadata": {"promptTokenCount": 8,"candidatesTokenCount": 12,"totalTokenCount": 83,"promptTokensDetails": [{"modality": "TEXT","tokenCount": 8}],"thoughtsTokenCount": 63,"serviceTier": "standard"},"modelVersion": "gemini-2.5-flash","responseId": "FxOIasHiIeTkxN8P09OkgQc"}
 

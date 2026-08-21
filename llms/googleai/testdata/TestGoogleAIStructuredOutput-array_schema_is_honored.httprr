@@ -1,27 +1,31 @@
 httprr trace v1
-960 1023
+961 1202
 POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent HTTP/1.1
 Host: generativelanguage.googleapis.com
 User-Agent: langchaingo-httprr
-Content-Length: 640
+Content-Length: 641
 Content-Type: application/json
 X-Goog-Api-Client: google-genai-sdk/X.XX.X gl-go/go1.26.5
 X-Goog-Api-Key: test-api-key
 
-{"contents":[{"parts":[{"text":"List three primary colors."}],"role":"user"}],"generationConfig":{"candidateCount":1,"maxOutputTokens":2048,"responseJsonSchema":{"properties":{"colors":{"items":{"type":"string"},"type":"array"}},"required":["colors"],"type":"object"},"responseMimeType":"application/json","temperature":0.5,"topK":3,"topP":0.95},"safetySettings":[{"category":"HARM_CATEGORY_DANGEROUS_CONTENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HARASSMENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HATE_SPEECH","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_SEXUALLY_EXPLICIT","threshold":"BLOCK_NONE"}]}HTTP/2.0 200 OK
+{"contents":[{"parts":[{"text":"List three primary colors."}],"role":"user"}],"generationConfig":{"candidateCount":1,"maxOutputTokens":16384,"responseJsonSchema":{"properties":{"colors":{"items":{"type":"string"},"type":"array"}},"required":["colors"],"type":"object"},"responseMimeType":"application/json","temperature":0.5,"topK":3,"topP":0.95},"safetySettings":[{"category":"HARM_CATEGORY_DANGEROUS_CONTENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HARASSMENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HATE_SPEECH","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_SEXUALLY_EXPLICIT","threshold":"BLOCK_NONE"}]}HTTP/2.0 200 OK
 Content-Length: 612
 Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+Content-Security-Policy: frame-ancestors 'none'
 Content-Type: application/json; charset=UTF-8
-Date: Tue, 04 Aug 2026 09:55:25 GMT
-Server: scaffolding on HTTPServer2
-Server-Timing: gfet4t7; dur=735
-Vary: Origin
-Vary: X-Origin
-Vary: Referer
+Date: Fri, 21 Aug 2026 08:57:58 GMT
+Server: nginx
+Server-Timing: gfet4t7; dur=823
+Strict-Transport-Security: max-age=31536000
+Vary: Accept-Encoding
+Vary: Origin, X-Origin, Referer
 X-Content-Type-Options: nosniff
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
 X-Frame-Options: SAMEORIGIN
 X-Gemini-Service-Tier: standard
 X-Xss-Protection: 0
+X-Xss-Protection: 1; mode=block
 
 {
   "candidates": [
@@ -41,16 +45,16 @@ X-Xss-Protection: 0
   "usageMetadata": {
     "promptTokenCount": 6,
     "candidatesTokenCount": 9,
-    "totalTokenCount": 83,
+    "totalTokenCount": 67,
     "promptTokensDetails": [
       {
         "modality": "TEXT",
         "tokenCount": 6
       }
     ],
-    "thoughtsTokenCount": 68,
+    "thoughtsTokenCount": 52,
     "serviceTier": "standard"
   },
   "modelVersion": "gemini-2.5-flash",
-  "responseId": "DLdxavn-H9jaxs0Pha-S0A0"
+  "responseId": "FROIarOIGNia28oPgvSq2AU"
 }

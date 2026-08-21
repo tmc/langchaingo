@@ -1,27 +1,31 @@
 httprr trace v1
-1052 1554
+1053 1733
 POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent HTTP/1.1
 Host: generativelanguage.googleapis.com
 User-Agent: langchaingo-httprr
-Content-Length: 732
+Content-Length: 733
 Content-Type: application/json
 X-Goog-Api-Client: google-genai-sdk/X.XX.X gl-go/go1.26.5
 X-Goog-Api-Key: test-api-key
 
-{"contents":[{"parts":[{"text":"What's the weather in New York?"}],"role":"user"}],"generationConfig":{"candidateCount":1,"maxOutputTokens":2048,"temperature":0.5,"topK":3,"topP":0.95},"safetySettings":[{"category":"HARM_CATEGORY_DANGEROUS_CONTENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HARASSMENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HATE_SPEECH","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_SEXUALLY_EXPLICIT","threshold":"BLOCK_NONE"}],"tools":[{"functionDeclarations":[{"description":"Get the weather for a location","name":"getWeather","parameters":{"properties":{"location":{"description":"The location to get weather for","type":"STRING"}},"required":["location"],"type":"OBJECT"}}]}]}HTTP/2.0 200 OK
+{"contents":[{"parts":[{"text":"What's the weather in New York?"}],"role":"user"}],"generationConfig":{"candidateCount":1,"maxOutputTokens":16384,"temperature":0.5,"topK":3,"topP":0.95},"safetySettings":[{"category":"HARM_CATEGORY_DANGEROUS_CONTENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HARASSMENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HATE_SPEECH","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_SEXUALLY_EXPLICIT","threshold":"BLOCK_NONE"}],"tools":[{"functionDeclarations":[{"description":"Get the weather for a location","name":"getWeather","parameters":{"properties":{"location":{"description":"The location to get weather for","type":"STRING"}},"required":["location"],"type":"OBJECT"}}]}]}HTTP/2.0 200 OK
 Content-Length: 1142
 Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+Content-Security-Policy: frame-ancestors 'none'
 Content-Type: application/json; charset=UTF-8
-Date: Tue, 04 Aug 2026 09:55:19 GMT
-Server: scaffolding on HTTPServer2
-Server-Timing: gfet4t7; dur=661
-Vary: Origin
-Vary: X-Origin
-Vary: Referer
+Date: Fri, 21 Aug 2026 08:57:52 GMT
+Server: nginx
+Server-Timing: gfet4t7; dur=724
+Strict-Transport-Security: max-age=31536000
+Vary: Accept-Encoding
+Vary: Origin, X-Origin, Referer
 X-Content-Type-Options: nosniff
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
 X-Frame-Options: SAMEORIGIN
 X-Gemini-Service-Tier: standard
 X-Xss-Protection: 0
+X-Xss-Protection: 1; mode=block
 
 {
   "candidates": [
@@ -35,7 +39,7 @@ X-Xss-Protection: 0
                 "location": "New York"
               }
             },
-            "thoughtSignature": "CvgBARFNMg8QXne8K2caDHL7VdzicwJCwjl6yOhyr2nsPnMtA04ARiTmzr1IwnjxsaxgESQ88Es6bCIlc3btQWO+b326smefWnR8oMFJYhKUAbcMtbTgoiJjQJkHyz9zJT1mljWy9SOslI2430a0zF44xw5M0Mjyzu6BrftKQt9vohf2sGfwffWE+5YKK+ic2s8T6Ui9hyttHXE8M3NX5rvjz60k0A87CODiCf6ng5c0n5Zxomdjz0OKJB92EqLAjUMsc7EeU51zs3ImN0yCa6CBD6wjB10xyp1h28ggX91xOHjlYXy+m1cEjxDhyRVMCqCJSCs+ZHpfkE4="
+            "thoughtSignature": "CvgBARFNMg/YdhZWr3fQs7qH6+Ifdjp/UTHvJgTl/7FyFUsnsUu+ubA2kLZ8NRnFgYYYKI2rt75d+jfPO00F4wyXVSrX+OhZ/0/Up9c/B9jGZuuo+ZpncM1ngGIGOhIHhPl4MNlmyHMxpQPCvRcikBmSvxCZysFJU0i06vaSPXm0YpiU2J6OgckaFclwfobAZtsG1ckEb7kaQbg9rc9J5RZJ7pe4eF8o0/E7fmwEQvAHJLSrwPFE6Z9cEQkpenzRYzHUxueWIYbobAlwtVBbT99KzFMe2Cw6nEGagb1iQTcm0GKxC/LBxNXBB4zwTWhCyyoB9ds4KQ9jiAs="
           }
         ],
         "role": "model"
@@ -59,5 +63,5 @@ X-Xss-Protection: 0
     "serviceTier": "standard"
   },
   "modelVersion": "gemini-2.5-flash",
-  "responseId": "B7dxarKOCc3rvdIPlKidoQk"
+  "responseId": "DxOIaoSvGazTxN8PwYnCgAg"
 }

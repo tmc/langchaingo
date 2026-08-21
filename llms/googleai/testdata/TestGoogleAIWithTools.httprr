@@ -1,27 +1,31 @@
 httprr trace v1
-1052 1598
+1053 1733
 POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent HTTP/1.1
 Host: generativelanguage.googleapis.com
 User-Agent: langchaingo-httprr
-Content-Length: 732
+Content-Length: 733
 Content-Type: application/json
 X-Goog-Api-Client: google-genai-sdk/X.XX.X gl-go/go1.26.5
 X-Goog-Api-Key: test-api-key
 
-{"contents":[{"parts":[{"text":"What's the weather in New York?"}],"role":"user"}],"generationConfig":{"candidateCount":1,"maxOutputTokens":2048,"temperature":0.5,"topK":3,"topP":0.95},"safetySettings":[{"category":"HARM_CATEGORY_DANGEROUS_CONTENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HARASSMENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HATE_SPEECH","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_SEXUALLY_EXPLICIT","threshold":"BLOCK_NONE"}],"tools":[{"functionDeclarations":[{"description":"Get the weather for a location","name":"getWeather","parameters":{"properties":{"location":{"description":"The location to get weather for","type":"STRING"}},"required":["location"],"type":"OBJECT"}}]}]}HTTP/2.0 200 OK
-Content-Length: 1186
+{"contents":[{"parts":[{"text":"What's the weather in New York?"}],"role":"user"}],"generationConfig":{"candidateCount":1,"maxOutputTokens":16384,"temperature":0.5,"topK":3,"topP":0.95},"safetySettings":[{"category":"HARM_CATEGORY_DANGEROUS_CONTENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HARASSMENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HATE_SPEECH","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_SEXUALLY_EXPLICIT","threshold":"BLOCK_NONE"}],"tools":[{"functionDeclarations":[{"description":"Get the weather for a location","name":"getWeather","parameters":{"properties":{"location":{"description":"The location to get weather for","type":"STRING"}},"required":["location"],"type":"OBJECT"}}]}]}HTTP/2.0 200 OK
+Content-Length: 1142
 Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+Content-Security-Policy: frame-ancestors 'none'
 Content-Type: application/json; charset=UTF-8
-Date: Tue, 04 Aug 2026 09:55:17 GMT
-Server: scaffolding on HTTPServer2
-Server-Timing: gfet4t7; dur=643
-Vary: Origin
-Vary: X-Origin
-Vary: Referer
+Date: Fri, 21 Aug 2026 08:57:50 GMT
+Server: nginx
+Server-Timing: gfet4t7; dur=772
+Strict-Transport-Security: max-age=31536000
+Vary: Accept-Encoding
+Vary: Origin, X-Origin, Referer
 X-Content-Type-Options: nosniff
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
 X-Frame-Options: SAMEORIGIN
 X-Gemini-Service-Tier: standard
 X-Xss-Protection: 0
+X-Xss-Protection: 1; mode=block
 
 {
   "candidates": [
@@ -35,7 +39,7 @@ X-Xss-Protection: 0
                 "location": "New York"
               }
             },
-            "thoughtSignature": "CpkCARFNMg9/hG7OqVs1G3hR3sZyO4TKCZROXYIIc4PLMYUpYfk67GTVzbcvtWmNpLvDyijmC2IrIcjaZZ8h/T01+prznI2rSy/us2vmCxEa3D2eEq47Cof/Dj2b5KBFq5FK27fW/xnpltFF/zO2lref455zib6RxynO4gsqhatjFWJzcutCr/DB42xJ0gs9ISxmVzHaH7OhOfEhmpWc2wWM4lO7hsEtUKti9/L/ZXgUzvcL6aIt+eiQDDgT5rVv5XdQC98+T7srZchN13GSzlQkYVnLzZlgigT0b1rLWaKy7H3Gusvu1dMIsuQpZw07QRvm0lGpUJdrTXQ09pOeN93VjnAjNYdyo7HtNTfNpAF4s9Y9QWC3NR3EoNc="
+            "thoughtSignature": "CvgBARFNMg/IJaDHKIpOE/OhqNyTGiuV/N10EP8onKuRG3uc+7wpjuqB7LOxZtG/jpGrPEdduo1LGq8UaY/OKjqPiVOVGWH8KgIf7GIrj6ZIPZ5SXEAflPSMf9G5Jtxgd6fJ+k2DodwX0cQbJf4TjzL756EybNEn3UwnpNOlyRE+qqWYIdzDD6TdoPuYJi4C7/MM/fCPUkuXn1rcyrl5aoONvrcL1FA2CnRHo4Ul34oGLNh/TmyeGNPg2TnENEL7xLgrWj+OLEl9x/FK99iuymTLGkmLu1CD0eXIVH2oYN9iOSrqbGXrB+sy34ObtDJGZhjohi+ueQOPpxs="
           }
         ],
         "role": "model"
@@ -48,16 +52,16 @@ X-Xss-Protection: 0
   "usageMetadata": {
     "promptTokenCount": 51,
     "candidatesTokenCount": 15,
-    "totalTokenCount": 125,
+    "totalTokenCount": 116,
     "promptTokensDetails": [
       {
         "modality": "TEXT",
         "tokenCount": 51
       }
     ],
-    "thoughtsTokenCount": 59,
+    "thoughtsTokenCount": 50,
     "serviceTier": "standard"
   },
   "modelVersion": "gemini-2.5-flash",
-  "responseId": "BbdxarXfF_3-vdIPhd69oQ8"
+  "responseId": "DROIapuDE7_8vdIP2f6XyQY"
 }

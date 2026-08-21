@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/vxcontrol/langchaingo/llms"
 	"github.com/vxcontrol/langchaingo/llms/googleai"
 
 	"google.golang.org/api/option"
@@ -28,8 +29,8 @@ func TestDefaultOptions(t *testing.T) {
 	if opts.DefaultCandidateCount != 1 {
 		t.Errorf("expected default candidate count 1, got %d", opts.DefaultCandidateCount)
 	}
-	if opts.DefaultMaxTokens != 2048 {
-		t.Errorf("expected default max tokens 2048, got %d", opts.DefaultMaxTokens)
+	if opts.DefaultMaxTokens != llms.DefaultMaxTokens {
+		t.Errorf("expected default max tokens %d, got %d", llms.DefaultMaxTokens, opts.DefaultMaxTokens)
 	}
 	if opts.DefaultTemperature != 0.5 {
 		t.Errorf("expected default temperature 0.5, got %f", opts.DefaultTemperature)

@@ -100,7 +100,7 @@ func TestDefaultOptions(t *testing.T) {
 	assert.Equal(t, "gemini-2.5-flash", opts.DefaultModel)
 	assert.Equal(t, "gemini-embedding-001", opts.DefaultEmbeddingModel)
 	assert.Equal(t, 1, opts.DefaultCandidateCount)
-	assert.Equal(t, 2048, opts.DefaultMaxTokens)
+	assert.Equal(t, llms.DefaultMaxTokens, opts.DefaultMaxTokens)
 	assert.Equal(t, 0.5, opts.DefaultTemperature)
 	assert.Equal(t, 3, opts.DefaultTopK)
 	assert.Equal(t, 0.95, opts.DefaultTopP)
