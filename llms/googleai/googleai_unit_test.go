@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"math"
 	"net/http"
 	"strings"
 	"testing"
@@ -1044,5 +1045,28 @@ func TestConfiguredDefaultTemperatureReachesTheWire(t *testing.T) {
 			require.NotNil(t, payload.GenerationConfig.Temperature)
 			require.InDelta(t, tc.want, *payload.GenerationConfig.Temperature, 1e-6)
 		})
+	}
+}
+
+func TestMaxTokensAboveInt32DoesNotGoNegative(t *testing.T) {
+	t.Parallel()
+	cases := []struct {
+		in   int
+		want int32
+	}{
+		{16384, 16384},
+		{math.MaxInt32, math.MaxInt32},
+		{math.MaxInt32 + 1, math.MaxInt32},
+		{3_000_000_000, math.MaxInt32},
+		{math.MinInt32 - 1, math.MinInt32},
+	}
+	for _, tc := range cases {
+		n := tc.in
+		if got := convertToInt32(&n); got != tc.want {
+			t.Errorf("convertToInt32(%d) = %d, want %d", tc.in, got, tc.want)
+		}
+		if got := convertToInt32Pointer(&n); got == nil || *got != tc.want {
+			t.Errorf("convertToInt32Pointer(%d) = %v, want %d", tc.in, got, tc.want)
+		}
 	}
 }
