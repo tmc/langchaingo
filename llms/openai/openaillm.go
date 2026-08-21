@@ -262,9 +262,14 @@ func (o *LLM) createChatRequest(chatMsgs []*ChatMessage, opts llms.CallOptions) 
 		req.SetResponseFormat(ResponseFormatJSON)
 	}
 
-	if model := o.effectiveModel(opts); reasoning.IsReasoningModel(model) &&
-		!opts.Reasoning.IsDisabled() && !reasoning.OpenAIAcceptsCustomTemperature(model) {
-		if opts.Temperature != nil {
+	switch model := o.effectiveModel(opts); {
+	case reasoning.ClaudeRejectsSampling(model):
+		req.Temperature, req.TopP = nil, nil
+	case reasoning.ClaudeMutuallyExclusiveSampling(model) && req.Temperature != nil && req.TopP != nil:
+		req.TopP = nil
+	case reasoning.IsReasoningModel(model) && !opts.Reasoning.IsDisabled() &&
+		!reasoning.OpenAIAcceptsCustomTemperature(model):
+		if req.Temperature != nil {
 			temperature := 1.0
 			req.Temperature = &temperature
 		}
