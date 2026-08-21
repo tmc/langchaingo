@@ -133,7 +133,7 @@ func ClaudeSupportsEffortWithBudget(model string, p Provider) bool {
 	if !containsAny(m, budgetEffortClaude) {
 		return false
 	}
-	return !(p == ProviderBedrock && containsAny(m, bedrockRejectsBudgetEffortClaude))
+	return p != ProviderBedrock || !containsAny(m, bedrockRejectsBudgetEffortClaude)
 }
 
 // noPrefillClaude models reject a conversation whose last message is an
