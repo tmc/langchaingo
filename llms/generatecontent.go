@@ -161,6 +161,10 @@ type ContentChoice struct {
 	// StopReason is the reason the model stopped generating output.
 	StopReason string
 
+	// Truncated reports whether generation stopped at the output token limit,
+	// derived from StopReason, which keeps the vendor's own spelling.
+	Truncated bool
+
 	// GenerationInfo is arbitrary information the model adds to the response.
 	GenerationInfo map[string]any
 

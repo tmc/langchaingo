@@ -249,6 +249,8 @@ type CallOptions struct {
 	// JSONMode is a flag to enable JSON mode.
 	JSONMode bool `json:"json"`
 
+	FailOnTruncation bool `json:"fail_on_truncation,omitempty"`
+
 	// StructuredOutput requests provider-native, schema-constrained output. When
 	// set (via WithStructuredOutput) JSONMode is also true and the provider is
 	// asked for strict output matching Schema. nil keeps the legacy schema-less
@@ -767,6 +769,14 @@ func WithToolChoice(choice any) CallOption {
 func WithTools(tools []Tool) CallOption {
 	return func(o *CallOptions) {
 		o.Tools = tools
+	}
+}
+
+// WithFailOnTruncation makes an answer that stopped at the output token limit
+// return an error rather than a successful response. Off by default.
+func WithFailOnTruncation() CallOption {
+	return func(o *CallOptions) {
+		o.FailOnTruncation = true
 	}
 }
 

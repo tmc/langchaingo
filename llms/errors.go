@@ -45,6 +45,9 @@ const (
 
 	// ErrCodeNotImplemented indicates a feature is not implemented.
 	ErrCodeNotImplemented ErrorCode = "not_implemented"
+
+	// ErrCodeTruncated indicates generation stopped at the output token limit.
+	ErrCodeTruncated ErrorCode = "truncated"
 )
 
 // Error represents a standardized error from an LLM provider.
@@ -185,6 +188,13 @@ func IsNotImplementedError(err error) bool {
 	return errors.As(err, &e) && e.Code == ErrCodeNotImplemented
 }
 
+// IsTruncatedError returns true if the error reports an answer that stopped at
+// the output token limit.
+func IsTruncatedError(err error) bool {
+	var e *Error
+	return errors.As(err, &e) && e.Code == ErrCodeTruncated
+}
+
 // Common error variables for easy comparison.
 var (
 	// ErrAuthentication is returned when authentication fails.
@@ -216,4 +226,7 @@ var (
 
 	// ErrNotImplemented is returned when a feature is not implemented.
 	ErrNotImplemented = &Error{Code: ErrCodeNotImplemented}
+
+	// ErrTruncated is returned when an answer stopped at the output token limit.
+	ErrTruncated = &Error{Code: ErrCodeTruncated}
 )
