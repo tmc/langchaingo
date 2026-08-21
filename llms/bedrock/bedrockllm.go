@@ -110,11 +110,19 @@ func (l *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 
 	// Use Converse API if enabled
 	if l.useConverseAPI {
-		return l.generateContentWithConverseAPI(ctx, messages, opts)
+		resp, err = l.generateContentWithConverseAPI(ctx, messages, opts)
+	} else {
+		resp, err = l.generateContentWithLegacyAPI(ctx, messages, opts)
+	}
+	if err != nil {
+		return resp, err
 	}
 
-	// Use legacy implementation
-	return l.generateContentWithLegacyAPI(ctx, messages, opts)
+	if err = llms.CheckTruncation(resp, opts); err != nil {
+		return resp, err
+	}
+
+	return resp, nil
 }
 
 // generateContentWithConverseAPI uses the unified Converse API

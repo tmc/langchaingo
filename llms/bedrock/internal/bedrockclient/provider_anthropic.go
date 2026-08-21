@@ -327,6 +327,7 @@ func createAnthropicCompletion(ctx context.Context,
 		Reasoning:  processReasoning(reasoningContent, signature),
 		ToolCalls:  toolCalls,
 		StopReason: output.StopReason,
+		Truncated:  llms.IsTruncated(output.StopReason),
 		GenerationInfo: map[string]any{
 			"input_tokens":     output.Usage.InputTokens,
 			"output_tokens":    output.Usage.OutputTokens,
@@ -503,6 +504,7 @@ func parseStreamingCompletionResponse(ctx context.Context, client *bedrockruntim
 				}
 			case "message_delta":
 				contentchoices[0].StopReason = resp.Delta.StopReason
+				contentchoices[0].Truncated = llms.IsTruncated(resp.Delta.StopReason)
 				inputTokens := resp.Message.Usage.InputTokens
 				outputTokens := resp.Message.Usage.OutputTokens
 				if inputTokens == 0 {

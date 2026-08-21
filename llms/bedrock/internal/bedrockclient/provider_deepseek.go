@@ -92,6 +92,7 @@ func createDeepSeekCompletion(ctx context.Context,
 		choices = append(choices, &llms.ContentChoice{
 			Content:    choice.Text,
 			StopReason: choice.StopReason,
+			Truncated:  llms.IsTruncated(choice.StopReason),
 		})
 	}
 
@@ -167,6 +168,7 @@ func parseDeepSeekStreamingResponse(ctx context.Context, client *bedrockruntime.
 
 			if len(resp.Choices) > 0 && resp.Choices[0].StopReason != "" {
 				contentchoices[0].StopReason = resp.Choices[0].StopReason
+				contentchoices[0].Truncated = llms.IsTruncated(resp.Choices[0].StopReason)
 			}
 		}
 	}

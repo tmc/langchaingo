@@ -216,6 +216,7 @@ func createAi21Completion(ctx context.Context, client *bedrockruntime.Client, mo
 		choices[i] = &llms.ContentChoice{
 			Content:    completion.Data.Text,
 			StopReason: completion.FinishReason.Reason,
+			Truncated:  llms.IsTruncated(completion.FinishReason.Reason),
 			GenerationInfo: map[string]any{
 				"id":            output.ID,
 				"input_tokens":  int32(len(output.Prompt.Tokens)),
@@ -293,6 +294,7 @@ func createAi21JambaCompletion(ctx context.Context, client *bedrockruntime.Clien
 		choices[i] = &llms.ContentChoice{
 			Content:    choice.Message.Content,
 			StopReason: choice.FinishReason,
+			Truncated:  llms.IsTruncated(choice.FinishReason),
 			GenerationInfo: map[string]any{
 				"id":            output.ID,
 				"input_tokens":  output.Usage.PromptTokens,
@@ -340,6 +342,7 @@ func parseAi21StreamingResponse(ctx context.Context, client *bedrockruntime.Clie
 			// Set completion reason
 			if resp.FinishReason != "" {
 				contentchoices[0].StopReason = resp.FinishReason
+				contentchoices[0].Truncated = llms.IsTruncated(resp.FinishReason)
 			}
 
 			// Set token counts if available

@@ -806,6 +806,7 @@ func (c *ConverseClient) processStreamingResponse(ctx context.Context, response 
 		GenerationInfo: make(map[string]any),
 		Reasoning:      c.processReasoning(reasoningContent.String(), sig),
 		StopReason:     stopReason,
+		Truncated:      llms.IsTruncated(stopReason),
 	}
 
 	result := &llms.ContentResponse{
@@ -892,6 +893,7 @@ func (c *ConverseClient) convertConverseResponse(response *bedrockruntime.Conver
 	// distinguishes end_turn from tool_use, max_tokens, guardrail_intervened,
 	// content_filtered and malformed-output states.
 	choice.StopReason = string(response.StopReason)
+	choice.Truncated = llms.IsTruncated(string(response.StopReason))
 
 	// Add usage information
 	if response.Usage != nil {

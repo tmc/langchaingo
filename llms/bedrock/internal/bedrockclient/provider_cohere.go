@@ -181,6 +181,7 @@ func createCohereCompletion(ctx context.Context,
 		choices[i] = &llms.ContentChoice{
 			Content:    gen.Text,
 			StopReason: gen.FinishReason,
+			Truncated:  llms.IsTruncated(gen.FinishReason),
 			GenerationInfo: map[string]any{
 				"generation_id": gen.ID,
 				"index":         i,
@@ -276,6 +277,7 @@ func createCohereCommandRCompletion(ctx context.Context,
 		{
 			Content:    output.Text,
 			StopReason: output.FinishReason,
+			Truncated:  llms.IsTruncated(output.FinishReason),
 			GenerationInfo: map[string]any{
 				"id": output.ID,
 			},
@@ -323,6 +325,7 @@ func parseCohereStreamingResponse(ctx context.Context, client *bedrockruntime.Cl
 			// Set completion reason
 			if resp.FinishReason != "" {
 				contentchoices[0].StopReason = resp.FinishReason
+				contentchoices[0].Truncated = llms.IsTruncated(resp.FinishReason)
 			}
 
 			// Set generation info

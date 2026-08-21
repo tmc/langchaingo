@@ -130,6 +130,7 @@ func createAmazonCompletion(ctx context.Context,
 		contentChoices[i] = &llms.ContentChoice{
 			Content:    result.OutputText,
 			StopReason: result.CompletionReason,
+			Truncated:  llms.IsTruncated(result.CompletionReason),
 			GenerationInfo: map[string]any{
 				"input_tokens":  output.InputTextTokenCount,
 				"output_tokens": result.TokenCount,
@@ -182,6 +183,7 @@ func parseAmazonStreamingResponse(ctx context.Context, client *bedrockruntime.Cl
 			// Set completion reason
 			if resp.CompletionReason != "" {
 				contentchoices[0].StopReason = resp.CompletionReason
+				contentchoices[0].Truncated = llms.IsTruncated(resp.CompletionReason)
 			}
 
 			// Set token counts

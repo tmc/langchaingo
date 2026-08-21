@@ -223,6 +223,7 @@ func createNovaCompletion(ctx context.Context,
 		Contentchoices[i] = &llms.ContentChoice{
 			Content:    c.Text,
 			StopReason: output.StopReason,
+			Truncated:  llms.IsTruncated(output.StopReason),
 			GenerationInfo: map[string]any{
 				"input_tokens":  output.Usage.InputTokens,
 				"output_tokens": output.Usage.OutputTokens,
@@ -382,6 +383,7 @@ func parseNovaStreamingResponse(ctx context.Context, client *bedrockruntime.Clie
 			// Check for message delta (contains stop reason and output tokens)
 			if resp.MessageDelta.StopReason != "" {
 				contentchoices[0].StopReason = resp.MessageDelta.StopReason
+				contentchoices[0].Truncated = llms.IsTruncated(resp.MessageDelta.StopReason)
 			}
 			if resp.MessageDelta.Usage.OutputTokens > 0 {
 				contentchoices[0].GenerationInfo["output_tokens"] = resp.MessageDelta.Usage.OutputTokens

@@ -117,6 +117,7 @@ func createMetaCompletion(ctx context.Context,
 			{
 				Content:    output.Generation,
 				StopReason: output.StopReason,
+				Truncated:  llms.IsTruncated(output.StopReason),
 				GenerationInfo: map[string]any{
 					"input_tokens":  output.PromptTokenCount,
 					"output_tokens": output.GenerationTokenCount,
@@ -166,6 +167,7 @@ func parseMetaStreamingResponse(ctx context.Context, client *bedrockruntime.Clie
 			// Set completion reason
 			if resp.StopReason != "" {
 				contentchoices[0].StopReason = resp.StopReason
+				contentchoices[0].Truncated = llms.IsTruncated(resp.StopReason)
 			}
 
 			// Set token counts
