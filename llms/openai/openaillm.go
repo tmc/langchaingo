@@ -116,6 +116,10 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 
 	response := o.processResponse(result)
 
+	if err := llms.CheckTruncation(response, opts); err != nil {
+		return response, err
+	}
+
 	// When structured output was requested, validate each normal-final choice
 	// against the original schema. The response is still returned alongside the
 	// typed error so callers keep usage and diagnostics.
@@ -396,10 +400,12 @@ func (o *LLM) processResponse(result *openaiclient.ChatCompletionResponse) *llms
 	choices := make([]*llms.ContentChoice, len(result.Choices))
 
 	for i, c := range result.Choices {
+		stopReason := fmt.Sprint(c.FinishReason)
 		choices[i] = &llms.ContentChoice{
 			Content:        c.Message.Content,
 			Reasoning:      o.processReasoning(c.Message.ReasoningContent),
-			StopReason:     fmt.Sprint(c.FinishReason),
+			StopReason:     stopReason,
+			Truncated:      llms.IsTruncated(stopReason),
 			GenerationInfo: o.processUsage(&result.Usage),
 		}
 

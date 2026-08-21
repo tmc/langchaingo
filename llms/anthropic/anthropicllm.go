@@ -309,6 +309,9 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 	if err != nil {
 		return nil, err
 	}
+	if err := llms.CheckTruncation(response, *opts); err != nil {
+		return response, err
+	}
 	// When structured output was requested, validate the final text against the
 	// original schema. The response is returned alongside the typed error so the
 	// caller keeps usage and diagnostics.
@@ -408,6 +411,7 @@ func processAnthropicResponse(result *anthropicclient.MessageResponsePayload) (*
 		Reasoning:  contentReasoning, // Always in choice for Anthropic
 		ToolCalls:  toolCalls,
 		StopReason: result.StopReason,
+		Truncated:  llms.IsTruncated(result.StopReason),
 		GenerationInfo: map[string]any{
 			// Standardized field names for cross-provider compatibility
 			"PromptTokens":             result.Usage.InputTokens + result.Usage.CacheCreationInputTokens + result.Usage.CacheReadInputTokens,
