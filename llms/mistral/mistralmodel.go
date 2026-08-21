@@ -164,6 +164,7 @@ func generateNonStreamingContent(ctx context.Context, m *Model, callOptions *llm
 		langchainContentResponse.Choices = append(langchainContentResponse.Choices, &llms.ContentChoice{
 			Content:    choice.Message.Content,
 			StopReason: string(choice.FinishReason),
+			Truncated:  llms.IsTruncated(string(choice.FinishReason)),
 			GenerationInfo: map[string]any{
 				"created": res.Created,
 				"model":   res.Model,
@@ -185,6 +186,11 @@ func generateNonStreamingContent(ctx context.Context, m *Model, callOptions *llm
 			}
 		}
 	}
+	if err := llms.CheckTruncation(langchainContentResponse, *callOptions); err != nil {
+		m.CallbacksHandler.HandleLLMError(ctx, err)
+		return langchainContentResponse, err
+	}
+
 	m.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, langchainContentResponse)
 
 	return langchainContentResponse, nil

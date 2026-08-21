@@ -169,6 +169,10 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 
 	response = o.createContentResponse(resp)
 
+	if err = llms.CheckTruncation(response, opts); err != nil {
+		return response, err
+	}
+
 	// When a schema was requested, validate the final response against it; the
 	// response is returned alongside the typed error so usage is preserved.
 	if err = o.validateStructuredOutput(opts, response); err != nil {
@@ -427,6 +431,7 @@ func (o *LLM) createContentResponse(resp api.ChatResponse) *llms.ContentResponse
 			Content:    content,
 			Reasoning:  contentReasoning,
 			StopReason: resp.DoneReason,
+			Truncated:  llms.IsTruncated(resp.DoneReason),
 			GenerationInfo: map[string]any{
 				"CompletionTokens": resp.EvalCount,
 				"PromptTokens":     resp.PromptEvalCount,
