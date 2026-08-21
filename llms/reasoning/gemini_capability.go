@@ -57,6 +57,9 @@ func geminiKnownNonThinking(model string) bool {
 // treated as disablable (optimistic: attempt it, let the API be the backstop).
 func GeminiCanDisable(model string) bool {
 	m := strings.ToLower(model)
+	if GeminiThinkingOffByDefault(m) {
+		return true
+	}
 	if hasFamily(m, "gemini-3") {
 		return false
 	}
@@ -64,4 +67,10 @@ func GeminiCanDisable(model string) bool {
 		return false
 	}
 	return true
+}
+
+// GeminiThinkingOffByDefault reports whether the model leaves thinking off until
+// asked, so omitting the thinking config already yields "off".
+func GeminiThinkingOffByDefault(model string) bool {
+	return strings.Contains(strings.ToLower(model), "flash-lite")
 }

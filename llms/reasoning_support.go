@@ -133,13 +133,10 @@ func ReasoningSupportFor(model string, p reasoning.Provider) ReasoningSupport {
 
 	if p == reasoning.ProviderGoogleAI && reasoning.GeminiSupportsThinking(model) {
 		return ReasoningSupport{
-			// Flash/Flash-Lite/Gemma disable via thinkingBudget:0; Pro and Gemini 3.x
-			// cannot fully disable — derive from the same resolver the wire uses.
 			CannotDisable: reasoning.ResolveOff(model, p) == reasoning.OffUnsupported,
 			Supported:     true,
 			Known:         true,
-			// These families think by default (Flash-Lite / Gemma may still accept budget:0).
-			DefaultOn: boolPtr(true),
+			DefaultOn:     boolPtr(!reasoning.GeminiThinkingOffByDefault(model)),
 		}
 	}
 

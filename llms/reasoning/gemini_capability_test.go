@@ -105,3 +105,28 @@ func TestGeminiFamilyBoundary(t *testing.T) {
 		}
 	}
 }
+
+func TestGeminiFlashLiteDisablesByOmitting(t *testing.T) {
+	t.Parallel()
+	cases := []struct {
+		model      string
+		canDisable bool
+		off        OffWire
+	}{
+		{"gemini-2.5-flash-lite", true, OffOmit},
+		{"gemini-3.1-flash-lite", true, OffOmit},
+		{"gemini-3.5-flash-lite", true, OffOmit},
+		{"gemini-2.5-flash", true, OffZeroBudget},
+		{"gemini-2.5-pro", false, OffUnsupported},
+		{"gemini-3.1-pro-preview", false, OffUnsupported},
+		{"gemini-3.6-flash", false, OffUnsupported},
+	}
+	for _, tc := range cases {
+		if got := GeminiCanDisable(tc.model); got != tc.canDisable {
+			t.Errorf("GeminiCanDisable(%q) = %v, want %v", tc.model, got, tc.canDisable)
+		}
+		if got := ResolveOff(tc.model, ProviderGoogleAI); got != tc.off {
+			t.Errorf("ResolveOff(%q) = %v, want %v", tc.model, got, tc.off)
+		}
+	}
+}

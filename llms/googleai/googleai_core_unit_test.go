@@ -1034,20 +1034,28 @@ func TestThinkingConfig(t *testing.T) {
 // (pentagi backend/pkg/providers/gemini/models.yml). Keep this list in sync when
 // that catalog changes — the tests below assert wire-level thinking behavior for
 // every entry so a new model cannot silently miss reasoning coverage.
+type disableWire int
+
+const (
+	disableUnsupported disableWire = iota // WithReasoningDisabled must error before the request
+	disableZeroBudget                     // thinking_budget: 0
+	disableOmit                           // no thinking config at all
+)
+
 var productionGeminiModels = []struct {
 	name              string
 	usesThinkingLevel bool // Gemini 3.x uses thinking_level; 2.5 / Gemma use thinking_budget
-	canDisable        bool // false → WithReasoningDisabled must error before the request
+	disable           disableWire
 }{
-	{name: "gemini-3.5-flash", usesThinkingLevel: true, canDisable: false},
-	{name: "gemini-3.1-pro-preview", usesThinkingLevel: true, canDisable: false},
-	{name: "gemini-3.1-pro-preview-customtools", usesThinkingLevel: true, canDisable: false},
-	{name: "gemini-3.1-flash-lite", usesThinkingLevel: true, canDisable: false},
-	{name: "gemini-2.5-pro", usesThinkingLevel: false, canDisable: false},
-	{name: "gemini-2.5-flash", usesThinkingLevel: false, canDisable: true},
-	{name: "gemini-2.5-flash-lite", usesThinkingLevel: false, canDisable: true},
-	{name: "gemma-4-31b-it", usesThinkingLevel: false, canDisable: true},
-	{name: "gemma-4-26b-a4b-it", usesThinkingLevel: false, canDisable: true},
+	{name: "gemini-3.5-flash", usesThinkingLevel: true, disable: disableUnsupported},
+	{name: "gemini-3.1-pro-preview", usesThinkingLevel: true, disable: disableUnsupported},
+	{name: "gemini-3.1-pro-preview-customtools", usesThinkingLevel: true, disable: disableUnsupported},
+	{name: "gemini-3.1-flash-lite", usesThinkingLevel: true, disable: disableOmit},
+	{name: "gemini-2.5-pro", usesThinkingLevel: false, disable: disableUnsupported},
+	{name: "gemini-2.5-flash", usesThinkingLevel: false, disable: disableZeroBudget},
+	{name: "gemini-2.5-flash-lite", usesThinkingLevel: false, disable: disableOmit},
+	{name: "gemma-4-31b-it", usesThinkingLevel: false, disable: disableZeroBudget},
+	{name: "gemma-4-26b-a4b-it", usesThinkingLevel: false, disable: disableZeroBudget},
 }
 
 func TestResolveTemperature(t *testing.T) {
@@ -1170,7 +1178,7 @@ func TestProductionGeminiModels_ThinkingConfig(t *testing.T) {
 			support := llms.ReasoningSupportFor(m.name, reasoning.ProviderGoogleAI)
 			assert.True(t, support.Supported)
 			assert.True(t, support.Known, "production model %s should be a Known reasoning model", m.name)
-			assert.Equal(t, !m.canDisable, support.CannotDisable,
+			assert.Equal(t, m.disable == disableUnsupported, support.CannotDisable,
 				"CannotDisable hint mismatch for %s", m.name)
 
 			// Reasoning on with effort (no explicit token budget).
@@ -1192,13 +1200,17 @@ func TestProductionGeminiModels_ThinkingConfig(t *testing.T) {
 			// Explicit disable.
 			offCfg := &llms.ReasoningConfig{Mode: llms.ReasoningOff}
 			tcOff, err := resolveThinkingConfig(m.name, offCfg, 8192)
-			if m.canDisable {
+			switch m.disable {
+			case disableZeroBudget:
 				require.NoError(t, err, "disable must succeed for %s", m.name)
 				require.NotNil(t, tcOff)
 				require.NotNil(t, tcOff.ThinkingBudget)
 				assert.Equal(t, int32(0), *tcOff.ThinkingBudget)
 				assert.False(t, tcOff.IncludeThoughts)
-			} else {
+			case disableOmit:
+				require.NoError(t, err, "disable must succeed for %s", m.name)
+				assert.Nil(t, tcOff, "%s is off unless asked, so disable sends nothing", m.name)
+			case disableUnsupported:
 				var offErr *reasoning.ErrReasoningOffUnsupported
 				require.ErrorAs(t, err, &offErr, "disable must be unsupported for %s", m.name)
 				assert.Nil(t, tcOff)

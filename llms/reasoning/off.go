@@ -78,7 +78,7 @@ func ResolveOff(model string, p Provider) OffWire {
 		}
 		// Known non-thinking families reject thinkingBudget:0, so omit rather than
 		// send it; unknown Gemini/Gemma names stay optimistic (attempt budget:0).
-		if geminiKnownNonThinking(model) {
+		if geminiKnownNonThinking(model) || GeminiThinkingOffByDefault(model) {
 			return OffOmit
 		}
 		return OffZeroBudget
