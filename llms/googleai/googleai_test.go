@@ -1,10 +1,12 @@
 package googleai
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -16,6 +18,25 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+func scrubProxyHeaders(buf *bytes.Buffer) error {
+	const sep = "\r\n\r\n"
+	dump := buf.String()
+	end := strings.Index(dump, sep)
+	if end == -1 {
+		return nil
+	}
+	kept := make([]string, 0, strings.Count(dump[:end], "\r\n")+1)
+	for _, line := range strings.Split(dump[:end], "\r\n") {
+		if strings.HasPrefix(strings.ToLower(line), "x-litellm-") {
+			continue
+		}
+		kept = append(kept, line)
+	}
+	buf.Reset()
+	buf.WriteString(strings.Join(kept, "\r\n") + dump[end:])
+	return nil
+}
 
 func newHTTPRRClient(t *testing.T, opts ...Option) *GoogleAI {
 	t.Helper()
@@ -32,10 +53,12 @@ func newHTTPRRClient(t *testing.T, opts ...Option) *GoogleAI {
 		transport = &httputil.ApiKeyTransport{
 			Transport: transport,
 			APIKey:    apiKey,
+			BaseURL:   os.Getenv("GOOGLE_BASE_URL"),
 		}
 	}
 
 	rr := httprr.OpenForTest(t, transport)
+	rr.ScrubResp(scrubProxyHeaders)
 
 	// Avoid issue with different view of request bodies for Google AI SDK
 	rr.ScrubReq(httprr.JsonCompactScrubBody)
@@ -870,4 +893,19 @@ func TestGoogleAIThinkingModels(t *testing.T) {
 			assert.Equal(t, resp.Choices[0].Reasoning.Content, thinkingContent.String())
 		}
 	})
+}
+
+func TestRecordingsCarryNoProxyHeaders(t *testing.T) {
+	t.Parallel()
+
+	files, err := filepath.Glob("testdata/*.httprr")
+	require.NoError(t, err)
+	require.NotEmpty(t, files)
+
+	for _, file := range files {
+		data, err := os.ReadFile(file)
+		require.NoError(t, err)
+		assert.False(t, strings.Contains(strings.ToLower(string(data)), "x-litellm-"),
+			"%s carries proxy headers", file)
+	}
 }
