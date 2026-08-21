@@ -202,20 +202,24 @@ func TestClaudeRejectsAssistantPrefill(t *testing.T) {
 func TestClaudeSupportsEffortWithBudget(t *testing.T) {
 	t.Parallel()
 	cases := []struct {
-		model string
-		want  bool
+		model    string
+		provider Provider
+		want     bool
 	}{
-		{"claude-opus-4-5-20251101", true},
-		{"claude-mythos-preview", true},
-		{"claude-opus-4-6", true},
-		{"us.anthropic.claude-sonnet-4-6", true},
-		{"claude-sonnet-4-5", false},
-		{"claude-haiku-4-5", false},
-		{"claude-sonnet-5", false},
+		{"claude-opus-4-5-20251101", ProviderAnthropic, true},
+		{"us.anthropic.claude-opus-4-5-20251101-v1:0", ProviderBedrock, false},
+		{"claude-mythos-preview", ProviderAnthropic, true},
+		{"claude-opus-4-6", ProviderAnthropic, true},
+		{"us.anthropic.claude-opus-4-6-v1", ProviderBedrock, true},
+		{"us.anthropic.claude-sonnet-4-6", ProviderBedrock, true},
+		{"claude-sonnet-4-5", ProviderAnthropic, false},
+		{"us.anthropic.claude-sonnet-4-5-20250929-v1:0", ProviderBedrock, false},
+		{"claude-haiku-4-5", ProviderAnthropic, false},
+		{"claude-sonnet-5", ProviderAnthropic, false},
 	}
 	for _, tc := range cases {
-		if got := ClaudeSupportsEffortWithBudget(tc.model); got != tc.want {
-			t.Errorf("ClaudeSupportsEffortWithBudget(%q) = %v, want %v", tc.model, got, tc.want)
+		if got := ClaudeSupportsEffortWithBudget(tc.model, tc.provider); got != tc.want {
+			t.Errorf("ClaudeSupportsEffortWithBudget(%q, %v) = %v, want %v", tc.model, tc.provider, got, tc.want)
 		}
 	}
 }

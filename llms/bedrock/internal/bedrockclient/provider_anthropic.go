@@ -722,7 +722,7 @@ func applyAnthropicReasoning(
 		}
 		if tokens := cfg.GetTokens(mt); tokens > 0 {
 			input.Thinking = &anthropicThinkingPayload{Type: "enabled", BudgetTokens: tokens}
-			if reasoning.ClaudeSupportsEffortWithBudget(modelID) {
+			if reasoning.ClaudeSupportsEffortWithBudget(modelID, reasoning.ProviderBedrock) {
 				input.OutputConfig = &anthropicOutputConfig{Effort: string(cfg.GetEffort(mt))}
 			}
 			// Budget thinking requires temperature=1.0 and rejects top_p/top_k.

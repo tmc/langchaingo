@@ -122,11 +122,18 @@ var budgetEffortClaude = []string{
 	"claude-opus-4-6", "claude-sonnet-4-6",
 }
 
+var bedrockRejectsBudgetEffortClaude = []string{"claude-opus-4-5"}
+
 // ClaudeSupportsEffortWithBudget reports whether the model accepts
-// output_config.effort together with manual (budget) thinking, so the effort is
-// not lost on the budget path for models that honor it.
-func ClaudeSupportsEffortWithBudget(model string) bool {
-	return containsAny(strings.ToLower(model), budgetEffortClaude)
+// output_config.effort together with manual (budget) thinking on the given
+// provider, so the effort is not lost on the budget path for models that honor
+// it and is not sent to a platform that rejects it.
+func ClaudeSupportsEffortWithBudget(model string, p Provider) bool {
+	m := strings.ToLower(model)
+	if !containsAny(m, budgetEffortClaude) {
+		return false
+	}
+	return !(p == ProviderBedrock && containsAny(m, bedrockRejectsBudgetEffortClaude))
 }
 
 // noPrefillClaude models reject a conversation whose last message is an

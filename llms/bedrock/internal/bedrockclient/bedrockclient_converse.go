@@ -167,7 +167,7 @@ func (c *ConverseClient) buildConverseInput(input *ConverseInput) (*bedrockrunti
 		setBudget := func() {
 			if tokens := input.ReasoningConfig.GetTokens(maxTokens); tokens > 0 {
 				additionalModelFields.Thinking = &converseThinkingPayload{Type: "enabled", BudgetTokens: tokens}
-				if reasoning.ClaudeSupportsEffortWithBudget(input.ModelID) {
+				if reasoning.ClaudeSupportsEffortWithBudget(input.ModelID, reasoning.ProviderBedrock) {
 					effort := input.ReasoningConfig.GetEffort(maxTokens)
 					additionalModelFields.OutputConfig = &converseOutputConfig{Effort: string(effort)}
 				}
