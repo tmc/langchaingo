@@ -134,6 +134,66 @@ func TestTruncationOnTheLegacyDoor(t *testing.T) {
 			body:     `{"inputTextTokenCount":1,"results":[{"tokenCount":1,"outputText":"a whole answer","completionReason":"FINISH"}]}`,
 			wantStop: "FINISH", wantTruncated: false,
 		},
+		{
+			name:     "ai21 out of budget",
+			model:    "ai21.j2-ultra-v1",
+			body:     `{"prompt":{"tokens":[]},"completions":[{"data":{"text":"half an ans","tokens":[]},"finishReason":{"reason":"length"}}]}`,
+			wantStop: "length", wantTruncated: true,
+		},
+		{
+			name:     "ai21 finished on its own",
+			model:    "ai21.j2-ultra-v1",
+			body:     `{"prompt":{"tokens":[]},"completions":[{"data":{"text":"a whole answer","tokens":[]},"finishReason":{"reason":"endoftext"}}]}`,
+			wantStop: "endoftext", wantTruncated: false,
+		},
+		{
+			name:     "ai21 jamba out of budget",
+			model:    "ai21.jamba-1-5-large-v1:0",
+			body:     `{"id":"x","choices":[{"index":0,"message":{"role":"assistant","content":"half an ans"},"finish_reason":"length"}],"usage":{"prompt_tokens":1,"completion_tokens":1,"total_tokens":2}}`,
+			wantStop: "length", wantTruncated: true,
+		},
+		{
+			name:     "cohere spells it MAX_TOKENS",
+			model:    "cohere.command-text-v14",
+			body:     `{"id":"x","generations":[{"id":"g","index":0,"finish_reason":"MAX_TOKENS","text":"half an ans"}]}`,
+			wantStop: "MAX_TOKENS", wantTruncated: true,
+		},
+		{
+			name:     "cohere command-r out of budget",
+			model:    "cohere.command-r-v1:0",
+			body:     `{"id":"x","text":"half an ans","finish_reason":"MAX_TOKENS"}`,
+			wantStop: "MAX_TOKENS", wantTruncated: true,
+		},
+		{
+			name:     "cohere command-r finished on its own",
+			model:    "cohere.command-r-v1:0",
+			body:     `{"id":"x","text":"a whole answer","finish_reason":"COMPLETE"}`,
+			wantStop: "COMPLETE", wantTruncated: false,
+		},
+		{
+			name:     "meta out of budget",
+			model:    "meta.llama3-8b-instruct-v1:0",
+			body:     `{"generation":"half an ans","prompt_token_count":1,"generation_token_count":1,"stop_reason":"length"}`,
+			wantStop: "length", wantTruncated: true,
+		},
+		{
+			name:     "nova out of budget",
+			model:    "amazon.nova-lite-v1:0",
+			body:     `{"output":{"message":{"content":[{"text":"half an ans"}],"role":"assistant"}},"stopReason":"max_tokens","usage":{"inputTokens":1,"outputTokens":1}}`,
+			wantStop: "max_tokens", wantTruncated: true,
+		},
+		{
+			name:     "nova finished on its own",
+			model:    "amazon.nova-lite-v1:0",
+			body:     `{"output":{"message":{"content":[{"text":"a whole answer"}],"role":"assistant"}},"stopReason":"end_turn","usage":{"inputTokens":1,"outputTokens":1}}`,
+			wantStop: "end_turn", wantTruncated: false,
+		},
+		{
+			name:     "deepseek out of budget",
+			model:    "deepseek.r1-v1:0",
+			body:     `{"choices":[{"text":"half an ans","stop_reason":"length"}]}`,
+			wantStop: "length", wantTruncated: true,
+		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
