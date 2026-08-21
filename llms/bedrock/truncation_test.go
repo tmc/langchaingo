@@ -98,16 +98,16 @@ func TestFailOnTruncationKeepsThePartialAnswer(t *testing.T) {
 	}
 }
 
-func TestTruncationOnTheLegacyDoor(t *testing.T) {
-	t.Parallel()
+type legacyTruncationCase struct {
+	name          string
+	model         string
+	body          string
+	wantStop      string
+	wantTruncated bool
+}
 
-	for _, tc := range []struct {
-		name          string
-		model         string
-		body          string
-		wantStop      string
-		wantTruncated bool
-	}{
+func legacyTruncationCases() []legacyTruncationCase {
+	return []legacyTruncationCase{
 		{
 			name:  "anthropic out of budget",
 			model: "anthropic.claude-3-sonnet-20240229-v1:0",
@@ -194,7 +194,13 @@ func TestTruncationOnTheLegacyDoor(t *testing.T) {
 			body:     `{"choices":[{"text":"half an ans","stop_reason":"length"}]}`,
 			wantStop: "length", wantTruncated: true,
 		},
-	} {
+	}
+}
+
+func TestTruncationOnTheLegacyDoor(t *testing.T) {
+	t.Parallel()
+
+	for _, tc := range legacyTruncationCases() {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			llm := truncationLLMWithBody(t, tc.body, bedrock.WithModel(tc.model))
