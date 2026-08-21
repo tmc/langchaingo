@@ -117,17 +117,21 @@ func ReasoningSupportFor(model string, p reasoning.Provider) ReasoningSupport {
 		}
 	}
 
-	if p == reasoning.ProviderOpenAI && reasoning.IsReasoningModel(model) {
-		var efforts []ReasoningEffort
-		if caps := reasoning.OpenAIReasoningCapsFor(model); caps.Known {
-			efforts = toReasoningEfforts(caps.Efforts)
+	if caps := reasoning.OpenAIReasoningCapsFor(model); caps.Known {
+		return ReasoningSupport{
+			Supported:     true,
+			Known:         true,
+			CannotDisable: !caps.CanDisable,
+			Efforts:       toReasoningEfforts(caps.Efforts),
+			// DefaultOn is per-model on the GPT-5.x line (some default off) — leave unknown.
 		}
+	}
+
+	if p == reasoning.ProviderOpenAI && reasoning.IsReasoningModel(model) {
 		return ReasoningSupport{
 			Supported:     true,
 			Known:         true,
 			CannotDisable: reasoning.ResolveOff(model, p) == reasoning.OffUnsupported,
-			Efforts:       efforts,
-			// DefaultOn is per-model on the GPT-5.x line (some default off) — leave unknown.
 		}
 	}
 

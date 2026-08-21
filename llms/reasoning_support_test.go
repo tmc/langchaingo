@@ -249,3 +249,51 @@ func TestReasoningSupportFor(t *testing.T) { //nolint:funlen // table-driven tes
 		}
 	})
 }
+
+func TestOpenAIHintSurvivesTheTransportLabel(t *testing.T) {
+	t.Parallel()
+
+	labels := []reasoning.Provider{
+		reasoning.ProviderUnknown,
+		reasoning.ProviderGoogleAI,
+		reasoning.ProviderBedrock,
+		reasoning.ProviderAnthropic,
+	}
+
+	for _, model := range []string{"gpt-5-pro", "gpt-5", "gpt-5-mini", "o3", "o4-mini", "gpt-5.1", "gpt-5.2"} {
+		want := ReasoningSupportFor(model, reasoning.ProviderOpenAI)
+		if !want.Known || len(want.Efforts) == 0 {
+			t.Fatalf("%s: the OpenAI label must know this model, got %+v", model, want)
+		}
+		for _, p := range labels {
+			got := ReasoningSupportFor(model, p)
+			if !got.Known {
+				t.Errorf("%s behind label %v: Known = false, want the same hint as the OpenAI label", model, p)
+			}
+			if !slices.Equal(got.Efforts, want.Efforts) {
+				t.Errorf("%s behind label %v: Efforts = %v, want %v", model, p, got.Efforts, want.Efforts)
+			}
+			if got.CannotDisable != want.CannotDisable {
+				t.Errorf("%s behind label %v: CannotDisable = %v, want %v", model, p, got.CannotDisable, want.CannotDisable)
+			}
+		}
+	}
+}
+
+func TestNonOpenAIModelsKeepTheirOwnBranch(t *testing.T) {
+	t.Parallel()
+
+	gemini := ReasoningSupportFor("gemini-2.5-flash", reasoning.ProviderGoogleAI)
+	if gemini.DefaultOn == nil {
+		t.Fatal("gemini on its own provider must still report DefaultOn from the Google branch")
+	}
+	if len(gemini.Efforts) != 0 {
+		t.Fatalf("gemini has no effort ladder, got %v", gemini.Efforts)
+	}
+
+	for _, model := range []string{"grok-4", "glm-5", "gemini-2.5-flash"} {
+		if got := ReasoningSupportFor(model, reasoning.ProviderUnknown); got.Known {
+			t.Errorf("%s behind an unknown label must stay unclassified, got %+v", model, got)
+		}
+	}
+}
