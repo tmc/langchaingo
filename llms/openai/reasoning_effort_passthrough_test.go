@@ -348,3 +348,54 @@ func TestTemperaturePinnedOnlyWhereTheModelDemandsIt(t *testing.T) {
 		})
 	}
 }
+
+func TestTopPDroppedOnlyWhereTheModelRejectsIt(t *testing.T) {
+	t.Parallel()
+
+	const completion = `{"id":"x","object":"chat.completion","created":1,"model":"m",` +
+		`"choices":[{"index":0,"message":{"role":"assistant","content":"ok"},"finish_reason":"stop"}],` +
+		`"usage":{"prompt_tokens":1,"completion_tokens":1,"total_tokens":2}}`
+
+	send := func(t *testing.T, model string, opts ...llms.CallOption) string {
+		t.Helper()
+		var body string
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			b, _ := io.ReadAll(r.Body)
+			body = string(b)
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = io.WriteString(w, completion)
+		}))
+		t.Cleanup(srv.Close)
+		llm, err := New(WithBaseURL(srv.URL), WithToken("test"), WithModel(model))
+		if err != nil {
+			t.Fatalf("New() error: %v", err)
+		}
+		opts = append([]llms.CallOption{llms.WithTopP(0.9)}, opts...)
+		if _, err := llm.GenerateContent(context.Background(),
+			[]llms.MessageContent{llms.TextParts(llms.ChatMessageTypeHuman, "hi")}, opts...); err != nil {
+			t.Fatalf("GenerateContent() error: %v", err)
+		}
+		return body
+	}
+
+	for _, model := range []string{"gpt-4.1", "gpt-4o", "gpt-5.1", "gpt-5.2", "gpt-5.4-mini"} {
+		t.Run("keeps/"+model, func(t *testing.T) {
+			if body := send(t, model); !strings.Contains(body, `"top_p":0.9`) {
+				t.Fatalf("%s takes the caller's top_p, got body: %s", model, body)
+			}
+		})
+	}
+	for _, model := range []string{"gpt-5", "gpt-5-mini", "gpt-5-nano", "o3", "o4-mini"} {
+		t.Run("drops/"+model, func(t *testing.T) {
+			if body := send(t, model); strings.Contains(body, "top_p") {
+				t.Fatalf("%s rejects top_p outright, got body: %s", model, body)
+			}
+		})
+		t.Run("drops-with-reasoning/"+model, func(t *testing.T) {
+			body := send(t, model, llms.WithReasoning(llms.ReasoningHigh, 0))
+			if strings.Contains(body, "top_p") {
+				t.Fatalf("%s rejects top_p with reasoning too, got body: %s", model, body)
+			}
+		})
+	}
+}

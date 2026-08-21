@@ -262,11 +262,13 @@ func (o *LLM) createChatRequest(chatMsgs []*ChatMessage, opts llms.CallOptions) 
 		req.SetResponseFormat(ResponseFormatJSON)
 	}
 
-	if model := o.effectiveModel(opts); opts.Temperature != nil &&
-		reasoning.IsReasoningModel(model) && !opts.Reasoning.IsDisabled() &&
-		!reasoning.OpenAIAcceptsCustomTemperature(model) {
-		temperature := 1.0
-		req.Temperature = &temperature
+	if model := o.effectiveModel(opts); reasoning.IsReasoningModel(model) &&
+		!opts.Reasoning.IsDisabled() && !reasoning.OpenAIAcceptsCustomTemperature(model) {
+		if opts.Temperature != nil {
+			temperature := 1.0
+			req.Temperature = &temperature
+		}
+		req.TopP = nil
 	}
 
 	// add tools from functions and tool definitions
