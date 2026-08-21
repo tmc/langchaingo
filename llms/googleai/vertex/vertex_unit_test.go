@@ -736,3 +736,35 @@ func TestVertexRejectsExplicitReasoningOff(t *testing.T) {
 		t.Fatalf("err = %v, want ErrReasoningOffUnsupported", err)
 	}
 }
+
+func TestConvertCandidatesReportsTruncation(t *testing.T) {
+	t.Parallel()
+
+	for _, tc := range []struct {
+		name          string
+		finishReason  genai.FinishReason
+		wantStop      string
+		wantTruncated bool
+	}{
+		{"out of budget", genai.FinishReasonMaxTokens, "FinishReasonMaxTokens", true},
+		{"finished on its own", genai.FinishReasonStop, "FinishReasonStop", false},
+		{"blocked by safety", genai.FinishReasonSafety, "FinishReasonSafety", false},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			resp, err := convertCandidates([]*genai.Candidate{{
+				FinishReason: tc.finishReason,
+				Content:      &genai.Content{Parts: []genai.Part{genai.Text("half an ans")}},
+			}}, nil)
+			if err != nil {
+				t.Fatalf("convertCandidates: %v", err)
+			}
+			if got := resp.Choices[0].Truncated; got != tc.wantTruncated {
+				t.Fatalf("Truncated = %v, want %v", got, tc.wantTruncated)
+			}
+			if got := resp.Choices[0].StopReason; got != tc.wantStop {
+				t.Fatalf("StopReason = %q, want %q", got, tc.wantStop)
+			}
+		})
+	}
+}

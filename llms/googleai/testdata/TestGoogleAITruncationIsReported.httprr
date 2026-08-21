@@ -1,0 +1,166 @@
+httprr trace v1
+806 1058
+POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent HTTP/1.1
+Host: generativelanguage.googleapis.com
+User-Agent: langchaingo-httprr
+Content-Length: 486
+Content-Type: application/json
+X-Goog-Api-Client: google-genai-sdk/X.XX.X gl-go/go1.26.5
+X-Goog-Api-Key: test-api-key
+
+{"contents":[{"parts":[{"text":"Describe the water cycle in full detail."}],"role":"user"}],"generationConfig":{"candidateCount":1,"maxOutputTokens":24,"temperature":0.5,"topK":3,"topP":0.95},"safetySettings":[{"category":"HARM_CATEGORY_DANGEROUS_CONTENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HARASSMENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HATE_SPEECH","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_SEXUALLY_EXPLICIT","threshold":"BLOCK_NONE"}]}HTTP/2.0 200 OK
+Content-Length: 468
+Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+Content-Security-Policy: frame-ancestors 'none'
+Content-Type: application/json; charset=UTF-8
+Date: Fri, 21 Aug 2026 09:38:06 GMT
+Server: nginx
+Server-Timing: gfet4t7; dur=541
+Strict-Transport-Security: max-age=31536000
+Vary: Accept-Encoding
+Vary: Origin, X-Origin, Referer
+X-Content-Type-Options: nosniff
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+X-Frame-Options: SAMEORIGIN
+X-Gemini-Service-Tier: standard
+X-Xss-Protection: 0
+X-Xss-Protection: 1; mode=block
+
+{
+  "candidates": [
+    {
+      "content": {
+        "role": "model"
+      },
+      "finishReason": "MAX_TOKENS",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 9,
+    "totalTokenCount": 29,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 9
+      }
+    ],
+    "thoughtsTokenCount": 20,
+    "serviceTier": "standard"
+  },
+  "modelVersion": "gemini-2.5-flash",
+  "responseId": "fRyIav2wKe2cnsEPqoa7gAM"
+}
+806 1058
+POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent HTTP/1.1
+Host: generativelanguage.googleapis.com
+User-Agent: langchaingo-httprr
+Content-Length: 486
+Content-Type: application/json
+X-Goog-Api-Client: google-genai-sdk/X.XX.X gl-go/go1.26.5
+X-Goog-Api-Key: test-api-key
+
+{"contents":[{"parts":[{"text":"Describe the water cycle in full detail."}],"role":"user"}],"generationConfig":{"candidateCount":1,"maxOutputTokens":24,"temperature":0.5,"topK":3,"topP":0.95},"safetySettings":[{"category":"HARM_CATEGORY_DANGEROUS_CONTENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HARASSMENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HATE_SPEECH","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_SEXUALLY_EXPLICIT","threshold":"BLOCK_NONE"}]}HTTP/2.0 200 OK
+Content-Length: 468
+Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+Content-Security-Policy: frame-ancestors 'none'
+Content-Type: application/json; charset=UTF-8
+Date: Fri, 21 Aug 2026 09:38:07 GMT
+Server: nginx
+Server-Timing: gfet4t7; dur=506
+Strict-Transport-Security: max-age=31536000
+Vary: Accept-Encoding
+Vary: Origin, X-Origin, Referer
+X-Content-Type-Options: nosniff
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+X-Frame-Options: SAMEORIGIN
+X-Gemini-Service-Tier: standard
+X-Xss-Protection: 0
+X-Xss-Protection: 1; mode=block
+
+{
+  "candidates": [
+    {
+      "content": {
+        "role": "model"
+      },
+      "finishReason": "MAX_TOKENS",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 9,
+    "totalTokenCount": 29,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 9
+      }
+    ],
+    "thoughtsTokenCount": 20,
+    "serviceTier": "standard"
+  },
+  "modelVersion": "gemini-2.5-flash",
+  "responseId": "fxyIav2AG62L7M8P-PTAuQo"
+}
+808 9401
+POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent HTTP/1.1
+Host: generativelanguage.googleapis.com
+User-Agent: langchaingo-httprr
+Content-Length: 488
+Content-Type: application/json
+X-Goog-Api-Client: google-genai-sdk/X.XX.X gl-go/go1.26.5
+X-Goog-Api-Key: test-api-key
+
+{"contents":[{"parts":[{"text":"Describe the water cycle in full detail."}],"role":"user"}],"generationConfig":{"candidateCount":1,"maxOutputTokens":4096,"temperature":0.5,"topK":3,"topP":0.95},"safetySettings":[{"category":"HARM_CATEGORY_DANGEROUS_CONTENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HARASSMENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HATE_SPEECH","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_SEXUALLY_EXPLICIT","threshold":"BLOCK_NONE"}]}HTTP/2.0 200 OK
+Content-Length: 8808
+Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+Content-Security-Policy: frame-ancestors 'none'
+Content-Type: application/json; charset=UTF-8
+Date: Fri, 21 Aug 2026 09:38:25 GMT
+Server: nginx
+Server-Timing: gfet4t7; dur=15917
+Strict-Transport-Security: max-age=31536000
+Vary: Accept-Encoding
+Vary: Origin, X-Origin, Referer
+X-Content-Type-Options: nosniff
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+X-Frame-Options: SAMEORIGIN
+X-Gemini-Service-Tier: standard
+X-Xss-Protection: 0
+X-Xss-Protection: 1; mode=block
+
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "The water cycle, also known as the **hydrologic cycle**, is the continuous movement of water on, above, and below the surface of the Earth. It's a complex, dynamic system driven primarily by solar energy and gravity, constantly transforming water between its liquid, solid, and gaseous states. There is no true \"beginning\" or \"end\" to the water cycle, but we can describe its key processes:\n\nHere's a full, detailed breakdown:\n\n---\n\n### **I. Introduction to the Water Cycle**\n\nThe Earth's water is always in motion, cycling through the atmosphere, oceans, land, and even living organisms. This continuous circulation ensures the availability of water for all life and plays a crucial role in regulating Earth's climate and shaping its landscapes. The total amount of water on Earth remains relatively constant, but its distribution and form change constantly.\n\n### **II. Key Processes of the Water Cycle**\n\nThe water cycle can be broken down into several interconnected processes:\n\n1.  **Evaporation:**\n    *   **Definition:** The process by which liquid water is converted into water vapor (a gas) and rises into the atmosphere.\n    *   **Mechanism:** Solar energy heats the surface of water bodies (oceans, lakes, rivers, puddles), providing the energy for water molecules to break free from their liquid state and become airborne.\n    *   **Sources:** The vast majority of evaporation (about 80%) occurs from the oceans due to their immense surface area. Significant evaporation also occurs from lakes, rivers, soil moisture, and even ice/snow surfaces (though this is technically sublimation).\n    *   **Factors Influencing:** Temperature (higher temperature = more evaporation), humidity (lower humidity = more evaporation), wind (removes saturated air, allowing more evaporation), and surface area.\n\n2.  **Transpiration:**\n    *   **Definition:** The process by which water vapor is released into the atmosphere from plants, primarily through small pores on their leaves called stomata.\n    *   **Mechanism:** Plants absorb water from the soil through their roots. This water travels up the plant stem to the leaves, where a small percentage is used for photosynthesis, and the vast majority evaporates from the leaf surface into the atmosphere.\n    *   **Contribution:** Transpiration is a significant contributor to atmospheric moisture, especially in heavily vegetated areas like forests and rainforests. It's often combined with evaporation and referred to as **evapotranspiration**.\n\n3.  **Sublimation:**\n    *   **Definition:** The process by which solid water (ice or snow) changes directly into water vapor without first melting into liquid water.\n    *   **Mechanism:** Occurs in cold, dry, and often windy conditions, typically in polar regions, high mountains, or during dry winter days. The solar energy is sufficient to convert the ice directly into gas.\n    *   **Contribution:** While less significant globally than evaporation, it's an important part of the cycle in specific cold environments.\n\n4.  **Condensation:**\n    *   **Definition:** The process by which water vapor in the atmosphere cools and changes back into liquid water droplets or ice crystals.\n    *   **Mechanism:** As warm, moist air rises, it expands and cools (adiabatic cooling). When the air cools to its **dew point** (the temperature at which it becomes saturated with water vapor), the water vapor molecules lose energy and begin to clump together.\n    *   **Condensation Nuclei:** This process usually requires tiny airborne particles called **condensation nuclei** (e.g., dust, pollen, salt, smoke) for the water vapor to condense upon.\n    *   **Forms:** Condensation forms **clouds** (masses of tiny water droplets or ice crystals suspended in the atmosphere), **fog** (clouds at ground level), **dew** (water droplets on surfaces cooled by radiation), and **frost** (ice crystals formed directly from vapor on cold surfaces).\n\n5.  **Precipitation:**\n    *   **Definition:** Any form of water that falls from the atmosphere to the Earth's surface.\n    *   **Mechanism:** Within clouds, water droplets or ice crystals grow in size (through collision and coalescence, or the Bergeron process where ice crystals grow at the expense of supercooled water droplets). When they become too heavy to be supported by air currents, they fall to the Earth.\n    *   **Forms:**\n        *   **Rain:** Liquid water droplets.\n        *   **Snow:** Ice crystals that form and remain frozen.\n        *   **Sleet:** Partially melted snow that refreezes into ice pellets before reaching the ground.\n        *   **Hail:** Lumps of ice formed in strong thunderstorms, growing as they are tossed up and down by updrafts and downdrafts.\n        *   **Freezing Rain:** Rain that freezes upon contact with surfaces that are at or below freezing temperature.\n\n6.  **Collection, Storage, and Movement:**\n    *   Once precipitation reaches the Earth's surface, it can follow several paths:\n        *   **Interception:** Some precipitation is caught by vegetation (leaves, branches) before reaching the ground. It may then evaporate directly back into the atmosphere or drip to the ground.\n        *   **Surface Runoff:** Water that flows over the land surface, unable to infiltrate the ground. It collects in streams, rivers, and eventually flows into lakes and oceans. This process can cause erosion and transport sediments and nutrients.\n        *   **Infiltration/Percolation:** Water that soaks into the ground.\n            *   **Infiltration:** The initial entry of water into the soil surface.\n            *   **Percolation:** The downward movement of water through soil and rock layers.\n        *   **Soil Moisture:** Water stored in the upper layers of the soil, available for plant uptake.\n        *   **Groundwater:** Water that has percolated deeper into the Earth and is stored in underground layers of permeable rock or sediment called **aquifers**. Groundwater moves slowly, often flowing towards lower elevations, and can discharge into rivers, lakes, or oceans, or emerge as **springs**.\n        *   **Lakes and Rivers:** Natural depressions or channels where surface water collects and flows.\n        *   **Oceans:** The largest reservoir of water on Earth, where most of the cycle's water eventually returns.\n        *   **Ice Caps and Glaciers:** Massive bodies of frozen freshwater, primarily in polar regions and high mountains. Water can be stored here for thousands of years.\n        *   **Atmospheric Water:** Water vapor, clouds, and ice crystals suspended in the atmosphere.\n        *   **Biological Water:** Water contained within living organisms (plants, animals, humans).\n\n### **III. Driving Forces of the Water Cycle**\n\n1.  **Solar Energy:**\n    *   The primary energy source for the entire water cycle.\n    *   Heats the Earth's surface, driving evaporation, transpiration, and sublimation.\n    *   Causes differential heating of the atmosphere, leading to air currents and wind, which transport water vapor.\n\n2.  **Gravity:**\n    *   Pulls precipitation down from clouds to the Earth's surface.\n    *   Drives surface runoff down slopes into rivers and lakes.\n    *   Causes groundwater to flow through aquifers.\n    *   Leads to the movement of glaciers.\n\n### **IV. Importance of the Water Cycle**\n\n*   **Sustains Life:** Provides fresh water for drinking, agriculture, and all biological processes.\n*   **Regulates Climate:** Redistributes heat around the globe (e.g., latent heat released during condensation warms the atmosphere). Water vapor is a potent greenhouse gas, influencing Earth's temperature.\n*   **Shapes Landscapes:** Erosion by rivers, glaciers, and rainfall carves valleys, canyons, and transports sediments.\n*   **Supports Ecosystems:** Maintains wetlands, forests, and aquatic environments essential for biodiversity.\n*   **Generates Energy:** Hydroelectric power relies on the movement of water.\n\n---\n\nIn essence, the water cycle is a continuous, never-ending journey of water, moving from the Earth's surface to the atmosphere and back again, constantly changing form and location, and making life on Earth possible."
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 9,
+    "candidatesTokenCount": 1738,
+    "totalTokenCount": 3209,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 9
+      }
+    ],
+    "thoughtsTokenCount": 1462,
+    "serviceTier": "standard"
+  },
+  "modelVersion": "gemini-2.5-flash",
+  "responseId": "gRyIasTjC8zYkdUPmJnUwQo"
+}

@@ -143,6 +143,10 @@ func (g *Vertex) GenerateContent(
 		return response, err
 	}
 
+	if err := llms.CheckTruncation(response, opts); err != nil {
+		return response, err
+	}
+
 	// When structured output was requested, validate each normal-final candidate
 	// against the original schema; the response is returned with the typed error.
 	if err := validateVertexStructuredOutput(&opts, response); err != nil {
@@ -200,6 +204,7 @@ func convertCandidates(candidates []*genai.Candidate, usage *genai.UsageMetadata
 			&llms.ContentChoice{
 				Content:        buf.String(),
 				StopReason:     candidate.FinishReason.String(),
+				Truncated:      candidate.FinishReason == genai.FinishReasonMaxTokens,
 				GenerationInfo: metadata,
 				ToolCalls:      toolCalls,
 			})

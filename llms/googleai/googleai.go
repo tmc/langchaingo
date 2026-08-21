@@ -196,6 +196,10 @@ func (g *GoogleAI) GenerateContent(
 		return response, err
 	}
 
+	if err := llms.CheckTruncation(response, opts); err != nil {
+		return response, err
+	}
+
 	// When structured output was requested, validate each normal-final candidate
 	// against the original schema; the response is returned with the typed error.
 	if err := validateGoogleStructuredOutput(&opts, response); err != nil {
@@ -493,6 +497,7 @@ StreamEnd:
 			Reasoning:      choiceReasoning,
 			ToolCalls:      accumulatedToolCalls,
 			StopReason:     stopReason,
+			Truncated:      llms.IsTruncated(stopReason),
 			GenerationInfo: metadata,
 		}},
 	}
@@ -602,6 +607,7 @@ func convertResponse(resp *genai.GenerateContentResponse) (*llms.ContentResponse
 			Content:        content.String(),
 			Reasoning:      choiceReasoning,
 			StopReason:     string(candidate.FinishReason),
+			Truncated:      llms.IsTruncated(string(candidate.FinishReason)),
 			GenerationInfo: metadata,
 			ToolCalls:      toolCalls,
 		})
