@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/vxcontrol/langchaingo/llms"
+	"github.com/vxcontrol/langchaingo/llms/streaming"
 )
 
 func truncationModel(t *testing.T, finishReason string) *Model {
@@ -76,5 +77,44 @@ func TestFailOnTruncationKeepsThePartialAnswer(t *testing.T) {
 
 	if _, err := model.GenerateContent(context.Background(), msgs); err != nil {
 		t.Fatalf("without the option the same response must stay a success: %v", err)
+	}
+}
+
+func TestTruncationOnTheStreamingPath(t *testing.T) {
+	t.Parallel()
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = io.Copy(io.Discard, r.Body)
+		w.Header().Set("Content-Type", "text/event-stream")
+		flusher, _ := w.(http.Flusher)
+		for _, chunk := range []string{
+			`{"id":"x","object":"chat.completion.chunk","created":1,"model":"mistral-small-latest","choices":[{"index":0,"delta":{"role":"assistant","content":"half an ans"},"finish_reason":""}]}`,
+			`{"id":"x","object":"chat.completion.chunk","created":1,"model":"mistral-small-latest","choices":[{"index":0,"delta":{"content":""},"finish_reason":"length"}]}`,
+		} {
+			_, _ = fmt.Fprintf(w, "data: %s\n\n", chunk)
+			if flusher != nil {
+				flusher.Flush()
+			}
+		}
+		_, _ = io.WriteString(w, "data: [DONE]\n\n")
+	}))
+	t.Cleanup(srv.Close)
+
+	model, err := New(WithAPIKey("unit-test-token"), WithEndpoint(srv.URL), WithModel("mistral-small-latest"))
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+	msgs := []llms.MessageContent{llms.TextParts(llms.ChatMessageTypeHuman, "hi")}
+	sink := func(context.Context, streaming.Chunk) error { return nil }
+
+	resp, err := model.GenerateContent(context.Background(), msgs, llms.WithStreamingFunc(sink))
+	if err != nil {
+		t.Fatalf("GenerateContent: %v", err)
+	}
+	if !resp.Choices[0].Truncated {
+		t.Fatalf("Truncated = false on a streamed answer that hit the limit, StopReason = %q", resp.Choices[0].StopReason)
+	}
+	if got := resp.Choices[0].StopReason; got != "length" {
+		t.Fatalf("StopReason = %q, want the vendor's own %q", got, "length")
 	}
 }
