@@ -50,18 +50,27 @@ func NewOpenAIFunctionsAgent(llm llms.Model, tools []tools.Tool, opts ...Option)
 }
 
 func (o *OpenAIFunctionsAgent) functions() []llms.FunctionDefinition {
-	res := make([]llms.FunctionDefinition, 0)
+	res := make([]llms.FunctionDefinition, 0, len(o.Tools))
 	for _, tool := range o.Tools {
-		res = append(res, llms.FunctionDefinition{
-			Name:        tool.Name(),
-			Description: tool.Description(),
-			Parameters: map[string]any{
+		var params map[string]any
+		if twp, ok := tool.(tools.ToolWithParameters); ok && twp.Parameters() != nil {
+			// Tool declares its own parameter schema (multi-parameter support).
+			params = twp.Parameters()
+		} else {
+			// Fall back to the legacy single-string "__arg1" schema for tools
+			// that do not implement ToolWithParameters.
+			params = map[string]any{
+				"type": "object",
 				"properties": map[string]any{
 					"__arg1": map[string]string{"title": "__arg1", "type": "string"},
 				},
 				"required": []string{"__arg1"},
-				"type":     "object",
-			},
+			}
+		}
+		res = append(res, llms.FunctionDefinition{
+			Name:        tool.Name(),
+			Description: tool.Description(),
+			Parameters:  params,
 		})
 	}
 	return res
