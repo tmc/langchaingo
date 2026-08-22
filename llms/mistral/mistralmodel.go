@@ -220,8 +220,10 @@ func generateStreamingContent(ctx context.Context, m *Model, callOptions *llms.C
 			for _, choice := range chatResChunk.Choices {
 				chunkStr += choice.Delta.Content
 				langchainContentResponse.Choices[0].Content += choice.Delta.Content
-				langchainContentResponse.Choices[0].StopReason = string(choice.FinishReason)
-				langchainContentResponse.Choices[0].Truncated = llms.IsTruncated(string(choice.FinishReason))
+				if choice.FinishReason != "" {
+					langchainContentResponse.Choices[0].StopReason = string(choice.FinishReason)
+					langchainContentResponse.Choices[0].Truncated = llms.IsTruncated(string(choice.FinishReason))
+				}
 				if len(choice.Delta.ToolCalls) > 0 {
 					langchainContentResponse.Choices[0].FuncCall = (*llms.FunctionCall)(&choice.Delta.ToolCalls[0].Function)
 					for _, tool := range choice.Delta.ToolCalls {
