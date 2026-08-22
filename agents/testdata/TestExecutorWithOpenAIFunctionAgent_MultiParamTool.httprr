@@ -1,0 +1,44 @@
+httprr trace v1
+815 1234
+POST https://api.deepseek.com/chat/completions HTTP/1.1
+Host: api.deepseek.com
+User-Agent: langchaingo-httprr
+Content-Length: 612
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"deepseek-v4-pro","messages":[{"role":"system","content":"You are a helpful weather assistant. Use tools to answer the request of the weather"},{"role":"user","content":"What is the current weather in Seattle, in celsius?"}],"tools":[{"type":"function","function":{"name":"get_weather","description":"get the current weather for a city.","parameters":{"properties":{"city":{"description":"The name of the city to get weather for","type":"string"},"unit":{"description":"The temperature unit, either celsius or fahrenheit","type":"string"}},"required":["city","unit"],"type":"object"}}}],"temperature":0}HTTP/2.0 200 OK
+Content-Length: 777
+Access-Control-Allow-Credentials: true
+Content-Type: application/json
+Date: Sat, 22 Aug 2026 09:00:07 GMT
+Eo-Cache-Status: MISS
+Eo-Log-Uuid: 8672584162429350082
+Server: openresty
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+Vary: origin, access-control-request-method, access-control-request-headers
+X-Content-Type-Options: nosniff
+X-Ds-Trace-Id: 4f4a903af40bf23b317d275dcf6f42cf
+
+{"id":"509a28d3-7b9d-4255-8147-3d1e4420de46","object":"chat.completion","created":1787389207,"model":"deepseek-v4-pro","choices":[{"index":0,"message":{"role":"assistant","content":"","reasoning_content":"We need to get weather for Seattle in celsius. Use tool.","tool_calls":[{"index":0,"id":"call_00_PoXliKuRlBEPScR1xdVM7044","type":"function","function":{"name":"get_weather","arguments":"{\"city\": \"Seattle\", \"unit\": \"celsius\"}"}}]},"logprobs":null,"finish_reason":"tool_calls"}],"usage":{"prompt_tokens":421,"completion_tokens":76,"total_tokens":497,"prompt_tokens_details":{"cached_tokens":384},"completion_tokens_details":{"reasoning_tokens":13},"prompt_cache_hit_tokens":384,"prompt_cache_miss_tokens":37},"system_fingerprint":"a307abda487cd1b463329ccb945ce396"}1145 1038
+POST https://api.deepseek.com/chat/completions HTTP/1.1
+Host: api.deepseek.com
+User-Agent: langchaingo-httprr
+Content-Length: 942
+Authorization: Bearer test-api-key
+Content-Type: application/json
+
+{"model":"deepseek-v4-pro","messages":[{"role":"system","content":"You are a helpful weather assistant. Use tools to answer the request of the weather"},{"role":"user","content":"What is the current weather in Seattle, in celsius?"},{"role":"assistant","content":"","tool_calls":[{"id":"call_00_PoXliKuRlBEPScR1xdVM7044","type":"function","function":{"name":"get_weather","arguments":"{\"city\": \"Seattle\", \"unit\": \"celsius\"}"}}]},{"role":"tool","content":"The weather in Seattle is 20.0 degrees celsius.","tool_call_id":"call_00_PoXliKuRlBEPScR1xdVM7044"}],"tools":[{"type":"function","function":{"name":"get_weather","description":"get the current weather for a city.","parameters":{"properties":{"city":{"description":"The name of the city to get weather for","type":"string"},"unit":{"description":"The temperature unit, either celsius or fahrenheit","type":"string"}},"required":["city","unit"],"type":"object"}}}],"temperature":0}HTTP/2.0 200 OK
+Content-Length: 581
+Access-Control-Allow-Credentials: true
+Content-Type: application/json
+Date: Sat, 22 Aug 2026 09:00:10 GMT
+Eo-Cache-Status: MISS
+Eo-Log-Uuid: 2275583458523747363
+Server: openresty
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+Vary: origin, access-control-request-method, access-control-request-headers
+X-Content-Type-Options: nosniff
+X-Ds-Trace-Id: aa1256aeb3fbc8397d2e4c7e71b0ecaa
+
+{"id":"cf0e0f93-ad97-46e4-a9b9-804b2f89216b","object":"chat.completion","created":1787389210,"model":"deepseek-v4-pro","choices":[{"index":0,"message":{"role":"assistant","content":"The current weather in Seattle is **20.0°C**.","reasoning_content":""},"logprobs":null,"finish_reason":"stop"}],"usage":{"prompt_tokens":519,"completion_tokens":14,"total_tokens":533,"prompt_tokens_details":{"cached_tokens":384},"completion_tokens_details":{"reasoning_tokens":0},"prompt_cache_hit_tokens":384,"prompt_cache_miss_tokens":135},"system_fingerprint":"a307abda487cd1b463329ccb945ce396"}

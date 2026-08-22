@@ -190,6 +190,57 @@ func TestExecutorWithOpenAIFunctionAgent(t *testing.T) {
 		"correct answer 2012 or March not in response")
 }
 
+// TestExecutorWithOpenAIFunctionAgent_MultiParamTool is an httprr
+// integration test that exercises the multi-parameter tool path against a real
+// OpenAI-style model. By default it replays a recorded interaction; re-record
+// against the real API with:
+//
+//	go test ./agents/ -run 'TestExecutorWithOpenAIFunctionAgent_MultiParamTool' -httprecord=.
+func TestExecutorWithOpenAIFunctionAgent_MultiParamTool(t *testing.T) {
+	t.Parallel()
+	ctx := context.Background()
+
+	// Skip if no recording available and no credentials.
+	if !hasExistingRecording(t) {
+		t.Skip("No httprr recording available. Hint: Re-run tests with -httprecord=. to record new HTTP interactions")
+	}
+
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+
+	// Configure OpenAI client with httprr.
+	opts := []openai.Option{
+		openai.WithModel("deepseek-v4-pro"),
+		openai.WithHTTPClient(rr.Client()),
+		openai.WithBaseURL("https://api.deepseek.com"),
+	}
+	if rr.Replaying() {
+		opts = append(opts, openai.WithToken("OPENAI_API_KEY"))
+	}
+
+	llm, err := openai.New(opts...)
+	require.NoError(t, err)
+
+	// Multi-parameter tool: its JSON Schema declares both city and unit.
+	agent := agents.NewOpenAIFunctionsAgent(
+		llm,
+		[]tools.Tool{tools.WeatherTool{}},
+		agents.NewOpenAIOption().WithSystemMessage("You are a helpful weather assistant. Use tools to answer the request of the weather"),
+	)
+	executor := agents.NewExecutor(agent)
+
+	result, err := chains.Run(ctx, executor, "What is the current weather in Seattle, in celsius?")
+	if err != nil {
+		// Check if this is a recording mismatch error.
+		if strings.Contains(err.Error(), "cached HTTP response not found") {
+			t.Skip("Recording format has changed or is incompatible. Hint: Re-run tests with -httprecord=. to record new HTTP interactions")
+		}
+		require.NoError(t, err)
+	}
+
+	t.Logf("Agent response: %s", result)
+	require.Contains(t, result, "Seattle")
+}
+
 // mockTool implements the tools.Tool interface for testing
 type mockTool struct {
 	name             string
