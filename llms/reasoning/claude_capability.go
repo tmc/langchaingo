@@ -170,7 +170,7 @@ func ClaudeMutuallyExclusiveSampling(model string) bool {
 // outputs (the output_config.format JSON Schema mode). A structured-output request
 // on them is rejected locally rather than sent for a guaranteed 4xx.
 var legacyNoStructuredClaude = []string{
-	"claude-2", "claude-instant",
+	"claude-2", "claude-v2", "claude-instant",
 	"claude-3-", "claude-3.",
 	"claude-opus-4-1", "claude-opus-4-20", "claude-sonnet-4-20",
 }
