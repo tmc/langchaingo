@@ -20,6 +20,7 @@ import (
 
 	"cloud.google.com/go/vertexai/genai"
 	"github.com/vxcontrol/langchaingo/internal/imageutil"
+	"github.com/vxcontrol/langchaingo/internal/numutil"
 	"github.com/vxcontrol/langchaingo/llms"
 	"github.com/vxcontrol/langchaingo/llms/reasoning"
 	"google.golang.org/api/iterator"
@@ -84,22 +85,7 @@ func (g *Vertex) GenerateContent(
 	}
 
 	model := g.client.GenerativeModel(opts.GetModel())
-	if opts.CandidateCount != nil {
-		model.SetCandidateCount(int32(opts.GetCandidateCount()))
-	}
-	if opts.MaxTokens != nil {
-		model.SetMaxOutputTokens(int32(opts.GetMaxTokens()))
-	}
-	if opts.Temperature != nil {
-		model.SetTemperature(float32(opts.GetTemperature()))
-	}
-	if opts.TopP != nil {
-		model.SetTopP(float32(opts.GetTopP()))
-	}
-	if opts.TopK != nil {
-		model.SetTopK(int32(opts.GetTopK()))
-	}
-	model.StopSequences = opts.StopWords
+	applyGenerationConfig(model, opts)
 	model.SafetySettings = []*genai.SafetySetting{
 		{
 			Category:  genai.HarmCategoryDangerousContent,
@@ -587,4 +573,23 @@ func convertVertexHarmBlockThreshold(threshold googleai.HarmBlockThreshold) gena
 	default:
 		return genai.HarmBlockOnlyHigh // Safe default
 	}
+}
+
+func applyGenerationConfig(model *genai.GenerativeModel, opts llms.CallOptions) {
+	if opts.CandidateCount != nil {
+		model.SetCandidateCount(numutil.SaturateInt32(opts.GetCandidateCount()))
+	}
+	if opts.MaxTokens != nil {
+		model.SetMaxOutputTokens(numutil.SaturateInt32(opts.GetMaxTokens()))
+	}
+	if opts.Temperature != nil {
+		model.SetTemperature(float32(opts.GetTemperature()))
+	}
+	if opts.TopP != nil {
+		model.SetTopP(float32(opts.GetTopP()))
+	}
+	if opts.TopK != nil {
+		model.SetTopK(numutil.SaturateInt32(opts.GetTopK()))
+	}
+	model.StopSequences = opts.StopWords
 }

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/vxcontrol/langchaingo/internal/numutil"
 	"github.com/vxcontrol/langchaingo/llms"
 	"github.com/vxcontrol/langchaingo/llms/reasoning"
 	"github.com/vxcontrol/langchaingo/llms/streaming"
@@ -102,7 +103,7 @@ func (c *ConverseClient) buildConverseInput(input *ConverseInput) (*bedrockrunti
 	// Build inference configuration
 	inferenceConfig := &types.InferenceConfiguration{}
 	if input.MaxTokens != nil {
-		inferenceConfig.MaxTokens = aws.Int32(int32(*input.MaxTokens))
+		inferenceConfig.MaxTokens = aws.Int32(numutil.SaturateInt32(*input.MaxTokens))
 	}
 	if input.Temperature != nil {
 		inferenceConfig.Temperature = aws.Float32(float32(*input.Temperature))

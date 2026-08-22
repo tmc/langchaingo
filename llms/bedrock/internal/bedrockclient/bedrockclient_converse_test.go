@@ -3,6 +3,7 @@ package bedrockclient
 import (
 	"context"
 	"encoding/json"
+	"math"
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
@@ -1098,6 +1099,34 @@ func TestConverseClient_DropsTopPWhenBothSamplingParamsSet(t *testing.T) {
 			require.NotNil(t, cfg)
 			assert.False(t, cfg.Temperature != nil && cfg.TopP != nil,
 				"both sampling params reached the wire for %s", model)
+		})
+	}
+}
+
+func TestConverseMaxTokensSaturatesInsteadOfWrapping(t *testing.T) {
+	t.Parallel()
+
+	for _, tc := range []struct {
+		name string
+		in   int
+		want int32
+	}{
+		{"ordinary", 16384, 16384},
+		{"exactly the ceiling", math.MaxInt32, math.MaxInt32},
+		{"above the ceiling", math.MaxInt32 + 1, math.MaxInt32},
+		{"far above the ceiling", 3_000_000_000, math.MaxInt32},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			maxTokens := tc.in
+			got, err := NewConverseClient(&MockBedrockRuntimeClient{}).buildConverseInput(&ConverseInput{
+				ModelID:   "anthropic.claude-3-sonnet-20240229-v1:0",
+				Messages:  []Message{{Role: llms.ChatMessageTypeHuman, Content: "hi", Type: "text"}},
+				MaxTokens: &maxTokens,
+			})
+			require.NoError(t, err)
+			require.NotNil(t, got.InferenceConfig.MaxTokens)
+			assert.Equal(t, tc.want, *got.InferenceConfig.MaxTokens)
 		})
 	}
 }
