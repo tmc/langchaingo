@@ -239,14 +239,17 @@ func generateStreamingContent(ctx context.Context, m *Model, callOptions *llms.C
 				}
 			}
 			if err := streaming.CallWithText(ctx, callOptions.StreamingFunc, chunkStr); err != nil {
+				m.CallbacksHandler.HandleLLMError(ctx, err)
 				return langchainContentResponse, err
 			}
 		} else {
+			m.CallbacksHandler.HandleLLMError(ctx, chatResChunk.Error)
 			return langchainContentResponse, chatResChunk.Error
 		}
 	}
 
 	if err := llms.CheckTruncation(langchainContentResponse, *callOptions); err != nil {
+		m.CallbacksHandler.HandleLLMError(ctx, err)
 		return langchainContentResponse, err
 	}
 
