@@ -12,10 +12,15 @@ import (
 type errorRecorder struct {
 	callbacks.SimpleHandler
 	errs []error
+	ends int
 }
 
 func (r *errorRecorder) HandleLLMError(_ context.Context, err error) {
 	r.errs = append(r.errs, err)
+}
+
+func (r *errorRecorder) HandleLLMGenerateContentEnd(_ context.Context, _ *llms.ContentResponse) {
+	r.ends++
 }
 
 func TestStreamingErrorsReachTheCallbackHandler(t *testing.T) {
@@ -38,5 +43,27 @@ func TestStreamingErrorsReachTheCallbackHandler(t *testing.T) {
 	}
 	if rec.errs[len(rec.errs)-1] == nil {
 		t.Error("the handler must receive the error itself, not nil")
+	}
+}
+
+func TestStreamingSuccessReachesTheCallbackHandler(t *testing.T) {
+	t.Parallel()
+
+	model := streamingModelWithTrailingChunk(t)
+	rec := &errorRecorder{}
+	model.CallbacksHandler = rec
+
+	sink := func(_ context.Context, _ streaming.Chunk) error { return nil }
+	if _, err := model.GenerateContent(context.Background(),
+		[]llms.MessageContent{llms.TextParts(llms.ChatMessageTypeHuman, "hi")},
+		llms.WithStreamingFunc(sink)); err != nil {
+		t.Fatalf("GenerateContent: %v", err)
+	}
+
+	if rec.ends != 1 {
+		t.Errorf("the streaming path must close the generation once, as the non-streaming path does; got %d", rec.ends)
+	}
+	if len(rec.errs) != 0 {
+		t.Errorf("a successful stream must report no error, got %v", rec.errs)
 	}
 }

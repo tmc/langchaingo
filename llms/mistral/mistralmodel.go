@@ -253,6 +253,8 @@ func generateStreamingContent(ctx context.Context, m *Model, callOptions *llms.C
 		return langchainContentResponse, err
 	}
 
+	m.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, langchainContentResponse)
+
 	return langchainContentResponse, nil
 }
 
