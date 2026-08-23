@@ -188,11 +188,12 @@ func convertCandidates(candidates []*genai.Candidate, usage *genai.UsageMetadata
 			metadata["total_tokens"] = usage.TotalTokenCount
 		}
 
+		stopReason := wireFinishReason(candidate.FinishReason)
 		contentResponse.Choices = append(contentResponse.Choices,
 			&llms.ContentChoice{
 				Content:        buf.String(),
-				StopReason:     wireFinishReason(candidate.FinishReason),
-				Truncated:      candidate.FinishReason == genai.FinishReasonMaxTokens,
+				StopReason:     stopReason,
+				Truncated:      llms.IsTruncated(stopReason),
 				GenerationInfo: metadata,
 				ToolCalls:      toolCalls,
 			})
