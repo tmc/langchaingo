@@ -1130,3 +1130,37 @@ func TestConverseMaxTokensSaturatesInsteadOfWrapping(t *testing.T) {
 		})
 	}
 }
+
+func TestConverseBudgetPinsTemperatureOnlyForClaude(t *testing.T) {
+	t.Parallel()
+
+	build := func(t *testing.T, model string) *types.InferenceConfiguration {
+		t.Helper()
+		temp, topP, maxTokens := 0.2, 0.9, 8192
+		got, err := NewConverseClient(&MockBedrockRuntimeClient{}).buildConverseInput(&ConverseInput{
+			ModelID:         model,
+			Messages:        []Message{{Role: llms.ChatMessageTypeHuman, Content: "hi", Type: "text"}},
+			Temperature:     &temp,
+			TopP:            &topP,
+			MaxTokens:       &maxTokens,
+			ReasoningConfig: &llms.ReasoningConfig{Mode: llms.ReasoningOn, Tokens: 2048},
+		})
+		require.NoError(t, err)
+		require.NotNil(t, got.InferenceConfig)
+		return got.InferenceConfig
+	}
+
+	t.Run("a Claude model takes the pin the mechanism requires", func(t *testing.T) {
+		t.Parallel()
+		cfg := build(t, "us.anthropic.claude-sonnet-4-5-v1:0")
+		require.NotNil(t, cfg.Temperature)
+		assert.InDelta(t, 1.0, *cfg.Temperature, 0.0001)
+	})
+
+	t.Run("a non-Claude reasoning model keeps the caller's sampling", func(t *testing.T) {
+		t.Parallel()
+		cfg := build(t, "openai.gpt-oss-120b-1:0")
+		require.NotNil(t, cfg.Temperature, "the caller's temperature must survive")
+		assert.InDelta(t, 0.2, *cfg.Temperature, 0.0001)
+	})
+}
