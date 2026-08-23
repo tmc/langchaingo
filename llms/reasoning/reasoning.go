@@ -179,6 +179,7 @@ func DefaultIsReasoningModel(model string) bool { //nolint:funlen // a flat cata
 	if idx := strings.LastIndex(modelLower, "/"); idx != -1 {
 		modelLower = modelLower[idx+1:]
 	}
+	modelLower = stripPlatformPrefix(modelLower)
 
 	// OpenAI reasoning models
 	if strings.HasPrefix(modelLower, "gpt-5") ||
@@ -191,13 +192,15 @@ func DefaultIsReasoningModel(model string) bool { //nolint:funlen // a flat cata
 
 	// Anthropic extended thinking / adaptive models
 	if strings.Contains(modelLower, "claude-3.7") ||
+		strings.Contains(modelLower, "claude-3-7") ||
 		strings.HasPrefix(modelLower, "claude-opus-4") ||
 		strings.HasPrefix(modelLower, "claude-opus-5") ||
 		strings.HasPrefix(modelLower, "claude-sonnet-4") ||
 		strings.HasPrefix(modelLower, "claude-sonnet-5") ||
 		strings.Contains(modelLower, "claude-fable-5") ||
 		strings.Contains(modelLower, "claude-mythos-5") ||
-		strings.Contains(modelLower, "claude-haiku-4.5") {
+		strings.Contains(modelLower, "claude-haiku-4.5") ||
+		strings.Contains(modelLower, "claude-haiku-4-5") {
 		return true
 	}
 
@@ -308,4 +311,26 @@ func DefaultIsReasoningModel(model string) bool { //nolint:funlen // a flat cata
 	}
 
 	return false
+}
+
+func stripPlatformPrefix(model string) string {
+	for {
+		idx := strings.Index(model, ".")
+		if idx <= 0 {
+			return model
+		}
+		if !isAlpha(model[:idx]) {
+			return model
+		}
+		model = model[idx+1:]
+	}
+}
+
+func isAlpha(s string) bool {
+	for i := range len(s) {
+		if s[i] < 'a' || s[i] > 'z' {
+			return false
+		}
+	}
+	return true
 }

@@ -63,3 +63,42 @@ func TestCanonicalClaudeLeavesUnrelatedDotsAlone(t *testing.T) {
 		}
 	}
 }
+
+func TestDetectionSeesPlatformIdsAndDashedVersions(t *testing.T) {
+	t.Parallel()
+
+	for _, tc := range []struct {
+		model string
+		want  bool
+	}{
+		{"us.anthropic.claude-opus-5-v1:0", true},
+		{"us.anthropic.claude-sonnet-4-6-v1:0", true},
+		{"eu.anthropic.claude-opus-4-6-v1:0", true},
+		{"claude-3-7-sonnet-20250219", true},
+		{"claude-3.7-sonnet", true},
+		{"claude-haiku-4-5", true},
+		{"glm-4.5", true},
+		{"deepseek-v3.1-terminus", true},
+		{"us.amazon.titan-text-lite-v1", false},
+	} {
+		if got := IsReasoningModel(tc.model); got != tc.want {
+			t.Errorf("IsReasoningModel(%q) = %v, want %v", tc.model, got, tc.want)
+		}
+	}
+}
+
+func TestStripPlatformPrefixLeavesVersionsAlone(t *testing.T) {
+	t.Parallel()
+
+	for _, tc := range []struct{ in, want string }{
+		{"us.anthropic.claude-opus-5-v1:0", "claude-opus-5-v1:0"},
+		{"anthropic.claude-opus-4-6", "claude-opus-4-6"},
+		{"glm-4.5", "glm-4.5"},
+		{"deepseek-v3.1-terminus", "deepseek-v3.1-terminus"},
+		{"claude-opus-4-7", "claude-opus-4-7"},
+	} {
+		if got := stripPlatformPrefix(tc.in); got != tc.want {
+			t.Errorf("stripPlatformPrefix(%q) = %q, want %q", tc.in, got, tc.want)
+		}
+	}
+}
