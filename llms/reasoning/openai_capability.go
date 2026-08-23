@@ -87,6 +87,10 @@ func openAIXHighCeiling(m string) bool {
 	return false
 }
 
+// OpenAIDisableEffort turns thinking off on the wire. It is not llms.ReasoningNone,
+// which is the empty string and instead omits the field.
+const OpenAIDisableEffort = "none"
+
 // OpenAIAcceptsCustomTemperature reports whether a reasoning model takes a
 // temperature other than the default, so the caller's value is not overwritten
 // on a model that honors it.

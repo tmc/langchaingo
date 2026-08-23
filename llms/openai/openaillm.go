@@ -262,20 +262,6 @@ func (o *LLM) createChatRequest(chatMsgs []*ChatMessage, opts llms.CallOptions) 
 		req.SetResponseFormat(ResponseFormatJSON)
 	}
 
-	switch model := o.effectiveModel(opts); {
-	case reasoning.ClaudeRejectsSampling(model):
-		req.Temperature, req.TopP = nil, nil
-	case reasoning.ClaudeMutuallyExclusiveSampling(model) && req.Temperature != nil && req.TopP != nil:
-		req.TopP = nil
-	case reasoning.IsReasoningModel(model) && !opts.Reasoning.IsDisabled() &&
-		!reasoning.OpenAIAcceptsCustomTemperature(model):
-		if req.Temperature != nil {
-			temperature := 1.0
-			req.Temperature = &temperature
-		}
-		req.TopP = nil
-	}
-
 	// add tools from functions and tool definitions
 	if err := o.addToolsToRequest(req, opts); err != nil {
 		return nil, err
@@ -292,10 +278,11 @@ func (o *LLM) createChatRequest(chatMsgs []*ChatMessage, opts llms.CallOptions) 
 		return nil, err
 	}
 
-	// set reasoning options, depends on the client and request options
-	if err := o.setReasoning(req, opts); err != nil {
+	wireEffort, err := o.setReasoning(req, opts)
+	if err != nil {
 		return nil, err
 	}
+	o.applySamplingPolicy(req, opts, wireEffort)
 
 	return req, nil
 }
@@ -315,20 +302,14 @@ func (o *LLM) effectiveModel(opts llms.CallOptions) string {
 }
 
 // setReasoning sets reasoning options, depends on the client and request options.
-func (o *LLM) setReasoning(req *openaiclient.ChatRequest, opts llms.CallOptions) error {
+// setReasoning writes the reasoning fields and reports the effort that reached the wire.
+func (o *LLM) setReasoning(req *openaiclient.ChatRequest, opts llms.CallOptions) (string, error) {
 	switch opts.Reasoning.ResolveMode() { //nolint:exhaustive // ReasoningOn is handled by the code after the switch
 	case llms.ReasoningDefault:
-		return nil
+		return "", nil
 	case llms.ReasoningOff:
 		return o.setReasoningOff(req, opts)
 	}
-
-	defer func() {
-		if req.Reasoning != nil || req.ReasoningEffort != nil {
-			// must of all reasoning models can't use temperature and top_p with reasoning at the same time
-			req.Temperature, req.TopP = nil, nil
-		}
-	}()
 
 	// Clamp the effort to what the model accepts (e.g. GPT-5 Pro accepts only
 	// high, GPT-5.4 mini rejects max) so a known-invalid value never reaches the
@@ -340,7 +321,7 @@ func (o *LLM) setReasoning(req *openaiclient.ChatRequest, opts llms.CallOptions)
 		if reasoningEffort != llms.ReasoningNone {
 			req.ReasoningEffort = &reasoningEffort
 		}
-		return nil
+		return string(reasoningEffort), nil
 	}
 
 	// using modern reasoning format
@@ -353,26 +334,54 @@ func (o *LLM) setReasoning(req *openaiclient.ChatRequest, opts llms.CallOptions)
 			Effort: reasoningEffort,
 		}
 	}
-	return nil
+	return string(reasoningEffort), nil
 }
 
 // setReasoningOff sends the model's explicit disable token so a reasoning model
 // runs as a plain completion. Sampling params are left intact (a non-thinking
 // call); a model whose thinking cannot be disabled returns a typed error.
-func (o *LLM) setReasoningOff(req *openaiclient.ChatRequest, opts llms.CallOptions) error {
+func (o *LLM) setReasoningOff(req *openaiclient.ChatRequest, opts llms.CallOptions) (string, error) {
 	model := o.effectiveModel(opts)
 	switch reasoning.ResolveOff(model, reasoning.ProviderOpenAI) { //nolint:exhaustive // only OpenAI-relevant wires are handled; others are a no-op
 	case reasoning.OffUnsupported:
-		return &reasoning.ErrReasoningOffUnsupported{Model: model}
+		return "", &reasoning.ErrReasoningOffUnsupported{Model: model}
 	case reasoning.OffEffortNone:
-		none := llms.ReasoningEffort("none")
-		if o.client.ModernReasoningFormat {
-			req.Reasoning = &openaiclient.ReasoningOptions{Effort: none}
-		} else {
-			req.ReasoningEffort = &none
-		}
+		o.writeDisableEffort(req)
+		return reasoning.OpenAIDisableEffort, nil
 	}
-	return nil
+	return "", nil
+}
+
+func (o *LLM) writeDisableEffort(req *openaiclient.ChatRequest) {
+	none := llms.ReasoningEffort(reasoning.OpenAIDisableEffort)
+	if o.client.ModernReasoningFormat {
+		req.Reasoning = &openaiclient.ReasoningOptions{Effort: none}
+	} else {
+		req.ReasoningEffort = &none
+	}
+}
+
+func (o *LLM) applySamplingPolicy(req *openaiclient.ChatRequest, opts llms.CallOptions, wireEffort string) {
+	switch model := o.effectiveModel(opts); {
+	case reasoning.ClaudeRejectsSampling(model):
+		req.Temperature, req.TopP = nil, nil
+	case reasoning.ClaudeMutuallyExclusiveSampling(model) && req.Temperature != nil && req.TopP != nil:
+		req.TopP = nil
+	case reasoning.IsReasoningModel(model) && !opts.Reasoning.IsDisabled() &&
+		!reasoning.OpenAIAcceptsCustomTemperature(model):
+		if req.Temperature != nil {
+			temperature := 1.0
+			req.Temperature = &temperature
+		}
+		req.TopP = nil
+	}
+	if isThinkingOnTheWire(wireEffort) {
+		req.TopP = nil
+	}
+}
+
+func isThinkingOnTheWire(wireEffort string) bool {
+	return wireEffort != "" && wireEffort != reasoning.OpenAIDisableEffort
 }
 
 // addToolsToRequest adds tools to the request from functions and tool definitions.
