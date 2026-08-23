@@ -125,7 +125,8 @@ type CompletionRequest struct {
 
 // Completion is a completion.
 type Completion struct {
-	Text string `json:"text"`
+	Text       string `json:"text"`
+	StopReason string `json:"stop_reason"`
 }
 
 // CreateCompletion creates a completion.
@@ -144,7 +145,8 @@ func (c *Client) CreateCompletion(ctx context.Context, r *CompletionRequest) (*C
 		return nil, err
 	}
 	return &Completion{
-		Text: resp.Completion,
+		Text:       resp.Completion,
+		StopReason: resp.StopReason,
 	}, nil
 }
 

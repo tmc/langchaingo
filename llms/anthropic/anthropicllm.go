@@ -171,9 +171,14 @@ func generateCompletionsContent(ctx context.Context, o *LLM, messages []llms.Mes
 	resp := &llms.ContentResponse{
 		Choices: []*llms.ContentChoice{
 			{
-				Content: result.Text,
+				Content:    result.Text,
+				StopReason: result.StopReason,
+				Truncated:  llms.IsTruncated(result.StopReason),
 			},
 		},
+	}
+	if err := llms.CheckTruncation(resp, *opts); err != nil {
+		return resp, err
 	}
 	return resp, nil
 }

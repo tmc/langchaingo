@@ -81,3 +81,63 @@ func TestFailOnTruncationKeepsThePartialAnswer(t *testing.T) {
 		t.Fatalf("without the option the same response must stay a success: %v", err)
 	}
 }
+
+func legacyCompletionsLLM(t *testing.T, stopReason string) *LLM {
+	t.Helper()
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = io.Copy(io.Discard, r.Body)
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = fmt.Fprintf(w, `{"completion":"half an ans","model":"claude-2.1","stop_reason":%q}`, stopReason)
+	}))
+	t.Cleanup(srv.Close)
+
+	llm, err := New(WithBaseURL(srv.URL), WithToken("unit-test-token"),
+		WithModel("claude-2.1"), WithLegacyTextCompletionsAPI())
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+	return llm
+}
+
+func TestLegacyCompletionsReportTruncation(t *testing.T) {
+	t.Parallel()
+
+	msgs := []llms.MessageContent{llms.TextParts(llms.ChatMessageTypeHuman, "hi")}
+
+	t.Run("the stop reason reaches the choice", func(t *testing.T) {
+		t.Parallel()
+		resp, err := legacyCompletionsLLM(t, "max_tokens").GenerateContent(context.Background(), msgs)
+		if err != nil {
+			t.Fatalf("GenerateContent: %v", err)
+		}
+		if got := resp.Choices[0].StopReason; got != "max_tokens" {
+			t.Errorf("StopReason = %q, want %q", got, "max_tokens")
+		}
+		if !resp.Choices[0].Truncated {
+			t.Error("a max_tokens stop must mark the choice truncated")
+		}
+	})
+
+	t.Run("finishing on its own is not truncation", func(t *testing.T) {
+		t.Parallel()
+		resp, err := legacyCompletionsLLM(t, "stop_sequence").GenerateContent(context.Background(), msgs)
+		if err != nil {
+			t.Fatalf("GenerateContent: %v", err)
+		}
+		if resp.Choices[0].Truncated {
+			t.Error("a stop_sequence stop must not mark the choice truncated")
+		}
+	})
+
+	t.Run("failing on truncation keeps the partial answer", func(t *testing.T) {
+		t.Parallel()
+		resp, err := legacyCompletionsLLM(t, "max_tokens").GenerateContent(context.Background(), msgs,
+			llms.WithFailOnTruncation())
+		if err == nil {
+			t.Fatal("WithFailOnTruncation must fail on a truncated legacy completion")
+		}
+		if resp == nil || resp.Choices[0].Content != "half an ans" {
+			t.Errorf("the partial answer must travel with the error, got %v", resp)
+		}
+	})
+}
