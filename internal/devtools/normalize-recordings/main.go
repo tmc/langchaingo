@@ -197,7 +197,6 @@ func normalizeContent(content string) string {
 	googClientVersionPattern := regexp.MustCompile(`(x-goog-api-client: [^\r\n]*)/v?\d+\.\d+(\.\d+)?`)
 	content = googClientVersionPattern.ReplaceAllString(content, "${1}/X.X.X")
 
-	// Normalize x-amz-user-agent header
 	amzPattern := regexp.MustCompile(`(x-amz-user-agent: [^\r\n]*)\bv?\d+\.\d+(\.\d+)?(-[a-zA-Z0-9.]+)?`)
 	content = amzPattern.ReplaceAllString(content, "${1}X.X.X")
 
