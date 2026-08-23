@@ -62,3 +62,25 @@ func TestNonTextModalitiesAreNotGuessedAsReasoning(t *testing.T) {
 		}
 	}
 }
+
+func TestFlashLiteIsRecognisedOnlyWithinTheGoogleFamilies(t *testing.T) {
+	t.Parallel()
+
+	for _, tc := range []struct {
+		model string
+		want  bool
+	}{
+		{"gemini-2.5-flash-lite", true},
+		{"gemini-3.1-flash-lite", true},
+		{"gemini-3.5-flash-lite", true},
+		{"gemma-4-flash-lite", true},
+		{"models/gemini-2.5-flash-lite-preview-06-17", true},
+		{"some-flash-lite-thing", false},
+		{"llama-4-flash-lite", false},
+		{"gemini-2.5-flash", false},
+	} {
+		if got := GeminiThinkingOffByDefault(tc.model); got != tc.want {
+			t.Errorf("GeminiThinkingOffByDefault(%q) = %v, want %v", tc.model, got, tc.want)
+		}
+	}
+}

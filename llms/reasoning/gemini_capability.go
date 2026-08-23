@@ -72,5 +72,9 @@ func GeminiCanDisable(model string) bool {
 // GeminiThinkingOffByDefault reports whether the model leaves thinking off until
 // asked, so omitting the thinking config already yields "off".
 func GeminiThinkingOffByDefault(model string) bool {
-	return strings.Contains(strings.ToLower(model), "flash-lite")
+	m := strings.ToLower(model)
+	if !strings.Contains(m, "flash-lite") {
+		return false
+	}
+	return strings.Contains(m, "gemini") || strings.Contains(m, "gemma")
 }
