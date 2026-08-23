@@ -310,3 +310,25 @@ func TestNonOpenAIModelsKeepTheirOwnBranch(t *testing.T) {
 		}
 	}
 }
+
+func TestCannotDisableFollowsTheResolverOnEveryProvider(t *testing.T) {
+	t.Parallel()
+
+	for _, tc := range []struct {
+		model string
+		p     reasoning.Provider
+		want  bool
+	}{
+		{"claude-sonnet-5", reasoning.ProviderAnthropic, false},
+		{"claude-sonnet-5", reasoning.ProviderBedrock, true},
+		{"claude-sonnet-5", reasoning.ProviderUnknown, false},
+		{"claude-fable-5", reasoning.ProviderAnthropic, true},
+		{"claude-fable-5", reasoning.ProviderBedrock, true},
+		{"claude-fable-5", reasoning.ProviderUnknown, true},
+		{"claude-opus-4-6", reasoning.ProviderUnknown, false},
+	} {
+		if got := ReasoningSupportFor(tc.model, tc.p).CannotDisable; got != tc.want {
+			t.Errorf("CannotDisable(%q, provider=%d) = %v, want %v", tc.model, tc.p, got, tc.want)
+		}
+	}
+}
