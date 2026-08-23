@@ -291,6 +291,19 @@ func (o *LLM) convertToolCall(toolCall llms.ToolCall) (api.ToolCall, error) {
 	return tc, nil
 }
 
+func resolveThink(opts llms.CallOptions) *api.ThinkValue {
+	switch opts.Reasoning.ResolveMode() { //nolint:exhaustive // ReasoningDefault leaves the field unset
+	case llms.ReasoningOff:
+		return &api.ThinkValue{Value: false}
+	case llms.ReasoningOn:
+		if level := (&api.ThinkValue{Value: string(opts.Reasoning.GetEffort(opts.GetMaxTokens()))}); level.IsValid() {
+			return level
+		}
+		return &api.ThinkValue{Value: true}
+	}
+	return nil
+}
+
 // createChatRequest creates a chat request with the given parameters.
 func (o *LLM) createChatRequest(model string, messages []api.Message, opts llms.CallOptions) (*api.ChatRequest, error) {
 	format, err := o.resolveFormat(opts)
@@ -313,6 +326,7 @@ func (o *LLM) createChatRequest(model string, messages []api.Message, opts llms.
 		Options:  ollamaOptions,
 		Stream:   &stream,
 		Tools:    make(api.Tools, len(opts.Tools)),
+		Think:    resolveThink(opts),
 	}
 
 	keepAlive := o.options.keepAlive
