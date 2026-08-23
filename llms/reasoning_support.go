@@ -123,6 +123,7 @@ func ReasoningSupportFor(model string, p reasoning.Provider) ReasoningSupport {
 			Known:         true,
 			CannotDisable: !caps.CanDisable,
 			Efforts:       toReasoningEfforts(caps.Efforts),
+			Mechanism:     ReasoningMechanismAdaptive,
 			// DefaultOn is per-model on the GPT-5.x line (some default off) — leave unknown.
 		}
 	}
@@ -130,7 +131,6 @@ func ReasoningSupportFor(model string, p reasoning.Provider) ReasoningSupport {
 	if p == reasoning.ProviderOpenAI && reasoning.IsReasoningModel(model) {
 		return ReasoningSupport{
 			Supported:     true,
-			Known:         true,
 			CannotDisable: reasoning.ResolveOff(model, p) == reasoning.OffUnsupported,
 		}
 	}

@@ -148,7 +148,20 @@ func TestReasoningSupportFor(t *testing.T) { //nolint:funlen // table-driven tes
 			}
 		}
 		eq(t, "gpt-5.5 Mechanism",
-			ReasoningSupportFor("gpt-5.5", reasoning.ProviderOpenAI).Mechanism, ReasoningMechanismUnknown)
+			ReasoningSupportFor("gpt-5.5", reasoning.ProviderOpenAI).Mechanism, ReasoningMechanismAdaptive)
+		eq(t, "unclassified model Mechanism",
+			ReasoningSupportFor("gpt-5.3", reasoning.ProviderOpenAI).Mechanism, ReasoningMechanismUnknown)
+	})
+
+	t.Run("a model outside the capability table is not reported as classified", func(t *testing.T) {
+		classified := ReasoningSupportFor("gpt-5.5", reasoning.ProviderOpenAI)
+		eq(t, "gpt-5.5 Known", classified.Known, true)
+		eq(t, "gpt-5.5 Efforts present", len(classified.Efforts) > 0, true)
+
+		unclassified := ReasoningSupportFor("gpt-5.3", reasoning.ProviderOpenAI)
+		eq(t, "gpt-5.3 Supported", unclassified.Supported, true)
+		eq(t, "gpt-5.3 Known", unclassified.Known, false)
+		eq(t, "gpt-5.3 Efforts empty", len(unclassified.Efforts), 0)
 	})
 
 	t.Run("OpenAI effort set is model-dependent", func(t *testing.T) {
