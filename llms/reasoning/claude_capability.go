@@ -216,7 +216,7 @@ var preAdaptiveClaude = []string{
 	"claude-2", "claude-v2",
 	"claude-instant",
 	"claude-3", // claude-3, claude-3-5, claude-3-7 all predate adaptive
-	"claude-opus-4-1",
+	"claude-opus-4-0", "claude-opus-4-1", "claude-sonnet-4-0",
 	"claude-opus-4-20", "claude-sonnet-4-20",
 }
 
@@ -245,9 +245,7 @@ func ClaudeRejectsSampling(model string) bool {
 // this file is keyed on. A dotted entry added to one of them never matches.
 func canonicalClaude(model string) string {
 	m := strings.ToLower(model)
-	if idx := strings.Index(m, "@"); idx != -1 {
-		m = m[:idx]
-	}
+	m = strings.ReplaceAll(m, "@", "-")
 	var b strings.Builder
 	b.Grow(len(m))
 	for i := range len(m) {

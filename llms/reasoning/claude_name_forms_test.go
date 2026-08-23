@@ -54,7 +54,7 @@ func TestCanonicalClaudeLeavesUnrelatedDotsAlone(t *testing.T) {
 	for _, tc := range []struct{ in, want string }{
 		{"claude-opus-4.7", "claude-opus-4-7"},
 		{"us.anthropic.claude-opus-4-7-v1:0", "us.anthropic.claude-opus-4-7-v1:0"},
-		{"claude-sonnet-4@20250514", "claude-sonnet-4"},
+		{"claude-sonnet-4@20250514", "claude-sonnet-4-20250514"},
 		{"CLAUDE-Opus-4.6", "claude-opus-4-6"},
 		{"gpt-4.1", "gpt-4-1"},
 	} {
@@ -119,6 +119,28 @@ func TestOpenAISuffixVariantsDoNotInheritTheBaseRules(t *testing.T) {
 		}
 		if IsReasoningModel(model) {
 			t.Errorf("%s: a chat variant must not be detected as reasoning", model)
+		}
+	}
+}
+
+func TestClaudeFourAliasesAreClassified(t *testing.T) {
+	t.Parallel()
+
+	for _, tc := range []struct {
+		model string
+		want  bool
+	}{
+		{"claude-opus-4-0", true},
+		{"claude-sonnet-4-0", true},
+		{"claude-sonnet-4@20250514", true},
+		{"claude-opus-4@20250514", true},
+		{"claude-opus-4-20250514", true},
+		{"claude-sonnet-4-5", false},
+		{"claude-sonnet-4-6", false},
+		{"claude-opus-4-6", false},
+	} {
+		if got := ClaudePredatesAdaptive(tc.model); got != tc.want {
+			t.Errorf("ClaudePredatesAdaptive(%q) = %v, want %v", tc.model, got, tc.want)
 		}
 	}
 }
