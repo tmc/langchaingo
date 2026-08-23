@@ -58,6 +58,17 @@ type anthropicTextGenerationInputContent struct {
 	CacheControl *anthropicCacheControl `json:"cache_control,omitempty"`
 }
 
+func (c anthropicTextGenerationInputContent) MarshalJSON() ([]byte, error) {
+	type alias anthropicTextGenerationInputContent
+	if c.Type != "thinking" {
+		return json.Marshal(alias(c))
+	}
+	return json.Marshal(struct {
+		alias
+		Thinking string `json:"thinking"`
+	}{alias: alias(c), Thinking: c.Thinking})
+}
+
 type anthropicCacheControl struct {
 	Type string `json:"type"`
 	TTL  string `json:"ttl,omitempty"`
