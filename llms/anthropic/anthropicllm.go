@@ -208,7 +208,7 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 				Display: "summarized",
 			}
 			outputConfig = &anthropicclient.OutputConfig{
-				Effort: string(opts.Reasoning.GetEffort(opts.GetMaxTokens())),
+				Effort: reasoning.ClaudeClampEffort(model, string(opts.Reasoning.GetEffort(opts.GetMaxTokens()))),
 			}
 		} else {
 			thinking = &anthropicclient.ThinkingPayload{
@@ -219,7 +219,7 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 			// the caller's effort is silently dropped on the budget path.
 			if reasoning.ClaudeSupportsEffortWithBudget(model, reasoning.ProviderAnthropic) {
 				outputConfig = &anthropicclient.OutputConfig{
-					Effort: string(opts.Reasoning.GetEffort(opts.GetMaxTokens())),
+					Effort: reasoning.ClaudeClampEffort(model, string(opts.Reasoning.GetEffort(opts.GetMaxTokens()))),
 				}
 			}
 		}

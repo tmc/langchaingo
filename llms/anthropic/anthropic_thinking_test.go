@@ -852,16 +852,29 @@ func TestAnthropic_AdaptiveThinkingRequest(t *testing.T) {
 		assert.Equal(t, "high", outputConfig["effort"])
 	})
 
-	t.Run("xhigh effort flows through to output_config", func(t *testing.T) {
+	t.Run("xhigh flows through where the generation takes it", func(t *testing.T) {
 		t.Parallel()
 
-		payload, _ := captureMessagesRequest(t,
+		payload, _ := captureMessagesRequestModel(t, "claude-opus-4-7",
 			llms.WithAdaptiveReasoning(llms.ReasoningXHigh),
 			llms.WithMaxTokens(4096),
 		)
 
 		outputConfig, _ := payload["output_config"].(map[string]any)
 		assert.Equal(t, "xhigh", outputConfig["effort"])
+	})
+
+	t.Run("xhigh is lowered where the generation does not", func(t *testing.T) {
+		t.Parallel()
+
+		payload, _ := captureMessagesRequestModel(t, "claude-opus-4-6",
+			llms.WithAdaptiveReasoning(llms.ReasoningXHigh),
+			llms.WithMaxTokens(4096),
+		)
+
+		outputConfig, _ := payload["output_config"].(map[string]any)
+		assert.Equal(t, "high", outputConfig["effort"],
+			"xhigh must step down to the highest level below it, not up to max")
 	})
 }
 

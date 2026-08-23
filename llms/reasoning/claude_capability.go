@@ -114,6 +114,29 @@ func ClaudeEffortsFor(model string) []string {
 	return slices.Clone(claudeEffortsByKind[ClaudeReasoningKindFor(model)])
 }
 
+var claudeEffortRank = map[string]int{"low": 1, "medium": 2, "high": 3, "xhigh": 4, "max": 5}
+
+// ClaudeClampEffort lowers an effort the model's generation does not accept to
+// the highest one it does. An unclassified model and an unknown level pass
+// through unchanged.
+func ClaudeClampEffort(model, effort string) string {
+	want, ok := claudeEffortRank[effort]
+	if !ok {
+		return effort
+	}
+	accepted := claudeEffortsByKind[ClaudeReasoningKindFor(model)]
+	if len(accepted) == 0 || slices.Contains(accepted, effort) {
+		return effort
+	}
+	best, bestRank := effort, 0
+	for _, level := range accepted {
+		if rank := claudeEffortRank[level]; rank <= want && rank > bestRank {
+			best, bestRank = level, rank
+		}
+	}
+	return best
+}
+
 // budgetEffortClaude are budget-thinking models that also accept an effort
 // output_config alongside manual thinking (introduced with Opus 4.5). Newer
 // generations use adaptive thinking, where effort is always available.

@@ -144,3 +144,25 @@ func TestClaudeFourAliasesAreClassified(t *testing.T) {
 		}
 	}
 }
+
+func TestClaudeClampEffortStepsDownNotUp(t *testing.T) {
+	t.Parallel()
+
+	for _, tc := range []struct{ model, effort, want string }{
+		{"claude-opus-4-7", "xhigh", "xhigh"},
+		{"claude-sonnet-5", "xhigh", "xhigh"},
+		{"claude-opus-4-6", "xhigh", "high"},
+		{"claude-sonnet-4-6", "xhigh", "high"},
+		{"claude-opus-4-5", "xhigh", "high"},
+		{"claude-opus-4-5", "max", "high"},
+		{"claude-haiku-4-5", "max", "high"},
+		{"claude-opus-4-6", "max", "max"},
+		{"claude-opus-4-6", "low", "low"},
+		{"grok-4", "xhigh", "xhigh"},
+		{"claude-opus-4-6", "", ""},
+	} {
+		if got := ClaudeClampEffort(tc.model, tc.effort); got != tc.want {
+			t.Errorf("ClaudeClampEffort(%q, %q) = %q, want %q", tc.model, tc.effort, got, tc.want)
+		}
+	}
+}
