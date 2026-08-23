@@ -367,8 +367,8 @@ func (o *LLM) handleChat(ctx context.Context, req *api.ChatRequest, opts llms.Ca
 
 	var (
 		resp              api.ChatResponse
-		streamedResponse  string
-		streamedThinking  string
+		streamedResponse  strings.Builder
+		streamedThinking  strings.Builder
 		streamedToolCalls []api.ToolCall
 	)
 
@@ -399,9 +399,9 @@ func (o *LLM) handleChat(ctx context.Context, req *api.ChatRequest, opts llms.Ca
 		}
 
 		if response.Message.Content != "" {
-			streamedResponse += response.Message.Content
+			streamedResponse.WriteString(response.Message.Content)
 		}
-		streamedThinking += response.Message.Thinking
+		streamedThinking.WriteString(response.Message.Thinking)
 		if len(response.Message.ToolCalls) > 0 {
 			streamedToolCalls = append(streamedToolCalls, response.Message.ToolCalls...)
 		}
@@ -410,8 +410,8 @@ func (o *LLM) handleChat(ctx context.Context, req *api.ChatRequest, opts llms.Ca
 			resp = response
 			resp.Message = api.Message{
 				Role:      "assistant",
-				Content:   streamedResponse,
-				Thinking:  streamedThinking,
+				Content:   streamedResponse.String(),
+				Thinking:  streamedThinking.String(),
 				ToolCalls: streamedToolCalls,
 			}
 		}

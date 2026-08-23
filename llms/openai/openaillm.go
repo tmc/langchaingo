@@ -407,7 +407,7 @@ func (o *LLM) processResponse(result *openaiclient.ChatCompletionResponse) *llms
 	choices := make([]*llms.ContentChoice, len(result.Choices))
 
 	for i, c := range result.Choices {
-		stopReason := fmt.Sprint(c.FinishReason)
+		stopReason := string(c.FinishReason)
 		choices[i] = &llms.ContentChoice{
 			Content:        c.Message.Content,
 			Reasoning:      o.processReasoning(c.Message.ReasoningContent),
