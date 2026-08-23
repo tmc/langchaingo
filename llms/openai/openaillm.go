@@ -364,7 +364,7 @@ func (o *LLM) writeDisableEffort(req *openaiclient.ChatRequest) {
 func (o *LLM) applySamplingPolicy(req *openaiclient.ChatRequest, opts llms.CallOptions, wireEffort string) {
 	switch model := o.effectiveModel(opts); {
 	case reasoning.ClaudeRejectsSampling(model):
-		req.Temperature, req.TopP = nil, nil
+		req.Temperature, req.TopP, req.TopK, req.MinP = nil, nil, nil, nil
 	case reasoning.ClaudeMutuallyExclusiveSampling(model) && req.Temperature != nil && req.TopP != nil:
 		req.TopP = nil
 	case reasoning.IsReasoningModel(model) && !opts.Reasoning.IsDisabled() &&

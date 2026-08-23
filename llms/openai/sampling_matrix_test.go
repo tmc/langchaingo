@@ -124,3 +124,16 @@ func TestSamplingMatrix(t *testing.T) {
 		})
 	}
 }
+
+func TestAModelThatRejectsSamplingGetsNoSamplingAtAll(t *testing.T) {
+	t.Parallel()
+
+	body := sendForWire(t, "claude-opus-4-7",
+		llms.WithTemperature(0.3), llms.WithTopP(0.9), llms.WithTopK(40), llms.WithMinP(0.05))
+
+	for _, field := range []string{`"temperature"`, `"top_p"`, `"top_k"`, `"min_p"`} {
+		if strings.Contains(body, field) {
+			t.Errorf("want no %s on the wire, got body: %s", field, body)
+		}
+	}
+}
