@@ -197,6 +197,9 @@ func ClaudeSupportsStructuredOutput(model string) bool {
 // So a currently-accepted call keeps its mechanism; only a currently-rejected
 // (400) combination is redirected to the mechanism the model accepts.
 func ResolveClaudeAdaptive(model string, adaptivePreferred bool) bool {
+	if ClaudePredatesAdaptive(model) {
+		return false
+	}
 	switch ClaudeReasoningKindFor(model) {
 	case ClaudeReasoningAdaptiveOnly:
 		return true

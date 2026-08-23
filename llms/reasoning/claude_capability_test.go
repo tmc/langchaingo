@@ -83,9 +83,12 @@ func TestResolveClaudeAdaptive(t *testing.T) {
 		// Dual: caller preference honored both ways (unchanged).
 		{"claude-opus-4-6", true, true, "adaptive on T2 honored"},
 		{"claude-opus-4-6", false, false, "budget on T2 honored"},
+		{"claude-3-5-haiku", true, false, "adaptive on pre-adaptive downgrades"},
+		{"claude-3-5-haiku", false, false, "budget on pre-adaptive stays"},
+		{"claude-3-5-sonnet-latest", true, false, "same for the dated alias"},
 		// Unknown: literal pass-through (unchanged).
-		{"claude-3-5-haiku", true, true, "adaptive on unknown literal"},
-		{"claude-3-5-haiku", false, false, "budget on unknown literal"},
+		{"claude-future-9", true, true, "adaptive on unknown literal"},
+		{"claude-future-9", false, false, "budget on unknown literal"},
 	}
 	for _, tc := range cases {
 		if got := ResolveClaudeAdaptive(tc.model, tc.preferAda); got != tc.want {
