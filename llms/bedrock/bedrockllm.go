@@ -11,6 +11,7 @@ import (
 	"github.com/vxcontrol/langchaingo/callbacks"
 	"github.com/vxcontrol/langchaingo/llms"
 	"github.com/vxcontrol/langchaingo/llms/bedrock/internal/bedrockclient"
+	"github.com/vxcontrol/langchaingo/llms/reasoning"
 
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
@@ -105,6 +106,10 @@ func (l *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 
 	// Validate structured-output configuration once for both API paths.
 	if err := opts.ValidateStructuredOutput(); err != nil {
+		return nil, err
+	}
+
+	if err := checkAnthropicTurnLimits(&opts, messages); err != nil {
 		return nil, err
 	}
 
@@ -371,3 +376,17 @@ func (l *LLM) supportsCaching(modelID string) bool {
 }
 
 var _ llms.Model = (*LLM)(nil)
+
+func checkAnthropicTurnLimits(opts *llms.CallOptions, messages []llms.MessageContent) error {
+	model := opts.GetModel()
+	manualThinking := opts.Reasoning.ResolveMode() == llms.ReasoningOn &&
+		!reasoning.ResolveClaudeAdaptive(model, opts.Reasoning.Adaptive)
+	if manualThinking && llms.ForcesToolUse(opts.ToolChoice) {
+		return &reasoning.ErrForcedToolUseWithThinking{Model: model}
+	}
+
+	if reasoning.ClaudeRejectsAssistantPrefill(model) && llms.HasAssistantPrefill(messages) {
+		return &reasoning.ErrAssistantPrefillUnsupported{Model: model}
+	}
+	return nil
+}

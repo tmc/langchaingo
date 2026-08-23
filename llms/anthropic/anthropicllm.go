@@ -232,11 +232,11 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 		}
 	}
 
-	if thinking != nil && thinking.Type == "enabled" && forcesToolUse(opts.ToolChoice) {
+	if thinking != nil && thinking.Type == "enabled" && llms.ForcesToolUse(opts.ToolChoice) {
 		return nil, &ErrForcedToolUseWithThinking{Model: model}
 	}
 
-	if reasoning.ClaudeRejectsAssistantPrefill(model) && anthropicHasAssistantPrefill(messages) {
+	if reasoning.ClaudeRejectsAssistantPrefill(model) && llms.HasAssistantPrefill(messages) {
 		return nil, &ErrAssistantPrefillUnsupported{Model: model}
 	}
 
@@ -811,22 +811,6 @@ func handleHumanMessage(msg llms.MessageContent) (anthropicclient.ChatMessage, e
 	}, nil
 }
 
-func forcesToolUse(choice any) bool {
-	forced := func(t string) bool { return t == "any" || t == "tool" }
-	switch c := choice.(type) {
-	case string:
-		return forced(c)
-	case llms.ToolChoice:
-		return forced(c.Type)
-	case *llms.ToolChoice:
-		return c != nil && forced(c.Type)
-	case map[string]any:
-		t, _ := c["type"].(string)
-		return forced(t)
-	}
-	return false
-}
-
 func handleAIMessage(msg llms.MessageContent) (anthropicclient.ChatMessage, error) {
 	message := anthropicclient.ChatMessage{
 		Role:    RoleAssistant,
@@ -959,7 +943,7 @@ func applyAnthropicStructuredOutput(
 			Reason:   "model predates the output_config.format JSON Schema mode",
 		}
 	}
-	if anthropicHasAssistantPrefill(messages) {
+	if llms.HasAssistantPrefill(messages) {
 		return nil, &llms.ErrStructuredOutputConflict{
 			Provider: providerAnthropic,
 			Detail:   "structured output is incompatible with assistant message prefilling",
@@ -978,13 +962,6 @@ func applyAnthropicStructuredOutput(
 		Schema: so.Schema,
 	}
 	return cfg, nil
-}
-
-func anthropicHasAssistantPrefill(messages []llms.MessageContent) bool {
-	if len(messages) == 0 {
-		return false
-	}
-	return messages[len(messages)-1].Role == llms.ChatMessageTypeAI
 }
 
 // validateAnthropicStructuredOutput validates the concatenation of all final text

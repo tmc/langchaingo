@@ -1,10 +1,10 @@
 package anthropic
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/vxcontrol/langchaingo/llms"
+	"github.com/vxcontrol/langchaingo/llms/reasoning"
 )
 
 // errorMapping represents a mapping from error patterns to error codes.
@@ -82,21 +82,9 @@ func MapError(err error) error {
 
 // ErrAssistantPrefillUnsupported reports that the model rejects a conversation
 // ending with an assistant turn.
-type ErrAssistantPrefillUnsupported struct{ Model string }
-
-func (e *ErrAssistantPrefillUnsupported) Error() string {
-	return fmt.Sprintf(
-		"anthropic: model %q does not support assistant message prefill; the conversation must end with a user message",
-		e.Model)
-}
+type ErrAssistantPrefillUnsupported = reasoning.ErrAssistantPrefillUnsupported
 
 // ErrForcedToolUseWithThinking reports the documented gap that manual (budget)
 // thinking accepts only tool_choice "auto" or "none": forcing a tool with "any"
 // or a named tool is rejected. Adaptive thinking has no such limit.
-type ErrForcedToolUseWithThinking struct{ Model string }
-
-func (e *ErrForcedToolUseWithThinking) Error() string {
-	return fmt.Sprintf(
-		"anthropic: model %q runs manual thinking, which rejects a forced tool choice; use tool_choice auto or none",
-		e.Model)
-}
+type ErrForcedToolUseWithThinking = reasoning.ErrForcedToolUseWithThinking
