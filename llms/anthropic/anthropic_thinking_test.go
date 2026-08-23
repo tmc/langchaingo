@@ -1281,3 +1281,30 @@ func TestAnthropic_ThinkingReplayNeverOmitsRequiredField(t *testing.T) {
 		require.Equal(t, "sig", emitted[0]["signature"])
 	})
 }
+
+func TestBudgetThinkingDoesNotPinTemperatureOnAModelThatRejectsIt(t *testing.T) {
+	t.Parallel()
+
+	t.Run("a model that rejects sampling gets no temperature", func(t *testing.T) {
+		t.Parallel()
+		payload, _ := captureMessagesRequestModel(t, "claude-mythos-preview",
+			llms.WithReasoning(llms.ReasoningMedium, 2048))
+
+		thinking, ok := payload["thinking"].(map[string]any)
+		require.True(t, ok, "budget thinking must reach the wire, got %v", payload)
+		require.Equal(t, "enabled", thinking["type"])
+		require.NotContains(t, payload, "temperature",
+			"a model listed as rejecting sampling must not be sent temperature, got %v", payload)
+	})
+
+	t.Run("a model that accepts sampling still gets the required pin", func(t *testing.T) {
+		t.Parallel()
+		payload, _ := captureMessagesRequestModel(t, "claude-opus-4-6",
+			llms.WithReasoning(llms.ReasoningMedium, 2048))
+
+		thinking, ok := payload["thinking"].(map[string]any)
+		require.True(t, ok, "budget thinking must reach the wire, got %v", payload)
+		require.Equal(t, "enabled", thinking["type"])
+		require.InDelta(t, 1.0, payload["temperature"], 0.0001)
+	})
+}

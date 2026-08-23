@@ -271,3 +271,35 @@ func TestApplyAnthropicReasoning_DropsTopPWhenBothSamplingParamsSet(t *testing.T
 		})
 	}
 }
+
+func TestApplyAnthropicReasoning_BudgetKeepsTheSamplingRefusal(t *testing.T) {
+	t.Parallel()
+
+	input := anthropicTextGenerationInput{MaxTokens: 4096, Temperature: 0.8, TopP: 0.9, TopK: 40}
+	applyAnthropicReasoning(&input,
+		&llms.ReasoningConfig{Effort: llms.ReasoningMedium, Tokens: 2048},
+		"anthropic.claude-mythos-preview-v1:0", 4096)
+
+	fields := marshalAnthropicInput(t, input)
+
+	thinking, _ := fields["thinking"].(map[string]any)
+	assert.Equal(t, "enabled", thinking["type"], "budget thinking must reach the wire")
+	_, hasTemperature := fields["temperature"]
+	assert.False(t, hasTemperature,
+		"a model listed as rejecting sampling must not be handed temperature back by the budget path")
+}
+
+func TestApplyAnthropicReasoning_BudgetStillPinsWhereSamplingIsAccepted(t *testing.T) {
+	t.Parallel()
+
+	input := anthropicTextGenerationInput{MaxTokens: 4096, Temperature: 0.8, TopP: 0.9, TopK: 40}
+	applyAnthropicReasoning(&input,
+		&llms.ReasoningConfig{Effort: llms.ReasoningMedium, Tokens: 2048},
+		"anthropic.claude-opus-4-6-v1:0", 4096)
+
+	fields := marshalAnthropicInput(t, input)
+
+	thinking, _ := fields["thinking"].(map[string]any)
+	assert.Equal(t, "enabled", thinking["type"])
+	assert.InDelta(t, 1.0, fields["temperature"], 0.0001)
+}

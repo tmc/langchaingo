@@ -743,6 +743,9 @@ func applyAnthropicReasoning(
 			}
 			// Budget thinking requires temperature=1.0 and rejects top_p/top_k.
 			input.Temperature = 1.0
+			if reasoning.ClaudeRejectsSampling(modelID) {
+				input.Temperature = 0
+			}
 			input.TopP = 0
 			input.TopK = 0
 		}

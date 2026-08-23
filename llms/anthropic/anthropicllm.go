@@ -276,6 +276,9 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 		topP = nil
 	case thinking != nil && thinking.Type == "enabled" && thinking.Budget > 0:
 		temperature = getFloatPointer(1.0)
+		if reasoning.ClaudeRejectsSampling(model) {
+			temperature = nil
+		}
 		topP = nil
 		maxTokens = max(thinking.Budget*2, maxTokens) // 2x the budget for thinking
 	case reasoning.ClaudeRejectsSampling(model):
