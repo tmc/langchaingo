@@ -733,9 +733,6 @@ func applyAnthropicReasoning(
 	}
 	setBudget := func() {
 		mt := maxTokens
-		if mt == 0 {
-			mt = 2048
-		}
 		if tokens := cfg.GetTokens(mt); tokens > 0 {
 			input.Thinking = &anthropicThinkingPayload{Type: "enabled", BudgetTokens: tokens}
 			if reasoning.ClaudeSupportsEffortWithBudget(modelID, reasoning.ProviderBedrock) {

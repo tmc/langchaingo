@@ -135,7 +135,7 @@ func (r *ReasoningConfig) GetEffort(maxTokens int) ReasoningEffort {
 	}
 
 	if maxTokens <= 0 {
-		maxTokens = 8192
+		maxTokens = DefaultMaxTokens
 	}
 
 	if r.Tokens > 0 {
@@ -174,7 +174,7 @@ func (r *ReasoningConfig) GetTokens(maxTokens int) int {
 	}
 
 	if maxTokens <= 0 {
-		maxTokens = 8192
+		maxTokens = DefaultMaxTokens
 	}
 
 	var tokens int

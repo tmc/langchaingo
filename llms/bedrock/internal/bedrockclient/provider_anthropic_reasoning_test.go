@@ -303,3 +303,19 @@ func TestApplyAnthropicReasoning_BudgetStillPinsWhereSamplingIsAccepted(t *testi
 	assert.Equal(t, "enabled", thinking["type"])
 	assert.InDelta(t, 1.0, fields["temperature"], 0.0001)
 }
+
+func TestApplyAnthropicReasoning_UnsetMaxTokensUsesTheSharedDefault(t *testing.T) {
+	t.Parallel()
+
+	cfg := &llms.ReasoningConfig{Effort: llms.ReasoningMedium}
+	input := anthropicTextGenerationInput{}
+	applyAnthropicReasoning(&input, cfg, "anthropic.claude-sonnet-4-5-v1:0", 0)
+
+	fields := marshalAnthropicInput(t, input)
+	thinking, ok := fields["thinking"].(map[string]any)
+	require.True(t, ok, "budget thinking must reach the wire, got %v", fields)
+
+	want := cfg.GetTokens(0)
+	assert.InDelta(t, float64(want), thinking["budget_tokens"], 0.5,
+		"an unset max-tokens must fall back to the same number every other caller gets")
+}
