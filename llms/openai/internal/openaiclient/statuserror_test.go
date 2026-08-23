@@ -30,3 +30,24 @@ func TestStatusErrorCapsTheQuotedBody(t *testing.T) {
 		t.Fatalf("error grew to %d bytes, want it capped near %d", len(err.Error()), maxErrorBodyBytes)
 	}
 }
+
+func TestStatusErrorParsesABodyLargerThanTwoKilobytes(t *testing.T) {
+	padding := strings.Repeat("d", 8<<10)
+	body := `{"error":{"message":"content filter triggered","type":"invalid_request_error","detail":"` +
+		padding + `"}}`
+
+	err := statusError(400, strings.NewReader(body))
+	if err == nil {
+		t.Fatal("want an error")
+	}
+	got := err.Error()
+	if !strings.Contains(got, "content filter triggered") {
+		t.Errorf("provider message lost: %s", got)
+	}
+	if strings.Contains(got, `{"error"`) {
+		t.Errorf("body was quoted raw instead of parsed: %.120s", got)
+	}
+	if strings.Contains(got, padding[:64]) {
+		t.Errorf("padding leaked into the error: %.120s", got)
+	}
+}

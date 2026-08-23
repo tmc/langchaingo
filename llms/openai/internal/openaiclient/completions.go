@@ -60,7 +60,7 @@ type errorMessage struct {
 	} `json:"error"`
 }
 
-const maxErrorBodyBytes = 2048
+const maxErrorBodyBytes = 64 << 10
 
 func statusError(statusCode int, body io.Reader) error {
 	msg := fmt.Sprintf("API returned unexpected status code: %d", statusCode)
