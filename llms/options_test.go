@@ -522,9 +522,9 @@ func TestGetTemperatureReasoningGuard(t *testing.T) {
 		want      float64
 	}{
 		{
-			name:  "reasoning model without reasoning option is pinned to 1.0",
+			name:  "a reasoning model gets the caller's temperature, not a rewritten one",
 			model: reasoningModel,
-			want:  1.0,
+			want:  0.2,
 		},
 		{
 			name:      "reasoning model with explicit disable honors user temperature",
@@ -1178,5 +1178,18 @@ func TestWithReasoningDisabled(t *testing.T) {
 	}
 	if o.Reasoning.IsEnabled() {
 		t.Error("disabled reasoning must not be IsEnabled")
+	}
+}
+
+func TestGetTemperatureLeavesAnUnsetValueAtTheDefault(t *testing.T) {
+	t.Parallel()
+
+	model := func(v string) *string { return &v }
+	for _, name := range []string{"o3-mini", "gpt-4.1", "deepseek-r1"} {
+		opts := llms.CallOptions{Model: model(name)}
+		if got := opts.GetTemperature(); got != llms.DefaultTemperature {
+			t.Errorf("%s: unset temperature = %v, want the package default %v",
+				name, got, llms.DefaultTemperature)
+		}
 	}
 }
