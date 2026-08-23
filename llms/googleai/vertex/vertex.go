@@ -18,6 +18,7 @@ import (
 	"github.com/vxcontrol/langchaingo/llms/googleai"
 	"github.com/vxcontrol/langchaingo/llms/streaming"
 
+	aiplatformpb "cloud.google.com/go/aiplatform/apiv1beta1/aiplatformpb"
 	"cloud.google.com/go/vertexai/genai"
 	"github.com/vxcontrol/langchaingo/internal/imageutil"
 	"github.com/vxcontrol/langchaingo/internal/numutil"
@@ -189,7 +190,7 @@ func convertCandidates(candidates []*genai.Candidate, usage *genai.UsageMetadata
 		contentResponse.Choices = append(contentResponse.Choices,
 			&llms.ContentChoice{
 				Content:        buf.String(),
-				StopReason:     candidate.FinishReason.String(),
+				StopReason:     wireFinishReason(candidate.FinishReason),
 				Truncated:      candidate.FinishReason == genai.FinishReasonMaxTokens,
 				GenerationInfo: metadata,
 				ToolCalls:      toolCalls,
@@ -592,4 +593,8 @@ func applyGenerationConfig(model *genai.GenerativeModel, opts llms.CallOptions) 
 		model.SetTopK(numutil.SaturateInt32(opts.GetTopK()))
 	}
 	model.StopSequences = opts.StopWords
+}
+
+func wireFinishReason(r genai.FinishReason) string {
+	return aiplatformpb.Candidate_FinishReason(r).String()
 }

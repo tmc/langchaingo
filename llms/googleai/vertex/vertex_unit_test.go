@@ -324,9 +324,8 @@ func TestConvertCandidates(t *testing.T) { //nolint:funlen // comprehensive test
 				if result.Choices[0].Content != "Response text" {
 					t.Errorf("expected content 'Response text', got %q", result.Choices[0].Content)
 				}
-				// The FinishReason.String() method returns the full enum name
-				if result.Choices[0].StopReason != "FinishReasonStop" {
-					t.Errorf("expected stop reason 'FinishReasonStop', got %q", result.Choices[0].StopReason)
+				if result.Choices[0].StopReason != "STOP" {
+					t.Errorf("expected stop reason 'STOP', got %q", result.Choices[0].StopReason)
 				}
 			},
 		},
@@ -746,9 +745,10 @@ func TestConvertCandidatesReportsTruncation(t *testing.T) {
 		wantStop      string
 		wantTruncated bool
 	}{
-		{"out of budget", genai.FinishReasonMaxTokens, "FinishReasonMaxTokens", true},
-		{"finished on its own", genai.FinishReasonStop, "FinishReasonStop", false},
-		{"blocked by safety", genai.FinishReasonSafety, "FinishReasonSafety", false},
+		{"out of budget", genai.FinishReasonMaxTokens, "MAX_TOKENS", true},
+		{"finished on its own", genai.FinishReasonStop, "STOP", false},
+		{"blocked by safety", genai.FinishReasonSafety, "SAFETY", false},
+		{"blocked by recitation", genai.FinishReasonRecitation, "RECITATION", false},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
@@ -764,6 +764,10 @@ func TestConvertCandidatesReportsTruncation(t *testing.T) {
 			}
 			if got := resp.Choices[0].StopReason; got != tc.wantStop {
 				t.Fatalf("StopReason = %q, want %q", got, tc.wantStop)
+			}
+			if got := llms.IsTruncated(resp.Choices[0].StopReason); got != tc.wantTruncated {
+				t.Fatalf("IsTruncated(%q) = %v, want it to agree with Truncated = %v",
+					resp.Choices[0].StopReason, got, tc.wantTruncated)
 			}
 		})
 	}
