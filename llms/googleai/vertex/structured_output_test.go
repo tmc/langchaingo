@@ -222,7 +222,7 @@ func TestValidateVertexStructuredOutput(t *testing.T) {
 		JSONMode:         true,
 		StructuredOutput: &llms.StructuredOutputConfig{Name: "s", Schema: json.RawMessage(`{"type":"object","properties":{"a":{"type":"string"}},"required":["a"],"additionalProperties":false}`)},
 	}
-	stop := genai.FinishReasonStop.String()
+	stop := "STOP"
 
 	if err := validateVertexStructuredOutput(opts, &llms.ContentResponse{Choices: []*llms.ContentChoice{{Content: `{"a":"ok"}`, StopReason: stop}}}); err != nil {
 		t.Errorf("valid STOP must pass: %v", err)
@@ -245,5 +245,26 @@ func TestValidateVertexStructuredOutput(t *testing.T) {
 	}
 	if err := validateVertexStructuredOutput(opts, &llms.ContentResponse{Choices: []*llms.ContentChoice{toolTurn}}); err != nil {
 		t.Errorf("a STOP turn carrying tool calls must not be validated as JSON: %v", err)
+	}
+}
+
+func TestValidateVertexStructuredOutputOnConvertedResponse(t *testing.T) {
+	t.Parallel()
+	opts := &llms.CallOptions{
+		JSONMode:         true,
+		StructuredOutput: &llms.StructuredOutputConfig{Name: "s", Schema: json.RawMessage(`{"type":"object","properties":{"a":{"type":"string"}},"required":["a"],"additionalProperties":false}`)},
+	}
+
+	resp, err := convertCandidates([]*genai.Candidate{{
+		Content:      &genai.Content{Parts: []genai.Part{genai.Text(`{"a":1}`)}},
+		FinishReason: genai.FinishReasonStop,
+	}}, nil)
+	if err != nil {
+		t.Fatalf("convertCandidates: %v", err)
+	}
+
+	var ve *llms.ErrStructuredOutputValidation
+	if got := validateVertexStructuredOutput(opts, resp); !errors.As(got, &ve) {
+		t.Errorf("schema violation on a converted STOP turn must fail typed, got %v", got)
 	}
 }

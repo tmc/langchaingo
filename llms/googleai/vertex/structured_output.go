@@ -63,7 +63,7 @@ func validateVertexStructuredOutput(opts *llms.CallOptions, resp *llms.ContentRe
 		return nil
 	}
 	model := opts.GetModel()
-	stop := genai.FinishReasonStop.String()
+	stop := wireFinishReason(genai.FinishReasonStop)
 	for i, choice := range resp.Choices {
 		if choice.StopReason != stop || len(choice.ToolCalls) > 0 {
 			continue
