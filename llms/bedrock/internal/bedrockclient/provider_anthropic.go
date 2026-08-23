@@ -60,13 +60,14 @@ type anthropicTextGenerationInputContent struct {
 
 func (c anthropicTextGenerationInputContent) MarshalJSON() ([]byte, error) {
 	type alias anthropicTextGenerationInputContent
-	if c.Type != "thinking" {
+	if c.Type != "thinking" || c.Thinking != "" {
 		return json.Marshal(alias(c))
 	}
 	return json.Marshal(struct {
-		alias
-		Thinking string `json:"thinking"`
-	}{alias: alias(c), Thinking: c.Thinking})
+		Type      string `json:"type"`
+		Thinking  string `json:"thinking"`
+		Signature string `json:"signature,omitempty"`
+	}{Type: c.Type, Signature: c.Signature})
 }
 
 type anthropicCacheControl struct {
