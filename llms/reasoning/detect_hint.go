@@ -18,6 +18,10 @@ func LikelyReasoningModel(model string) bool {
 		m = m[idx+1:]
 	}
 
+	if namesNonTextModality(m) {
+		return false
+	}
+
 	switch {
 	case strings.HasPrefix(m, "gpt-"):
 		return !openAIPreReasoning(m)
@@ -29,6 +33,10 @@ func LikelyReasoningModel(model string) bool {
 		return !geminiKnownNonThinking(m)
 	}
 	return false
+}
+
+func namesNonTextModality(m string) bool {
+	return strings.Contains(m, "embedding") || strings.Contains(m, "image")
 }
 
 // openAIPreReasoning matches the GPT generations below the GPT-5 line, where

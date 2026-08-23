@@ -41,3 +41,24 @@ func TestLikelyReasoningModel(t *testing.T) {
 		}
 	}
 }
+
+func TestNonTextModalitiesAreNotGuessedAsReasoning(t *testing.T) {
+	t.Parallel()
+
+	for _, tc := range []struct {
+		model string
+		want  bool
+	}{
+		{"gpt-image-1", false},
+		{"gemini-embedding-001", false},
+		{"openai/gpt-image-1", false},
+		{"gpt-5.5", true},
+		{"gemini-2.5-flash", true},
+		{"claude-opus-4-6", true},
+		{"o3", true},
+	} {
+		if got := LikelyReasoningModel(tc.model); got != tc.want {
+			t.Errorf("LikelyReasoningModel(%q) = %v, want %v", tc.model, got, tc.want)
+		}
+	}
+}
