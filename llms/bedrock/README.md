@@ -209,7 +209,9 @@ source of truth used by the first-party Anthropic provider):
   yields off.
 - **Adaptive + budget** (Opus 4.6, Sonnet 4.6): either mechanism; caller preference honored.
 - **Budget-only** (Opus 4.5, Sonnet 4.5, Haiku 4.5): `thinking.type=enabled` +
-  `budget_tokens`; Opus 4.5 also honors `output_config.effort`.
+  `budget_tokens`. Opus 4.6 and Sonnet 4.6 also carry `output_config.effort` on
+  this path; Opus 4.5 accepts it on the first-party API but rejects it here, so
+  this door does not send it.
 
 Non-Claude reasoning models (GPT OSS, Kimi K2-Thinking, MiniMax M2) use budget
 thinking through the Converse API. `WithReasoningDisabled()` returns a typed
@@ -767,13 +769,14 @@ for the exact model IDs.
 | Mistral | ✅*** | ❌ | ✅ | Some | ❌ | Converse native* |
 | Moonshot Kimi | ✅**** | ✅ | ✅ | Some | ❌ | Converse native* |
 | MiniMax M2/M2.1/M2.5 | ✅ | ✅ (M2.5/M2.1) | ✅ | ❌ | ❌ | Converse native* |
-| GLM-4.7/4.7-Flash/5 | ❌***** | ✅ (GLM-5) | ✅ | ❌ | ❌ | Converse native* |
-| NVIDIA Nemotron 3 Super | ✅ | ✅ | ✅ | ❌ | ❌ | Converse native* |
+| GLM-4.7/4.7-Flash/5 | ❌***** | ❌****** | ✅ | ❌ | ❌ | Converse native* |
+| NVIDIA Nemotron 3 Super | ✅ | ❌****** | ✅ | ❌ | ❌ | Converse native* |
 
 *Converse native: structured output is passed via AWS `OutputConfig.TextFormat`; support depends on what AWS advertises for the model at the time. The legacy InvokeModel structured-output path is implemented for Anthropic only.  
 **Qwen3: Most models support tools, except Qwen3-VL (unstable in streaming)  
 ***Mistral: Large 3 and Large 2402 support tools, Magistral Small 2509 does not  
 ****Moonshot: K2.5 supports tools, K2-Thinking is unstable in streaming  
-*****GLM models: Backend incompatibility with Converse API tool format (requires string instead of JSON)
+*****GLM models: Backend incompatibility with Converse API tool format (requires string instead of JSON)  
+******GLM-5 and Nemotron 3 may reason on their own, but this door sends them no thinking instruction: they are absent from the reasoning list in `supportsReasoning`, so a reasoning request on them is a no-op here.
 
 See `models_list.go` for the complete model list and detailed capabilities.

@@ -72,5 +72,6 @@ Options passed to `GenerateContent` (or `llms.GenerateFromSinglePrompt`) work ac
 - **Structured output**: `llms.WithStructuredOutput` requests schema-constrained JSON and validates the response against your schema.
 - **Streaming**: `llms.WithStreamingFunc` receives a `streaming.Chunk` per token.
 - **Tools / function calling**: `llms.WithTools`.
+- **Truncation**: `llms.WithFailOnTruncation` turns an answer cut short by the output-token limit into a typed error instead of a silently shortened result; the partial answer is returned alongside it, and `ContentChoice.Truncated` carries the same signal without the option.
 
 <DocCardList />
