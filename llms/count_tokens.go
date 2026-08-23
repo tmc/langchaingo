@@ -62,6 +62,11 @@ var modelToContextSize = map[string]int{
 
 // GetModelContextSize gets the max number of tokens for a language model. If the model
 // name isn't recognized the default value 2048 is returned.
+//
+// Deprecated: the table it reads covers only GPT-3.5, GPT-4, GPT-4o and the
+// legacy completion models, so every current model falls through to 2048 —
+// orders of magnitude below its real window. Ask the provider for the window,
+// or carry it in your own configuration.
 func GetModelContextSize(model string) int {
 	contextSize, ok := modelToContextSize[model]
 	if !ok {
@@ -84,6 +89,9 @@ func CountTokens(model, text string) int {
 }
 
 // CalculateMaxTokens calculates the max number of tokens that could be added to a text.
+//
+// Deprecated: it derives the budget from GetModelContextSize, which no longer
+// recognizes current models.
 func CalculateMaxTokens(model, text string) int {
 	return GetModelContextSize(model) - CountTokens(model, text)
 }
