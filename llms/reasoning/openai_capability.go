@@ -56,9 +56,11 @@ func OpenAIReasoningCapsFor(model string) OpenAIReasoningCaps {
 	if idx := strings.LastIndex(m, "/"); idx != -1 {
 		m = m[idx+1:] // strip a proxy prefix such as "openai/"
 	}
+	if strings.Contains(m, "-chat-latest") {
+		return OpenAIReasoningCaps{Known: false}
+	}
 	switch {
-	case strings.HasPrefix(m, "gpt-5-pro"):
-		// GPT-5 Pro accepts only high and cannot be disabled.
+	case openAIProVariant(m):
 		return OpenAIReasoningCaps{Known: true, CanDisable: false, Efforts: []string{"high"}}
 	case openAIMandatoryReasoning(m):
 		return OpenAIReasoningCaps{Known: true, CanDisable: false, Efforts: []string{"low", "medium", "high", "xhigh"}}
@@ -71,6 +73,10 @@ func OpenAIReasoningCapsFor(model string) OpenAIReasoningCaps {
 	default:
 		return OpenAIReasoningCaps{Known: false}
 	}
+}
+
+func openAIProVariant(m string) bool {
+	return strings.HasPrefix(m, "gpt-5") && strings.Contains(m, "-pro")
 }
 
 func openAIGPT5Base(m string) bool {

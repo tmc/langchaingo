@@ -181,6 +181,10 @@ func DefaultIsReasoningModel(model string) bool { //nolint:funlen // a flat cata
 	}
 	modelLower = stripPlatformPrefix(modelLower)
 
+	if strings.Contains(modelLower, "-chat-latest") {
+		return false
+	}
+
 	// OpenAI reasoning models
 	if strings.HasPrefix(modelLower, "gpt-5") ||
 		strings.HasPrefix(modelLower, "gpt-oss-") ||

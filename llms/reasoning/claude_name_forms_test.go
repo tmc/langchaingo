@@ -102,3 +102,23 @@ func TestStripPlatformPrefixLeavesVersionsAlone(t *testing.T) {
 		}
 	}
 }
+
+func TestOpenAISuffixVariantsDoNotInheritTheBaseRules(t *testing.T) {
+	t.Parallel()
+
+	for _, model := range []string{"gpt-5-pro", "gpt-5.1-pro", "gpt-5.2-pro", "gpt-5.4-pro"} {
+		caps := OpenAIReasoningCapsFor(model)
+		if !caps.Known || caps.CanDisable || len(caps.Efforts) != 1 || caps.Efforts[0] != "high" {
+			t.Errorf("%s: want the Pro caps (high only, not disablable), got %+v", model, caps)
+		}
+	}
+
+	for _, model := range []string{"gpt-5-chat-latest", "gpt-5.2-chat-latest"} {
+		if caps := OpenAIReasoningCapsFor(model); caps.Known {
+			t.Errorf("%s: a chat variant must not be classified as a reasoning model, got %+v", model, caps)
+		}
+		if IsReasoningModel(model) {
+			t.Errorf("%s: a chat variant must not be detected as reasoning", model)
+		}
+	}
+}
