@@ -13,20 +13,6 @@ import (
 // provider API (an HTTP 400) is the ultimate arbiter. The table asserts only
 // KNOWN facts; it never fabricates a capability it cannot back — unknown effort
 // tiers and default state are left nil rather than guessed.
-// ReasoningMechanism describes how a model takes its thinking instruction.
-type ReasoningMechanism int
-
-const (
-	// ReasoningMechanismUnknown is a model whose mechanism this build does not classify.
-	ReasoningMechanismUnknown ReasoningMechanism = iota
-	// ReasoningMechanismAdaptive takes an effort level and decides how much to think.
-	ReasoningMechanismAdaptive
-	// ReasoningMechanismBudget takes a manual token budget.
-	ReasoningMechanismBudget
-	// ReasoningMechanismAdaptiveAndBudget accepts either mechanism.
-	ReasoningMechanismAdaptiveAndBudget
-)
-
 type ReasoningSupport struct {
 	// Supported reports whether the model reasons at all.
 	Supported bool
@@ -47,6 +33,20 @@ type ReasoningSupport struct {
 	// DefaultOn reports whether thinking runs when reasoning is unset; nil when unknown.
 	DefaultOn *bool
 }
+
+// ReasoningMechanism describes how a model takes its thinking instruction.
+type ReasoningMechanism int
+
+const (
+	// ReasoningMechanismUnknown is a model whose mechanism this build does not classify.
+	ReasoningMechanismUnknown ReasoningMechanism = iota
+	// ReasoningMechanismAdaptive takes an effort level and decides how much to think.
+	ReasoningMechanismAdaptive
+	// ReasoningMechanismBudget takes a manual token budget.
+	ReasoningMechanismBudget
+	// ReasoningMechanismAdaptiveAndBudget accepts either mechanism.
+	ReasoningMechanismAdaptiveAndBudget
+)
 
 var (
 	reasoningOverridesMu sync.RWMutex
