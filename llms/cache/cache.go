@@ -77,7 +77,7 @@ func (c *Cacher) GenerateContent(ctx context.Context, messages []llms.MessageCon
 
 	response, err := c.llm.GenerateContent(ctx, messages, options...)
 	if err != nil {
-		return nil, err
+		return response, err
 	}
 
 	c.cache.Put(ctx, key, response)
