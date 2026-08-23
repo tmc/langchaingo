@@ -130,26 +130,27 @@ func (g *Vertex) GenerateContent(
 		return response, err
 	}
 
-	if err := llms.CheckTruncation(response, opts); err != nil {
-		return response, err
-	}
-
-	// When structured output was requested, validate each normal-final candidate
-	// against the original schema; the response is returned with the typed error.
-	if err := validateVertexStructuredOutput(&opts, response); err != nil {
+	if err := finishVertexResponse(&opts, response); err != nil {
 		return response, err
 	}
 
 	return response, nil
 }
 
+func finishVertexResponse(opts *llms.CallOptions, response *llms.ContentResponse) error {
+	if err := llms.CheckTruncation(response, *opts); err != nil {
+		return err
+	}
+	return validateVertexStructuredOutput(opts, response)
+}
+
 // convertCandidates converts a sequence of genai.Candidate to a response.
 func convertCandidates(candidates []*genai.Candidate, usage *genai.UsageMetadata) (*llms.ContentResponse, error) {
 	var contentResponse llms.ContentResponse
-	var toolCalls []llms.ToolCall
 
 	for _, candidate := range candidates {
 		buf := strings.Builder{}
+		var toolCalls []llms.ToolCall
 
 		if candidate.Content != nil {
 			for _, part := range candidate.Content.Parts {
