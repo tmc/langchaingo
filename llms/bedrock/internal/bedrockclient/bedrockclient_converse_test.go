@@ -1097,8 +1097,10 @@ func TestConverseClient_DropsTopPWhenBothSamplingParamsSet(t *testing.T) {
 			require.NoError(t, err)
 			cfg := got.InferenceConfig
 			require.NotNil(t, cfg)
-			assert.False(t, cfg.Temperature != nil && cfg.TopP != nil,
-				"both sampling params reached the wire for %s", model)
+			require.NotNil(t, cfg.Temperature,
+				"%s takes a temperature; dropping both params would satisfy a not-both assertion", model)
+			assert.InDelta(t, 0.5, *cfg.Temperature, 0.0001, "the caller's temperature must survive for %s", model)
+			assert.Nil(t, cfg.TopP, "top_p is the one that goes for %s", model)
 		})
 	}
 }

@@ -267,7 +267,9 @@ func TestApplyAnthropicReasoning_DropsTopPWhenBothSamplingParamsSet(t *testing.T
 			fields := marshalAnthropicInput(t, input)
 			_, hasTemp := fields["temperature"]
 			_, hasTopP := fields["top_p"]
-			assert.False(t, hasTemp && hasTopP, "both sampling params reached the wire: %v", fields)
+			require.True(t, hasTemp,
+				"the model takes a temperature; dropping both params would satisfy a not-both assertion: %v", fields)
+			assert.False(t, hasTopP, "top_p is the one that goes: %v", fields)
 		})
 	}
 }
