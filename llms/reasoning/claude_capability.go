@@ -54,7 +54,7 @@ var (
 // case-insensitive and substring-based so provider/region prefixes and
 // -vN:0 suffixes do not affect the result.
 func ClaudeReasoningKindFor(model string) ClaudeReasoningKind {
-	m := strings.ToLower(model)
+	m := canonicalClaude(model)
 	if containsAny(m, adaptiveOnlyClaude) {
 		return ClaudeReasoningAdaptiveOnly
 	}
@@ -92,13 +92,13 @@ var (
 // ClaudeThinkingAlwaysOn reports whether the model's thinking cannot be disabled
 // (Fable 5 / Mythos 5 — an explicit disable returns 400).
 func ClaudeThinkingAlwaysOn(model string) bool {
-	return containsAny(strings.ToLower(model), alwaysOnClaude)
+	return containsAny(canonicalClaude(model), alwaysOnClaude)
 }
 
 // ClaudeThinkingDefaultsOn reports whether the model thinks when thinking is
 // omitted, so disabling it requires an explicit disable rather than omission.
 func ClaudeThinkingDefaultsOn(model string) bool {
-	return containsAny(strings.ToLower(model), defaultOnClaude)
+	return containsAny(canonicalClaude(model), defaultOnClaude)
 }
 
 // claudeEffortsByKind lists the effort levels each generation accepts.
@@ -129,7 +129,7 @@ var bedrockRejectsBudgetEffortClaude = []string{"claude-opus-4-5"}
 // provider, so the effort is not lost on the budget path for models that honor
 // it and is not sent to a platform that rejects it.
 func ClaudeSupportsEffortWithBudget(model string, p Provider) bool {
-	m := strings.ToLower(model)
+	m := canonicalClaude(model)
 	if !containsAny(m, budgetEffortClaude) {
 		return false
 	}
@@ -147,23 +147,20 @@ var noPrefillClaude = []string{
 // ClaudeRejectsAssistantPrefill reports whether the model rejects a prefilled
 // assistant response outright, so the request must not be sent.
 func ClaudeRejectsAssistantPrefill(model string) bool {
-	return containsAny(strings.ToLower(model), noPrefillClaude)
+	return containsAny(canonicalClaude(model), noPrefillClaude)
 }
 
 // mutuallyExclusiveSamplingClaude models reject temperature and top_p set
 // together (only one may be provided).
 var mutuallyExclusiveSamplingClaude = []string{
-	"claude-haiku-4-5", "claude-haiku-4.5",
-	"claude-sonnet-4-5", "claude-sonnet-4.5",
-	"claude-opus-4-5", "claude-opus-4.5",
-	"claude-sonnet-4-6", "claude-sonnet-4.6",
-	"claude-opus-4-6", "claude-opus-4.6",
+	"claude-haiku-4-5", "claude-sonnet-4-5", "claude-opus-4-5",
+	"claude-sonnet-4-6", "claude-opus-4-6",
 }
 
 // ClaudeMutuallyExclusiveSampling reports whether the model returns a 400 when
 // temperature and top_p are set together, so the caller must send at most one.
 func ClaudeMutuallyExclusiveSampling(model string) bool {
-	return containsAny(strings.ToLower(model), mutuallyExclusiveSamplingClaude)
+	return containsAny(canonicalClaude(model), mutuallyExclusiveSamplingClaude)
 }
 
 // legacyNoStructuredClaude are Claude generations known to predate structured
@@ -180,7 +177,7 @@ var legacyNoStructuredClaude = []string{
 // any unrecognized (newer) name passes through so the provider API stays the final
 // arbiter and the local table never blocks a future model.
 func ClaudeSupportsStructuredOutput(model string) bool {
-	return !containsAny(strings.ToLower(model), legacyNoStructuredClaude)
+	return !containsAny(canonicalClaude(model), legacyNoStructuredClaude)
 }
 
 // ResolveClaudeAdaptive returns whether to send adaptive thinking (true) or
@@ -227,7 +224,7 @@ var preAdaptiveClaude = []string{
 // generation, so an adaptive request must be gated (not sent verbatim) rather than
 // optimistically forwarded the way a genuinely newer, unclassified model is.
 func ClaudePredatesAdaptive(model string) bool {
-	return containsAny(strings.ToLower(model), preAdaptiveClaude)
+	return containsAny(canonicalClaude(model), preAdaptiveClaude)
 }
 
 // rejectsSamplingClaude models are sent no temperature, top_p or top_k on any
@@ -241,8 +238,29 @@ var rejectsSamplingClaude = []string{
 // outright, so sampling params must be dropped even when no thinking is
 // requested.
 func ClaudeRejectsSampling(model string) bool {
-	return containsAny(strings.ToLower(model), rejectsSamplingClaude)
+	return containsAny(canonicalClaude(model), rejectsSamplingClaude)
 }
+
+// canonicalClaude reduces a Claude identifier to the dashed form every table in
+// this file is keyed on. A dotted entry added to one of them never matches.
+func canonicalClaude(model string) string {
+	m := strings.ToLower(model)
+	if idx := strings.Index(m, "@"); idx != -1 {
+		m = m[:idx]
+	}
+	var b strings.Builder
+	b.Grow(len(m))
+	for i := range len(m) {
+		if m[i] == '.' && i > 0 && i+1 < len(m) && isDigit(m[i-1]) && isDigit(m[i+1]) {
+			b.WriteByte('-')
+			continue
+		}
+		b.WriteByte(m[i])
+	}
+	return b.String()
+}
+
+func isDigit(c byte) bool { return c >= '0' && c <= '9' }
 
 func containsAny(s string, subs []string) bool {
 	for _, sub := range subs {
