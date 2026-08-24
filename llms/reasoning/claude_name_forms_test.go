@@ -145,6 +145,69 @@ func TestClaudeFourAliasesAreClassified(t *testing.T) {
 	}
 }
 
+func TestStructuredOutputGateSeesEverySpellingOfTheSameGeneration(t *testing.T) {
+	t.Parallel()
+
+	for _, model := range []string{
+		"claude-opus-4-0", "claude-sonnet-4-0",
+		"claude-opus-4@20250514", "claude-sonnet-4@20250514",
+		"claude-opus-4-20250514", "claude-sonnet-4-20250514",
+		"us.anthropic.claude-sonnet-4-0",
+	} {
+		if ClaudeSupportsStructuredOutput(model) {
+			t.Errorf("%q predates structured output, so it must be refused locally", model)
+		}
+	}
+
+	for _, model := range []string{
+		"claude-sonnet-4-5", "claude-opus-4-5", "claude-opus-4-6", "claude-opus-5",
+	} {
+		if !ClaudeSupportsStructuredOutput(model) {
+			t.Errorf("%q takes structured output", model)
+		}
+	}
+}
+
+func TestDottedSpellingsSurviveTheirTableEntriesBeingDropped(t *testing.T) {
+	t.Parallel()
+
+	if got := ClaudeReasoningKindFor("claude-haiku-4.5"); got != ClaudeReasoningBudgetOnly {
+		t.Errorf("ClaudeReasoningKindFor(dotted haiku) = %v, want budget-only", got)
+	}
+	if ClaudeSupportsStructuredOutput("claude-3.5-sonnet") {
+		t.Error("the dotted Claude 3 spelling predates structured output too")
+	}
+}
+
+func TestLikelyReasoningModelIgnoresThePlatformSpelling(t *testing.T) {
+	t.Parallel()
+
+	for _, pair := range [][2]string{
+		{"claude-9-sonnet", "us.anthropic.claude-9-sonnet"},
+		{"gpt-9", "azure.gpt-9"},
+	} {
+		bare, platform := LikelyReasoningModel(pair[0]), LikelyReasoningModel(pair[1])
+		if bare != platform {
+			t.Errorf("hint differs by spelling: %q = %v, %q = %v", pair[0], bare, pair[1], platform)
+		}
+	}
+}
+
+func TestClaudePreThinkingStopsBelow37(t *testing.T) {
+	t.Parallel()
+
+	for _, model := range []string{"claude-3-7-sonnet-20250219", "claude-3.7-sonnet"} {
+		if claudePreThinking(model) {
+			t.Errorf("%q is where extended thinking starts, not below it", model)
+		}
+	}
+	for _, model := range []string{"claude-3-5-sonnet", "claude-3.5-sonnet", "claude-2", "claude-instant-1"} {
+		if !claudePreThinking(model) {
+			t.Errorf("%q predates extended thinking", model)
+		}
+	}
+}
+
 func TestClaudeClampEffortStepsDownNotUp(t *testing.T) {
 	t.Parallel()
 

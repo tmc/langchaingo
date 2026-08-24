@@ -17,6 +17,7 @@ func LikelyReasoningModel(model string) bool {
 	if idx := strings.LastIndex(m, "/"); idx != -1 {
 		m = m[idx+1:]
 	}
+	m = stripPlatformPrefix(m)
 
 	if namesNonTextModality(m) {
 		return false
@@ -48,10 +49,14 @@ func openAIPreReasoning(m string) bool {
 // claudePreThinking matches the Claude generations below 3.7, where extended
 // thinking starts.
 func claudePreThinking(m string) bool {
-	return strings.HasPrefix(m, "claude-2") ||
-		strings.HasPrefix(m, "claude-v2") ||
-		strings.HasPrefix(m, "claude-instant") ||
-		strings.HasPrefix(m, "claude-3")
+	c := canonicalClaude(m)
+	if strings.Contains(c, "claude-3-7") {
+		return false
+	}
+	return strings.HasPrefix(c, "claude-2") ||
+		strings.HasPrefix(c, "claude-v2") ||
+		strings.HasPrefix(c, "claude-instant") ||
+		strings.HasPrefix(c, "claude-3")
 }
 
 // isOSeries matches the OpenAI o-series naming (o1, o3, o4-mini, successors);

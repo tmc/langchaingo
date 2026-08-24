@@ -195,16 +195,15 @@ func DefaultIsReasoningModel(model string) bool { //nolint:funlen // a flat cata
 	}
 
 	// Anthropic extended thinking / adaptive models
-	if strings.Contains(modelLower, "claude-3.7") ||
-		strings.Contains(modelLower, "claude-3-7") ||
-		strings.HasPrefix(modelLower, "claude-opus-4") ||
-		strings.HasPrefix(modelLower, "claude-opus-5") ||
-		strings.HasPrefix(modelLower, "claude-sonnet-4") ||
-		strings.HasPrefix(modelLower, "claude-sonnet-5") ||
-		strings.Contains(modelLower, "claude-fable-5") ||
-		strings.Contains(modelLower, "claude-mythos-5") ||
-		strings.Contains(modelLower, "claude-haiku-4.5") ||
-		strings.Contains(modelLower, "claude-haiku-4-5") {
+	claudeName := canonicalClaude(modelLower)
+	if strings.Contains(claudeName, "claude-3-7") ||
+		strings.HasPrefix(claudeName, "claude-opus-4") ||
+		strings.HasPrefix(claudeName, "claude-opus-5") ||
+		strings.HasPrefix(claudeName, "claude-sonnet-4") ||
+		strings.HasPrefix(claudeName, "claude-sonnet-5") ||
+		strings.Contains(claudeName, "claude-fable-5") ||
+		strings.Contains(claudeName, "claude-mythos-5") ||
+		strings.Contains(claudeName, "claude-haiku-4-5") {
 		return true
 	}
 

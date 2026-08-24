@@ -46,7 +46,7 @@ var (
 	budgetOnlyClaude = []string{
 		"claude-opus-4-5",
 		"claude-sonnet-4-5",
-		"claude-haiku-4-5", "claude-haiku-4.5",
+		"claude-haiku-4-5",
 	}
 )
 
@@ -191,8 +191,10 @@ func ClaudeMutuallyExclusiveSampling(model string) bool {
 // on them is rejected locally rather than sent for a guaranteed 4xx.
 var legacyNoStructuredClaude = []string{
 	"claude-2", "claude-v2", "claude-instant",
-	"claude-3-", "claude-3.",
-	"claude-opus-4-1", "claude-opus-4-20", "claude-sonnet-4-20",
+	"claude-3-",
+	"claude-opus-4-1",
+	"claude-opus-4-0", "claude-opus-4-20",
+	"claude-sonnet-4-0", "claude-sonnet-4-20",
 }
 
 // ClaudeSupportsStructuredOutput reports whether the model can be asked for schema
