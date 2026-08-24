@@ -6,6 +6,7 @@ import (
 	"reflect"
 
 	"github.com/vxcontrol/langchaingo/llms"
+	"github.com/vxcontrol/langchaingo/llms/reasoning"
 
 	"cloud.google.com/go/vertexai/genai"
 	"google.golang.org/api/option"
@@ -240,6 +241,14 @@ const (
 	// HarmBlockNone means all content will be allowed.
 	HarmBlockNone HarmBlockThreshold = "BLOCK_NONE"
 )
+
+// ResolveTemperature reports the temperature to send when the caller set none.
+func (o Options) ResolveTemperature(model string) float64 {
+	if !o.temperatureFromCaller && reasoning.GeminiUsesThinkingLevel(model) {
+		return 1.0
+	}
+	return o.DefaultTemperature
+}
 
 // helper to inspect incoming client options for auth options.
 func hasAuthOptions(opts []option.ClientOption) bool {

@@ -68,19 +68,8 @@ func (g *Vertex) GenerateContent(
 		}()
 	}
 
-	opts := llms.CallOptions{
-		Model:          &g.opts.DefaultModel,
-		CandidateCount: &g.opts.DefaultCandidateCount,
-		MaxTokens:      &g.opts.DefaultMaxTokens,
-		Temperature:    &g.opts.DefaultTemperature,
-		TopP:           &g.opts.DefaultTopP,
-		TopK:           &g.opts.DefaultTopK,
-	}
-	for _, opt := range options {
-		opt(&opts)
-	}
-
-	if opts.Reasoning.ResolveMode() == llms.ReasoningOff {
+	opts := g.resolveCallOptions(options)
+	if refusesReasoningOff(opts) {
 		return nil, &reasoning.ErrReasoningOffUnsupported{Model: opts.GetModel()}
 	}
 
@@ -575,6 +564,32 @@ func convertVertexHarmBlockThreshold(threshold googleai.HarmBlockThreshold) gena
 	default:
 		return genai.HarmBlockOnlyHigh // Safe default
 	}
+}
+
+func (g *Vertex) resolveCallOptions(options []llms.CallOption) llms.CallOptions {
+	opts := llms.CallOptions{
+		Model:          &g.opts.DefaultModel,
+		CandidateCount: &g.opts.DefaultCandidateCount,
+		MaxTokens:      &g.opts.DefaultMaxTokens,
+		TopP:           &g.opts.DefaultTopP,
+		TopK:           &g.opts.DefaultTopK,
+	}
+	for _, opt := range options {
+		opt(&opts)
+	}
+	if opts.Temperature == nil {
+		temperature := g.opts.ResolveTemperature(opts.GetModel())
+		opts.Temperature = &temperature
+	}
+	return opts
+}
+
+// refusesReasoningOff reports whether an explicit disable cannot be honored.
+// This door builds no thinking config at all, so only a model that is already
+// off once the config is omitted can be turned off here.
+func refusesReasoningOff(opts llms.CallOptions) bool {
+	return opts.Reasoning.ResolveMode() == llms.ReasoningOff &&
+		reasoning.ResolveOff(opts.GetModel(), reasoning.ProviderGoogleAI) != reasoning.OffOmit
 }
 
 func applyGenerationConfig(model *genai.GenerativeModel, opts llms.CallOptions) {

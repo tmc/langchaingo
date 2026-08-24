@@ -1082,10 +1082,7 @@ func convertIntToFloat32Pointer(i *int) *float32 {
 // unset. Gemini 3 defaults to 1.0, the value Google recommends (lower values can
 // cause looping and degraded reasoning); other models keep the SDK-wide default.
 func resolveTemperature(model string, clientOpts Options) float64 {
-	if !clientOpts.temperatureFromCaller && reasoning.GeminiUsesThinkingLevel(model) {
-		return 1.0
-	}
-	return clientOpts.DefaultTemperature
+	return clientOpts.ResolveTemperature(model)
 }
 
 // resolveThinkingConfig builds the Gemini thinking config for the reasoning mode.
