@@ -380,6 +380,7 @@ var _ llms.Model = (*LLM)(nil)
 func checkAnthropicTurnLimits(opts *llms.CallOptions, messages []llms.MessageContent) error {
 	model := opts.GetModel()
 	manualThinking := opts.Reasoning.ResolveMode() == llms.ReasoningOn &&
+		reasoning.ClaudeSupportsThinking(model) &&
 		!reasoning.ResolveClaudeAdaptive(model, opts.Reasoning.Adaptive)
 	if manualThinking && llms.ForcesToolUse(opts.ToolChoice) {
 		return &reasoning.ErrForcedToolUseWithThinking{Model: model}

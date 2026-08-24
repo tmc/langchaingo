@@ -52,5 +52,18 @@ func TestBedrockRefusesTheSameTurnsAsThePrimaryDoor(t *testing.T) {
 				t.Errorf("want ErrForcedToolUseWithThinking, got %v", err)
 			}
 		})
+
+		t.Run(name+"/a non-Claude family is not refused for the same turn", func(t *testing.T) {
+			t.Parallel()
+			llm := truncationLLMWithBody(t, `{}`,
+				append([]bedrock.Option{bedrock.WithModel("us.amazon.nova-pro-v1:0")}, opts...)...)
+			_, err := llm.GenerateContent(context.Background(), turnLimitMessages(llms.ChatMessageTypeHuman),
+				llms.WithReasoning(llms.ReasoningMedium, 2048),
+				llms.WithToolChoice(llms.ToolChoice{Type: "any"}))
+			var target *reasoning.ErrForcedToolUseWithThinking
+			if errors.As(err, &target) {
+				t.Errorf("the Claude-only rule refused a family that never carries a thinking payload: %v", err)
+			}
+		})
 	}
 }
