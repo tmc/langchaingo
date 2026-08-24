@@ -233,9 +233,10 @@ func createAnthropicCompletion(ctx context.Context,
 		system = systemPrompt
 	}
 
+	maxTokens := getMaxTokens(options.GetMaxTokens(), 2048)
 	input := anthropicTextGenerationInput{
 		AnthropicVersion: AnthropicLatestVersion,
-		MaxTokens:        getMaxTokens(options.GetMaxTokens(), 2048),
+		MaxTokens:        maxTokens,
 		System:           system,
 		Messages:         inputContents,
 		Temperature:      options.GetTemperature(),
@@ -245,7 +246,7 @@ func createAnthropicCompletion(ctx context.Context,
 		Tools:            tools,
 	}
 
-	if err := applyAnthropicReasoning(&input, options.Reasoning, modelID, options.GetMaxTokens()); err != nil {
+	if err := applyAnthropicReasoning(&input, options.Reasoning, modelID, maxTokens); err != nil {
 		return nil, err
 	}
 
@@ -538,7 +539,10 @@ func parseStreamingCompletionResponse(ctx context.Context, client *bedrockruntim
 	contentchoices[0].ToolCalls = toolCalls
 
 	// Add signature to reasoning if accumulated
-	if signature.Len() > 0 && contentchoices[0].Reasoning != nil {
+	if signature.Len() > 0 {
+		if contentchoices[0].Reasoning == nil {
+			contentchoices[0].Reasoning = &reasoning.ContentReasoning{}
+		}
 		contentchoices[0].Reasoning.Signature = []byte(signature.String())
 	}
 
@@ -733,11 +737,10 @@ func applyAnthropicReasoning(
 		input.TopK = 0
 	}
 	setBudget := func() {
-		mt := maxTokens
-		if tokens := cfg.GetTokens(mt); tokens > 0 {
+		if tokens := cfg.GetTokens(maxTokens); tokens > 0 {
 			input.Thinking = &anthropicThinkingPayload{Type: "enabled", BudgetTokens: tokens}
 			if reasoning.ClaudeSupportsEffortWithBudget(modelID, reasoning.ProviderBedrock) {
-				input.OutputConfig = &anthropicOutputConfig{Effort: reasoning.ClaudeClampEffort(modelID, string(cfg.GetEffort(mt)))}
+				input.OutputConfig = &anthropicOutputConfig{Effort: reasoning.ClaudeClampEffort(modelID, string(cfg.GetEffort(maxTokens)))}
 			}
 			// Budget thinking requires temperature=1.0 and rejects top_p/top_k.
 			input.Temperature = 1.0
