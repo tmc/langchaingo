@@ -308,7 +308,7 @@ func (o *LLM) setReasoning(req *openaiclient.ChatRequest, opts llms.CallOptions)
 	case llms.ReasoningDefault:
 		return "", nil
 	case llms.ReasoningOff:
-		return o.setReasoningOff(req, opts)
+		return "", o.setReasoningOff(req, opts)
 	}
 
 	model := o.effectiveModel(opts)
@@ -336,18 +336,17 @@ func (o *LLM) setReasoning(req *openaiclient.ChatRequest, opts llms.CallOptions)
 }
 
 // setReasoningOff sends the model's explicit disable token so a reasoning model
-// runs as a plain completion. Sampling params are left intact (a non-thinking
-// call); a model whose thinking cannot be disabled returns a typed error.
-func (o *LLM) setReasoningOff(req *openaiclient.ChatRequest, opts llms.CallOptions) (string, error) {
+// runs as a plain completion; a model whose thinking cannot be disabled returns
+// a typed error.
+func (o *LLM) setReasoningOff(req *openaiclient.ChatRequest, opts llms.CallOptions) error {
 	model := o.effectiveModel(opts)
 	switch reasoning.ResolveOff(model, reasoning.ProviderOpenAI) { //nolint:exhaustive // only OpenAI-relevant wires are handled; others are a no-op
 	case reasoning.OffUnsupported:
-		return "", &reasoning.ErrReasoningOffUnsupported{Model: model}
+		return &reasoning.ErrReasoningOffUnsupported{Model: model}
 	case reasoning.OffEffortNone:
 		o.writeDisableEffort(req)
-		return reasoning.OpenAIDisableEffort, nil
 	}
-	return "", nil
+	return nil
 }
 
 func (o *LLM) writeDisableEffort(req *openaiclient.ChatRequest) {
