@@ -38,6 +38,34 @@ func sendForWire(t *testing.T, model string, opts ...llms.CallOption) string {
 	return body
 }
 
+type samplingCase struct {
+	name    string
+	model   string
+	opts    []llms.CallOption
+	present []string
+	absent  []string
+}
+
+func runSamplingCases(t *testing.T, cases []samplingCase) {
+	t.Helper()
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			body := sendForWire(t, tc.model, tc.opts...)
+			for _, want := range tc.present {
+				if !strings.Contains(body, want) {
+					t.Errorf("want %s on the wire, got body: %s", want, body)
+				}
+			}
+			for _, unwanted := range tc.absent {
+				if strings.Contains(body, unwanted) {
+					t.Errorf("want no %s on the wire, got body: %s", unwanted, body)
+				}
+			}
+		})
+	}
+}
+
 func TestSamplingMatrix(t *testing.T) {
 	t.Parallel()
 
@@ -46,13 +74,7 @@ func TestSamplingMatrix(t *testing.T) {
 	high := llms.WithReasoning(llms.ReasoningHigh, 0)
 	off := llms.WithReasoningDisabled()
 
-	for _, tc := range []struct {
-		name    string
-		model   string
-		opts    []llms.CallOption
-		present []string
-		absent  []string
-	}{{
+	runSamplingCases(t, []samplingCase{{
 		name:    "accepting model keeps its temperature while thinking",
 		model:   "gpt-5.4",
 		opts:    []llms.CallOption{temp, topP, high},
@@ -76,12 +98,27 @@ func TestSamplingMatrix(t *testing.T) {
 		present: []string{`"temperature":0.3`, `"top_p":0.9`},
 		absent:  []string{`"reasoning_effort"`},
 	}, {
-		name:    "omitted effort pins a non-accepting name",
+		name:    "omitted effort pins a name that thinks by default",
 		model:   "gpt-5.5",
 		opts:    []llms.CallOption{temp, topP},
 		present: []string{`"temperature":1`},
 		absent:  []string{`"top_p"`, `"reasoning_effort"`},
 	}, {
+		name:    "a non-reasoning model keeps everything",
+		model:   "gpt-4.1",
+		opts:    []llms.CallOption{temp, topP},
+		present: []string{`"temperature":0.3`, `"top_p":0.9`},
+	}})
+}
+
+func TestClaudeSamplingMatrix(t *testing.T) {
+	t.Parallel()
+
+	temp := llms.WithTemperature(0.3)
+	topP := llms.WithTopP(0.9)
+	high := llms.WithReasoning(llms.ReasoningHigh, 0)
+
+	runSamplingCases(t, []samplingCase{{
 		name:   "a model that rejects sampling gets neither param",
 		model:  "claude-opus-4-7",
 		opts:   []llms.CallOption{temp, topP},
@@ -93,36 +130,30 @@ func TestSamplingMatrix(t *testing.T) {
 		present: []string{`"temperature":0.3`},
 		absent:  []string{`"top_p"`},
 	}, {
-		name:    "temperature alone on the same model is pinned instead",
+		name:    "an omitted effort leaves a request-only thinker unpinned",
 		model:   "claude-opus-4-5",
 		opts:    []llms.CallOption{temp},
-		present: []string{`"temperature":1`},
+		present: []string{`"temperature":0.3`},
+		absent:  []string{`"reasoning_effort"`},
 	}, {
-		name:    "a non-reasoning model keeps everything",
-		model:   "gpt-4.1",
-		opts:    []llms.CallOption{temp, topP},
-		present: []string{`"temperature":0.3`, `"top_p":0.9`},
+		name:    "thinking pins the temperature even when top_p forced a drop",
+		model:   "claude-sonnet-4-5",
+		opts:    []llms.CallOption{temp, topP, high},
+		present: []string{`"temperature":1`, `"reasoning_effort":"high"`},
+		absent:  []string{`"top_p"`},
+	}, {
+		name:    "an effort above the generation's ceiling is lowered",
+		model:   "claude-opus-4-6",
+		opts:    []llms.CallOption{llms.WithReasoning(llms.ReasoningXHigh, 0)},
+		present: []string{`"reasoning_effort":"high"`},
+		absent:  []string{`"reasoning_effort":"xhigh"`},
 	}, {
 		name:    "extra body overwrites a param the policy stripped",
 		model:   "claude-opus-4-7",
 		opts:    []llms.CallOption{temp, topP, WithExtraBody(map[string]any{"temperature": 0.7})},
 		present: []string{`"temperature":0.7`},
 		absent:  []string{`"top_p"`},
-	}} {
-		t.Run(tc.name, func(t *testing.T) {
-			body := sendForWire(t, tc.model, tc.opts...)
-			for _, want := range tc.present {
-				if !strings.Contains(body, want) {
-					t.Errorf("want %s on the wire, got body: %s", want, body)
-				}
-			}
-			for _, unwanted := range tc.absent {
-				if strings.Contains(body, unwanted) {
-					t.Errorf("want no %s on the wire, got body: %s", unwanted, body)
-				}
-			}
-		})
-	}
+	}})
 }
 
 func TestAModelThatRejectsSamplingGetsNoSamplingAtAll(t *testing.T) {

@@ -311,11 +311,9 @@ func (o *LLM) setReasoning(req *openaiclient.ChatRequest, opts llms.CallOptions)
 		return o.setReasoningOff(req, opts)
 	}
 
-	// Clamp the effort to what the model accepts (e.g. GPT-5 Pro accepts only
-	// high, GPT-5.4 mini rejects max) so a known-invalid value never reaches the
-	// API; unknown models pass through unchanged.
-	caps := reasoning.OpenAIReasoningCapsFor(o.effectiveModel(opts))
-	reasoningEffort := llms.ReasoningEffort(caps.ClampEffort(string(opts.Reasoning.GetEffort(opts.GetMaxTokens()))))
+	model := o.effectiveModel(opts)
+	effort := reasoning.OpenAIReasoningCapsFor(model).ClampEffort(string(opts.Reasoning.GetEffort(opts.GetMaxTokens())))
+	reasoningEffort := llms.ReasoningEffort(reasoning.ClaudeClampEffort(model, effort))
 	reasoningTokens := opts.Reasoning.GetTokens(opts.GetMaxTokens())
 	if !o.client.ModernReasoningFormat {
 		if reasoningEffort != llms.ReasoningNone {
@@ -362,22 +360,41 @@ func (o *LLM) writeDisableEffort(req *openaiclient.ChatRequest) {
 }
 
 func (o *LLM) applySamplingPolicy(req *openaiclient.ChatRequest, opts llms.CallOptions, wireEffort string) {
-	switch model := o.effectiveModel(opts); {
-	case reasoning.ClaudeRejectsSampling(model):
+	model := o.effectiveModel(opts)
+	if reasoning.ClaudeRejectsSampling(model) {
 		req.Temperature, req.TopP, req.TopK, req.MinP = nil, nil, nil, nil
-	case reasoning.ClaudeMutuallyExclusiveSampling(model) && req.Temperature != nil && req.TopP != nil:
-		req.TopP = nil
-	case reasoning.IsReasoningModel(model) && !opts.Reasoning.IsDisabled() &&
-		!reasoning.OpenAIAcceptsCustomTemperature(model):
+		return
+	}
+
+	switch {
+	case thinkingRuns(model, opts, wireEffort) && !reasoning.OpenAIAcceptsCustomTemperature(model):
 		if req.Temperature != nil {
 			temperature := 1.0
 			req.Temperature = &temperature
 		}
 		req.TopP = nil
+	case reasoning.ClaudeMutuallyExclusiveSampling(model) && req.Temperature != nil && req.TopP != nil:
+		req.TopP = nil
 	}
+
 	if isThinkingOnTheWire(wireEffort) {
 		req.TopP = nil
 	}
+}
+
+// thinkingRuns reports whether the model reasons on this request: an effort
+// reached the wire, or none did and the model reasons until told otherwise.
+func thinkingRuns(model string, opts llms.CallOptions, wireEffort string) bool {
+	if opts.Reasoning.IsDisabled() || !reasoning.IsReasoningModel(model) {
+		return false
+	}
+	if isThinkingOnTheWire(wireEffort) {
+		return true
+	}
+	if reasoning.ClaudeSupportsThinking(model) {
+		return reasoning.ClaudeThinkingDefaultsOn(model)
+	}
+	return true
 }
 
 func isThinkingOnTheWire(wireEffort string) bool {
