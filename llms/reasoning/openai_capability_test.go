@@ -96,3 +96,29 @@ func TestResolveOffOpenAIGeneration(t *testing.T) {
 		}
 	}
 }
+
+func TestClampEffortMovesToAnAcceptedLevel(t *testing.T) {
+	t.Parallel()
+
+	for _, tc := range []struct {
+		model  string
+		effort string
+		want   string
+	}{
+		{"gpt-5.2", "minimal", "low"},
+		{"gpt-5.2", "max", "xhigh"},
+		{"gpt-5.2", "medium", "medium"},
+		{"gpt-5", "minimal", "minimal"},
+		{"gpt-5", "xhigh", "high"},
+		{"gpt-5-pro", "low", "high"},
+		{"gpt-5-pro", "max", "high"},
+		{"gpt-5.1", "xhigh", "high"},
+		{"claude-opus-4-6", "xhigh", "xhigh"},
+		{"gpt-5.2", "", ""},
+		{"gpt-5.2", "turbo", "turbo"},
+	} {
+		if got := OpenAIReasoningCapsFor(tc.model).ClampEffort(tc.effort); got != tc.want {
+			t.Errorf("%s.ClampEffort(%q) = %q, want %q", tc.model, tc.effort, got, tc.want)
+		}
+	}
+}

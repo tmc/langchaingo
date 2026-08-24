@@ -332,3 +332,24 @@ func TestCannotDisableFollowsTheResolverOnEveryProvider(t *testing.T) {
 		}
 	}
 }
+
+func TestGoogleHintNamesItsMechanism(t *testing.T) {
+	t.Parallel()
+
+	for _, tc := range []struct {
+		model string
+		want  ReasoningMechanism
+	}{
+		{"gemini-3-pro-preview", ReasoningMechanismAdaptive},
+		{"gemini-2.5-flash", ReasoningMechanismBudget},
+		{"gemma-4-27b", ReasoningMechanismBudget},
+	} {
+		got := ReasoningSupportFor(tc.model, reasoning.ProviderGoogleAI)
+		if !got.Known {
+			t.Fatalf("%q is a classified Google thinking model", tc.model)
+		}
+		if got.Mechanism != tc.want {
+			t.Errorf("ReasoningSupportFor(%q).Mechanism = %v, want %v", tc.model, got.Mechanism, tc.want)
+		}
+	}
+}

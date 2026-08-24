@@ -1,6 +1,9 @@
 package reasoning
 
-import "strings"
+import (
+	"slices"
+	"strings"
+)
 
 // openAIEffortRank orders OpenAI reasoning efforts so a requested effort can be
 // clamped to a model's ceiling. It does not include "none", which is the disable
@@ -29,22 +32,27 @@ type OpenAIReasoningCaps struct {
 	Efforts []string
 }
 
-// ClampEffort lowers a requested effort to what the model accepts: an effort
-// above the model's ceiling drops to the ceiling, and a model that accepts a
-// single effort (e.g. GPT-5 Pro accepts only "high") pins to it. Unknown models
-// and the empty effort are returned unchanged.
+// ClampEffort moves a requested effort to one the model accepts: above the
+// ceiling drops to the ceiling, below the floor rises to the floor, and anything
+// the set does not list steps down to the nearest level it does (a model
+// accepting a single effort, e.g. GPT-5 Pro, pins to it). Unknown models and
+// efforts outside the scale are returned unchanged.
 func (c OpenAIReasoningCaps) ClampEffort(effort string) string {
-	if !c.Known || effort == "" || len(c.Efforts) == 0 {
+	want, ranked := openAIEffortRank[effort]
+	if !c.Known || !ranked || len(c.Efforts) == 0 {
 		return effort
 	}
-	if len(c.Efforts) == 1 {
-		return c.Efforts[0]
+	if slices.Contains(c.Efforts, effort) {
+		return effort
 	}
-	ceiling := c.Efforts[len(c.Efforts)-1]
-	if openAIEffortRank[effort] > openAIEffortRank[ceiling] {
-		return ceiling
+
+	accepted := c.Efforts[0]
+	for _, level := range c.Efforts {
+		if openAIEffortRank[level] <= want {
+			accepted = level
+		}
 	}
-	return effort
+	return accepted
 }
 
 // OpenAIReasoningCapsFor classifies an OpenAI reasoning model by the effort set
