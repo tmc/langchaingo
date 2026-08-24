@@ -25,6 +25,7 @@ func TestIsTruncatedCoversEveryVendorSpelling(t *testing.T) {
 		"bedrock deepseek": "length",
 		"googleai":         "MAX_TOKENS",
 		"vertex":           "MAX_TOKENS",
+		"mistral context":  "model_length",
 	}
 	for vendor, reason := range truncated {
 		assert.True(t, IsTruncated(reason), "%s spells truncation %q", vendor, reason)
@@ -59,6 +60,18 @@ func TestCheckTruncationStaysSilentUnlessRequested(t *testing.T) {
 	assert.True(t, IsTruncatedError(err))
 	assert.True(t, errors.Is(err, ErrTruncated))
 	assert.Contains(t, err.Error(), "max_tokens")
+}
+
+func TestCheckTruncationReadsTheStopReasonNotTheFlag(t *testing.T) {
+	t.Parallel()
+
+	unflagged := &ContentResponse{Choices: []*ContentChoice{
+		{Content: "half an ans", StopReason: "length"},
+	}}
+
+	err := CheckTruncation(unflagged, CallOptions{FailOnTruncation: true})
+	require.Error(t, err)
+	assert.True(t, IsTruncatedError(err))
 }
 
 func TestCheckTruncationReportsALaterChoice(t *testing.T) {

@@ -6,8 +6,9 @@ import (
 )
 
 var truncationStopReasons = map[string]bool{
-	"length":     true,
-	"max_tokens": true,
+	"length":       true,
+	"max_tokens":   true,
+	"model_length": true,
 }
 
 // IsTruncated reports whether a vendor stop reason means generation stopped at
@@ -24,7 +25,7 @@ func CheckTruncation(resp *ContentResponse, opts CallOptions) error {
 		return nil
 	}
 	for i, choice := range resp.Choices {
-		if choice == nil || !choice.Truncated {
+		if choice == nil || !IsTruncated(choice.StopReason) {
 			continue
 		}
 		return NewError(ErrCodeTruncated, "", fmt.Sprintf(
