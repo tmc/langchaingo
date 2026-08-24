@@ -210,10 +210,10 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 			outputConfig = &anthropicclient.OutputConfig{
 				Effort: reasoning.ClaudeClampEffort(model, string(opts.Reasoning.GetEffort(opts.GetMaxTokens()))),
 			}
-		} else {
+		} else if budget := opts.Reasoning.GetTokens(opts.GetMaxTokens()); budget > 0 {
 			thinking = &anthropicclient.ThinkingPayload{
 				Type:   "enabled",
-				Budget: opts.Reasoning.GetTokens(opts.GetMaxTokens()),
+				Budget: budget,
 			}
 			// Some budget-thinking models (Opus 4.5) also honor effort; without this
 			// the caller's effort is silently dropped on the budget path.
@@ -280,8 +280,9 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 		temperature = nil
 		topP = nil
 	case thinking != nil && thinking.Type == "enabled" && thinking.Budget > 0:
-		temperature = getFloatPointer(1.0)
-		if reasoning.ClaudeRejectsSampling(model) {
+		if !reasoning.ClaudeRejectsSampling(model) {
+			temperature = getFloatPointer(1.0)
+		} else {
 			temperature = nil
 		}
 		topP = nil
@@ -390,12 +391,12 @@ func processAnthropicResponse(result *anthropicclient.MessageResponsePayload) (*
 
 	// Process content blocks to collect text and tool calls
 	var toolCalls []llms.ToolCall
-	var textContent string
+	var textContent strings.Builder
 
 	for _, content := range result.Content {
 		switch cv := content.(type) {
 		case *anthropicclient.TextContent:
-			textContent = cv.Text
+			textContent.WriteString(cv.Text)
 		case *anthropicclient.ToolUseContent:
 			argumentsJSON, err := json.Marshal(cv.Input)
 			if err != nil {
@@ -415,7 +416,7 @@ func processAnthropicResponse(result *anthropicclient.MessageResponsePayload) (*
 
 	// Build response choice - reasoning ALWAYS goes to choice, not tool calls
 	choice := &llms.ContentChoice{
-		Content:    textContent,
+		Content:    textContent.String(),
 		Reasoning:  contentReasoning, // Always in choice for Anthropic
 		ToolCalls:  toolCalls,
 		StopReason: result.StopReason,
