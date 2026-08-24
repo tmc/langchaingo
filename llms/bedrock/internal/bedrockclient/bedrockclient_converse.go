@@ -284,7 +284,7 @@ func (a *aiMessageAccumulator) build() types.Message {
 	if a.reasoning != nil && (a.reasoning.Content != "" || len(a.reasoning.Signature) > 0) {
 		reasoningBlock := types.ReasoningContentBlockMemberReasoningText{
 			Value: types.ReasoningTextBlock{
-				Text:      ptrStringOrNil(a.reasoning.Content),
+				Text:      aws.String(a.reasoning.Content),
 				Signature: ptrStringOrNil(string(a.reasoning.Signature)),
 			},
 		}
@@ -546,7 +546,7 @@ func (c *ConverseClient) convertUserOrAssistantMessage(msg Message) (types.Messa
 		if msg.Reasoning.Content != "" || len(msg.Reasoning.Signature) > 0 {
 			reasoningBlock := types.ReasoningContentBlockMemberReasoningText{
 				Value: types.ReasoningTextBlock{
-					Text:      ptrStringOrNil(msg.Reasoning.Content),
+					Text:      aws.String(msg.Reasoning.Content),
 					Signature: ptrStringOrNil(string(msg.Reasoning.Signature)),
 				},
 			}
