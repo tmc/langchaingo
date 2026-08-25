@@ -21,7 +21,6 @@ import (
 	"github.com/vxcontrol/langchaingo/llms/streaming"
 )
 
-// legacyLLMCapturing serves body and reports the request the door built.
 func legacyLLMCapturing(t *testing.T, body string, opts ...bedrock.Option) (*bedrock.LLM, *string) {
 	t.Helper()
 

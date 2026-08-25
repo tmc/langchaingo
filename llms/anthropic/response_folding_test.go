@@ -13,8 +13,8 @@ import (
 	"github.com/vxcontrol/langchaingo/llms"
 )
 
-// serveAnthropic replies with response; the returned pointer holds the request
-// body once GenerateContent returns.
+// serveAnthropic's returned pointer holds the request body only once
+// GenerateContent has returned.
 func serveAnthropic(t *testing.T, response string) (*httptest.Server, *string) {
 	t.Helper()
 
