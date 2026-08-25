@@ -45,8 +45,9 @@ const (
 
 	// Claude Opus 5 is Anthropic's model for complex agentic coding and enterprise work, succeeding
 	// Opus 4.8. Adaptive thinking is on by default (a breaking change from Opus 4.8, which defaulted
-	// off) but, unlike Fable 5/Mythos 5, it still accepts an explicit disable. Supports adaptive
-	// thinking only: budget thinking and sampling params are rejected.
+	// off). Supports adaptive thinking only: budget thinking and sampling params are rejected. On
+	// Bedrock, adaptive thinking is always on and cannot be disabled, unlike the Anthropic API where
+	// it accepts an explicit disable.
 	//
 	// Max tokens: 1M
 	// Languages: English, French, Modern Standard Arabic, Mandarin Chinese, Hindi, Spanish, Portuguese, Korean, Japanese, German, Russian, Polish, and other languages.
