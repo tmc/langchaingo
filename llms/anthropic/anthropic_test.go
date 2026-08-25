@@ -60,6 +60,20 @@ func TestAnthropic_Refusal(t *testing.T) {
 		assert.Equal(t, 7, refusal.OutputTokens, "billed output tokens must be preserved")
 	})
 
+	t.Run("refusal carries the cached input it was billed for", func(t *testing.T) {
+		t.Parallel()
+		_, err := generateAgainst(t, `{"id":"m","type":"message","role":"assistant","model":"claude-fable-5",`+
+			`"content":[],"stop_reason":"refusal",`+
+			`"usage":{"input_tokens":13,"output_tokens":4,`+
+			`"cache_creation_input_tokens":300,"cache_read_input_tokens":3602}}`)
+		var refusal *anthropic.ErrModelRefusal
+		require.ErrorAs(t, err, &refusal)
+		assert.Equal(t, 300, refusal.CacheCreationInputTokens)
+		assert.Equal(t, 3602, refusal.CacheReadInputTokens)
+		assert.Equal(t, 3915, refusal.InputTokens+refusal.CacheCreationInputTokens+refusal.CacheReadInputTokens,
+			"the whole prompt must be recoverable from the error")
+	})
+
 	t.Run("empty refusal is a refusal, not an empty response", func(t *testing.T) {
 		t.Parallel()
 		_, err := generateAgainst(t, `{"id":"m","type":"message","role":"assistant","model":"claude-fable-5",`+

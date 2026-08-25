@@ -34,14 +34,17 @@ var (
 // stop_reason "refusal"), e.g. a creative model such as Claude Fable 5 hitting a
 // content boundary. It is distinct from an empty or failed response; any refusal
 // text the model returned is in Message. Category and Explanation carry the API's
-// stop_details so callers can pick a fallback by classifier; InputTokens and
-// OutputTokens preserve billed usage (a refusal is still billed for what ran).
+// stop_details so callers can pick a fallback by classifier. InputTokens counts
+// only the uncached input: the whole billed prompt is the sum of the three input
+// counts.
 type ErrModelRefusal struct {
-	Message      string
-	Category     string
-	Explanation  string
-	InputTokens  int
-	OutputTokens int
+	Message                  string
+	Category                 string
+	Explanation              string
+	InputTokens              int
+	OutputTokens             int
+	CacheCreationInputTokens int
+	CacheReadInputTokens     int
 }
 
 func (e *ErrModelRefusal) Error() string {
@@ -351,9 +354,11 @@ func processAnthropicResponse(result *anthropicclient.MessageResponsePayload) (*
 	// model declined" from "no response" (an empty refusal would otherwise look empty).
 	if result.StopReason == "refusal" {
 		refusal := &ErrModelRefusal{
-			Message:      anthropicTextContent(result.Content),
-			InputTokens:  result.Usage.InputTokens,
-			OutputTokens: result.Usage.OutputTokens,
+			Message:                  anthropicTextContent(result.Content),
+			InputTokens:              result.Usage.InputTokens,
+			OutputTokens:             result.Usage.OutputTokens,
+			CacheCreationInputTokens: result.Usage.CacheCreationInputTokens,
+			CacheReadInputTokens:     result.Usage.CacheReadInputTokens,
 		}
 		if result.StopDetails != nil {
 			refusal.Category = result.StopDetails.Category
