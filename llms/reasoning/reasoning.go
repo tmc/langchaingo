@@ -319,7 +319,12 @@ func DefaultIsReasoningModel(model string) bool { //nolint:funlen // a flat cata
 // ThinkingOptIn reports whether the model reasons only when a request asks it to.
 func ThinkingOptIn(model string) bool {
 	m := stripPlatformPrefix(baseModelName(model))
-	return strings.HasPrefix(m, "mistral-medium-3")
+	for _, prefix := range []string{"mistral-medium-3", "mistral-small-2603", "solar-pro-3"} {
+		if strings.HasPrefix(m, prefix) {
+			return true
+		}
+	}
+	return false
 }
 
 // ThinkingMarkedInName reports whether the model name selects a routing variant

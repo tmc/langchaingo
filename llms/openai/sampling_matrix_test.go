@@ -220,5 +220,29 @@ func TestOptInThinkingKeepsSamplingUntilAsked(t *testing.T) {
 			opts:    []llms.CallOption{llms.WithTemperature(0.3)},
 			present: []string{`"temperature":0.3`},
 		},
+		{
+			name:    "a later generation of the same family is opt-in too",
+			model:   "mistral-medium-3-5",
+			opts:    []llms.CallOption{llms.WithTemperature(0.3)},
+			present: []string{`"temperature":0.3`},
+		},
+		{
+			name:    "mistral-small-2603 is opt-in",
+			model:   "mistral-small-2603",
+			opts:    []llms.CallOption{llms.WithTemperature(0.3)},
+			present: []string{`"temperature":0.3`},
+		},
+		{
+			name:    "solar-pro-3 is opt-in",
+			model:   "solar-pro-3",
+			opts:    []llms.CallOption{llms.WithTemperature(0.3)},
+			present: []string{`"temperature":0.3`},
+		},
+		{
+			name:    "a family that reasons unasked keeps the pin",
+			model:   "hy3-preview",
+			opts:    []llms.CallOption{llms.WithTemperature(0.3)},
+			present: []string{`"temperature":1`},
+		},
 	})
 }
