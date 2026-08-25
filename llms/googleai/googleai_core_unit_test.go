@@ -1155,6 +1155,16 @@ func TestResolveThinkingConfig(t *testing.T) {
 		assert.Equal(t, int32(2048), *got.ThinkingBudget)
 		assert.Equal(t, genai.ThinkingLevel(""), got.ThinkingLevel)
 	})
+
+	t.Run("a non-positive budget is no budget at all on gemini 3.x", func(t *testing.T) {
+		for _, tokens := range []int{-5, -1} {
+			got, err := resolveThinkingConfig("gemini-3.1-pro", &llms.ReasoningConfig{Effort: llms.ReasoningLow, Tokens: tokens}, 8192)
+			require.NoError(t, err)
+			require.NotNil(t, got)
+			assert.Nil(t, got.ThinkingBudget, "tokens=%d must not reach the deprecated control", tokens)
+			assert.Equal(t, genai.ThinkingLevelLow, got.ThinkingLevel)
+		}
+	})
 }
 
 // TestProductionGeminiModels_ThinkingConfig locks the wire-level thinking
