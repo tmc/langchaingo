@@ -96,6 +96,10 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		opt(&opts)
 	}
 
+	if err := llms.CheckClaudeTurnLimits(o.effectiveModel(opts), opts, messages); err != nil {
+		return nil, err
+	}
+
 	chatMsgs, err := o.convertMessages(messages)
 	if err != nil {
 		return nil, err

@@ -1,5 +1,7 @@
 package llms
 
+import "github.com/vxcontrol/langchaingo/llms/reasoning"
+
 // ForcesToolUse reports whether a tool choice demands a tool call rather than
 // leaving the decision to the model.
 func ForcesToolUse(choice any) bool {
@@ -25,4 +27,21 @@ func HasAssistantPrefill(messages []MessageContent) bool {
 		return false
 	}
 	return messages[len(messages)-1].Role == ChatMessageTypeAI
+}
+
+// CheckClaudeTurnLimits refuses the two turns a Claude model rejects on the
+// wire: manual (budget) thinking combined with a forced tool choice, and a
+// conversation that ends on an assistant turn.
+func CheckClaudeTurnLimits(model string, opts CallOptions, messages []MessageContent) error {
+	budgetThinking := opts.Reasoning.ResolveMode() == ReasoningOn &&
+		reasoning.ClaudeSupportsThinking(model) &&
+		!reasoning.ResolveClaudeAdaptive(model, opts.Reasoning.Adaptive)
+	if budgetThinking && ForcesToolUse(opts.ToolChoice) {
+		return &reasoning.ErrForcedToolUseWithThinking{Model: model}
+	}
+
+	if reasoning.ClaudeRejectsAssistantPrefill(model) && HasAssistantPrefill(messages) {
+		return &reasoning.ErrAssistantPrefillUnsupported{Model: model}
+	}
+	return nil
 }
