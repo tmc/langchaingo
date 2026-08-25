@@ -10,10 +10,10 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"math"
 	"strings"
 
 	"github.com/vxcontrol/langchaingo/internal/imageutil"
+	"github.com/vxcontrol/langchaingo/internal/numutil"
 	"github.com/vxcontrol/langchaingo/llms"
 	"github.com/vxcontrol/langchaingo/llms/reasoning"
 	"github.com/vxcontrol/langchaingo/llms/streaming"
@@ -1046,7 +1046,7 @@ func convertToInt32Pointer(i *int) *int32 {
 		return nil
 	}
 
-	i32 := saturateInt32(*i)
+	i32 := numutil.SaturateInt32(*i)
 	return &i32
 }
 
@@ -1055,18 +1055,7 @@ func convertToInt32(i *int) int32 {
 		return 0
 	}
 
-	return saturateInt32(*i)
-}
-
-func saturateInt32(i int) int32 {
-	switch {
-	case i > math.MaxInt32:
-		return math.MaxInt32
-	case i < math.MinInt32:
-		return math.MinInt32
-	default:
-		return int32(i)
-	}
+	return numutil.SaturateInt32(*i)
 }
 
 func convertIntToFloat32Pointer(i *int) *float32 {
