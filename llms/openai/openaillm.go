@@ -326,7 +326,7 @@ func (o *LLM) setReasoning(req *openaiclient.ChatRequest, opts llms.CallOptions)
 	}
 
 	// using modern reasoning format
-	if o.client.UseReasoningMaxTokens && opts.Reasoning.Tokens != 0 && reasoningTokens != 0 {
+	if o.client.UseReasoningMaxTokens && opts.Reasoning.Tokens != 0 && reasoningTokens > 0 {
 		req.Reasoning = &openaiclient.ReasoningOptions{
 			MaxTokens: reasoningTokens,
 		}
