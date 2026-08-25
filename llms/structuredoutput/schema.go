@@ -28,41 +28,54 @@ func requireClosed(node any) error {
 	}
 	// A node is an object schema when its type is "object" or it declares
 	// properties. Such a node must close itself with additionalProperties:false.
-	t, _ := m["type"].(string)
-	props, hasProps := m["properties"].(map[string]any)
-	if t == "object" || hasProps {
+	_, hasProps := m["properties"].(map[string]any)
+	if declaresObject(m["type"]) || hasProps {
 		if ap, ok := m["additionalProperties"].(bool); !ok || ap {
 			return fmt.Errorf("%w: every object schema must explicitly set additionalProperties:false",
 				llms.ErrStructuredOutputConfig)
 		}
 	}
-	for _, v := range props {
-		if err := requireClosed(v); err != nil {
-			return err
-		}
-	}
-	for _, key := range []string{"$defs", "definitions"} {
-		if defs, ok := m[key].(map[string]any); ok {
-			for _, v := range defs {
-				if err := requireClosed(v); err != nil {
+	for _, key := range []string{"properties", "patternProperties", "$defs", "definitions"} {
+		if group, ok := m[key].(map[string]any); ok {
+			for _, v := range group {
+				if err := requireClosedValue(v); err != nil {
 					return err
 				}
 			}
 		}
 	}
-	if items, ok := m["items"]; ok {
-		if err := requireClosed(items); err != nil {
+	for _, key := range []string{"items", "prefixItems", "additionalProperties", "anyOf", "oneOf", "allOf"} {
+		if err := requireClosedValue(m[key]); err != nil {
 			return err
 		}
 	}
-	for _, key := range []string{"anyOf", "oneOf", "allOf"} {
-		if arr, ok := m[key].([]any); ok {
-			for _, v := range arr {
-				if err := requireClosed(v); err != nil {
-					return err
-				}
+	return nil
+}
+
+func requireClosedValue(v any) error {
+	switch node := v.(type) {
+	case map[string]any:
+		return requireClosed(node)
+	case []any:
+		for _, item := range node {
+			if err := requireClosedValue(item); err != nil {
+				return err
 			}
 		}
 	}
 	return nil
+}
+
+func declaresObject(v any) bool {
+	switch t := v.(type) {
+	case string:
+		return t == "object"
+	case []any:
+		for _, item := range t {
+			if name, ok := item.(string); ok && name == "object" {
+				return true
+			}
+		}
+	}
+	return false
 }

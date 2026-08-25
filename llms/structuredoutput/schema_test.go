@@ -25,6 +25,15 @@ func TestRequireClosedObjects(t *testing.T) {
 		{"object inside array items", `{"type":"array","items":{"type":"object","properties":{"a":{"type":"string"}}}}`, true},
 		{"non-object schema is fine", `{"type":"string"}`, false},
 		{"array of strings is fine", `{"type":"array","items":{"type":"string"}}`, false},
+		{"union type naming object", `{"type":["object","null"]}`, true},
+		{"union type naming object, closed", `{"type":["object","null"],"additionalProperties":false}`, false},
+		{"union type without object is fine", `{"type":["string","null"]}`, false},
+		{"object under prefixItems", `{"type":"array","prefixItems":[{"type":"object","properties":{"a":{"type":"string"}}}],"items":false}`, true},
+		{"object under prefixItems, closed", `{"type":"array","prefixItems":[{"type":"object","properties":{"a":{"type":"string"}},"additionalProperties":false}],"items":false}`, false},
+		{"object under tuple-form items", `{"type":"array","items":[{"type":"object","properties":{"a":{"type":"string"}}}]}`, true},
+		{"object under patternProperties", `{"type":"object","additionalProperties":false,"patternProperties":{"^k":{"type":"object","properties":{"a":{"type":"string"}}}}}`, true},
+		{"object under patternProperties, closed", `{"type":"object","additionalProperties":false,"patternProperties":{"^k":{"type":"object","properties":{"a":{"type":"string"}},"additionalProperties":false}}}`, false},
+		{"object under a schema-valued additionalProperties", `{"additionalProperties":{"type":"object","properties":{"a":{"type":"string"}}}}`, true},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
