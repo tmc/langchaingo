@@ -59,18 +59,29 @@ func (m *Model) Call(ctx context.Context, prompt string, options ...llms.CallOpt
 		return "", err
 	}
 	if len(res.Choices) != 1 {
+		err := errors.New("unexpected response from Mistral SDK, length of the Choices slice must be 1")
 		m.CallbacksHandler.HandleLLMError(ctx, err)
-		return "", errors.New("unexpected response from Mistral SDK, length of the Choices slice must be 1")
+		return "", err
 	}
 
 	return res.Choices[0].Message.Content, nil
 }
 
 // GenerateContent implements the langchaingo llms.Model interface.
-func (m *Model) GenerateContent(ctx context.Context, langchainMessages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) {
+func (m *Model) GenerateContent(ctx context.Context, langchainMessages []llms.MessageContent, options ...llms.CallOption) (resp *llms.ContentResponse, err error) { //nolint:lll,nonamedreturns
+	if m.CallbacksHandler != nil {
+		m.CallbacksHandler.HandleLLMGenerateContentStart(ctx, langchainMessages)
+		defer func() {
+			if err != nil {
+				m.CallbacksHandler.HandleLLMError(ctx, err)
+			} else {
+				m.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, resp)
+			}
+		}()
+	}
+
 	callOptions := resolveDefaultOptions(sdk.DefaultChatRequestParams, m.clientOptions)
 	setCallOptions(options, callOptions)
-	m.CallbacksHandler.HandleLLMGenerateContentStart(ctx, langchainMessages)
 
 	chatOpts := mistralChatParamsFromCallOptions(callOptions)
 
@@ -82,7 +93,7 @@ func (m *Model) GenerateContent(ctx context.Context, langchainMessages []llms.Me
 	if callOptions.StreamingFunc != nil {
 		return generateStreamingContent(ctx, m, callOptions, messages, chatOpts)
 	}
-	return generateNonStreamingContent(ctx, m, callOptions, messages, chatOpts)
+	return generateNonStreamingContent(m, callOptions, messages, chatOpts)
 }
 
 func setCallOptions(options []llms.CallOption, callOpts *llms.CallOptions) {
@@ -144,16 +155,13 @@ func mistralChatParamsFromCallOptions(callOpts *llms.CallOptions) sdk.ChatReques
 	return chatOpts
 }
 
-func generateNonStreamingContent(ctx context.Context, m *Model, callOptions *llms.CallOptions, messages []sdk.ChatMessage, chatOpts sdk.ChatRequestParams) (*llms.ContentResponse, error) {
+func generateNonStreamingContent(m *Model, callOptions *llms.CallOptions, messages []sdk.ChatMessage, chatOpts sdk.ChatRequestParams) (*llms.ContentResponse, error) {
 	res, err := m.client.Chat(callOptions.GetModel(), messages, &chatOpts)
-	m.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, nil)
 	if err != nil {
-		m.CallbacksHandler.HandleLLMError(ctx, err)
 		return nil, err
 	}
 
 	if len(res.Choices) < 1 {
-		m.CallbacksHandler.HandleLLMError(ctx, err)
 		return nil, errors.New("unexpected response from Mistral SDK, length of the Choices slice must be greater than or equal 1")
 	}
 
@@ -187,11 +195,8 @@ func generateNonStreamingContent(ctx context.Context, m *Model, callOptions *llm
 		}
 	}
 	if err := llms.CheckTruncation(langchainContentResponse, *callOptions); err != nil {
-		m.CallbacksHandler.HandleLLMError(ctx, err)
 		return langchainContentResponse, err
 	}
-
-	m.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, langchainContentResponse)
 
 	return langchainContentResponse, nil
 }
@@ -199,7 +204,6 @@ func generateNonStreamingContent(ctx context.Context, m *Model, callOptions *llm
 func generateStreamingContent(ctx context.Context, m *Model, callOptions *llms.CallOptions, messages []sdk.ChatMessage, chatOpts sdk.ChatRequestParams) (*llms.ContentResponse, error) {
 	chatResChan, err := m.client.ChatStream(callOptions.GetModel(), messages, &chatOpts)
 	if err != nil {
-		m.CallbacksHandler.HandleLLMError(ctx, err)
 		return nil, err
 	}
 	langchainContentResponse := &llms.ContentResponse{
@@ -239,21 +243,16 @@ func generateStreamingContent(ctx context.Context, m *Model, callOptions *llms.C
 				}
 			}
 			if err := streaming.CallWithText(ctx, callOptions.StreamingFunc, chunkStr); err != nil {
-				m.CallbacksHandler.HandleLLMError(ctx, err)
 				return langchainContentResponse, err
 			}
 		} else {
-			m.CallbacksHandler.HandleLLMError(ctx, chatResChunk.Error)
 			return langchainContentResponse, chatResChunk.Error
 		}
 	}
 
 	if err := llms.CheckTruncation(langchainContentResponse, *callOptions); err != nil {
-		m.CallbacksHandler.HandleLLMError(ctx, err)
 		return langchainContentResponse, err
 	}
-
-	m.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, langchainContentResponse)
 
 	return langchainContentResponse, nil
 }
