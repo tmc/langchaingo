@@ -136,6 +136,9 @@ func TestLegacyCompletionsReportTruncation(t *testing.T) {
 		if err == nil {
 			t.Fatal("WithFailOnTruncation must fail on a truncated legacy completion")
 		}
+		if !llms.IsTruncatedError(err) {
+			t.Errorf("the error must stay recognizable as truncation, got %v", err)
+		}
 		if resp == nil || resp.Choices[0].Content != "half an ans" {
 			t.Errorf("the partial answer must travel with the error, got %v", resp)
 		}

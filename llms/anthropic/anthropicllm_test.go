@@ -799,6 +799,9 @@ func TestSamplingParamsNeverBothOnTheWire(t *testing.T) {
 			if strings.Contains(body, `"temperature"`) && strings.Contains(body, `"top_p"`) {
 				t.Fatalf("both sampling params reached the wire: %s", body)
 			}
+			if !strings.Contains(body, `"temperature"`) {
+				t.Fatalf("these models take a temperature, so dropping both params must not pass: %s", body)
+			}
 		})
 	}
 }

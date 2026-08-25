@@ -1017,7 +1017,7 @@ func TestConverseClient_AdaptiveEffortDerivedFromMaxTokens(t *testing.T) {
 		ModelID:         "us.anthropic.claude-sonnet-5",
 		Messages:        []Message{{Role: llms.ChatMessageTypeHuman, Content: "Hello", Type: "text"}},
 		MaxTokens:       ptr(32000),
-		ReasoningConfig: &llms.ReasoningConfig{Mode: llms.ReasoningOn, Tokens: 3000},
+		ReasoningConfig: &llms.ReasoningConfig{Mode: llms.ReasoningOn, Tokens: 5000},
 	}
 
 	_, err := client.CreateCompletionConverse(t.Context(), input)
@@ -1033,7 +1033,7 @@ func TestConverseClient_AdaptiveEffortDerivedFromMaxTokens(t *testing.T) {
 
 	outputConfig, _ := fields["output_config"].(map[string]any)
 	assert.Equal(t, string(llms.ReasoningLow), outputConfig["effort"],
-		"3000 of 32000 max tokens is a low effort; deriving from a hardcoded 0 would say high")
+		"5000 of 32000 max tokens is a low effort; deriving from a substituted default would say medium")
 }
 
 func TestConverseClient_NoBudgetEffortForOpus45OnBedrock(t *testing.T) {
