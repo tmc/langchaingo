@@ -38,6 +38,32 @@ func sendForWire(t *testing.T, model string, opts ...llms.CallOption) string {
 	return body
 }
 
+func sendMessagesForWire(t *testing.T, model string, messages []llms.MessageContent) string {
+	t.Helper()
+
+	const completion = `{"id":"x","object":"chat.completion","created":1,"model":"m",` +
+		`"choices":[{"index":0,"message":{"role":"assistant","content":"ok"},"finish_reason":"stop"}],` +
+		`"usage":{"prompt_tokens":1,"completion_tokens":1,"total_tokens":2}}`
+
+	var body string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		b, _ := io.ReadAll(r.Body)
+		body = string(b)
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = io.WriteString(w, completion)
+	}))
+	t.Cleanup(srv.Close)
+
+	llm, err := New(WithBaseURL(srv.URL), WithToken("test"), WithModel(model))
+	if err != nil {
+		t.Fatalf("New() error: %v", err)
+	}
+	if _, err := llm.GenerateContent(context.Background(), messages); err != nil {
+		t.Fatalf("GenerateContent() error: %v", err)
+	}
+	return body
+}
+
 type samplingCase struct {
 	name    string
 	model   string

@@ -602,9 +602,13 @@ func toolCallsFromToolCalls(tcs []llms.ToolCall) []openaiclient.ToolCall {
 
 // toolCallFromToolCall converts an llms.ToolCall to a ToolCall.
 func toolCallFromToolCall(tc llms.ToolCall) openaiclient.ToolCall {
+	toolType := openaiclient.ToolType(tc.Type)
+	if toolType == "" {
+		toolType = openaiclient.ToolTypeFunction
+	}
 	return openaiclient.ToolCall{
 		ID:   tc.ID,
-		Type: openaiclient.ToolType(tc.Type),
+		Type: toolType,
 		Function: openaiclient.ToolFunction{
 			Name:      tc.FunctionCall.Name,
 			Arguments: tc.FunctionCall.Arguments,
