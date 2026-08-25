@@ -179,3 +179,27 @@ func TestLegacyStreamKeepsASignatureOnlyThinkingBlock(t *testing.T) {
 		"a thinking block that arrived as a signature alone must survive, as it does off the stream")
 	assert.Equal(t, "sig-only", string(choice.Reasoning.Signature))
 }
+
+func TestLegacyPromptTokensCountTheCachedInput(t *testing.T) {
+	t.Parallel()
+
+	const resp = `{"id":"x","type":"message","role":"assistant","model":"m",` +
+		`"content":[{"type":"text","text":"ok"}],"stop_reason":"end_turn",` +
+		`"usage":{"input_tokens":13,"output_tokens":4,` +
+		`"cache_creation_input_tokens":300,"cache_read_input_tokens":3602}}`
+
+	llm, _ := legacyLLMCapturing(t, resp,
+		bedrock.WithModel("anthropic.claude-sonnet-4-5-20250929-v1:0"))
+
+	got, err := llm.GenerateContent(context.Background(),
+		[]llms.MessageContent{llms.TextParts(llms.ChatMessageTypeHuman, "hi")})
+	require.NoError(t, err)
+	require.Len(t, got.Choices, 1)
+
+	info := got.Choices[0].GenerationInfo
+	assert.Equal(t, int32(13), info["input_tokens"],
+		"the vendor's own field reports the uncached input alone")
+	assert.Equal(t, int32(3915), info["PromptTokens"],
+		"the standardized field must count the cached input the request was billed for")
+	assert.Equal(t, int32(3919), info["TotalTokens"])
+}

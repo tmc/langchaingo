@@ -335,6 +335,8 @@ func createAnthropicCompletion(ctx context.Context,
 	}
 
 	// Create single choice with all content
+	promptTokens := output.Usage.InputTokens +
+		output.Usage.CacheCreationInputTokens + output.Usage.CacheReadInputTokens
 	choice := &llms.ContentChoice{
 		Content:    textContent,
 		Reasoning:  processReasoning(reasoningContent, signature),
@@ -344,9 +346,9 @@ func createAnthropicCompletion(ctx context.Context,
 		GenerationInfo: map[string]any{
 			"input_tokens":     output.Usage.InputTokens,
 			"output_tokens":    output.Usage.OutputTokens,
-			"PromptTokens":     output.Usage.InputTokens,
+			"PromptTokens":     promptTokens,
 			"CompletionTokens": output.Usage.OutputTokens,
-			"TotalTokens":      output.Usage.InputTokens + output.Usage.OutputTokens,
+			"TotalTokens":      promptTokens + output.Usage.OutputTokens,
 			// Cache metrics
 			"CacheReadInputTokens":                output.Usage.CacheReadInputTokens,
 			"CacheCreationInputTokens":            output.Usage.CacheCreationInputTokens,

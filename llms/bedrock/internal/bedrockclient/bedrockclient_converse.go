@@ -900,9 +900,10 @@ func (c *ConverseClient) convertConverseResponse(response *bedrockruntime.Conver
 
 	// Add usage information
 	if response.Usage != nil {
+		var promptTokens int32
 		if response.Usage.InputTokens != nil {
 			choice.GenerationInfo["input_tokens"] = *response.Usage.InputTokens
-			choice.GenerationInfo["PromptTokens"] = *response.Usage.InputTokens
+			promptTokens += *response.Usage.InputTokens
 		}
 		if response.Usage.OutputTokens != nil {
 			choice.GenerationInfo["output_tokens"] = *response.Usage.OutputTokens
@@ -917,11 +918,14 @@ func (c *ConverseClient) convertConverseResponse(response *bedrockruntime.Conver
 			choice.GenerationInfo["cacheReadInputTokens"] = *response.Usage.CacheReadInputTokens
 			choice.GenerationInfo["CacheReadInputTokens"] = *response.Usage.CacheReadInputTokens
 			choice.GenerationInfo["PromptCachedTokens"] = *response.Usage.CacheReadInputTokens
+			promptTokens += *response.Usage.CacheReadInputTokens
 		}
 		if response.Usage.CacheWriteInputTokens != nil {
 			choice.GenerationInfo["cacheWriteInputTokens"] = *response.Usage.CacheWriteInputTokens
 			choice.GenerationInfo["CacheCreationInputTokens"] = *response.Usage.CacheWriteInputTokens
+			promptTokens += *response.Usage.CacheWriteInputTokens
 		}
+		choice.GenerationInfo["PromptTokens"] = promptTokens
 	}
 
 	return &llms.ContentResponse{

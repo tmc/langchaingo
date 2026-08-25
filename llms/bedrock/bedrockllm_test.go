@@ -2834,6 +2834,8 @@ func TestAmazonAutomaticCachingLegacyAPI(t *testing.T) { //nolint:funlen
 
 	t.Logf("Turn 2 Response: %s", resp2.Choices[0].Content)
 
+	requireUsageAddsUp(t, resp2.Choices[0].GenerationInfo)
+
 	// Turn 3: Continue conversation - automatic caching should apply
 	messages = append(messages,
 		llms.MessageContent{
@@ -3006,6 +3008,8 @@ func TestAmazonAutomaticCachingConverseAPI(t *testing.T) { //nolint:funlen
 	}
 
 	t.Logf("Turn 2 Response: %s", resp2.Choices[0].Content)
+
+	requireUsageAddsUp(t, resp2.Choices[0].GenerationInfo)
 
 	// Turn 3: Continue conversation - automatic caching should apply
 	messages = append(messages,
@@ -3200,4 +3204,33 @@ func TestCreateClientWithBearerTokenCredentials(t *testing.T) {
 	}
 
 	t.Logf("Response: %s", resp)
+}
+
+func requireUsageAddsUp(t *testing.T, info map[string]any) {
+	t.Helper()
+
+	prompt, ok := info["PromptTokens"].(int32)
+	if !ok {
+		t.Fatalf("PromptTokens missing or not int32: %#v", info["PromptTokens"])
+	}
+	completion, ok := info["CompletionTokens"].(int32)
+	if !ok {
+		t.Fatalf("CompletionTokens missing or not int32: %#v", info["CompletionTokens"])
+	}
+	cached, _ := info["CacheReadInputTokens"].(int32)
+	created, _ := info["CacheCreationInputTokens"].(int32)
+	if cached+created == 0 {
+		t.Fatalf("this recording carries no cache tokens, so it cannot show whether they are counted: %#v", info)
+	}
+	total, ok := info["TotalTokens"].(int32)
+	if !ok {
+		total = prompt + completion
+	}
+	if prompt+completion != total {
+		t.Errorf("PromptTokens(%d) + CompletionTokens(%d) = %d, but TotalTokens = %d;"+
+			" cache read %d, cache creation %d", prompt, completion, prompt+completion, total, cached, created)
+	}
+	if prompt <= cached+created {
+		t.Errorf("PromptTokens(%d) does not count the cached input (read %d, created %d)", prompt, cached, created)
+	}
 }
