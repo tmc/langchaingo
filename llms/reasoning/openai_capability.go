@@ -70,7 +70,7 @@ func OpenAIReasoningCapsFor(model string) OpenAIReasoningCaps {
 	case openAIProVariant(m):
 		return OpenAIReasoningCaps{Known: true, CanDisable: false, Efforts: []string{"high"}}
 	case openAIMandatoryReasoning(m):
-		return OpenAIReasoningCaps{Known: true, CanDisable: false, Efforts: []string{"low", "medium", "high"}}
+		return OpenAIReasoningCaps{Known: true, CanDisable: false, Efforts: []string{"low", "medium", "high", "xhigh"}}
 	case openAIGPT5Base(m):
 		return OpenAIReasoningCaps{Known: true, CanDisable: false, Efforts: []string{"minimal", "low", "medium", "high"}}
 	case strings.HasPrefix(m, "gpt-5.1"):
