@@ -74,15 +74,15 @@ func TestResolveClaudeAdaptive(t *testing.T) {
 		note      string
 	}{
 		// Adaptive-only: budget preference upgraded to adaptive.
-		{"claude-sonnet-5", false, true, "budget on T1 upgrades"},
-		{"claude-sonnet-5", true, true, "adaptive on T1 stays"},
+		{"claude-sonnet-5", false, true, "budget on an adaptive-only model upgrades"},
+		{"claude-sonnet-5", true, true, "adaptive on an adaptive-only model stays"},
 		{"claude-opus-5", false, true, "budget on Opus 5 upgrades"},
 		// Budget-only: adaptive preference downgraded to budget.
-		{"claude-haiku-4-5", true, false, "adaptive on T3 downgrades"},
-		{"claude-haiku-4-5", false, false, "budget on T3 stays"},
+		{"claude-haiku-4-5", true, false, "adaptive on a budget-only model downgrades"},
+		{"claude-haiku-4-5", false, false, "budget on a budget-only model stays"},
 		// Dual: caller preference honored both ways (unchanged).
-		{"claude-opus-4-6", true, true, "adaptive on T2 honored"},
-		{"claude-opus-4-6", false, false, "budget on T2 honored"},
+		{"claude-opus-4-6", true, true, "adaptive on a dual model is honored"},
+		{"claude-opus-4-6", false, false, "budget on a dual model is honored"},
 		{"claude-3-5-haiku", true, false, "adaptive on pre-adaptive downgrades"},
 		{"claude-3-5-haiku", false, false, "budget on pre-adaptive stays"},
 		{"claude-3-5-sonnet-latest", true, false, "same for the dated alias"},

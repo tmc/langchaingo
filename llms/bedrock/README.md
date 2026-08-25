@@ -213,7 +213,7 @@ source of truth used by the first-party Anthropic provider):
   this path; Opus 4.5 accepts it on the first-party API but rejects it here, so
   this door does not send it.
 
-Non-Claude reasoning models (GPT OSS, Kimi K2-Thinking, MiniMax M2) use budget
+Non-Claude reasoning models (GPT OSS, Kimi K2-Thinking, MiniMax M2.5/M2.1) use budget
 thinking through the Converse API. `WithReasoningDisabled()` returns a typed
 `ErrReasoningOffUnsupported` for always-on Bedrock models.
 

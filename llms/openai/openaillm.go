@@ -301,7 +301,6 @@ func (o *LLM) effectiveModel(opts llms.CallOptions) string {
 	return openaiclient.DefaultChatModel
 }
 
-// setReasoning sets reasoning options, depends on the client and request options.
 // setReasoning writes the reasoning fields and reports the effort that reached the wire.
 func (o *LLM) setReasoning(req *openaiclient.ChatRequest, opts llms.CallOptions) (string, error) {
 	switch opts.Reasoning.ResolveMode() { //nolint:exhaustive // ReasoningOn is handled by the code after the switch

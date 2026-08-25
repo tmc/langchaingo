@@ -114,7 +114,7 @@ func (r *ReasoningConfig) IsDisabled() bool {
 }
 
 // GetEffort returns enum value of the effort based on kept values inside.
-// If maxTokens is less than 0, it will be set to 8192.
+// A non-positive maxTokens is replaced with DefaultMaxTokens.
 // If neither are set, it will return ReasoningNone.
 // If effort is set, it will return the set effort.
 // If tokens are set, it will return the effort that is the closest to the set tokens.
@@ -160,7 +160,7 @@ func (r *ReasoningConfig) GetEffort(maxTokens int) ReasoningEffort {
 
 // GetTokens returns the number of tokens to use for reasoning based on kept values inside.
 // Maximum value is maxTokens*2/3 because we need to leave some tokens for the response.
-// If maxTokens is less than 0, it will be set to 8192.
+// A non-positive maxTokens is replaced with DefaultMaxTokens.
 // If tokens are set, it will return the minimum of the set tokens and maxTokens*2/3.
 // If effort is set, it will return the maximum of the effort and maxTokens*2/3.
 // If neither are set, it will return 0 or -1 if effort is set to an invalid value.
@@ -695,9 +695,8 @@ func WithPresencePenalty(presencePenalty float64) CallOption {
 // WithReasoning sets the reasoning configuration for the model call.
 // You can specify either the reasoning effort or the number of tokens to allocate for reasoning.
 // If both effort is ReasoningNone and tokens is 0, the reasoning control is
-// omitted and the model's own default applies — on models that think by default
-// (claude-sonnet-5, claude-opus-5, gemini-2.5-flash) thinking stays on and is
-// billed. Use WithReasoningDisabled to force it off.
+// omitted and the model's own default applies, which on a model that thinks by
+// default leaves thinking on. Use WithReasoningDisabled to force it off.
 // Note: Most LLM providers expect only one of these options to be set at a time.
 // Internally, the options may be converted between each other according to predefined rules.
 func WithReasoning(effort ReasoningEffort, tokens int) CallOption {

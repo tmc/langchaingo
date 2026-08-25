@@ -6,8 +6,7 @@ import "strings"
 // IsReasoningModel knows, plus any name from a family whose current generations
 // reason and which is not a known pre-reasoning generation.
 //
-// For UI hints only. Wire paths keep using IsReasoningModel: a wrong guess here
-// costs a control in a form, there it would change the request.
+// For UI hints only. Wire paths keep using IsReasoningModel.
 func LikelyReasoningModel(model string) bool {
 	if IsReasoningModel(model) {
 		return true

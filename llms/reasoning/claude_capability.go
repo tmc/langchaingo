@@ -89,8 +89,8 @@ var (
 	}
 )
 
-// ClaudeThinkingAlwaysOn reports whether the model's thinking cannot be disabled
-// (Fable 5 / Mythos 5 — an explicit disable returns 400).
+// ClaudeThinkingAlwaysOn reports whether the model's thinking cannot be disabled,
+// so an explicit disable has to be refused rather than sent.
 func ClaudeThinkingAlwaysOn(model string) bool {
 	return containsAny(canonicalClaude(model), alwaysOnClaude)
 }
@@ -149,8 +149,7 @@ var bedrockRejectsBudgetEffortClaude = []string{"claude-opus-4-5"}
 
 // ClaudeSupportsEffortWithBudget reports whether the model accepts
 // output_config.effort together with manual (budget) thinking on the given
-// provider, so the effort is not lost on the budget path for models that honor
-// it and is not sent to a platform that rejects it.
+// provider.
 func ClaudeSupportsEffortWithBudget(model string, p Provider) bool {
 	m := canonicalClaude(model)
 	if !containsAny(m, budgetEffortClaude) {
