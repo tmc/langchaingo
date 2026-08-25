@@ -150,14 +150,9 @@ func convertVertexNode(node map[string]any) (*genai.Schema, error) { //nolint:fu
 		schema.Pattern = s
 	}
 
-	// additionalProperties: only the strict `false` is accepted. Vertex object
-	// schemas have no field for it, but dropping `false` does not loosen the
-	// effective guarantee — the final response is validated against the original
-	// schema locally. Any schema value (or `true`) IS a meaningful loosening, so it
-	// is rejected instead of silently ignored.
 	if ap, ok := node["additionalProperties"]; ok {
-		if b, isBool := ap.(bool); !isBool || b {
-			return nil, unsupportedVertexSchema("additionalProperties must be false; a schema or true is not representable")
+		if _, isBool := ap.(bool); !isBool {
+			return nil, unsupportedVertexSchema("a schema-valued additionalProperties is not representable")
 		}
 	}
 

@@ -154,12 +154,12 @@ func TestConvertJSONSchemaToVertex(t *testing.T) { //nolint:funlen // table-driv
 	})
 
 	unrepresentable := map[string]string{
-		"$ref":                      `{"$ref":"#/x"}`,
-		"anyOf":                     `{"anyOf":[{"type":"string"}]}`,
-		"oneOf":                     `{"oneOf":[{"type":"string"}]}`,
-		"const":                     `{"const":"x"}`,
-		"additionalProperties true": `{"type":"object","properties":{"a":{"type":"string"}},"additionalProperties":true}`,
-		"union type":                `{"type":["string","number"]}`,
+		"$ref":                               `{"$ref":"#/x"}`,
+		"anyOf":                              `{"anyOf":[{"type":"string"}]}`,
+		"oneOf":                              `{"oneOf":[{"type":"string"}]}`,
+		"const":                              `{"const":"x"}`,
+		"schema-valued additionalProperties": `{"type":"object","properties":{"a":{"type":"string"}},"additionalProperties":{"type":"string"}}`,
+		"union type":                         `{"type":["string","number"]}`,
 	}
 	for name, raw := range unrepresentable {
 		t.Run("rejects "+name, func(t *testing.T) {
@@ -168,6 +168,23 @@ func TestConvertJSONSchemaToVertex(t *testing.T) { //nolint:funlen // table-driv
 			var unsup *llms.ErrStructuredOutputUnsupported
 			if !errors.As(err, &unsup) {
 				t.Fatalf("want ErrStructuredOutputUnsupported, got %v", err)
+			}
+		})
+	}
+
+	for name, raw := range map[string]string{
+		"absent":                     `{"type":"object","properties":{"a":{"type":"string"}}}`,
+		"additionalProperties false": `{"type":"object","properties":{"a":{"type":"string"}},"additionalProperties":false}`,
+		"additionalProperties true":  `{"type":"object","properties":{"a":{"type":"string"}},"additionalProperties":true}`,
+	} {
+		t.Run("accepts "+name, func(t *testing.T) {
+			t.Parallel()
+			got, err := convertJSONSchemaToVertex(json.RawMessage(raw))
+			if err != nil {
+				t.Fatalf("an explicit boolean says no more than its absence does: %v", err)
+			}
+			if got == nil {
+				t.Fatal("want a schema")
 			}
 		})
 	}
