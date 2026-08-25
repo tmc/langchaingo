@@ -5,7 +5,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
+	"path/filepath"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/vxcontrol/langchaingo/llms"
@@ -1191,5 +1194,32 @@ func TestGetTemperatureLeavesAnUnsetValueAtTheDefault(t *testing.T) {
 			t.Errorf("%s: unset temperature = %v, want the package default %v",
 				name, got, llms.DefaultTemperature)
 		}
+	}
+}
+
+func TestValidateStructuredOutputDoesNotReadTheFilesystem(t *testing.T) {
+	t.Parallel()
+
+	present := filepath.Join(t.TempDir(), "present.json")
+	if err := os.WriteFile(present, []byte(`{"type":"integer","minimum":42}`), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	opts := llms.CallOptions{JSONMode: true, StructuredOutput: &llms.StructuredOutputConfig{
+		Name: "s",
+		Schema: json.RawMessage(fmt.Sprintf(
+			`{"type":"object","additionalProperties":false,"properties":{"n":{"$ref":%q}}}`,
+			"file://"+present)),
+	}}
+
+	err := opts.ValidateStructuredOutput()
+	if err == nil {
+		t.Fatal("a caller-supplied schema must not be able to pull a file off the local disk")
+	}
+	if !errors.Is(err, llms.ErrStructuredOutputConfig) {
+		t.Errorf("error must wrap ErrStructuredOutputConfig, got %v", err)
+	}
+	if !strings.Contains(err.Error(), "no URLLoader registered") {
+		t.Errorf("want the reference refused before any filesystem access, got %v", err)
 	}
 }

@@ -152,6 +152,7 @@ func compileStructuredOutputSchema(schema json.RawMessage) error {
 	}
 	const resource = "structuredoutput:schema"
 	comp := jsonschema.NewCompiler()
+	comp.UseLoader(jsonschema.SchemeURLLoader{})
 	if err := comp.AddResource(resource, doc); err != nil {
 		return err
 	}

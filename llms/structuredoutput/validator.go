@@ -26,6 +26,7 @@ func Compile(schema json.RawMessage) (*Compiled, error) {
 	}
 	const resource = "structuredoutput:schema"
 	comp := jsonschema.NewCompiler()
+	comp.UseLoader(jsonschema.SchemeURLLoader{})
 	if err := comp.AddResource(resource, doc); err != nil {
 		return nil, fmt.Errorf("load schema: %w", err)
 	}

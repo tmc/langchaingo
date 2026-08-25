@@ -3,6 +3,10 @@ package structuredoutput_test
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/vxcontrol/langchaingo/llms"
@@ -92,5 +96,54 @@ func TestValidate_TypedError(t *testing.T) {
 	}
 	if ve.Unwrap() == nil {
 		t.Error("typed error must retain an unwrap-able cause")
+	}
+}
+
+func TestCompileDoesNotReadTheFilesystem(t *testing.T) {
+	t.Parallel()
+
+	dir := t.TempDir()
+	present := filepath.Join(dir, "present.json")
+	if err := os.WriteFile(present, []byte(`{"type":"integer","minimum":42}`), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	absent := filepath.Join(dir, "absent.json")
+
+	refSchema := func(target string) json.RawMessage {
+		return json.RawMessage(fmt.Sprintf(
+			`{"type":"object","additionalProperties":false,"properties":{"n":{"$ref":%q}}}`,
+			"file://"+target))
+	}
+
+	_, presentErr := structuredoutput.Compile(refSchema(present))
+	_, absentErr := structuredoutput.Compile(refSchema(absent))
+
+	if presentErr == nil {
+		t.Fatal("a file:// reference must not compile: the schema would be read off the caller's disk")
+	}
+	if absentErr == nil {
+		t.Fatal("a file:// reference must not compile")
+	}
+	const refused = "no URLLoader registered"
+	for label, err := range map[string]error{"present": presentErr, "absent": absentErr} {
+		if !strings.Contains(err.Error(), refused) {
+			t.Errorf("%s path: want the reference refused before any filesystem access, got %v", label, err)
+		}
+	}
+}
+
+func TestCompileStillAcceptsInternalAndDraftRefs(t *testing.T) {
+	t.Parallel()
+
+	for name, schema := range map[string]string{
+		"internal $defs": `{"$defs":{"leaf":{"type":"string"}},"type":"object",` +
+			`"additionalProperties":false,"properties":{"a":{"$ref":"#/$defs/leaf"}}}`,
+		"explicit draft 2020-12": `{"$schema":"https://json-schema.org/draft/2020-12/schema",` +
+			`"type":"object","additionalProperties":false,"properties":{"a":{"type":"string"}}}`,
+		"explicit draft-07": `{"$schema":"http://json-schema.org/draft-07/schema#","type":"string"}`,
+	} {
+		if _, err := structuredoutput.Compile(json.RawMessage(schema)); err != nil {
+			t.Errorf("%s: %v", name, err)
+		}
 	}
 }
