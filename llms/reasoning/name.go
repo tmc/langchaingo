@@ -32,3 +32,13 @@ func splitPlatformPrefix(model string) (vendor, rest string) {
 		vendor, rest = rest[:idx], rest[idx+1:]
 	}
 }
+
+// hasGeneration rejects a trailing digit, so it must not be used where the digits
+// that follow are a date rather than a later generation.
+func hasGeneration(model, generation string) bool {
+	rest, ok := strings.CutPrefix(model, generation)
+	if !ok {
+		return false
+	}
+	return rest == "" || rest[0] < '0' || rest[0] > '9'
+}

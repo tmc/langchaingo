@@ -78,7 +78,7 @@ func openAICapsForForm(m string) OpenAIReasoningCaps {
 		return OpenAIReasoningCaps{Known: true, CanDisable: false, Efforts: []string{"low", "medium", "high", "xhigh"}}
 	case openAIGPT5Base(m):
 		return OpenAIReasoningCaps{Known: true, CanDisable: false, Efforts: []string{"minimal", "low", "medium", "high"}}
-	case strings.HasPrefix(m, "gpt-5.1"):
+	case hasGeneration(m, "gpt-5.1"):
 		return OpenAIReasoningCaps{Known: true, CanDisable: true, Efforts: []string{"low", "medium", "high"}}
 	case openAIXHighCeiling(m):
 		return OpenAIReasoningCaps{Known: true, CanDisable: true, Efforts: []string{"low", "medium", "high", "xhigh"}}
@@ -88,17 +88,17 @@ func openAICapsForForm(m string) OpenAIReasoningCaps {
 }
 
 func openAIProVariant(m string) bool {
-	return strings.HasPrefix(m, "gpt-5") && strings.Contains(m, "-pro")
+	return hasGeneration(m, "gpt-5") && strings.Contains(m, "-pro")
 }
 
 func openAIGPT5Base(m string) bool {
 	return m == "gpt-5" || strings.HasPrefix(m, "gpt-5-20") ||
-		strings.HasPrefix(m, "gpt-5-mini") || strings.HasPrefix(m, "gpt-5-nano")
+		hasGeneration(m, "gpt-5-mini") || hasGeneration(m, "gpt-5-nano")
 }
 
 func openAIXHighCeiling(m string) bool {
-	for _, prefix := range []string{"gpt-5.2", "gpt-5.4", "gpt-5.5", "gpt-5.6"} {
-		if strings.HasPrefix(m, prefix) {
+	for _, generation := range []string{"gpt-5.2", "gpt-5.4", "gpt-5.5", "gpt-5.6"} {
+		if hasGeneration(m, generation) {
 			return true
 		}
 	}
@@ -114,8 +114,8 @@ const OpenAIDisableEffort = "none"
 // on a model that honors it.
 func OpenAIAcceptsCustomTemperature(model string) bool {
 	for _, form := range modelSpellings(model) {
-		for _, prefix := range []string{"gpt-5.1", "gpt-5.2", "gpt-5.4"} {
-			if strings.HasPrefix(form, prefix) {
+		for _, generation := range []string{"gpt-5.1", "gpt-5.2", "gpt-5.4"} {
+			if hasGeneration(form, generation) {
 				return true
 			}
 		}

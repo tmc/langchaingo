@@ -122,3 +122,35 @@ func TestClampEffortMovesToAnAcceptedLevel(t *testing.T) {
 		}
 	}
 }
+
+func TestAGenerationDoesNotAnswerForALaterOne(t *testing.T) {
+	t.Parallel()
+
+	for _, tc := range []struct {
+		model string
+		known bool
+		why   string
+	}{
+		{"gpt-5.1", true, "the generation itself"},
+		{"gpt-5.10", false, "a later generation whose name extends gpt-5.1"},
+		{"gpt-5.2", true, "the generation itself"},
+		{"gpt-5.20", false, "a later generation whose name extends gpt-5.2"},
+		{"gpt-5", true, "the generation itself"},
+		{"gpt-51", false, "a name that merely starts with gpt-5"},
+		{"o1", true, "the generation itself"},
+		{"o10", false, "a later generation whose name extends o1"},
+		{"o3", true, "the generation itself"},
+		{"o30", false, "a later generation whose name extends o3"},
+		{"gpt-5-2025-08-07", true, "a dated snapshot: the digits after gpt-5-20 are a date, not a generation"},
+		{"gpt-5-mini-2025-08-07", true, "a dated snapshot of a named variant"},
+		{"o4-mini-2025-04-16", true, "a dated snapshot of the o-series"},
+	} {
+		t.Run(tc.model, func(t *testing.T) {
+			t.Parallel()
+			if got := OpenAIReasoningCapsFor(tc.model).Known; got != tc.known {
+				t.Errorf("OpenAIReasoningCapsFor(%q).Known = %v, want %v — %s",
+					tc.model, got, tc.known, tc.why)
+			}
+		})
+	}
+}

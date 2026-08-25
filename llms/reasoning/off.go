@@ -107,9 +107,9 @@ func isClaudeModel(model string) bool {
 // treated as disablable and left to the API to reject if wrong.
 func openAIMandatoryReasoning(model string) bool {
 	for _, form := range modelSpellings(model) {
-		if strings.HasPrefix(form, "o1") ||
-			strings.HasPrefix(form, "o3") ||
-			strings.HasPrefix(form, "o4-mini") {
+		if hasGeneration(form, "o1") ||
+			hasGeneration(form, "o3") ||
+			hasGeneration(form, "o4-mini") {
 			return true
 		}
 	}
