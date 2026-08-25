@@ -329,6 +329,7 @@ if err != nil {
 agent, err := agents.Initialize(
     llm,
     []tools.Tool{calculator, search},
+    agents.ZeroShotReactDescription,
     agents.WithMaxIterations(5),
 )
 if err != nil {
