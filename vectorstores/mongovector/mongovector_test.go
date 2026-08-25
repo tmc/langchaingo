@@ -843,7 +843,10 @@ func createVectorSearchIndex(
 			doc = cursor.Current
 		} else {
 			if time.Now().After(deadline) {
-				return "", fmt.Errorf("index %s did not become queryable before deadline (last error: %w)", searchName, lastErr)
+				if lastErr != nil {
+					return "", fmt.Errorf("index %s did not become queryable before deadline: %w", searchName, lastErr)
+				}
+				return "", fmt.Errorf("index %s did not become queryable before deadline", searchName)
 			}
 			time.Sleep(2 * time.Second)
 		}
