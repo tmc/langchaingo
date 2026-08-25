@@ -396,7 +396,7 @@ func thinkingRuns(model string, opts llms.CallOptions, wireEffort string) bool {
 	if reasoning.ClaudeSupportsThinking(model) {
 		return reasoning.ClaudeThinkingDefaultsOn(model)
 	}
-	return true
+	return !reasoning.ThinkingOptIn(model)
 }
 
 func isThinkingOnTheWire(wireEffort string) bool {

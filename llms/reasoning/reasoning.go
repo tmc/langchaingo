@@ -316,6 +316,12 @@ func DefaultIsReasoningModel(model string) bool { //nolint:funlen // a flat cata
 	return false
 }
 
+// ThinkingOptIn reports whether the model reasons only when a request asks it to.
+func ThinkingOptIn(model string) bool {
+	m := stripPlatformPrefix(baseModelName(model))
+	return strings.HasPrefix(m, "mistral-medium-3")
+}
+
 // ThinkingMarkedInName reports whether the model name selects a routing variant
 // that already runs with thinking on, not merely a model capable of thinking.
 func ThinkingMarkedInName(model string) bool {

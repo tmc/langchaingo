@@ -168,3 +168,31 @@ func TestAModelThatRejectsSamplingGetsNoSamplingAtAll(t *testing.T) {
 		}
 	}
 }
+
+func TestOptInThinkingKeepsSamplingUntilAsked(t *testing.T) {
+	t.Parallel()
+
+	runSamplingCases(t, []samplingCase{
+		{
+			name:    "no effort leaves the caller's sampling alone",
+			model:   "mistral-medium-3",
+			opts:    []llms.CallOption{llms.WithTemperature(0.3), llms.WithTopP(0.7)},
+			present: []string{`"temperature":0.3`, `"top_p":0.7`},
+		},
+		{
+			name:  "an effort puts the request on the thinking terms",
+			model: "mistral-medium-3",
+			opts: []llms.CallOption{
+				llms.WithTemperature(0.3), llms.WithTopP(0.7), llms.WithReasoning(llms.ReasoningMedium, 0),
+			},
+			present: []string{`"temperature":1`, `"reasoning_effort":"medium"`},
+			absent:  []string{`"top_p"`},
+		},
+		{
+			name:    "the provider-prefixed spelling resolves the same",
+			model:   "mistralai/mistral-medium-3",
+			opts:    []llms.CallOption{llms.WithTemperature(0.3)},
+			present: []string{`"temperature":0.3`},
+		},
+	})
+}
