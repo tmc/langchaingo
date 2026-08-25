@@ -172,15 +172,16 @@ func IsReasoningModel(model string) bool {
 // DefaultIsReasoningModel provides the default reasoning model detection logic.
 // This can be used by LLM implementations that want to extend rather than replace
 // the default detection logic.
-func DefaultIsReasoningModel(model string) bool { //nolint:funlen // a flat catalog of model-family prefix checks; splitting hurts readability
-	modelLower := strings.ToLower(model)
-
-	// Remove provider prefix if present (e.g., "openai/", "anthropic/", "google/")
-	if idx := strings.LastIndex(modelLower, "/"); idx != -1 {
-		modelLower = modelLower[idx+1:]
+func DefaultIsReasoningModel(model string) bool {
+	for _, form := range modelSpellings(model) {
+		if namesReasoningModel(form) {
+			return true
+		}
 	}
-	modelLower = stripPlatformPrefix(modelLower)
+	return false
+}
 
+func namesReasoningModel(modelLower string) bool { //nolint:funlen // a flat catalog of model-family prefix checks; splitting hurts readability
 	if strings.Contains(modelLower, "-chat-latest") {
 		return false
 	}
@@ -318,10 +319,11 @@ func DefaultIsReasoningModel(model string) bool { //nolint:funlen // a flat cata
 
 // ThinkingOptIn reports whether the model reasons only when a request asks it to.
 func ThinkingOptIn(model string) bool {
-	m := stripPlatformPrefix(baseModelName(model))
-	for _, prefix := range []string{"mistral-medium-3", "mistral-small-2603", "solar-pro-3"} {
-		if strings.HasPrefix(m, prefix) {
-			return true
+	for _, form := range modelSpellings(model) {
+		for _, prefix := range []string{"mistral-medium-3", "mistral-small-2603", "solar-pro-3"} {
+			if strings.HasPrefix(form, prefix) {
+				return true
+			}
 		}
 	}
 	return false

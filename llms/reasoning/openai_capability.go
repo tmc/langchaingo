@@ -59,10 +59,15 @@ func (c OpenAIReasoningCaps) ClampEffort(effort string) string {
 // generations (including newer ones) returns Known=false so the caller stays
 // optimistic and the API arbitrates.
 func OpenAIReasoningCapsFor(model string) OpenAIReasoningCaps {
-	m := strings.ToLower(model)
-	if idx := strings.LastIndex(m, "/"); idx != -1 {
-		m = m[idx+1:] // strip a proxy prefix such as "openai/"
+	for _, form := range modelSpellings(model) {
+		if caps := openAICapsForForm(form); caps.Known {
+			return caps
+		}
 	}
+	return OpenAIReasoningCaps{Known: false}
+}
+
+func openAICapsForForm(m string) OpenAIReasoningCaps {
 	if strings.Contains(m, "-chat-latest") {
 		return OpenAIReasoningCaps{Known: false}
 	}
@@ -108,13 +113,11 @@ const OpenAIDisableEffort = "none"
 // temperature other than the default, so the caller's value is not overwritten
 // on a model that honors it.
 func OpenAIAcceptsCustomTemperature(model string) bool {
-	m := strings.ToLower(model)
-	if idx := strings.LastIndex(m, "/"); idx != -1 {
-		m = m[idx+1:]
-	}
-	for _, prefix := range []string{"gpt-5.1", "gpt-5.2", "gpt-5.4"} {
-		if strings.HasPrefix(m, prefix) {
-			return true
+	for _, form := range modelSpellings(model) {
+		for _, prefix := range []string{"gpt-5.1", "gpt-5.2", "gpt-5.4"} {
+			if strings.HasPrefix(form, prefix) {
+				return true
+			}
 		}
 	}
 	return false

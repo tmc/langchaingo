@@ -12,12 +12,15 @@ func LikelyReasoningModel(model string) bool {
 		return true
 	}
 
-	m := strings.ToLower(model)
-	if idx := strings.LastIndex(m, "/"); idx != -1 {
-		m = m[idx+1:]
+	for _, form := range modelSpellings(model) {
+		if likelyReasoningFamily(form) {
+			return true
+		}
 	}
-	m = stripPlatformPrefix(m)
+	return false
+}
 
+func likelyReasoningFamily(m string) bool {
 	if namesNonTextModality(m) {
 		return false
 	}

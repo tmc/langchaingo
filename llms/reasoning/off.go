@@ -106,11 +106,12 @@ func isClaudeModel(model string) bool {
 // hard-disabled (their effort floor is minimal/low). GPT-5.x and unknowns are
 // treated as disablable and left to the API to reject if wrong.
 func openAIMandatoryReasoning(model string) bool {
-	m := strings.ToLower(model)
-	if idx := strings.LastIndex(m, "/"); idx != -1 {
-		m = m[idx+1:]
+	for _, form := range modelSpellings(model) {
+		if strings.HasPrefix(form, "o1") ||
+			strings.HasPrefix(form, "o3") ||
+			strings.HasPrefix(form, "o4-mini") {
+			return true
+		}
 	}
-	return strings.HasPrefix(m, "o1") ||
-		strings.HasPrefix(m, "o3") ||
-		strings.HasPrefix(m, "o4-mini")
+	return false
 }
