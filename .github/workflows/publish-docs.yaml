@@ -74,19 +74,3 @@ jobs:
           artifact_name: github-pages
           preview: ${{ github.ref != 'refs/heads/main-vxcontrol' }}
 
-      - name: Comment PR
-        if: |
-          github.event_name == 'pull_request' &&
-          (github.ref == 'refs/heads/docs-test' ||
-           startsWith(github.ref, 'refs/heads/docs/'))
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const url = '${{ steps.deployment.outputs.page_url }}';
-            const message = `📚 Documentation preview available at: ${url}`;
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: message
-            });
