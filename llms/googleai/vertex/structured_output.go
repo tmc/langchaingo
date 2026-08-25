@@ -59,20 +59,11 @@ func applyVertexResponseFormat(model *genai.GenerativeModel, opts *llms.CallOpti
 // candidate against the original schema.
 func validateVertexStructuredOutput(opts *llms.CallOptions, resp *llms.ContentResponse) error {
 	so := opts.StructuredOutput
-	if so == nil || resp == nil {
+	if so == nil {
 		return nil
 	}
-	model := opts.GetModel()
-	stop := wireFinishReason(genai.FinishReasonStop)
-	for i, choice := range resp.Choices {
-		if choice.StopReason != stop || len(choice.ToolCalls) > 0 {
-			continue
-		}
-		if err := structuredoutput.Validate(so.Schema, providerVertex, model, i, choice.StopReason, choice.Content); err != nil {
-			return err
-		}
-	}
-	return nil
+	return structuredoutput.ValidateFinalChoices(
+		so.Schema, providerVertex, opts.GetModel(), wireFinishReason(genai.FinishReasonStop), resp)
 }
 
 func unsupportedVertexSchema(reason string) error {

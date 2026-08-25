@@ -256,19 +256,11 @@ func applyGoogleResponseFormat(config *genai.GenerateContentConfig, opts *llms.C
 // outcomes keep their prior semantics and are not validated as final JSON.
 func validateGoogleStructuredOutput(opts *llms.CallOptions, resp *llms.ContentResponse) error {
 	so := opts.StructuredOutput
-	if so == nil || resp == nil {
+	if so == nil {
 		return nil
 	}
-	model := opts.GetModel()
-	for i, choice := range resp.Choices {
-		if choice.StopReason != string(genai.FinishReasonStop) || len(choice.ToolCalls) > 0 {
-			continue
-		}
-		if err := structuredoutput.Validate(so.Schema, providerGoogleAI, model, i, choice.StopReason, choice.Content); err != nil {
-			return err
-		}
-	}
-	return nil
+	return structuredoutput.ValidateFinalChoices(
+		so.Schema, providerGoogleAI, opts.GetModel(), string(genai.FinishReasonStop), resp)
 }
 
 func (g *GoogleAI) generateFromSingleMessage(

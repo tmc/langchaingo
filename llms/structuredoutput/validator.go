@@ -77,3 +77,24 @@ func wrap(provider, model string, choice int, stopReason string, cause error) er
 		Cause:      cause,
 	}
 }
+
+// ValidateFinalChoices validates every choice that finished normally against the
+// schema. normalStop is the vendor's spelling of an ordinary finish: a choice
+// that stopped for any other reason, or that answered with a tool call, carries
+// no final JSON and is left alone.
+func ValidateFinalChoices(
+	schema json.RawMessage, provider, model, normalStop string, resp *llms.ContentResponse,
+) error {
+	if len(schema) == 0 || resp == nil {
+		return nil
+	}
+	for i, choice := range resp.Choices {
+		if choice.StopReason != normalStop || len(choice.ToolCalls) > 0 {
+			continue
+		}
+		if err := Validate(schema, provider, model, i, choice.StopReason, choice.Content); err != nil {
+			return err
+		}
+	}
+	return nil
+}
