@@ -99,7 +99,7 @@ func ResolveOff(model string, p Provider) OffWire {
 }
 
 func isClaudeModel(model string) bool {
-	return strings.Contains(strings.ToLower(model), "claude")
+	return strings.Contains(baseModelName(model), "claude")
 }
 
 // openAIMandatoryReasoning reports the OpenAI reasoning families that cannot be

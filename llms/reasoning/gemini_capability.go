@@ -8,6 +8,14 @@ import "strings"
 // model-string checks. Provider-wire specifics that need the genai types
 // (thinking_level mapping, the temperature value) stay in the googleai adapter.
 
+func baseModelName(model string) string {
+	m := strings.ToLower(model)
+	if idx := strings.LastIndex(m, "/"); idx != -1 {
+		m = m[idx+1:]
+	}
+	return m
+}
+
 func hasFamily(model, family string) bool {
 	rest := model
 	for {
@@ -25,7 +33,7 @@ func hasFamily(model, family string) bool {
 // GeminiSupportsThinking reports whether the model belongs to a Google thinking
 // family: Gemini 2.5, Gemini 3.x, or Gemma 4.
 func GeminiSupportsThinking(model string) bool {
-	m := strings.ToLower(model)
+	m := baseModelName(model)
 	return hasFamily(m, "gemini-2.5") ||
 		hasFamily(m, "gemini-3") ||
 		hasFamily(m, "gemma-4")
@@ -35,7 +43,7 @@ func GeminiSupportsThinking(model string) bool {
 // thinking_level control (Gemini 3.x), where thinking_budget is deprecated,
 // instead of a token budget. Gemini 3 also recommends running at temperature 1.0.
 func GeminiUsesThinkingLevel(model string) bool {
-	return hasFamily(strings.ToLower(model), "gemini-3")
+	return hasFamily(baseModelName(model), "gemini-3")
 }
 
 // geminiKnownNonThinking reports whether the model is a pre-thinking Gemini/Gemma
@@ -43,7 +51,7 @@ func GeminiUsesThinkingLevel(model string) bool {
 // control at all. Unclassified names are NOT matched, staying optimistic so a
 // future thinking model is not wrongly treated as non-thinking.
 func geminiKnownNonThinking(model string) bool {
-	m := strings.ToLower(model)
+	m := baseModelName(model)
 	return hasFamily(m, "gemini-1") ||
 		hasFamily(m, "gemini-2.0") ||
 		hasFamily(m, "gemma-1") ||
@@ -56,7 +64,7 @@ func geminiKnownNonThinking(model string) bool {
 // and Gemini 3.x (budget:0 is ignored) cannot. Unclassified Google models are
 // treated as disablable (optimistic: attempt it, let the API be the backstop).
 func GeminiCanDisable(model string) bool {
-	m := strings.ToLower(model)
+	m := baseModelName(model)
 	if GeminiThinkingOffByDefault(m) {
 		return true
 	}
@@ -72,7 +80,7 @@ func GeminiCanDisable(model string) bool {
 // GeminiThinkingOffByDefault reports whether the model leaves thinking off until
 // asked, so omitting the thinking config already yields "off".
 func GeminiThinkingOffByDefault(model string) bool {
-	m := strings.ToLower(model)
+	m := baseModelName(model)
 	if !strings.Contains(m, "flash-lite") {
 		return false
 	}
