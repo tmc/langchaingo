@@ -31,6 +31,10 @@ func LikelyReasoningModel(model string) bool {
 		return !claudePreThinking(m)
 	case strings.HasPrefix(m, "gemini-"), strings.HasPrefix(m, "gemma-"):
 		return !geminiKnownNonThinking(m)
+	case strings.HasPrefix(m, "qwen"):
+		return !qwenPreReasoning(m)
+	case strings.HasPrefix(m, "qvq"):
+		return true
 	}
 	return false
 }
@@ -56,6 +60,13 @@ func claudePreThinking(m string) bool {
 		strings.HasPrefix(c, "claude-v2") ||
 		strings.HasPrefix(c, "claude-instant") ||
 		strings.HasPrefix(c, "claude-3")
+}
+
+func qwenPreReasoning(m string) bool {
+	return strings.HasPrefix(m, "qwen1") ||
+		strings.HasPrefix(m, "qwen2") ||
+		strings.HasPrefix(m, "qwen-1") ||
+		strings.HasPrefix(m, "qwen-2")
 }
 
 // isOSeries matches the OpenAI o-series naming (o1, o3, o4-mini, successors);

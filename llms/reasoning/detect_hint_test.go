@@ -84,3 +84,41 @@ func TestFlashLiteIsRecognisedOnlyWithinTheGoogleFamilies(t *testing.T) {
 		}
 	}
 }
+
+func TestQwenHintIsOptimisticWithoutMovingTheWire(t *testing.T) {
+	t.Parallel()
+
+	for _, tc := range []struct {
+		model string
+		want  bool
+	}{
+		{"qwen3-coder-flash", true},
+		{"qwen3-coder-plus", true},
+		{"qwen3-14b", true},
+		{"qwen3.5-flash", true},
+		{"qwen3.6-plus", true},
+		{"qwen3.7-max", true},
+		{"qwen4-max", true},
+		{"qwen-plus", true},
+		{"qwen-turbo", true},
+		{"qwen-max", true},
+		{"qwen/qwen3-32b", true},
+		{"qwen.qwen3-32b-v1:0", true},
+		{"Qwen/Qwen3.6-27B-FP8", true},
+		{"qvq-max", true},
+		{"qvq-72b-preview", true},
+		{"qwen2.5-72b-instruct", false},
+		{"qwen2-7b", false},
+		{"qwen1.5-14b", false},
+		{"qwen-1.8b", false},
+		{"qwen-2.5-coder", false},
+	} {
+		if got := LikelyReasoningModel(tc.model); got != tc.want {
+			t.Errorf("LikelyReasoningModel(%q) = %v, want %v", tc.model, got, tc.want)
+		}
+		if tc.want && IsReasoningModel(tc.model) {
+			t.Errorf("IsReasoningModel(%q) = true: the hint must not widen the wire path,"+
+				" which pins temperature only for an explicit thinking marker", tc.model)
+		}
+	}
+}
