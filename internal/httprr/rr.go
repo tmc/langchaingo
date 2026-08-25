@@ -1003,14 +1003,18 @@ func normalizeGoogleAPIClientHeader(header string) string {
 	originalLen := len(header)
 
 	// Replace each version segment while preserving its length
-	versionPattern := regexp.MustCompile(`(/v?)(\d+\.\d+(?:\.\d+)?)`)
+	versionPattern := regexp.MustCompile(`(/v?(?:go)?)(\d+\.\d+(?:\.\d+)?)`)
 
 	normalized := versionPattern.ReplaceAllStringFunc(header, func(match string) string {
-		// Find the slash and optional 'v'
 		slashIdx := strings.Index(match, "/")
 		prefix := match[:slashIdx+1]
-		if strings.HasPrefix(match[slashIdx+1:], "v") {
+		rest := match[slashIdx+1:]
+		if strings.HasPrefix(rest, "v") {
 			prefix += "v"
+			rest = rest[1:]
+		}
+		if strings.HasPrefix(rest, "go") {
+			prefix += "go"
 		}
 
 		// Calculate how many characters we need for the version part

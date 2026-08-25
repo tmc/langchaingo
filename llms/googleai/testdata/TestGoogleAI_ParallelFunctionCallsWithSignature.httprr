@@ -5,7 +5,7 @@ Host: generativelanguage.googleapis.com
 User-Agent: langchaingo-httprr
 Content-Length: 753
 Content-Type: application/json
-X-Goog-Api-Client: google-genai-sdk/X.XX.X gl-go/go1.26.5
+X-Goog-Api-Client: google-genai-sdk/X.XX.X gl-go/goX.XX.X
 X-Goog-Api-Key: test-api-key
 
 {"contents":[{"parts":[{"text":"What's the temperature in Paris and London?"}],"role":"user"}],"generationConfig":{"candidateCount":1,"maxOutputTokens":1024,"temperature":1,"topK":3,"topP":0.95},"safetySettings":[{"category":"HARM_CATEGORY_DANGEROUS_CONTENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HARASSMENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HATE_SPEECH","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_SEXUALLY_EXPLICIT","threshold":"BLOCK_NONE"}],"tools":[{"functionDeclarations":[{"description":"Get the current temperature for a location","name":"get_temperature","parameters":{"properties":{"location":{"description":"The city name, e.g. Paris","type":"STRING"}},"required":["location"],"type":"OBJECT"}}]}]}HTTP/2.0 200 OK
@@ -77,7 +77,7 @@ Host: generativelanguage.googleapis.com
 User-Agent: langchaingo-httprr
 Content-Length: 1360
 Content-Type: application/json
-X-Goog-Api-Client: google-genai-sdk/X.XX.X gl-go/go1.26.5
+X-Goog-Api-Client: google-genai-sdk/X.XX.X gl-go/goX.XX.X
 X-Goog-Api-Key: test-api-key
 
 {"contents":[{"parts":[{"text":"What's the temperature in Paris and London?"}],"role":"user"},{"parts":[{"functionCall":{"args":{"location":"Paris"},"id":"pkjly1p7","name":"get_temperature"},"thoughtSignature":"ErwCCrkCARFNMg9mMORTMaw4mPhBdF3AK++rCjOH+n+QysYX1w47IEVhSBpnj/qrc50FEW82LTDU4YtPHnpC3SNFH4O9tT12zbhW32B0DsixxEAiIC3OkxXZ9lzOohuckzMCbGMMmAboW06tW+9RKhFpO89BKVIwNTVIdaK46wDQ7/+5o6IsEaKLUwgWCxNy6frMOzRMHZwhd1cb+lO4tWW2uv7euMHXrGfS0f6bv0maY1xHo2IaardO4YR2K9XYKB7YyKP0QyFvb70ToGPagCZ9ehQvUmXQItb22d1gMXDUMichOcsHiawiMxa1mpZI08Nx48vzuYkMtyb4iKy6fmd6cp1XOeD1ijSNdbOOxii6xfEp8Xen0cyaMPjwqHjb5y3xB6IkIIuwx3ezNjabj4o/Rc2tHD87deZ81H+Q8Q=="},{"functionCall":{"args":{"location":"London"},"id":"bnxwmmb1","name":"get_temperature"}}],"role":"model"},{"parts":[{"functionResponse":{"id":"pkjly1p7","name":"get_temperature","response":{"response":"22°C"}}},{"functionResponse":{"id":"bnxwmmb1","name":"get_temperature","response":{"response":"22°C"}}}],"role":"user"}],"generationConfig":{"candidateCount":1,"maxOutputTokens":512,"temperature":1,"topK":3,"topP":0.95},"safetySettings":[{"category":"HARM_CATEGORY_DANGEROUS_CONTENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HARASSMENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HATE_SPEECH","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_SEXUALLY_EXPLICIT","threshold":"BLOCK_NONE"}]}HTTP/2.0 200 OK

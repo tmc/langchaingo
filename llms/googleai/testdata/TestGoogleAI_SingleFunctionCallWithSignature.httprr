@@ -5,7 +5,7 @@ Host: generativelanguage.googleapis.com
 User-Agent: langchaingo-httprr
 Content-Length: 767
 Content-Type: application/json
-X-Goog-Api-Client: google-genai-sdk/X.XX.X gl-go/go1.26.5
+X-Goog-Api-Client: google-genai-sdk/X.XX.X gl-go/goX.XX.X
 X-Goog-Api-Key: test-api-key
 
 {"contents":[{"parts":[{"text":"Use the multiply function to calculate 7 times 9"}],"role":"user"}],"generationConfig":{"candidateCount":1,"maxOutputTokens":1024,"temperature":1,"topK":3,"topP":0.95},"safetySettings":[{"category":"HARM_CATEGORY_DANGEROUS_CONTENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HARASSMENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HATE_SPEECH","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_SEXUALLY_EXPLICIT","threshold":"BLOCK_NONE"}],"tools":[{"functionDeclarations":[{"description":"Multiply two numbers together","name":"multiply","parameters":{"properties":{"a":{"description":"First number","type":"NUMBER"},"b":{"description":"Second number","type":"NUMBER"}},"required":["a","b"],"type":"OBJECT"}}]}]}HTTP/2.0 200 OK
@@ -69,7 +69,7 @@ Host: generativelanguage.googleapis.com
 User-Agent: langchaingo-httprr
 Content-Length: 1060
 Content-Type: application/json
-X-Goog-Api-Client: google-genai-sdk/X.XX.X gl-go/go1.26.5
+X-Goog-Api-Client: google-genai-sdk/X.XX.X gl-go/goX.XX.X
 X-Goog-Api-Key: test-api-key
 
 {"contents":[{"parts":[{"text":"Use the multiply function to calculate 7 times 9"}],"role":"user"},{"parts":[{"functionCall":{"args":{"a":7,"b":9},"id":"n5u72jdq","name":"multiply"},"thoughtSignature":"EvQBCvEBARFNMg+DspE09ruHIitzO7Rtj6iul3YH7KKQoEXyKfo7w8/KtUpPI1e21bLS4HXmejeLtRoHIXVdbNMws/7g0dM288dfRw9VeGqygB+ecVeBqKBvsS/V0TgoCDLQKN4jWA5VEY7g/04IpcwfaT9FX/knJtSwWzWI+ybxZ9HcdbeyrHGa2J8UVhdaWMPC0bN1+7xnlfFPv6YYN0eQpbZInobATWoCHDuPt5xcv/cXZZtckE99zJAf+RTvSr1sSJbFwQ6/t3MBNKyZQ48AZOarHbqcx9iw+wBWWrptT2o6/d/8Klx6KWBaYwK+TmVmDNEWdg=="}],"role":"model"},{"parts":[{"functionResponse":{"id":"n5u72jdq","name":"multiply","response":{"response":"63"}}}],"role":"user"}],"generationConfig":{"candidateCount":1,"maxOutputTokens":512,"temperature":1,"topK":3,"topP":0.95},"safetySettings":[{"category":"HARM_CATEGORY_DANGEROUS_CONTENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HARASSMENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HATE_SPEECH","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_SEXUALLY_EXPLICIT","threshold":"BLOCK_NONE"}]}HTTP/2.0 200 OK

@@ -31,6 +31,16 @@ func TestNormalizeGoogleAPIClientHeader(t *testing.T) {
 			input:    "client/unknown sdk/latest rest/UNKNOWN",
 			expected: "client/unknown sdk/latest rest/UNKNOWN",
 		},
+		{
+			name:     "Go toolchain version carries a go prefix",
+			input:    "google-genai-sdk/1.29.0 gl-go/go1.26.5",
+			expected: "google-genai-sdk/X.XX.X gl-go/goX.XX.X",
+		},
+		{
+			name:     "A newer patch of the same toolchain normalizes the same way",
+			input:    "google-genai-sdk/1.29.0 gl-go/go1.26.7",
+			expected: "google-genai-sdk/X.XX.X gl-go/goX.XX.X",
+		},
 	}
 
 	for _, tt := range tests {

@@ -5,7 +5,7 @@ Host: generativelanguage.googleapis.com
 User-Agent: langchaingo-httprr
 Content-Length: 715
 Content-Type: application/json
-X-Goog-Api-Client: google-genai-sdk/X.XX.X gl-go/go1.26.5
+X-Goog-Api-Client: google-genai-sdk/X.XX.X gl-go/goX.XX.X
 X-Goog-Api-Key: test-api-key
 
 {"contents":[{"parts":[{"text":"What is 15 * 7?"}],"role":"user"}],"generationConfig":{"candidateCount":1,"maxOutputTokens":16384,"temperature":0.5,"topK":3,"topP":0.95},"safetySettings":[{"category":"HARM_CATEGORY_DANGEROUS_CONTENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HARASSMENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HATE_SPEECH","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_SEXUALLY_EXPLICIT","threshold":"BLOCK_NONE"}],"tools":[{"functionDeclarations":[{"description":"Perform a calculation","name":"calculate","parameters":{"properties":{"expression":{"description":"Mathematical expression to evaluate","type":"STRING"}},"required":["expression"],"type":"OBJECT"}}]}]}HTTP/2.0 200 OK
@@ -71,7 +71,7 @@ Host: generativelanguage.googleapis.com
 User-Agent: langchaingo-httprr
 Content-Length: 1215
 Content-Type: application/json
-X-Goog-Api-Client: google-genai-sdk/X.XX.X gl-go/go1.26.5
+X-Goog-Api-Client: google-genai-sdk/X.XX.X gl-go/goX.XX.X
 X-Goog-Api-Key: test-api-key
 
 {"contents":[{"parts":[{"text":"What is 15 * 7?"}],"role":"user"},{"parts":[{"functionCall":{"args":{"expression":"15 * 7"},"name":"calculate"},"thoughtSignature":"CtIBARFNMg9bLy4DsYEqPnNlA2GOfovJLcDUSfrqxZniZfiwLCyVkytZps9AKV3nMLR671S4l0WLCm7rJXxX2Sz0iB0te5OhnULyEkj0lvMH3qXaM7QXgaHYmnSe3+pwhcGHDZvcBAjKSrJcYzc01XVNnD8hC+4lt74upVT1cLI/8b4ttwwSENdUD7NGD6Gbtr8bx22+yQ+2T0PV4717BEvPCax42DK2WGR86ybVHZJ7SyCsf4oPAt8DrSLjJ6N7Y++gAKpzSeKQzyaMsE1P2z4Dmcir"}],"role":"model"},{"parts":[{"functionResponse":{"name":"calculate","response":{"response":"105"}}}],"role":"user"}],"generationConfig":{"candidateCount":1,"maxOutputTokens":16384,"temperature":0.5,"topK":3,"topP":0.95},"safetySettings":[{"category":"HARM_CATEGORY_DANGEROUS_CONTENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HARASSMENT","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_HATE_SPEECH","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_SEXUALLY_EXPLICIT","threshold":"BLOCK_NONE"}],"tools":[{"functionDeclarations":[{"description":"Perform a calculation","name":"calculate","parameters":{"properties":{"expression":{"description":"Mathematical expression to evaluate","type":"STRING"}},"required":["expression"],"type":"OBJECT"}}]}]}HTTP/2.0 200 OK
