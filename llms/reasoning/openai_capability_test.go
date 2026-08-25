@@ -14,9 +14,9 @@ func TestOpenAIReasoningCapsFor(t *testing.T) {
 		efforts    []string
 	}{
 		{"gpt-5-pro", true, false, []string{"high"}},
-		{"o3-mini", true, false, []string{"low", "medium", "high", "xhigh"}},
-		{"o1-preview", true, false, []string{"low", "medium", "high", "xhigh"}},
-		{"o4-mini", true, false, []string{"low", "medium", "high", "xhigh"}},
+		{"o3-mini", true, false, []string{"low", "medium", "high"}},
+		{"o1-preview", true, false, []string{"low", "medium", "high"}},
+		{"o4-mini", true, false, []string{"low", "medium", "high"}},
 		{"gpt-5", true, false, []string{"minimal", "low", "medium", "high"}},
 		{"gpt-5-2025-08-07", true, false, []string{"minimal", "low", "medium", "high"}},
 		{"gpt-5-mini", true, false, []string{"minimal", "low", "medium", "high"}},
@@ -56,8 +56,8 @@ func TestOpenAIReasoningCaps_ClampEffort(t *testing.T) {
 		{"gpt-5-pro", "low", "high"},
 		{"gpt-5-pro", "max", "high"},
 		{"gpt-5-pro", "high", "high"},
-		{"o3", "xhigh", "xhigh"},
-		{"o4-mini", "max", "xhigh"},
+		{"o3", "xhigh", "high"},
+		{"o4-mini", "max", "high"},
 		{"gpt-5", "xhigh", "high"},
 		{"gpt-5-mini", "minimal", "minimal"},
 		{"gpt-5.1", "xhigh", "high"},

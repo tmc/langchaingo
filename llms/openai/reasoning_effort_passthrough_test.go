@@ -228,10 +228,10 @@ func TestReasoningEffortClampedPerModel(t *testing.T) {
 		}
 	})
 
-	t.Run("o-series keeps xhigh", func(t *testing.T) {
+	t.Run("o-series clamps xhigh to high", func(t *testing.T) {
 		body := capture(t, "o3", llms.ReasoningXHigh)
-		if !strings.Contains(body, `"reasoning_effort":"xhigh"`) {
-			t.Fatalf("o3 accepts xhigh and must not be downgraded, got body: %s", body)
+		if !strings.Contains(body, `"reasoning_effort":"high"`) {
+			t.Fatalf("o3 takes only low/medium/high, got body: %s", body)
 		}
 	})
 
