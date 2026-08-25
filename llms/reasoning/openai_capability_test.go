@@ -14,6 +14,9 @@ func TestOpenAIReasoningCapsFor(t *testing.T) {
 		efforts    []string
 	}{
 		{"gpt-5-pro", true, false, []string{"high"}},
+		{"gpt-5.2-pro", true, false, []string{"medium", "high", "xhigh"}},
+		{"gpt-5.4-pro", true, false, []string{"medium", "high", "xhigh"}},
+		{"gpt-5.5-pro", true, false, []string{"medium", "high", "xhigh"}},
 		{"o3-mini", true, false, []string{"low", "medium", "high", "xhigh"}},
 		{"o1-preview", true, false, []string{"low", "medium", "high", "xhigh"}},
 		{"o4-mini", true, false, []string{"low", "medium", "high", "xhigh"}},

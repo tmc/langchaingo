@@ -1,6 +1,9 @@
 package reasoning
 
-import "testing"
+import (
+	"slices"
+	"testing"
+)
 
 func TestClaudePredicatesAgreeAcrossNameForms(t *testing.T) {
 	t.Parallel()
@@ -106,10 +109,18 @@ func TestStripPlatformPrefixLeavesVersionsAlone(t *testing.T) {
 func TestOpenAISuffixVariantsDoNotInheritTheBaseRules(t *testing.T) {
 	t.Parallel()
 
-	for _, model := range []string{"gpt-5-pro", "gpt-5.1-pro", "gpt-5.2-pro", "gpt-5.4-pro"} {
-		caps := OpenAIReasoningCapsFor(model)
-		if !caps.Known || caps.CanDisable || len(caps.Efforts) != 1 || caps.Efforts[0] != "high" {
-			t.Errorf("%s: want the Pro caps (high only, not disablable), got %+v", model, caps)
+	for _, tc := range []struct {
+		model   string
+		efforts []string
+	}{
+		{"gpt-5-pro", []string{"high"}},
+		{"gpt-5.1-pro", []string{"high"}},
+		{"gpt-5.2-pro", []string{"medium", "high", "xhigh"}},
+		{"gpt-5.4-pro", []string{"medium", "high", "xhigh"}},
+	} {
+		caps := OpenAIReasoningCapsFor(tc.model)
+		if !caps.Known || caps.CanDisable || !slices.Equal(caps.Efforts, tc.efforts) {
+			t.Errorf("%s: want the Pro caps (%v, not disablable), got %+v", tc.model, tc.efforts, caps)
 		}
 	}
 

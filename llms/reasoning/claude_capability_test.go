@@ -62,6 +62,8 @@ func TestClaudeEffortsFor(t *testing.T) {
 		{"claude-sonnet-4-6", []string{"low", "medium", "high", "max"}},
 		{"claude-mythos-preview", []string{"low", "medium", "high", "max"}},
 		{"claude-opus-4-5-20251101", []string{"low", "medium", "high"}},
+		{"claude-sonnet-4-5-20250929", nil},
+		{"us.anthropic.claude-haiku-4-5-20251001-v1:0", nil},
 		{"gpt-5.5", nil},
 	}
 	for _, tc := range cases {

@@ -73,6 +73,9 @@ func openAICapsForForm(m string) OpenAIReasoningCaps {
 	}
 	switch {
 	case openAIProVariant(m):
+		if openAIXHighCeiling(m) {
+			return OpenAIReasoningCaps{Known: true, CanDisable: false, Efforts: []string{"medium", "high", "xhigh"}}
+		}
 		return OpenAIReasoningCaps{Known: true, CanDisable: false, Efforts: []string{"high"}}
 	case openAIMandatoryReasoning(m):
 		return OpenAIReasoningCaps{Known: true, CanDisable: false, Efforts: []string{"low", "medium", "high", "xhigh"}}

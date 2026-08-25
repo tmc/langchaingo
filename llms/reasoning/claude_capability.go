@@ -112,7 +112,11 @@ var claudeEffortsByKind = map[ClaudeReasoningKind][]string{
 // ClaudeEffortsFor returns the effort levels the model's generation accepts, or
 // nil for a model this package does not classify.
 func ClaudeEffortsFor(model string) []string {
-	return slices.Clone(claudeEffortsByKind[ClaudeReasoningKindFor(model)])
+	kind := ClaudeReasoningKindFor(model)
+	if kind == ClaudeReasoningBudgetOnly && !containsAny(canonicalClaude(model), budgetEffortClaude) {
+		return nil
+	}
+	return slices.Clone(claudeEffortsByKind[kind])
 }
 
 var claudeEffortRank = map[string]int{"low": 1, "medium": 2, "high": 3, "xhigh": 4, "max": 5}
