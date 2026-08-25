@@ -34,9 +34,8 @@ type OpenAIReasoningCaps struct {
 
 // ClampEffort moves a requested effort to one the model accepts: above the
 // ceiling drops to the ceiling, below the floor rises to the floor, and anything
-// the set does not list steps down to the nearest level it does (a model
-// accepting a single effort, e.g. GPT-5 Pro, pins to it). Unknown models and
-// efforts outside the scale are returned unchanged.
+// the set does not list steps down to the nearest level it does. Unknown models
+// and efforts outside the scale are returned unchanged.
 func (c OpenAIReasoningCaps) ClampEffort(effort string) string {
 	want, ranked := openAIEffortRank[effort]
 	if !c.Known || !ranked || len(c.Efforts) == 0 {
