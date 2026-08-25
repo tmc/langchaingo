@@ -390,7 +390,7 @@ func thinkingRuns(model string, opts llms.CallOptions, wireEffort string) bool {
 	if opts.Reasoning.IsDisabled() || !reasoning.IsReasoningModel(model) {
 		return false
 	}
-	if isThinkingOnTheWire(wireEffort) {
+	if isThinkingOnTheWire(wireEffort) || reasoning.ThinkingMarkedInName(model) {
 		return true
 	}
 	if reasoning.ClaudeSupportsThinking(model) {

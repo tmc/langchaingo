@@ -80,6 +80,53 @@ func TestLegacyBudgetStaysBelowMaxTokens(t *testing.T) {
 		"a missing max-tokens must be substituted once, not twice with different values")
 }
 
+func TestLegacyBudgetThinkingReachesEveryBudgetGeneration(t *testing.T) {
+	t.Parallel()
+
+	const resp = `{"id":"x","type":"message","role":"assistant","model":"m",` +
+		`"content":[{"type":"text","text":"ok"}],"stop_reason":"end_turn",` +
+		`"usage":{"input_tokens":1,"output_tokens":1}}`
+
+	for _, model := range []string{
+		"anthropic.claude-3-7-sonnet-20250219-v1:0",
+		"us.anthropic.claude-3-7-sonnet-20250219-v1:0",
+		"anthropic.claude-opus-4-20250514-v1:0",
+		"anthropic.claude-sonnet-4-20250514-v1:0",
+		"anthropic.claude-sonnet-4-5-20250929-v1:0",
+	} {
+		t.Run(model, func(t *testing.T) {
+			t.Parallel()
+
+			llm, sent := legacyLLMCapturing(t, resp, bedrock.WithModel(model))
+
+			_, err := llm.GenerateContent(context.Background(),
+				[]llms.MessageContent{llms.TextParts(llms.ChatMessageTypeHuman, "hi")},
+				llms.WithReasoning(llms.ReasoningLow, 0))
+			require.NoError(t, err)
+
+			var got struct {
+				Temperature float64 `json:"temperature"`
+				Thinking    *struct {
+					Type         string `json:"type"`
+					BudgetTokens int    `json:"budget_tokens"`
+				} `json:"thinking"`
+				OutputConfig *struct {
+					Effort string `json:"effort"`
+				} `json:"output_config"`
+			}
+			require.NoError(t, json.Unmarshal([]byte(*sent), &got))
+
+			require.NotNil(t, got.Thinking, "budget generation must receive a thinking block")
+			assert.Equal(t, "enabled", got.Thinking.Type)
+			assert.Positive(t, got.Thinking.BudgetTokens)
+			assert.InDelta(t, 1.0, got.Temperature, 1e-9,
+				"budget thinking runs at temperature 1")
+			assert.Nil(t, got.OutputConfig,
+				"a budget-only generation takes no effort alongside the budget")
+		})
+	}
+}
+
 func writeBedrockChunk(t *testing.T, w io.Writer, enc *eventstream.Encoder, chunk string) {
 	t.Helper()
 

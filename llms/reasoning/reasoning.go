@@ -241,7 +241,7 @@ func DefaultIsReasoningModel(model string) bool { //nolint:funlen // a flat cata
 	// Qwen reasoning models. Qwen3.x thinking is user-toggleable with configurable
 	// sampling, so the bare qwen3 prefix must not force temperature pinning; only
 	// an explicit "thinking" marker or the QwQ line count as always-on reasoning.
-	if (strings.HasPrefix(modelLower, "qwen") && strings.Contains(modelLower, "thinking")) ||
+	if (strings.HasPrefix(modelLower, "qwen") && ThinkingMarkedInName(modelLower)) ||
 		strings.Contains(modelLower, "qwq-") {
 		return true
 	}
@@ -314,6 +314,12 @@ func DefaultIsReasoningModel(model string) bool { //nolint:funlen // a flat cata
 	}
 
 	return false
+}
+
+// ThinkingMarkedInName reports whether the model name selects a routing variant
+// that already runs with thinking on, not merely a model capable of thinking.
+func ThinkingMarkedInName(model string) bool {
+	return strings.Contains(strings.ToLower(model), "thinking")
 }
 
 func stripPlatformPrefix(model string) string {

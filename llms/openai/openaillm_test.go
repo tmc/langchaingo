@@ -869,7 +869,80 @@ func TestErrorMapping(t *testing.T) {
 	}
 }
 
-// TestCreateChatRequest_ReasoningModelTemperature tests temperature adjustment for reasoning models
+var reasoningTemperatureCases = []struct {
+	name                string
+	model               string
+	temperature         float64
+	expectedTemperature float64
+}{
+	{
+		name:                "reasoning model o1-preview with non-1.0 temperature",
+		model:               "o1-preview",
+		temperature:         0.7,
+		expectedTemperature: 1.0,
+	},
+	{
+		name:                "reasoning model o1-mini with zero temperature",
+		model:               "o1-mini",
+		temperature:         0.0,
+		expectedTemperature: 1.0,
+	},
+	{
+		name:                "reasoning model o3-mini with temperature 0.5",
+		model:               "o3-mini",
+		temperature:         0.5,
+		expectedTemperature: 1.0,
+	},
+	{
+		name:                "reasoning model with temperature already 1.0",
+		model:               "o1-preview",
+		temperature:         1.0,
+		expectedTemperature: 1.0,
+	},
+	{
+		name:                "non-reasoning model gpt-4 preserves temperature",
+		model:               "gpt-4",
+		temperature:         0.7,
+		expectedTemperature: 0.7,
+	},
+	{
+		name:                "non-reasoning model gpt-4o-mini preserves zero temperature",
+		model:               "gpt-4o-mini",
+		temperature:         0.0,
+		expectedTemperature: 0.0,
+	},
+	{
+		name:                "deepseek-r1 reasoning model adjusts temperature",
+		model:               "deepseek-r1",
+		temperature:         0.8,
+		expectedTemperature: 1.0,
+	},
+	{
+		name:                "gemini-2.5-flash reasoning model adjusts temperature",
+		model:               "gemini-2.5-flash-thinking-exp",
+		temperature:         0.3,
+		expectedTemperature: 1.0,
+	},
+	{
+		name:                "claude-3.7-sonnet thinks only when asked and keeps the temperature",
+		model:               "claude-3.7-sonnet",
+		temperature:         0.9,
+		expectedTemperature: 0.9,
+	},
+	{
+		name:                "claude-3.7-sonnet thinking route adjusts temperature",
+		model:               "anthropic/claude-3.7-sonnet:thinking",
+		temperature:         0.9,
+		expectedTemperature: 1.0,
+	},
+	{
+		name:                "claude-sonnet-4-5 thinks only when asked and keeps the temperature",
+		model:               "claude-sonnet-4-5",
+		temperature:         0.3,
+		expectedTemperature: 0.3,
+	},
+}
+
 func TestCreateChatRequest_ReasoningModelTemperature(t *testing.T) {
 	t.Parallel()
 
@@ -879,69 +952,7 @@ func TestCreateChatRequest_ReasoningModelTemperature(t *testing.T) {
 
 	llm := &LLM{client: client}
 
-	tests := []struct {
-		name                string
-		model               string
-		temperature         float64
-		expectedTemperature float64
-	}{
-		{
-			name:                "reasoning model o1-preview with non-1.0 temperature",
-			model:               "o1-preview",
-			temperature:         0.7,
-			expectedTemperature: 1.0,
-		},
-		{
-			name:                "reasoning model o1-mini with zero temperature",
-			model:               "o1-mini",
-			temperature:         0.0,
-			expectedTemperature: 1.0,
-		},
-		{
-			name:                "reasoning model o3-mini with temperature 0.5",
-			model:               "o3-mini",
-			temperature:         0.5,
-			expectedTemperature: 1.0,
-		},
-		{
-			name:                "reasoning model with temperature already 1.0",
-			model:               "o1-preview",
-			temperature:         1.0,
-			expectedTemperature: 1.0,
-		},
-		{
-			name:                "non-reasoning model gpt-4 preserves temperature",
-			model:               "gpt-4",
-			temperature:         0.7,
-			expectedTemperature: 0.7,
-		},
-		{
-			name:                "non-reasoning model gpt-4o-mini preserves zero temperature",
-			model:               "gpt-4o-mini",
-			temperature:         0.0,
-			expectedTemperature: 0.0,
-		},
-		{
-			name:                "deepseek-r1 reasoning model adjusts temperature",
-			model:               "deepseek-r1",
-			temperature:         0.8,
-			expectedTemperature: 1.0,
-		},
-		{
-			name:                "gemini-2.5-flash reasoning model adjusts temperature",
-			model:               "gemini-2.5-flash-thinking-exp",
-			temperature:         0.3,
-			expectedTemperature: 1.0,
-		},
-		{
-			name:                "claude-3.7-sonnet reasoning model adjusts temperature",
-			model:               "claude-3.7-sonnet",
-			temperature:         0.9,
-			expectedTemperature: 1.0,
-		},
-	}
-
-	for _, tt := range tests {
+	for _, tt := range reasoningTemperatureCases {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 

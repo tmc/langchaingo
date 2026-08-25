@@ -44,9 +44,10 @@ var (
 		"claude-opus-4-6", "claude-sonnet-4-6", "claude-mythos-preview",
 	}
 	budgetOnlyClaude = []string{
-		"claude-opus-4-5",
-		"claude-sonnet-4-5",
+		"claude-opus-4-5", "claude-opus-4-1", "claude-opus-4-0", "claude-opus-4-2025",
+		"claude-sonnet-4-5", "claude-sonnet-4-0", "claude-sonnet-4-2025",
 		"claude-haiku-4-5",
+		"claude-3-7",
 	}
 )
 
