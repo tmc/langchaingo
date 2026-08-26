@@ -24,8 +24,18 @@ type ContentReasoning struct {
 	Signature []byte `json:"signature,omitempty"`
 }
 
+// IsEmpty reports whether there is nothing to carry back into the next turn.
+// A signature alone still counts as something to carry, so this must not be
+// narrowed to the content.
 func (r *ContentReasoning) IsEmpty() bool {
 	return r == nil || (r.Content == "" && len(r.Signature) == 0)
+}
+
+// HasContent reports whether the model actually reasoned. A bare signature does
+// not qualify, so asking IsEmpty instead overstates thinking wherever a provider
+// signs an answer it did not think about.
+func (r *ContentReasoning) HasContent() bool {
+	return r != nil && r.Content != ""
 }
 
 func (r *ContentReasoning) String() string {
