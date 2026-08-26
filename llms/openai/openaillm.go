@@ -315,6 +315,9 @@ func (o *LLM) setReasoning(req *openaiclient.ChatRequest, opts llms.CallOptions)
 	}
 
 	model := o.effectiveModel(opts)
+	if !reasoning.AcceptsEffortWire(model) {
+		return "", nil
+	}
 	effort := reasoning.OpenAIReasoningCapsFor(model).ClampEffort(string(opts.Reasoning.GetEffort(opts.GetMaxTokens())))
 	reasoningEffort := llms.ReasoningEffort(reasoning.ClaudeClampEffort(model, effort))
 	reasoningTokens := opts.Reasoning.GetTokens(opts.GetMaxTokens())

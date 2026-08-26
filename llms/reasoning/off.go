@@ -47,9 +47,8 @@ func (e *ErrReasoningOffUnsupported) Error() string {
 
 // ResolveOff decides how to disable thinking for a model on a provider, from the
 // same capability tables the enable path reads. Unknown models get the provider's
-// best-effort disable wire (optimistic: attempt it and let an API error be the
-// backstop) rather than a silent omit, so a caller's explicit "off" is honored
-// wherever the provider can honor it.
+// best-effort disable wire rather than a silent omit, so a caller's explicit
+// "off" is honored wherever the provider can honor it.
 func ResolveOff(model string, p Provider) OffWire {
 	if isClaudeModel(model) {
 		switch {
@@ -86,9 +85,12 @@ func ResolveOff(model string, p Provider) OffWire {
 		if !IsReasoningModel(model) {
 			return OffOmit // non-reasoning model does not think
 		}
-		// A model known to reject disabling (o-series, GPT-5 Pro) is unsupported;
-		// unknown models stay optimistic and attempt "none", with a 400 backstop.
+		// The disable token rides on the effort field, so a door that refuses that
+		// field cannot express "off" at all.
 		if caps := OpenAIReasoningCapsFor(model); caps.Known && !caps.CanDisable {
+			return OffUnsupported
+		}
+		if !AcceptsEffortWire(model) {
 			return OffUnsupported
 		}
 		return OffEffortNone
