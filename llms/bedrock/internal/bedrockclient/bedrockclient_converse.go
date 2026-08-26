@@ -5,6 +5,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"maps"
+	"slices"
 	"strings"
 
 	"github.com/vxcontrol/langchaingo/internal/numutil"
@@ -654,6 +656,27 @@ func converseToolChoice(choice any) types.ToolChoice {
 	}
 }
 
+type converseToolCallBuilder struct {
+	id        string
+	name      string
+	arguments strings.Builder
+}
+
+func (b *converseToolCallBuilder) streamingCall() streaming.ToolCall {
+	return streaming.ToolCall{ID: b.id, Name: b.name, Arguments: b.arguments.String()}
+}
+
+func (b *converseToolCallBuilder) toolCall() llms.ToolCall {
+	return llms.ToolCall{
+		ID:   b.id,
+		Type: "function",
+		FunctionCall: &llms.FunctionCall{
+			Name:      b.name,
+			Arguments: b.arguments.String(),
+		},
+	}
+}
+
 // handleNonStreamingResponse handles non-streaming responses
 func (c *ConverseClient) handleNonStreamingResponse(ctx context.Context, input *bedrockruntime.ConverseInput) (*llms.ContentResponse, error) {
 	response, err := c.client.Converse(ctx, input)
@@ -693,7 +716,7 @@ func (c *ConverseClient) processStreamingResponse(ctx context.Context, response 
 	var signature bytes.Buffer
 	var toolCalls []llms.ToolCall
 	var stopReason string
-	currentToolCalls := make(map[string]*streaming.ToolCall) // Track streaming tool calls by ID
+	currentToolCalls := make(map[int32]*converseToolCallBuilder) // Track streaming tool calls by content block index
 
 	defer streaming.CallWithDone(ctx, callback)
 
@@ -735,15 +758,9 @@ func (c *ConverseClient) processStreamingResponse(ctx context.Context, response 
 						}
 					}
 				case *types.ContentBlockDeltaMemberToolUse:
-					// Handle tool use delta (accumulate input arguments)
 					if delta.Value.Input != nil {
-						// delta.Value.Input is already a partial JSON string
-						inputStr := *delta.Value.Input
-
-						// Find the active tool call and accumulate arguments
-						for _, toolCall := range currentToolCalls {
-							toolCall.Arguments += inputStr
-							break // Only one active tool call at a time typically
+						if builder, ok := currentToolCalls[aws.ToInt32(e.Value.ContentBlockIndex)]; ok {
+							builder.arguments.WriteString(*delta.Value.Input)
 						}
 					}
 				}
@@ -751,61 +768,36 @@ func (c *ConverseClient) processStreamingResponse(ctx context.Context, response 
 		case *types.ConverseStreamOutputMemberContentBlockStart:
 			if e.Value.Start != nil {
 				if toolUse, ok := e.Value.Start.(*types.ContentBlockStartMemberToolUse); ok {
-					// Create streaming tool call, arguments will come through delta events
-					toolCall := &streaming.ToolCall{
-						ID:        *toolUse.Value.ToolUseId,
-						Name:      *toolUse.Value.Name,
-						Arguments: "",
+					currentToolCalls[aws.ToInt32(e.Value.ContentBlockIndex)] = &converseToolCallBuilder{
+						id:   aws.ToString(toolUse.Value.ToolUseId),
+						name: aws.ToString(toolUse.Value.Name),
 					}
-
-					currentToolCalls[*toolUse.Value.ToolUseId] = toolCall
-
-					// Don't send chunk here, will send complete one in ContentBlockStop
 				}
 			}
 		case *types.ConverseStreamOutputMemberContentBlockStop:
-			// Handle tool call completion
-			for _, toolCall := range currentToolCalls {
-				// Send complete tool call through streaming
+			index := aws.ToInt32(e.Value.ContentBlockIndex)
+			if builder, ok := currentToolCalls[index]; ok {
+				delete(currentToolCalls, index)
 				if callback != nil {
-					streamChunk := streaming.Chunk{
+					chunk := streaming.Chunk{
 						Type:     streaming.ChunkTypeToolCall,
-						ToolCall: *toolCall,
+						ToolCall: builder.streamingCall(),
 					}
-					if err := callback(ctx, streamChunk); err != nil {
+					if err := callback(ctx, chunk); err != nil {
 						return nil, err
 					}
 				}
-
-				// Convert streaming tool call to final llms.ToolCall
-				finalToolCall := llms.ToolCall{
-					ID:   toolCall.ID,
-					Type: "function",
-					FunctionCall: &llms.FunctionCall{
-						Name:      toolCall.Name,
-						Arguments: toolCall.Arguments,
-					},
-				}
-				toolCalls = append(toolCalls, finalToolCall)
+				toolCalls = append(toolCalls, builder.toolCall())
 			}
-			// Clear current tool calls after completion
-			currentToolCalls = make(map[string]*streaming.ToolCall)
 		case *types.ConverseStreamOutputMemberMessageStop:
 			// The terminal event carries the stop reason (end_turn, tool_use,
 			// max_tokens, guardrail_intervened, content_filtered, ...).
 			stopReason = string(e.Value.StopReason)
 			// Stream completed - ensure any remaining tool calls are added
-			for _, toolCall := range currentToolCalls {
-				finalToolCall := llms.ToolCall{
-					ID:   toolCall.ID,
-					Type: "function",
-					FunctionCall: &llms.FunctionCall{
-						Name:      toolCall.Name,
-						Arguments: toolCall.Arguments,
-					},
-				}
-				toolCalls = append(toolCalls, finalToolCall)
+			for _, index := range slices.Sorted(maps.Keys(currentToolCalls)) {
+				toolCalls = append(toolCalls, currentToolCalls[index].toolCall())
 			}
+			currentToolCalls = nil
 		}
 	}
 
