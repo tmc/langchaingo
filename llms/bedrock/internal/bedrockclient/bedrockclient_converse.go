@@ -67,6 +67,7 @@ type ConverseInput struct {
 	TopP             *float64
 	StopSequences    []string
 	Tools            []llms.Tool
+	ToolChoice       any
 	StreamingFunc    streaming.Callback
 	ReasoningConfig  *llms.ReasoningConfig
 	EnableCaching    bool
@@ -142,7 +143,7 @@ func (c *ConverseClient) buildConverseInput(input *ConverseInput) (*bedrockrunti
 
 	// Add tool configuration if tools are provided
 	if len(input.Tools) > 0 {
-		toolConfig, err := c.convertToolsToToolConfig(input.Tools)
+		toolConfig, err := c.convertToolsToToolConfig(input.Tools, input.ToolChoice)
 		if err != nil {
 			return nil, fmt.Errorf("failed to convert tools: %w", err)
 		}
@@ -604,7 +605,7 @@ func (c *ConverseClient) convertToolCallInput(args any) (any, error) {
 }
 
 // convertToolsToToolConfig converts llms.Tool to Converse ToolConfiguration
-func (c *ConverseClient) convertToolsToToolConfig(tools []llms.Tool) (*types.ToolConfiguration, error) {
+func (c *ConverseClient) convertToolsToToolConfig(tools []llms.Tool, choice any) (*types.ToolConfiguration, error) {
 	var converseTools []types.Tool
 
 	for _, tool := range tools {
@@ -635,8 +636,22 @@ func (c *ConverseClient) convertToolsToToolConfig(tools []llms.Tool) (*types.Too
 
 	return &types.ToolConfiguration{
 		Tools:      converseTools,
-		ToolChoice: &types.ToolChoiceMemberAuto{},
+		ToolChoice: converseToolChoice(choice),
 	}, nil
+}
+
+// converseToolChoice carries the caller's choice to the wire. An unset or
+// unrecognized choice leaves the decision to the model.
+func converseToolChoice(choice any) types.ToolChoice {
+	name, forced := llms.ForcedToolName(choice)
+	switch {
+	case forced && name != "":
+		return &types.ToolChoiceMemberTool{Value: types.SpecificToolChoice{Name: &name}}
+	case forced:
+		return &types.ToolChoiceMemberAny{}
+	default:
+		return &types.ToolChoiceMemberAuto{}
+	}
 }
 
 // handleNonStreamingResponse handles non-streaming responses

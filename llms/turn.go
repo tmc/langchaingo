@@ -20,6 +20,36 @@ func ForcesToolUse(choice any) bool {
 	return false
 }
 
+// ForcedToolName reports whether the choice demands a tool call, and names the
+// tool when the caller picked one. An empty name with forced=true means "any
+// tool", which every door spells differently.
+func ForcedToolName(choice any) (name string, forced bool) {
+	if !ForcesToolUse(choice) {
+		return "", false
+	}
+	switch c := choice.(type) {
+	case ToolChoice:
+		return functionName(c.Function), true
+	case *ToolChoice:
+		return functionName(c.Function), true
+	case map[string]any:
+		if fn, ok := c["function"].(map[string]any); ok {
+			n, _ := fn["name"].(string)
+			return n, true
+		}
+		n, _ := c["name"].(string)
+		return n, true
+	}
+	return "", true
+}
+
+func functionName(fn *FunctionReference) string {
+	if fn == nil {
+		return ""
+	}
+	return fn.Name
+}
+
 // HasAssistantPrefill reports whether the conversation ends with an assistant
 // turn, which some models reject.
 func HasAssistantPrefill(messages []MessageContent) bool {
