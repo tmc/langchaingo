@@ -61,8 +61,8 @@ func geminiKnownNonThinking(model string) bool {
 
 // GeminiCanDisable reports whether thinking can be turned off via
 // thinkingBudget:0. Gemini 2.5 Flash/Flash-Lite and Gemma 4 can; Gemini 2.5 Pro
-// and Gemini 3.x (budget:0 is ignored) cannot. Unclassified Google models are
-// treated as disablable (optimistic: attempt it, let the API be the backstop).
+// and Gemini 3.x cannot. Unclassified Google models are treated as disablable,
+// so a model this package has not seen is attempted rather than refused.
 func GeminiCanDisable(model string) bool {
 	m := baseModelName(model)
 	if GeminiThinkingOffByDefault(m) {
