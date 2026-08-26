@@ -173,6 +173,14 @@ func TestWithKeepAlive(t *testing.T) {
 	// Use TestCreateEmbedding for embedding tests
 }
 
+func TestWithThinkOption(t *testing.T) {
+	var opts options
+	WithThink(false)(&opts)
+
+	require.NotNil(t, opts.think)
+	assert.False(t, *opts.think)
+}
+
 func TestWithThink(t *testing.T) {
 	ctx := context.Background()
 
@@ -189,7 +197,7 @@ func TestWithThink(t *testing.T) {
 		},
 	}
 
-	// The request should include think:true in options
+	// The request should include think:true at the top level
 	resp, err := llm.GenerateContent(ctx, content)
 	require.NoError(t, err)
 
