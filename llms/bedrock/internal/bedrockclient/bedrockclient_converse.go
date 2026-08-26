@@ -182,22 +182,11 @@ func (c *ConverseClient) buildConverseInput(input *ConverseInput) (*bedrockrunti
 				}
 			}
 		}
-		switch {
-		case reasoning.ClaudeSupportsThinking(input.ModelID):
-			// Known thinking Claude: the model, not the flag, picks the mechanism.
-			if reasoning.ResolveClaudeAdaptive(input.ModelID, input.ReasoningConfig.Adaptive) {
-				setAdaptive()
-			} else {
-				setBudget()
-			}
-		case input.ReasoningConfig.Adaptive && isAnthropicModelID(input.ModelID) &&
-			!reasoning.ClaudePredatesAdaptive(input.ModelID):
-			// Unclassified — assumed newer than the table — Claude generation with an
-			// explicit adaptive request. Known pre-adaptive families are excluded so
-			// adaptive is never sent to a model (e.g. claude-3-5-haiku) that rejects it.
+		switch reasoning.ResolveMechanism(input.ModelID, input.ReasoningConfig.Adaptive,
+			isAnthropicModelID(input.ModelID), c.supportsReasoning(input.ModelID)) {
+		case reasoning.MechanismAdaptive:
 			setAdaptive()
-		case c.supportsReasoning(input.ModelID):
-			// Non-Claude reasoning model (gpt-oss, kimi): budget thinking.
+		case reasoning.MechanismBudget:
 			setBudget()
 		}
 		if additionalModelFields.Thinking != nil {
