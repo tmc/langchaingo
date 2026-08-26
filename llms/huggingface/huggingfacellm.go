@@ -68,9 +68,14 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	resp := &llms.ContentResponse{
 		Choices: []*llms.ContentChoice{
 			{
-				Content: result.Text,
+				Content:    result.Text,
+				StopReason: result.StopReason,
+				Truncated:  llms.IsTruncated(result.StopReason),
 			},
 		},
+	}
+	if err := llms.CheckTruncation(resp, *opts); err != nil {
+		return nil, err
 	}
 	return resp, nil
 }

@@ -34,6 +34,7 @@ type parameters struct {
 	MaxLength         int     `json:"max_length,omitempty"`
 	RepetitionPenalty float64 `json:"repetition_penalty,omitempty"`
 	Seed              int     `json:"seed,omitempty"`
+	Details           bool    `json:"details,omitempty"`
 }
 
 // Chat completions API structures for router-based requests
@@ -56,14 +57,19 @@ type chatCompletionsResponse struct {
 		Message struct {
 			Content string `json:"content"`
 		} `json:"message"`
-		Index int `json:"index"`
+		Index        int    `json:"index"`
+		FinishReason string `json:"finish_reason"`
 	} `json:"choices"`
 }
 
 type (
 	inferenceResponsePayload []inferenceResponse
 	inferenceResponse        struct {
-		Text string `json:"generated_text"`
+		Text    string            `json:"generated_text"`
+		Details *inferenceDetails `json:"details,omitempty"`
+	}
+	inferenceDetails struct {
+		FinishReason string `json:"finish_reason"`
 	}
 )
 
@@ -206,7 +212,8 @@ func (c *Client) runChatCompletions(ctx context.Context, payload *inferencePaylo
 	// Convert to the expected response format
 	response := make(inferenceResponsePayload, 1)
 	response[0] = inferenceResponse{
-		Text: chatResponse.Choices[0].Message.Content,
+		Text:    chatResponse.Choices[0].Message.Content,
+		Details: &inferenceDetails{FinishReason: chatResponse.Choices[0].FinishReason},
 	}
 
 	return response, nil
