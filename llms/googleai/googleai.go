@@ -493,6 +493,9 @@ StreamEnd:
 			GenerationInfo: metadata,
 		}},
 	}
+	if err := checkEmptyStream(lastCandidate, resp.Choices[0], opts); err != nil {
+		return resp, err
+	}
 	// A callback that returned an error stopped the stream early; surface it
 	// (matching the other providers) instead of masking it as a success.
 	if streamErr != nil {
@@ -1094,6 +1097,21 @@ func resolveThinkingConfig(model string, cfg *llms.ReasoningConfig, maxTokens in
 		}
 	}
 	return nil, nil
+}
+
+// checkEmptyStream reports an output limit too small to start an answer.
+func checkEmptyStream(lastCandidate *genai.Candidate, choice *llms.ContentChoice, opts *llms.CallOptions) error {
+	if lastCandidate != nil || opts == nil || opts.MaxTokens == nil || *opts.MaxTokens <= 0 {
+		return nil
+	}
+	if choice.Content != "" || len(choice.ToolCalls) > 0 {
+		return nil
+	}
+	return &llms.Error{
+		Code:     llms.ErrCodeTokenLimit,
+		Message:  "the model returned no candidates: max_tokens is too small to start an answer",
+		Provider: providerGoogleAI,
+	}
 }
 
 // thinkingLevelForEffort maps a reasoning effort to a Gemini thinking_level.
