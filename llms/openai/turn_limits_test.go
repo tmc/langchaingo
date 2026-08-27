@@ -60,6 +60,22 @@ func TestClaudeTurnLimitsOnTheOpenAITransport(t *testing.T) {
 		}
 	})
 
+	t.Run("the OpenAI spelling of a forced tool is refused too", func(t *testing.T) {
+		t.Parallel()
+		for _, choice := range []any{
+			"required",
+			llms.ToolChoice{Type: "function", Function: &llms.FunctionReference{Name: "calc"}},
+			map[string]any{"type": "function", "function": map[string]any{"name": "calc"}},
+		} {
+			err := turnLimitErr(t, "claude-sonnet-4-5", askedFor("hi"),
+				thinking, llms.WithToolChoice(choice))
+			var target *reasoning.ErrForcedToolUseWithThinking
+			if !errors.As(err, &target) {
+				t.Errorf("%#v demands a tool, want ErrForcedToolUseWithThinking, got %v", choice, err)
+			}
+		}
+	})
+
 	t.Run("adaptive thinking carries no such limit", func(t *testing.T) {
 		t.Parallel()
 		if err := turnLimitErr(t, "claude-sonnet-5", askedFor("hi"), thinking, forced); err != nil {
