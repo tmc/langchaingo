@@ -156,17 +156,22 @@ type anthropicTextGenerationOutput struct {
 	// One of: ["end_turn", "max_tokens", "stop_sequence", "tool_use"]
 	StopReason string `json:"stop_reason"`
 	// Which custom stop sequence was matched, if any.
-	StopSequence string `json:"stop_sequence"`
-	Usage        struct {
-		InputTokens              int32 `json:"input_tokens"`
-		OutputTokens             int32 `json:"output_tokens"`
-		CacheCreationInputTokens int32 `json:"cache_creation_input_tokens,omitempty"`
-		CacheReadInputTokens     int32 `json:"cache_read_input_tokens,omitempty"`
-		CacheCreation            struct {
-			Ephemeral5mInputTokens int32 `json:"ephemeral_5m_input_tokens,omitempty"`
-			Ephemeral1hInputTokens int32 `json:"ephemeral_1h_input_tokens,omitempty"`
-		} `json:"cache_creation,omitempty"`
-	} `json:"usage"`
+	StopSequence string         `json:"stop_sequence"`
+	Usage        anthropicUsage `json:"usage"`
+}
+
+type anthropicUsage struct {
+	InputTokens              int32 `json:"input_tokens"`
+	OutputTokens             int32 `json:"output_tokens"`
+	CacheCreationInputTokens int32 `json:"cache_creation_input_tokens,omitempty"`
+	CacheReadInputTokens     int32 `json:"cache_read_input_tokens,omitempty"`
+	CacheCreation            struct {
+		Ephemeral5mInputTokens int32 `json:"ephemeral_5m_input_tokens,omitempty"`
+		Ephemeral1hInputTokens int32 `json:"ephemeral_1h_input_tokens,omitempty"`
+	} `json:"cache_creation,omitempty"`
+	OutputTokensDetails struct {
+		ThinkingTokens int32 `json:"thinking_tokens,omitempty"`
+	} `json:"output_tokens_details,omitempty"`
 }
 
 type anthropicContentBlock struct {
@@ -358,6 +363,7 @@ func createAnthropicCompletion(ctx context.Context,
 			"CacheCreationEphemeral5mInputTokens": output.Usage.CacheCreation.Ephemeral5mInputTokens,
 			"CacheCreationEphemeral1hInputTokens": output.Usage.CacheCreation.Ephemeral1hInputTokens,
 			"PromptCachedTokens":                  output.Usage.CacheReadInputTokens,
+			"ReasoningTokens":                     output.Usage.OutputTokensDetails.ThinkingTokens,
 		},
 	}
 	Contentchoices = append(Contentchoices, choice)
@@ -406,9 +412,7 @@ type streamingCompletionResponseChunk struct {
 		InvocationLatency int32 `json:"invocationLatency"`
 		FirstByteLatency  int32 `json:"firstByteLatency"`
 	} `json:"amazon-bedrock-invocationMetrics"`
-	Usage struct {
-		OutputTokens int32 `json:"output_tokens"`
-	} `json:"usage"`
+	Usage   anthropicUsage `json:"usage"`
 	Message struct {
 		ID           string `json:"id"`
 		Type         string `json:"type"`
@@ -527,9 +531,18 @@ func parseStreamingCompletionResponse(ctx context.Context, client *bedrockruntim
 				inputTokens := resp.Message.Usage.InputTokens
 				outputTokens := resp.Message.Usage.OutputTokens
 				if inputTokens == 0 {
+					inputTokens = resp.Usage.InputTokens
+				}
+				if outputTokens == 0 {
+					outputTokens = resp.Usage.OutputTokens
+				}
+				if inputTokens == 0 {
 					if v, ok := contentchoices[0].GenerationInfo["input_tokens"].(int32); ok {
 						inputTokens = v
 					}
+				}
+				if thinkingTokens := resp.Usage.OutputTokensDetails.ThinkingTokens; thinkingTokens != 0 {
+					contentchoices[0].GenerationInfo["ReasoningTokens"] = thinkingTokens
 				}
 				contentchoices[0].GenerationInfo["output_tokens"] = outputTokens
 				contentchoices[0].GenerationInfo["CompletionTokens"] = outputTokens

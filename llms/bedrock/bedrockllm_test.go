@@ -1362,6 +1362,15 @@ func testReasoningWorkflow( //nolint:funlen
 		return fmt.Errorf("empty reasoning content")
 	}
 
+	if got, ok := choice.GenerationInfo["ReasoningTokens"].(int32); !ok || got <= 0 {
+		return fmt.Errorf("an answer that reasoned must report ReasoningTokens, got %v",
+			choice.GenerationInfo["ReasoningTokens"])
+	}
+	if got, ok := choice.GenerationInfo["CompletionTokens"].(int32); !ok || got <= 0 {
+		return fmt.Errorf("an answer that reasoned must report CompletionTokens, got %v",
+			choice.GenerationInfo["CompletionTokens"])
+	}
+
 	t.Logf("Reasoning workflow completed successfully for model: %s", model)
 	return nil
 }
