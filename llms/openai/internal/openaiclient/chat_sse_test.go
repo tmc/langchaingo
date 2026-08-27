@@ -42,6 +42,16 @@ data: [DONE]`,
 			expectedContent: "Test",
 		},
 		{
+			name: "a malformed chunk is skipped, not fatal",
+			body: `data: {"id":"1","object":"chat.completion.chunk","created":1234567890,"model":"test","choices":[{"index":0,"delta":{"content":"Half"},"finish_reason":null}]}
+data: {"id":"1","choices":[{"index":0,"delta":{"content":
+data: not json at all
+data: {"id":"1","object":"chat.completion.chunk","created":1234567890,"model":"test","choices":[{"index":0,"delta":{"content":" answer"},"finish_reason":null}]}
+data: {"id":"1","object":"chat.completion.chunk","created":1234567890,"model":"test","choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}
+data: [DONE]`,
+			expectedContent: "Half answer",
+		},
+		{
 			name: "other_sse_fields",
 			body: `event: message
 id: 12345

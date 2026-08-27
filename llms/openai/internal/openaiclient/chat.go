@@ -729,7 +729,7 @@ func parseStreamingChatResponse(
 			if data == "[DONE]" {
 				return
 			}
-			if !isValidJSON(data) {
+			if !looksLikeJSONObject(data) {
 				continue
 			}
 
@@ -762,13 +762,11 @@ func parseStreamingChatResponse(
 	return combineStreamingChatResponse(ctx, payload, responseChan)
 }
 
-func isValidJSON(data string) bool {
-	var dummy any
+// looksLikeJSONObject must not parse the chunk: whether it really parses is
+// answered by the decode that follows.
+func looksLikeJSONObject(data string) bool {
 	data = strings.Trim(data, " \n\r\t")
-	if !strings.HasPrefix(data, "{") || !strings.HasSuffix(data, "}") {
-		return false
-	}
-	return json.Unmarshal([]byte(data), &dummy) == nil
+	return strings.HasPrefix(data, "{") && strings.HasSuffix(data, "}")
 }
 
 //nolint:gocognit,cyclop
