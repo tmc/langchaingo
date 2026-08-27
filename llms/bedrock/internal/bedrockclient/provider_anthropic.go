@@ -249,6 +249,9 @@ func createAnthropicCompletion(ctx context.Context,
 	if err := applyAnthropicReasoning(&input, options.Reasoning, modelID, maxTokens); err != nil {
 		return nil, err
 	}
+	if input.Thinking != nil {
+		input.MaxTokens = reasoning.ClaudeMaxTokensForBudget(input.Thinking.BudgetTokens, input.MaxTokens)
+	}
 
 	// Structured output rides in output_config.format, merged with any effort set
 	// by applyAnthropicReasoning (the two are independent).
@@ -739,7 +742,7 @@ func applyAnthropicReasoning(
 		input.TopK = 0
 	}
 	setBudget := func() {
-		if tokens := cfg.GetTokens(maxTokens); tokens > 0 {
+		if tokens := reasoning.ClaudeClampBudget(modelID, cfg.GetTokens(maxTokens)); tokens > 0 {
 			input.Thinking = &anthropicThinkingPayload{Type: "enabled", BudgetTokens: tokens}
 			if reasoning.ClaudeSupportsEffortWithBudget(modelID, reasoning.ProviderBedrock) {
 				input.OutputConfig = &anthropicOutputConfig{Effort: reasoning.ClaudeClampEffort(modelID, string(cfg.GetEffort(maxTokens)))}

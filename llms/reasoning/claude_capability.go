@@ -142,6 +142,33 @@ func ClaudeClampEffort(model, effort string) string {
 	return best
 }
 
+// ClaudeMinThinkingBudget is the smallest budget_tokens Anthropic accepts.
+const ClaudeMinThinkingBudget = 1024
+
+// ClaudeClampBudget raises a budget below the vendor floor up to it, and leaves
+// every other model and a zero budget untouched.
+func ClaudeClampBudget(model string, budget int) int {
+	if budget <= 0 || budget >= ClaudeMinThinkingBudget {
+		return budget
+	}
+	switch ClaudeReasoningKindFor(model) {
+	case ClaudeReasoningBudgetOnly, ClaudeReasoningAdaptiveAndBudget:
+		return ClaudeMinThinkingBudget
+	case ClaudeReasoningUnknown, ClaudeReasoningAdaptiveOnly:
+		return budget
+	}
+	return budget
+}
+
+// ClaudeMaxTokensForBudget returns a ceiling that still leaves the answer room
+// once the budget is spent.
+func ClaudeMaxTokensForBudget(budget, maxTokens int) int {
+	if budget <= 0 {
+		return maxTokens
+	}
+	return max(budget*2, maxTokens)
+}
+
 // budgetEffortClaude are budget-thinking models that also accept an effort
 // output_config alongside manual thinking (introduced with Opus 4.5). Newer
 // generations use adaptive thinking, where effort is always available.

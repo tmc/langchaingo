@@ -213,7 +213,8 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 			outputConfig = &anthropicclient.OutputConfig{
 				Effort: reasoning.ClaudeClampEffort(model, string(opts.Reasoning.GetEffort(opts.GetMaxTokens()))),
 			}
-		} else if budget := opts.Reasoning.GetTokens(opts.GetMaxTokens()); budget > 0 {
+		} else if budget := reasoning.ClaudeClampBudget(model,
+			opts.Reasoning.GetTokens(opts.GetMaxTokens())); budget > 0 {
 			thinking = &anthropicclient.ThinkingPayload{
 				Type:   "enabled",
 				Budget: budget,
@@ -289,7 +290,7 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 			temperature = nil
 		}
 		topP = nil
-		maxTokens = max(thinking.Budget*2, maxTokens) // 2x the budget for thinking
+		maxTokens = reasoning.ClaudeMaxTokensForBudget(thinking.Budget, maxTokens)
 	case reasoning.ClaudeRejectsSampling(model):
 		// Adaptive-only models reject sampling params even without thinking.
 		temperature = nil

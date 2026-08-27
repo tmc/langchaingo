@@ -169,7 +169,8 @@ func (c *ConverseClient) buildConverseInput(input *ConverseInput) (*bedrockrunti
 			inferenceConfig.TopP = nil
 		}
 		setBudget := func() {
-			if tokens := input.ReasoningConfig.GetTokens(maxTokens); tokens > 0 {
+			if tokens := reasoning.ClaudeClampBudget(input.ModelID,
+				input.ReasoningConfig.GetTokens(maxTokens)); tokens > 0 {
 				additionalModelFields.Thinking = &converseThinkingPayload{Type: "enabled", BudgetTokens: tokens}
 				if reasoning.ClaudeSupportsEffortWithBudget(input.ModelID, reasoning.ProviderBedrock) {
 					effort := reasoning.ClaudeClampEffort(input.ModelID, string(input.ReasoningConfig.GetEffort(maxTokens)))
@@ -191,6 +192,10 @@ func (c *ConverseClient) buildConverseInput(input *ConverseInput) (*bedrockrunti
 		}
 		if additionalModelFields.Thinking != nil {
 			converseInput.AdditionalModelRequestFields = document.NewLazyDocument(additionalModelFields)
+			if budget := additionalModelFields.Thinking.BudgetTokens; budget > 0 {
+				ceiling := reasoning.ClaudeMaxTokensForBudget(budget, maxTokens)
+				inferenceConfig.MaxTokens = aws.Int32(numutil.SaturateInt32(ceiling))
+			}
 		}
 	case llms.ReasoningOff:
 		switch reasoning.ResolveOff(input.ModelID, reasoning.ProviderBedrock) {
