@@ -308,7 +308,7 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 		Temperature:   temperature,
 		TopP:          topP,
 		Tools:         tools,
-		ToolChoice:    opts.ToolChoice,
+		ToolChoice:    anthropicToolChoice(opts.ToolChoice),
 		Thinking:      thinking,
 		OutputConfig:  outputConfig,
 		BetaHeaders:   betaHeaders,
@@ -1010,4 +1010,16 @@ func appendIfMissing(slice []string, val string) []string {
 
 func getFloatPointer(f float64) *float64 {
 	return &f
+}
+
+func anthropicToolChoice(choice any) any {
+	name, forced := llms.ForcedToolName(choice)
+	switch {
+	case forced && name != "":
+		return anthropicclient.ToolChoice{Type: "tool", Name: name}
+	case forced:
+		return anthropicclient.ToolChoice{Type: "any"}
+	default:
+		return choice
+	}
 }
