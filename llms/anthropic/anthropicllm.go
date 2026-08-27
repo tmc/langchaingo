@@ -432,7 +432,7 @@ func processAnthropicResponse(result *anthropicclient.MessageResponsePayload) (*
 			"PromptTokens":             result.Usage.InputTokens + result.Usage.CacheCreationInputTokens + result.Usage.CacheReadInputTokens,
 			"CompletionTokens":         result.Usage.OutputTokens,
 			"TotalTokens":              result.Usage.InputTokens + result.Usage.CacheCreationInputTokens + result.Usage.CacheReadInputTokens + result.Usage.OutputTokens,
-			"ReasoningTokens":          0, // Reasoning tokens are not included in the usage metrics
+			"ReasoningTokens":          result.Usage.OutputTokensDetails.ThinkingTokens,
 			"PromptCachedTokens":       result.Usage.CacheReadInputTokens,
 			"CacheReadInputTokens":     result.Usage.CacheReadInputTokens,
 			"CacheCreationInputTokens": result.Usage.CacheCreationInputTokens,
