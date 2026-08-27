@@ -1,13 +1,13 @@
 httprr trace v1
-324 873
+339 873
 POST https://api-inference.huggingface.co/models/HuggingFaceH4/zephyr-7b-beta HTTP/1.1
 Host: api-inference.huggingface.co
 User-Agent: langchaingo-httprr
-Content-Length: 79
+Content-Length: 94
 Authorization: Bearer test-api-key
 Content-Type: application/json
 
-{"inputs":"Hello, my name is","parameters":{"temperature":0.5,"max_length":20}}HTTP/2.0 404 Not Found
+{"inputs":"Hello, my name is","parameters":{"temperature":0.5,"max_length":20,"details":true}}HTTP/2.0 404 Not Found
 Content-Length: 9
 Access-Control-Allow-Credentials: true
 Access-Control-Allow-Origin: *

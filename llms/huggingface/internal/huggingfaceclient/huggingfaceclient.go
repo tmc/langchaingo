@@ -73,6 +73,8 @@ type InferenceRequest struct {
 
 type InferenceResponse struct {
 	Text string `json:"generated_text"`
+	// StopReason is the vendor's finish reason, empty when the door did not report one.
+	StopReason string `json:"finish_reason,omitempty"`
 }
 
 func (c *Client) RunInference(ctx context.Context, request *InferenceRequest) (*InferenceResponse, error) {
@@ -87,6 +89,7 @@ func (c *Client) RunInference(ctx context.Context, request *InferenceRequest) (*
 			MaxLength:         request.MaxLength,
 			RepetitionPenalty: request.RepetitionPenalty,
 			Seed:              request.Seed,
+			Details:           true,
 		},
 	}
 	resp, err := c.runInference(ctx, payload)
@@ -97,10 +100,15 @@ func (c *Client) RunInference(ctx context.Context, request *InferenceRequest) (*
 		return nil, ErrEmptyResponse
 	}
 	text := resp[0].Text
+	var stopReason string
+	if resp[0].Details != nil {
+		stopReason = resp[0].Details.FinishReason
+	}
 	// TODO: Add response cleaning based on Model.
 	// e.g., for gpt2, text = text[len(request.Prompt)+1:]
 	return &InferenceResponse{
-		Text: text,
+		Text:       text,
+		StopReason: stopReason,
 	}, nil
 }
 

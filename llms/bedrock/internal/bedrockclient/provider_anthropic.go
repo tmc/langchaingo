@@ -754,21 +754,10 @@ func applyAnthropicReasoning(
 		}
 	}
 
-	switch {
-	case reasoning.ClaudeSupportsThinking(modelID):
-		// Known thinking Claude: the model, not the flag, picks the mechanism.
-		if reasoning.ResolveClaudeAdaptive(modelID, cfg.Adaptive) {
-			setAdaptive()
-		} else {
-			setBudget()
-		}
-	case cfg.Adaptive && !reasoning.ClaudePredatesAdaptive(modelID):
-		// Unclassified — assumed newer than the table — Claude generation with an
-		// explicit adaptive request. Known pre-adaptive families are excluded so
-		// adaptive is never sent to a model that would reject it with a 400; those
-		// fall through to the budget gate below (or send no thinking at all).
+	switch reasoning.ResolveMechanism(modelID, cfg.Adaptive, true, supportsAnthropicReasoning(modelID)) {
+	case reasoning.MechanismAdaptive:
 		setAdaptive()
-	case supportsAnthropicReasoning(modelID):
+	case reasoning.MechanismBudget:
 		setBudget()
 	}
 	return nil

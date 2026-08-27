@@ -149,6 +149,7 @@ func (l *LLM) generateContentWithConverseAPI(ctx context.Context, messages []llm
 		ModelID:          opts.GetModel(),
 		Messages:         m,
 		Tools:            opts.Tools,
+		ToolChoice:       opts.ToolChoice,
 		StreamingFunc:    opts.StreamingFunc,
 		ReasoningConfig:  opts.Reasoning,
 		EnableCaching:    enableCaching,
