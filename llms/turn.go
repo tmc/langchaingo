@@ -5,7 +5,13 @@ import "github.com/vxcontrol/langchaingo/llms/reasoning"
 // ForcesToolUse reports whether a tool choice demands a tool call rather than
 // leaving the decision to the model.
 func ForcesToolUse(choice any) bool {
-	forced := func(t string) bool { return t == "any" || t == "tool" }
+	forced := func(t string) bool {
+		switch t {
+		case "any", "tool", "function", "required":
+			return true
+		}
+		return false
+	}
 	switch c := choice.(type) {
 	case string:
 		return forced(c)
