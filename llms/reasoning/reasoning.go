@@ -329,6 +329,9 @@ func namesReasoningModel(modelLower string) bool { //nolint:funlen // a flat cat
 
 // ThinkingOptIn reports whether the model reasons only when a request asks it to.
 func ThinkingOptIn(model string) bool {
+	if OpenAIThinkingOptIn(model) {
+		return true
+	}
 	for _, form := range modelSpellings(model) {
 		for _, prefix := range []string{"mistral-medium-3", "mistral-small-2603", "solar-pro-3"} {
 			if strings.HasPrefix(form, prefix) {

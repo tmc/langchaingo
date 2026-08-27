@@ -108,14 +108,9 @@ func openAIXHighCeiling(m string) bool {
 	return false
 }
 
-// OpenAIDisableEffort turns thinking off on the wire. It is not llms.ReasoningNone,
-// which is the empty string and instead omits the field.
-const OpenAIDisableEffort = "none"
-
-// OpenAIAcceptsCustomTemperature reports whether a reasoning model takes a
-// temperature other than the default, so the caller's value is not overwritten
-// on a model that honors it.
-func OpenAIAcceptsCustomTemperature(model string) bool {
+// OpenAIThinkingOptIn reports the generations that reason only when an effort
+// asks them to.
+func OpenAIThinkingOptIn(model string) bool {
 	for _, form := range modelSpellings(model) {
 		for _, generation := range []string{"gpt-5.1", "gpt-5.2", "gpt-5.4"} {
 			if hasGeneration(form, generation) {
@@ -125,3 +120,7 @@ func OpenAIAcceptsCustomTemperature(model string) bool {
 	}
 	return false
 }
+
+// OpenAIDisableEffort turns thinking off on the wire. It is not llms.ReasoningNone,
+// which is the empty string and instead omits the field.
+const OpenAIDisableEffort = "none"

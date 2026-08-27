@@ -101,13 +101,19 @@ func TestSamplingMatrix(t *testing.T) {
 	off := llms.WithReasoningDisabled()
 
 	runSamplingCases(t, []samplingCase{{
-		name:    "accepting model keeps its temperature while thinking",
+		name:    "an opt-in model keeps its temperature until asked to think",
+		model:   "gpt-5.4",
+		opts:    []llms.CallOption{temp, topP},
+		present: []string{`"temperature":0.3`},
+		absent:  []string{`"reasoning_effort"`},
+	}, {
+		name:    "the same model is pinned once an effort is asked for",
 		model:   "gpt-5.4",
 		opts:    []llms.CallOption{temp, topP, high},
-		present: []string{`"temperature":0.3`, `"reasoning_effort":"high"`},
+		present: []string{`"temperature":1`, `"reasoning_effort":"high"`},
 		absent:  []string{`"top_p"`},
 	}, {
-		name:    "non-accepting model is pinned while thinking",
+		name:    "a model that thinks from the start is pinned without being asked",
 		model:   "gpt-5.5",
 		opts:    []llms.CallOption{temp, topP, high},
 		present: []string{`"temperature":1`, `"reasoning_effort":"high"`},

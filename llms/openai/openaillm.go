@@ -372,7 +372,7 @@ func (o *LLM) applySamplingPolicy(req *openaiclient.ChatRequest, opts llms.CallO
 	}
 
 	switch {
-	case thinkingRuns(model, opts, wireEffort) && !reasoning.OpenAIAcceptsCustomTemperature(model):
+	case thinkingRuns(model, opts, wireEffort):
 		if req.Temperature != nil {
 			temperature := 1.0
 			req.Temperature = &temperature

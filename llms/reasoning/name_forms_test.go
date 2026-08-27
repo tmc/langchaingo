@@ -8,9 +8,9 @@ import (
 func capabilityAnswers(model string) string {
 	caps := OpenAIReasoningCapsFor(model)
 	return fmt.Sprintf(
-		"reasoning=%v likely=%v claude=%d openaiKnown=%v openaiEfforts=%v openaiTemp=%v gemini=%v optIn=%v off=%v",
+		"reasoning=%v likely=%v claude=%d openaiKnown=%v openaiEfforts=%v gemini=%v optIn=%v off=%v",
 		IsReasoningModel(model), LikelyReasoningModel(model), ClaudeReasoningKindFor(model),
-		caps.Known, caps.Efforts, OpenAIAcceptsCustomTemperature(model),
+		caps.Known, caps.Efforts,
 		GeminiSupportsThinking(model), ThinkingOptIn(model),
 		ResolveOff(model, ProviderUnknown))
 }
