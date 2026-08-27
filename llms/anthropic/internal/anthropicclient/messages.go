@@ -248,6 +248,9 @@ type MessageResponsePayload struct {
 			Ephemeral5mInputTokens int `json:"ephemeral_5m_input_tokens,omitempty"`
 			Ephemeral1hInputTokens int `json:"ephemeral_1h_input_tokens,omitempty"`
 		} `json:"cache_creation,omitempty"`
+		OutputTokensDetails struct {
+			ThinkingTokens int `json:"thinking_tokens,omitempty"`
+		} `json:"output_tokens_details,omitempty"`
 		ServiceTier string `json:"service_tier,omitempty"`
 	} `json:"usage"`
 }
@@ -780,6 +783,11 @@ func handleMessageDeltaEvent(event map[string]interface{}, response MessageRespo
 	}
 	if cacheReadTokens, err := getFloat64(usage, "cache_read_input_tokens"); err == nil {
 		response.Usage.CacheReadInputTokens = int(cacheReadTokens)
+	}
+	if details, ok := usage["output_tokens_details"].(map[string]interface{}); ok {
+		if thinkingTokens, err := getFloat64(details, "thinking_tokens"); err == nil {
+			response.Usage.OutputTokensDetails.ThinkingTokens = int(thinkingTokens)
+		}
 	}
 	return response, nil
 }
