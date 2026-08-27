@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"os"
+	"strings"
 
 	"github.com/vxcontrol/langchaingo/callbacks"
 	"github.com/vxcontrol/langchaingo/llms"
@@ -215,6 +216,9 @@ func generateStreamingContent(ctx context.Context, m *Model, callOptions *llms.C
 	}
 	defer streaming.CallWithDone(ctx, callOptions.StreamingFunc) //nolint:errcheck
 
+	var streamedContent strings.Builder
+	defer func() { langchainContentResponse.Choices[0].Content = streamedContent.String() }()
+
 	for chatResChunk := range chatResChan {
 		chunkStr := ""
 		langchainContentResponse.Choices[0].GenerationInfo["created"] = chatResChunk.Created
@@ -223,7 +227,7 @@ func generateStreamingContent(ctx context.Context, m *Model, callOptions *llms.C
 		if chatResChunk.Error == nil {
 			for _, choice := range chatResChunk.Choices {
 				chunkStr += choice.Delta.Content
-				langchainContentResponse.Choices[0].Content += choice.Delta.Content
+				streamedContent.WriteString(choice.Delta.Content)
 				if choice.FinishReason != "" {
 					langchainContentResponse.Choices[0].StopReason = string(choice.FinishReason)
 					langchainContentResponse.Choices[0].Truncated = llms.IsTruncated(string(choice.FinishReason))

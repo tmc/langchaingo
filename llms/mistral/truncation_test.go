@@ -2,6 +2,7 @@ package mistral
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -181,5 +182,28 @@ func TestFailOnTruncationFiresOnTheStreamingPath(t *testing.T) {
 	}
 	if resp == nil || resp.Choices[0].Content != "half an ans" {
 		t.Fatalf("want the partial answer alongside the error, got %+v", resp)
+	}
+}
+
+func TestStreamingKeepsWhatArrivedBeforeAFailingSink(t *testing.T) {
+	t.Parallel()
+
+	model := streamingModelWithTrailingChunk(t)
+	sinkErr := errors.New("sink gave up")
+	sink := func(_ context.Context, chunk streaming.Chunk) error {
+		if chunk.Type == streaming.ChunkTypeText {
+			return sinkErr
+		}
+		return nil
+	}
+
+	resp, err := model.GenerateContent(context.Background(),
+		[]llms.MessageContent{llms.TextParts(llms.ChatMessageTypeHuman, "hi")},
+		llms.WithStreamingFunc(sink))
+	if !errors.Is(err, sinkErr) {
+		t.Fatalf("want the sink's own error, got %v", err)
+	}
+	if resp == nil || resp.Choices[0].Content != "half an ans" {
+		t.Fatalf("want what arrived before the sink failed, got %+v", resp)
 	}
 }

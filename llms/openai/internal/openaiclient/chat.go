@@ -782,6 +782,7 @@ func combineStreamingChatResponse(
 	var (
 		response          ChatCompletionResponse
 		splitters         []reasoning.ChunkContentSplitter
+		accums            []*streamedText
 		toolCallNameCache = make(map[string]string) // Cache tool call names by ID for streaming
 	)
 
@@ -802,6 +803,7 @@ func combineStreamingChatResponse(
 				if len(response.Choices) <= idx {
 					response.Choices = append(response.Choices, &ChatCompletionChoice{})
 					splitters = append(splitters, reasoning.NewChunkContentSplitter())
+					accums = append(accums, &streamedText{})
 				}
 			}
 			// Get current updatable values
@@ -816,9 +818,10 @@ func combineStreamingChatResponse(
 			}
 
 			content, reasoningContent := getChunkContent(choice, splitter)
-			responseChoice.Message.Content += content
-			responseChoice.Message.ReasoningContent += reasoningContent
-			responseChoice.Message.Refusal += choice.Delta.Refusal
+			accum := accums[choice.Index]
+			accum.content.WriteString(content)
+			accum.reasoningContent.WriteString(reasoningContent)
+			accum.refusal.WriteString(choice.Delta.Refusal)
 
 			reasoning := &reasoning.ContentReasoning{Content: reasoningContent}
 			if err := streaming.CallWithReasoning(ctx, payload.StreamingFunc, reasoning); err != nil {
@@ -849,9 +852,26 @@ func combineStreamingChatResponse(
 		}
 	}
 
+	for idx, accum := range accums {
+		accum.flushInto(&response.Choices[idx].Message)
+	}
+
 	removeEmptyToolCalls(&response)
 
 	return &response, nil
+}
+
+// streamedText collects one choice's text across deltas.
+type streamedText struct {
+	content          strings.Builder
+	reasoningContent strings.Builder
+	refusal          strings.Builder
+}
+
+func (t *streamedText) flushInto(msg *ChatMessage) {
+	msg.Content = t.content.String()
+	msg.ReasoningContent = t.reasoningContent.String()
+	msg.Refusal = t.refusal.String()
 }
 
 func getChunkContent(choice StreamedChatResponseChunk, splitter reasoning.ChunkContentSplitter) (string, string) {

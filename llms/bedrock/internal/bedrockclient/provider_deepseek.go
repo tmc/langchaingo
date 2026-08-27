@@ -147,6 +147,7 @@ func parseDeepSeekStreamingResponse(ctx context.Context, client *bedrockruntime.
 	defer streaming.CallWithDone(ctx, options.StreamingFunc) //nolint:errcheck
 
 	contentchoices := []*llms.ContentChoice{{GenerationInfo: map[string]any{}}}
+	var streamedContent strings.Builder
 	for e := range stream.Events() {
 		if err = stream.Err(); err != nil {
 			return nil, err
@@ -163,7 +164,7 @@ func parseDeepSeekStreamingResponse(ctx context.Context, client *bedrockruntime.
 				if err = streaming.CallWithText(ctx, options.StreamingFunc, resp.Choices[0].Text); err != nil {
 					return nil, err
 				}
-				contentchoices[0].Content += resp.Choices[0].Text
+				streamedContent.WriteString(resp.Choices[0].Text)
 			}
 
 			if len(resp.Choices) > 0 && resp.Choices[0].StopReason != "" {
@@ -175,6 +176,8 @@ func parseDeepSeekStreamingResponse(ctx context.Context, client *bedrockruntime.
 	if err = stream.Err(); err != nil {
 		return nil, err
 	}
+
+	contentchoices[0].Content = streamedContent.String()
 
 	return &llms.ContentResponse{
 		Choices: contentchoices,

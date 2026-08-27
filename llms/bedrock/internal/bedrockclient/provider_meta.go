@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"strings"
 
 	"github.com/vxcontrol/langchaingo/llms"
 	"github.com/vxcontrol/langchaingo/llms/streaming"
@@ -144,6 +145,7 @@ func parseMetaStreamingResponse(ctx context.Context, client *bedrockruntime.Clie
 	defer streaming.CallWithDone(ctx, options.StreamingFunc) //nolint:errcheck
 
 	contentchoices := []*llms.ContentChoice{{GenerationInfo: map[string]any{}}}
+	var streamedContent strings.Builder
 	for e := range stream.Events() {
 		if err = stream.Err(); err != nil {
 			return nil, err
@@ -161,7 +163,7 @@ func parseMetaStreamingResponse(ctx context.Context, client *bedrockruntime.Clie
 				if err = streaming.CallWithText(ctx, options.StreamingFunc, resp.Generation); err != nil {
 					return nil, err
 				}
-				contentchoices[0].Content += resp.Generation
+				streamedContent.WriteString(resp.Generation)
 			}
 
 			// Set completion reason
@@ -187,6 +189,8 @@ func parseMetaStreamingResponse(ctx context.Context, client *bedrockruntime.Clie
 	if err = stream.Err(); err != nil {
 		return nil, err
 	}
+
+	contentchoices[0].Content = streamedContent.String()
 
 	return &llms.ContentResponse{
 		Choices: contentchoices,

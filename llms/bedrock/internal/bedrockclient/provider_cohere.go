@@ -302,6 +302,7 @@ func parseCohereStreamingResponse(ctx context.Context, client *bedrockruntime.Cl
 	defer streaming.CallWithDone(ctx, options.StreamingFunc) //nolint:errcheck
 
 	contentchoices := []*llms.ContentChoice{{GenerationInfo: map[string]any{}}}
+	var streamedContent strings.Builder
 	for e := range stream.Events() {
 		if err = stream.Err(); err != nil {
 			return nil, err
@@ -319,7 +320,7 @@ func parseCohereStreamingResponse(ctx context.Context, client *bedrockruntime.Cl
 				if err = streaming.CallWithText(ctx, options.StreamingFunc, resp.Text); err != nil {
 					return nil, err
 				}
-				contentchoices[0].Content += resp.Text
+				streamedContent.WriteString(resp.Text)
 			}
 
 			// Set completion reason
@@ -337,6 +338,8 @@ func parseCohereStreamingResponse(ctx context.Context, client *bedrockruntime.Cl
 	if err = stream.Err(); err != nil {
 		return nil, err
 	}
+
+	contentchoices[0].Content = streamedContent.String()
 
 	return &llms.ContentResponse{
 		Choices: contentchoices,

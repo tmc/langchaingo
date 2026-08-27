@@ -437,6 +437,7 @@ func parseStreamingCompletionResponse(ctx context.Context, client *bedrockruntim
 	defer streaming.CallWithDone(ctx, options.StreamingFunc) //nolint:errcheck
 
 	contentchoices := []*llms.ContentChoice{{GenerationInfo: map[string]any{}}}
+	var streamedContent strings.Builder
 	var currentToolCall *streaming.ToolCall
 	var toolCalls []llms.ToolCall
 	var signature strings.Builder
@@ -471,7 +472,7 @@ func parseStreamingCompletionResponse(ctx context.Context, client *bedrockruntim
 					if err = streaming.CallWithText(ctx, options.StreamingFunc, resp.Delta.Text); err != nil {
 						return nil, err
 					}
-					contentchoices[0].Content += resp.Delta.Text
+					streamedContent.WriteString(resp.Delta.Text)
 				case "thinking_delta":
 					if resp.Delta.Thinking != "" {
 						chunk := streaming.Chunk{
@@ -550,6 +551,8 @@ func parseStreamingCompletionResponse(ctx context.Context, client *bedrockruntim
 		}
 		contentchoices[0].Reasoning.Signature = []byte(signature.String())
 	}
+
+	contentchoices[0].Content = streamedContent.String()
 
 	return &llms.ContentResponse{
 		Choices: contentchoices,
