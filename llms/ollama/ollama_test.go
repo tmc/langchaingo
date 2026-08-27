@@ -37,7 +37,7 @@ func newTestClient(t *testing.T, opts ...Option) *LLM {
 	})
 
 	// Default model for testing
-	ollamaModel := "gemma3:1b"
+	ollamaModel := "qwen3:8b"
 	if envModel := os.Getenv("OLLAMA_TEST_MODEL"); envModel != "" {
 		ollamaModel = envModel
 	}
