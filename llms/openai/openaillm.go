@@ -248,7 +248,7 @@ func (o *LLM) createChatRequest(chatMsgs []*ChatMessage, opts llms.CallOptions) 
 		FrequencyPenalty:     opts.FrequencyPenalty,
 		PresencePenalty:      opts.PresencePenalty,
 		RepetitionPenalty:    opts.RepetitionPenalty,
-		ToolChoice:           opts.ToolChoice,
+		ToolChoice:           openaiToolChoice(opts.ToolChoice),
 		FunctionCallBehavior: openaiclient.FunctionCallBehavior(opts.FunctionCallBehavior),
 		Seed:                 opts.Seed,
 		Metadata:             opts.Metadata,
@@ -640,4 +640,16 @@ func webSearchOptionsFromCallOptions(opts *llms.WebSearchOptions) *openaiclient.
 		}
 	}
 	return result
+}
+
+func openaiToolChoice(choice any) any {
+	name, forced := llms.ForcedToolName(choice)
+	switch {
+	case forced && name != "":
+		return llms.ToolChoice{Type: "function", Function: &llms.FunctionReference{Name: name}}
+	case forced:
+		return "required"
+	default:
+		return choice
+	}
 }
