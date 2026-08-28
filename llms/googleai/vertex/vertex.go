@@ -357,11 +357,13 @@ DoStream:
 			break DoStream
 		}
 		if err != nil {
-			return nil, fmt.Errorf("error in stream mode: %w", err)
+			streamErr = fmt.Errorf("error in stream mode: %w", err)
+			break DoStream
 		}
 
 		if len(resp.Candidates) != 1 {
-			return nil, fmt.Errorf("expect single candidate in stream mode; got %v", len(resp.Candidates))
+			streamErr = fmt.Errorf("expect single candidate in stream mode; got %v", len(resp.Candidates))
+			break DoStream
 		}
 		respCandidate := resp.Candidates[0]
 
@@ -378,9 +380,15 @@ DoStream:
 			}
 		}
 	}
-	mresp := iter.MergedResponse()
-	resp, err := convertCandidates([]*genai.Candidate{candidate}, mresp.UsageMetadata)
+	var usage *genai.UsageMetadata
+	if mresp := iter.MergedResponse(); mresp != nil {
+		usage = mresp.UsageMetadata
+	}
+	resp, err := convertCandidates([]*genai.Candidate{candidate}, usage)
 	if err != nil {
+		if streamErr != nil {
+			return nil, streamErr
+		}
 		return nil, err
 	}
 	return resp, streamErr

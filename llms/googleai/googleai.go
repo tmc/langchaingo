@@ -346,6 +346,7 @@ func (g *GoogleAI) generateStreamingContent(
 	var thoughtSignature []byte
 	var lastUsageMetadata *genai.GenerateContentResponseUsageMetadata
 	var lastCandidate *genai.Candidate
+	var blockReason *genai.GenerateContentResponsePromptFeedback
 	var streamErr error
 
 	// Trying to keep the same ID for the same tool call name
@@ -369,6 +370,10 @@ func (g *GoogleAI) generateStreamingContent(
 		// Capture usage metadata from each chunk (last one will be the final)
 		if chunk.UsageMetadata != nil {
 			lastUsageMetadata = chunk.UsageMetadata
+		}
+
+		if fb := chunk.PromptFeedback; fb != nil && fb.BlockReason != "" {
+			blockReason = fb
 		}
 
 		if len(chunk.Candidates) == 0 {
@@ -493,7 +498,7 @@ StreamEnd:
 			GenerationInfo: metadata,
 		}},
 	}
-	if err := checkEmptyStream(lastCandidate, resp.Choices[0], opts); err != nil {
+	if err := checkEmptyStream(lastCandidate, blockReason, resp.Choices[0], opts); err != nil {
 		return resp, err
 	}
 	// A callback that returned an error stopped the stream early; surface it
@@ -1100,11 +1105,30 @@ func resolveThinkingConfig(model string, cfg *llms.ReasoningConfig, maxTokens in
 }
 
 // checkEmptyStream reports an output limit too small to start an answer.
-func checkEmptyStream(lastCandidate *genai.Candidate, choice *llms.ContentChoice, opts *llms.CallOptions) error {
-	if lastCandidate != nil || opts == nil || opts.MaxTokens == nil || *opts.MaxTokens <= 0 {
+func checkEmptyStream(
+	lastCandidate *genai.Candidate,
+	blockReason *genai.GenerateContentResponsePromptFeedback,
+	choice *llms.ContentChoice,
+	opts *llms.CallOptions,
+) error {
+	if lastCandidate != nil {
 		return nil
 	}
 	if choice.Content != "" || len(choice.ToolCalls) > 0 {
+		return nil
+	}
+	if blockReason != nil {
+		message := "the model returned no candidates: the prompt was blocked (" + string(blockReason.BlockReason) + ")"
+		if blockReason.BlockReasonMessage != "" {
+			message += ": " + blockReason.BlockReasonMessage
+		}
+		return &llms.Error{
+			Code:     llms.ErrCodeContentFilter,
+			Message:  message,
+			Provider: providerGoogleAI,
+		}
+	}
+	if opts == nil || opts.MaxTokens == nil || *opts.MaxTokens <= 0 {
 		return nil
 	}
 	return &llms.Error{
