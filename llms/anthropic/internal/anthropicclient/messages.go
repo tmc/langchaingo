@@ -416,7 +416,8 @@ func parseStreamingMessageResponse(
 			}
 			response, err = processStreamEvent(ctx, event, payload, response, eventChan)
 			if err != nil {
-				eventChan <- MessageEvent{Response: nil, Err: fmt.Errorf("failed to process stream event: %w", err)}
+				partial := response
+				eventChan <- MessageEvent{Response: &partial, Err: fmt.Errorf("failed to process stream event: %w", err)}
 				return
 			}
 		}
@@ -428,7 +429,10 @@ func parseStreamingMessageResponse(
 	var lastResponse *MessageResponsePayload
 	for event := range eventChan {
 		if event.Err != nil {
-			return nil, event.Err
+			if event.Response != nil {
+				lastResponse = event.Response
+			}
+			return lastResponse, event.Err
 		}
 		lastResponse = event.Response
 	}

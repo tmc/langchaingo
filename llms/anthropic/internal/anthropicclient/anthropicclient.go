@@ -187,7 +187,7 @@ func (c *Client) CreateMessage(ctx context.Context, r *MessageRequest) (*Message
 		OutputConfig:  r.OutputConfig,
 	}, r.BetaHeaders)
 	if err != nil {
-		return nil, err
+		return resp, err
 	}
 	return resp, nil
 }

@@ -316,7 +316,15 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 	})
 	if err != nil {
 		// The closing callback is emitted once by GenerateContent's deferred handler.
-		return nil, fmt.Errorf("anthropic: failed to create message: %w", err)
+		wrapped := fmt.Errorf("anthropic: failed to create message: %w", err)
+		if result == nil {
+			return nil, wrapped
+		}
+		partial, buildErr := processAnthropicResponse(result)
+		if buildErr != nil {
+			return nil, wrapped
+		}
+		return partial, wrapped
 	}
 	response, err := processAnthropicResponse(result)
 	if err != nil {

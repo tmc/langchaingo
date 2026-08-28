@@ -52,7 +52,7 @@ func (c *ConverseClient) CreateCompletionConverse(ctx context.Context, input *Co
 		resp, err = c.handleNonStreamingResponse(ctx, converseInput)
 	}
 	if err != nil {
-		return nil, err
+		return resp, err
 	}
 	if err := validateConverseStructuredOutput(input, resp); err != nil {
 		return resp, err
@@ -708,6 +708,7 @@ func (c *ConverseClient) processStreamingResponse(ctx context.Context, response 
 	var signature bytes.Buffer
 	var toolCalls []llms.ToolCall
 	var stopReason string
+	var streamErr error
 	var usage *types.TokenUsage
 	currentToolCalls := make(map[int32]*converseToolCallBuilder) // Track streaming tool calls by content block index
 
@@ -716,6 +717,7 @@ func (c *ConverseClient) processStreamingResponse(ctx context.Context, response 
 	stream := response.GetStream()
 	defer stream.Close()
 
+DoStream:
 	for event := range stream.Events() {
 		switch e := event.(type) {
 		case *types.ConverseStreamOutputMemberContentBlockDelta:
@@ -729,7 +731,8 @@ func (c *ConverseClient) processStreamingResponse(ctx context.Context, response 
 							Content: delta.Value,
 						}
 						if err := callback(ctx, chunk); err != nil {
-							return nil, err
+							streamErr = err
+							break DoStream
 						}
 					}
 				case *types.ContentBlockDeltaMemberReasoningContent:
@@ -742,7 +745,8 @@ func (c *ConverseClient) processStreamingResponse(ctx context.Context, response 
 								Reasoning: &reasoning.ContentReasoning{Content: block.Value},
 							}
 							if err := callback(ctx, chunk); err != nil {
-								return nil, err
+								streamErr = err
+								break DoStream
 							}
 						case *types.ReasoningContentBlockDeltaMemberSignature:
 							if len(block.Value) > 0 {
@@ -777,7 +781,8 @@ func (c *ConverseClient) processStreamingResponse(ctx context.Context, response 
 						ToolCall: builder.streamingCall(),
 					}
 					if err := callback(ctx, chunk); err != nil {
-						return nil, err
+						streamErr = err
+						break DoStream
 					}
 				}
 				toolCalls = append(toolCalls, builder.toolCall())
@@ -819,7 +824,7 @@ func (c *ConverseClient) processStreamingResponse(ctx context.Context, response 
 		Choices: []*llms.ContentChoice{choice},
 	}
 
-	return result, nil
+	return result, streamErr
 }
 
 func applyConverseUsage(info map[string]any, usage *types.TokenUsage) {
