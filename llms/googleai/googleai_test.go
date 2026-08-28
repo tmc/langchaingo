@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/google/generative-ai-go/genai"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/httputil"
@@ -588,4 +589,15 @@ func TestGoogleAIToolCallResponse(t *testing.T) {
 		require.NotNil(t, resp2)
 		assert.Contains(t, resp2.Choices[0].Content, "105")
 	}
+}
+
+func TestGenerateFromMessages_SystemOnlyMessages(t *testing.T) {
+	messages := []llms.MessageContent{
+		{
+			Role:  llms.ChatMessageTypeSystem,
+			Parts: []llms.ContentPart{llms.TextContent{Text: "You are a helpful assistant."}},
+		},
+	}
+	_, err := generateFromMessages(context.Background(), &genai.GenerativeModel{}, messages, &llms.CallOptions{})
+	assert.ErrorIs(t, err, ErrEmptyNonSystemMessages)
 }
