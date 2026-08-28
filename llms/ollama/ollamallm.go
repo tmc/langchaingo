@@ -164,7 +164,11 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 
 	resp, err := o.handleChat(ctx, req, opts)
 	if err != nil {
-		return nil, err
+		partial := o.createContentResponse(resp)
+		if len(partial.Choices) == 0 || partial.Choices[0].Content == "" {
+			return nil, err
+		}
+		return partial, err
 	}
 
 	response = o.createContentResponse(resp)
@@ -433,6 +437,14 @@ func (o *LLM) handleChat(ctx context.Context, req *api.ChatRequest, opts llms.Ca
 	}
 
 	err := o.client.Chat(ctx, req, fn)
+	if err != nil && resp.Message.Content == "" && resp.Message.Thinking == "" && len(resp.Message.ToolCalls) == 0 {
+		resp.Message = api.Message{
+			Role:      "assistant",
+			Content:   streamedResponse.String(),
+			Thinking:  streamedThinking.String(),
+			ToolCalls: streamedToolCalls,
+		}
+	}
 	return resp, err
 }
 

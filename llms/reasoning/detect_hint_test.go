@@ -122,3 +122,25 @@ func TestQwenHintIsOptimisticWithoutMovingTheWire(t *testing.T) {
 		}
 	}
 }
+
+func TestTheHintDoesNotOfferReasoningToNonTextModels(t *testing.T) {
+	t.Parallel()
+
+	for _, model := range []string{
+		"gpt-audio", "gpt-realtime", "gpt-4o-transcribe", "whisper-1",
+		"tts-1", "text-embedding-3-large", "gpt-image-1",
+	} {
+		if LikelyReasoningModel(model) {
+			t.Errorf("%q answers in another modality, so no reasoning control belongs on it", model)
+		}
+	}
+}
+
+func TestTheHintAgreesWithTheMatchersOnChatLatest(t *testing.T) {
+	t.Parallel()
+
+	const model = "gpt-5-chat-latest"
+	if LikelyReasoningModel(model) {
+		t.Errorf("%q is excluded by the other two matchers, so the hint must exclude it too", model)
+	}
+}

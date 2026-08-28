@@ -48,3 +48,32 @@ func TestRequireClosedObjects(t *testing.T) {
 		})
 	}
 }
+
+func TestRequireClosedObjectsReachesEveryKeywordThatHoldsASchema(t *testing.T) {
+	t.Parallel()
+
+	open := `{"type":"object","properties":{"x":{"type":"string"}}}`
+
+	for _, keyword := range []string{
+		"not", "if", "then", "else", "contains", "propertyNames",
+		"unevaluatedItems", "unevaluatedProperties",
+	} {
+		t.Run(keyword, func(t *testing.T) {
+			t.Parallel()
+			schema := []byte(`{"type":"object","additionalProperties":false,"properties":{},"` +
+				keyword + `":` + open + `}`)
+			if err := structuredoutput.RequireClosedObjects(schema); err == nil {
+				t.Fatalf("an object under %q is still an object schema and must be closed", keyword)
+			}
+		})
+	}
+
+	t.Run("dependentSchemas", func(t *testing.T) {
+		t.Parallel()
+		schema := []byte(`{"type":"object","additionalProperties":false,"properties":{},` +
+			`"dependentSchemas":{"x":` + open + `}}`)
+		if err := structuredoutput.RequireClosedObjects(schema); err == nil {
+			t.Fatal("an object under dependentSchemas must be closed too")
+		}
+	})
+}

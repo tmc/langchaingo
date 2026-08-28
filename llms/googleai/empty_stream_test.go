@@ -47,3 +47,36 @@ func TestStreamWithoutCandidatesIsNotASilentSuccess(t *testing.T) {
 	require.NotNil(t, resp)
 	assert.Empty(t, resp.Choices[0].Content)
 }
+
+type blockedPromptStream struct{}
+
+func (blockedPromptStream) RoundTrip(r *http.Request) (*http.Response, error) {
+	const event = "data: {\"promptFeedback\":{\"blockReason\":\"SAFETY\"," +
+		"\"blockReasonMessage\":\"the prompt was rejected\"},\"candidates\":[]}\n\n"
+	return &http.Response{
+		StatusCode: http.StatusOK,
+		Header:     http.Header{"Content-Type": []string{"text/event-stream"}},
+		Body:       io.NopCloser(bytes.NewReader([]byte(event))),
+		Request:    r,
+	}, nil
+}
+
+func TestABlockedPromptIsNotBlamedOnTheBudget(t *testing.T) {
+	t.Parallel()
+
+	llm, err := New(context.Background(),
+		WithRest(), WithAPIKey("test-key"), WithDefaultModel("gemini-2.5-flash"),
+		WithHTTPClient(&http.Client{Transport: blockedPromptStream{}}))
+	require.NoError(t, err)
+
+	_, err = llm.GenerateContent(context.Background(),
+		[]llms.MessageContent{llms.TextParts(llms.ChatMessageTypeHuman, "hi")},
+		llms.WithMaxTokens(16384),
+		llms.WithStreamingFunc(func(context.Context, streaming.Chunk) error { return nil }))
+
+	var apiErr *llms.Error
+	require.ErrorAs(t, err, &apiErr)
+	assert.Equal(t, llms.ErrCodeContentFilter, apiErr.Code,
+		"a blocked prompt must not be reported as a budget that is too small")
+	assert.Contains(t, apiErr.Message, "SAFETY")
+}

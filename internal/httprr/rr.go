@@ -585,7 +585,7 @@ func (rr *RecordReplay) reqWire(req *http.Request) (string, error) {
 	result = regexp.MustCompile(`(?m)^User-Agent: .*$`).ReplaceAllString(result, "User-Agent: langchaingo-httprr")
 
 	// Remove OpenAI-Project header for consistency across recordings
-	result = regexp.MustCompile(`(?m)^openai-project: .*\n`).ReplaceAllString(result, "")
+	result = regexp.MustCompile(`(?mi)^openai-project: .*\n`).ReplaceAllString(result, "")
 
 	// Normalize x-goog-api-client header with version information
 	result = regexp.MustCompile(`(?m)^x-goog-api-client: (.*)$`).ReplaceAllStringFunc(result, func(match string) string {
@@ -1213,6 +1213,9 @@ func getDefaultResponseScrubbers() []func(*bytes.Buffer) error {
 			}
 			if resp.Header.Get("openai-organization") != "" {
 				resp.Header.Set("openai-organization", "lcgo-tst")
+			}
+			if resp.Header.Get("Openai-Project") != "" {
+				resp.Header.Set("Openai-Project", "proj_lcgo-tst")
 			}
 
 			// Re-serialize the response

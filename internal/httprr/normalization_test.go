@@ -1,7 +1,9 @@
 package httprr
 
 import (
-	"regexp"
+	"net/http"
+	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -120,57 +122,33 @@ func TestVersionNormalizationConsistency(t *testing.T) {
 }
 
 func TestOpenAIProjectHeaderScrubbing(t *testing.T) {
-	tests := []struct {
-		name     string
-		input    string
-		expected string
-	}{
-		{
-			name: "Remove OpenAI-Project header",
-			input: `POST /v1/chat/completions HTTP/1.1
-Host: api.openai.com
-User-Agent: Go-http-client/1.1
-Authorization: Bearer sk-test
-openai-project: proj-123456789
-Content-Type: application/json
+	rr, err := create(filepath.Join(t.TempDir(), "scrub.httprr"), http.DefaultTransport)
+	if err != nil {
+		t.Fatalf("create() error: %v", err)
+	}
+	t.Cleanup(func() { _ = rr.Close() })
 
-{"model":"gpt-4"}`,
-			expected: `POST /v1/chat/completions HTTP/1.1
-Host: api.openai.com
-User-Agent: langchaingo-httprr
-Authorization: Bearer sk-test
-Content-Type: application/json
+	req, err := http.NewRequest(http.MethodPost, "https://api.openai.com/v1/chat/completions",
+		strings.NewReader(`{"model":"gpt-4"}`))
+	if err != nil {
+		t.Fatalf("NewRequest() error: %v", err)
+	}
+	req.Header.Set("Authorization", "Bearer sk-test")
+	req.Header.Set("openai-project", "proj-123456789")
+	req.Header.Set("User-Agent", "Go-http-client/1.1")
 
-{"model":"gpt-4"}`,
-		},
-		{
-			name: "No OpenAI-Project header present",
-			input: `POST /v1/chat/completions HTTP/1.1
-Host: api.openai.com
-User-Agent: Go-http-client/1.1
-Authorization: Bearer sk-test
-Content-Type: application/json
-
-{"model":"gpt-4"}`,
-			expected: `POST /v1/chat/completions HTTP/1.1
-Host: api.openai.com
-User-Agent: langchaingo-httprr
-Authorization: Bearer sk-test
-Content-Type: application/json
-
-{"model":"gpt-4"}`,
-		},
+	wire, err := rr.reqWire(req)
+	if err != nil {
+		t.Fatalf("reqWire() error: %v", err)
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			// This simulates what happens in reqWire during request serialization
-			result := regexp.MustCompile(`(?m)^User-Agent: .*$`).ReplaceAllString(tt.input, "User-Agent: langchaingo-httprr")
-			result = regexp.MustCompile(`(?m)^openai-project: .*\n`).ReplaceAllString(result, "")
-
-			if result != tt.expected {
-				t.Errorf("OpenAI-Project header scrubbing failed:\nGot:\n%s\n\nExpected:\n%s", result, tt.expected)
-			}
-		})
+	if strings.Contains(strings.ToLower(wire), "openai-project") {
+		t.Errorf("the project header must not reach the cassette match key:\n%s", wire)
+	}
+	if strings.Contains(wire, "Go-http-client") {
+		t.Errorf("the user agent must be normalized in the match key:\n%s", wire)
+	}
+	if !strings.Contains(wire, `{"model":"gpt-4"}`) {
+		t.Errorf("the body must survive scrubbing:\n%s", wire)
 	}
 }

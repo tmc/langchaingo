@@ -96,7 +96,12 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		opt(&opts)
 	}
 
-	if err := llms.CheckClaudeTurnLimits(o.effectiveModel(opts), opts, messages); err != nil {
+	if err := opts.ValidateReasoning(); err != nil {
+		return nil, err
+	}
+
+	sendsBudget := o.client.UseReasoningMaxTokens && opts.Reasoning.Tokens != 0
+	if err := llms.CheckClaudeTurnLimitsOnWire(o.effectiveModel(opts), opts, messages, sendsBudget); err != nil {
 		return nil, err
 	}
 
@@ -331,7 +336,7 @@ func (o *LLM) setReasoning(req *openaiclient.ChatRequest, opts llms.CallOptions)
 	// using modern reasoning format
 	if o.client.UseReasoningMaxTokens && opts.Reasoning.Tokens != 0 && reasoningTokens > 0 {
 		req.Reasoning = &openaiclient.ReasoningOptions{
-			MaxTokens: reasoningTokens,
+			MaxTokens: reasoning.ClaudeClampBudget(o.effectiveModel(opts), reasoningTokens),
 		}
 	} else if reasoningEffort != llms.ReasoningNone {
 		req.Reasoning = &openaiclient.ReasoningOptions{
@@ -643,12 +648,15 @@ func webSearchOptionsFromCallOptions(opts *llms.WebSearchOptions) *openaiclient.
 }
 
 func openaiToolChoice(choice any) any {
-	name, forced := llms.ForcedToolName(choice)
-	switch {
-	case forced && name != "":
+	switch kind, name := llms.ClassifyToolChoice(choice); kind {
+	case llms.ToolChoiceNamed:
 		return llms.ToolChoice{Type: "function", Function: &llms.FunctionReference{Name: name}}
-	case forced:
+	case llms.ToolChoiceAny:
 		return "required"
+	case llms.ToolChoiceAuto:
+		return "auto"
+	case llms.ToolChoiceNone:
+		return "none"
 	default:
 		return choice
 	}

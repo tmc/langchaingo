@@ -102,4 +102,22 @@ func TestConverseKeepsAForcedChoiceInEveryNotation(t *testing.T) {
 			}
 		})
 	}
+
+	for _, tc := range []struct {
+		name   string
+		choice any
+	}{
+		{"none as a bare string", "none"},
+		{"none as a struct", llms.ToolChoice{Type: "none"}},
+		{"none as a raw map", map[string]any{"type": "none"}},
+	} {
+		t.Run("forbidding tools offers the model none: "+tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			body := capture(t, tc.choice)
+			if strings.Contains(body, `"toolConfig"`) {
+				t.Fatalf("a forbidden tool must not be offered at all, got body: %s", body)
+			}
+		})
+	}
 }

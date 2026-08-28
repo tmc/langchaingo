@@ -24,6 +24,7 @@ func Compile(schema json.RawMessage) (*Compiled, error) {
 	if err != nil {
 		return nil, fmt.Errorf("parse schema: %w", err)
 	}
+	doc = admitNullable(doc)
 	const resource = "structuredoutput:schema"
 	comp := jsonschema.NewCompiler()
 	comp.UseLoader(jsonschema.SchemeURLLoader{})
@@ -35,6 +36,43 @@ func Compile(schema json.RawMessage) (*Compiled, error) {
 		return nil, fmt.Errorf("compile schema: %w", err)
 	}
 	return &Compiled{schema: sch}, nil
+}
+
+func admitNullable(node any) any {
+	switch typed := node.(type) {
+	case map[string]any:
+		for key, value := range typed {
+			typed[key] = admitNullable(value)
+		}
+		if nullable, ok := typed["nullable"].(bool); ok && nullable {
+			typed["type"] = withNull(typed["type"])
+		}
+		return typed
+	case []any:
+		for i, item := range typed {
+			typed[i] = admitNullable(item)
+		}
+		return typed
+	}
+	return node
+}
+
+func withNull(declared any) any {
+	switch typed := declared.(type) {
+	case string:
+		if typed == "null" {
+			return typed
+		}
+		return []any{typed, "null"}
+	case []any:
+		for _, entry := range typed {
+			if name, _ := entry.(string); name == "null" {
+				return typed
+			}
+		}
+		return append(typed, "null")
+	}
+	return declared
 }
 
 // ValidateText parses text as exactly one JSON value (trailing text or a second

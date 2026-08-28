@@ -187,6 +187,10 @@ func generateCompletionsContent(ctx context.Context, o *LLM, messages []llms.Mes
 }
 
 func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.MessageContent, opts *llms.CallOptions) (*llms.ContentResponse, error) { //nolint:lll,funlen,cyclop
+	if err := opts.ValidateReasoning(); err != nil {
+		return nil, err
+	}
+
 	chatMessages, systemPrompt, err := processMessages(messages)
 	if err != nil {
 		return nil, fmt.Errorf("anthropic: failed to process messages: %w", err)
@@ -316,7 +320,15 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 	})
 	if err != nil {
 		// The closing callback is emitted once by GenerateContent's deferred handler.
-		return nil, fmt.Errorf("anthropic: failed to create message: %w", err)
+		wrapped := fmt.Errorf("anthropic: failed to create message: %w", err)
+		if result == nil {
+			return nil, wrapped
+		}
+		partial, buildErr := processAnthropicResponse(result)
+		if buildErr != nil {
+			return nil, wrapped
+		}
+		return partial, wrapped
 	}
 	response, err := processAnthropicResponse(result)
 	if err != nil {
@@ -367,7 +379,7 @@ func processAnthropicResponse(result *anthropicclient.MessageResponsePayload) (*
 		}
 		return nil, refusal
 	}
-	if len(result.Content) == 0 {
+	if len(result.Content) == 0 && result.StopReason == "" {
 		return nil, ErrEmptyResponse
 	}
 
@@ -1013,12 +1025,15 @@ func getFloatPointer(f float64) *float64 {
 }
 
 func anthropicToolChoice(choice any) any {
-	name, forced := llms.ForcedToolName(choice)
-	switch {
-	case forced && name != "":
+	switch kind, name := llms.ClassifyToolChoice(choice); kind {
+	case llms.ToolChoiceNamed:
 		return anthropicclient.ToolChoice{Type: "tool", Name: name}
-	case forced:
+	case llms.ToolChoiceAny:
 		return anthropicclient.ToolChoice{Type: "any"}
+	case llms.ToolChoiceAuto:
+		return anthropicclient.ToolChoice{Type: "auto"}
+	case llms.ToolChoiceNone:
+		return anthropicclient.ToolChoice{Type: "none"}
 	default:
 		return choice
 	}

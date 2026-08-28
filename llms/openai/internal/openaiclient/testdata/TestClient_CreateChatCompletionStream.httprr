@@ -1,5 +1,5 @@
 httprr trace v1
-382 6250
+382 6234
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
@@ -16,7 +16,7 @@ Content-Type: text/event-stream; charset=utf-8
 Date: Tue, 10 Mar 2026 15:26:02 GMT
 Openai-Organization: lcgo-tst
 Openai-Processing-Ms: 279
-Openai-Project: proj_pf0r5emOzUBDExmxgmWVPVjK
+Openai-Project: proj_lcgo-tst
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload

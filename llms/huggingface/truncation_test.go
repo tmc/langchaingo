@@ -3,6 +3,7 @@ package huggingface
 import (
 	"context"
 	"errors"
+	"github.com/vxcontrol/langchaingo/callbacks"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -106,7 +107,10 @@ func TestFailOnTruncationOnTheInferenceDoor(t *testing.T) {
 	if err != nil {
 		t.Fatalf("New() error: %v", err)
 	}
-	_, err = llm.GenerateContent(context.Background(),
+	handler := &recordingCallbacks{}
+	llm.CallbacksHandler = handler
+
+	resp, err := llm.GenerateContent(context.Background(),
 		[]llms.MessageContent{llms.TextParts(llms.ChatMessageTypeHuman, "hi")},
 		llms.WithFailOnTruncation())
 	if err == nil {
@@ -116,4 +120,20 @@ func TestFailOnTruncationOnTheInferenceDoor(t *testing.T) {
 	if !errors.As(err, &apiErr) || apiErr.Code != llms.ErrCodeTruncated {
 		t.Fatalf("expected ErrCodeTruncated, got: %v", err)
 	}
+	if resp == nil || len(resp.Choices) == 0 {
+		t.Fatal("the partial answer must travel with the error, as it does on every other door")
+	}
+	if got := resp.Choices[0].Content; got != "partial" {
+		t.Fatalf("partial answer = %q, want %q", got, "partial")
+	}
+	if handler.errors != 1 {
+		t.Fatalf("HandleLLMError calls = %d, want 1", handler.errors)
+	}
 }
+
+type recordingCallbacks struct {
+	callbacks.SimpleHandler
+	errors int
+}
+
+func (h *recordingCallbacks) HandleLLMError(context.Context, error) { h.errors++ }

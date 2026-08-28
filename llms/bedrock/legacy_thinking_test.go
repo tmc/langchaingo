@@ -197,9 +197,9 @@ func TestLegacyPromptTokensCountTheCachedInput(t *testing.T) {
 	require.Len(t, got.Choices, 1)
 
 	info := got.Choices[0].GenerationInfo
-	assert.Equal(t, int32(13), info["input_tokens"],
+	assert.Equal(t, 13, info["input_tokens"],
 		"the vendor's own field reports the uncached input alone")
-	assert.Equal(t, int32(3915), info["PromptTokens"],
+	assert.Equal(t, 3915, info["PromptTokens"],
 		"the standardized field must count the cached input the request was billed for")
-	assert.Equal(t, int32(3919), info["TotalTokens"])
+	assert.Equal(t, 3919, info["TotalTokens"])
 }

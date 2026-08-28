@@ -35,7 +35,7 @@ func requireClosed(node any) error {
 				llms.ErrStructuredOutputConfig)
 		}
 	}
-	for _, key := range []string{"properties", "patternProperties", "$defs", "definitions"} {
+	for _, key := range []string{"properties", "patternProperties", "$defs", "definitions", "dependentSchemas"} {
 		if group, ok := m[key].(map[string]any); ok {
 			for _, v := range group {
 				if err := requireClosedValue(v); err != nil {
@@ -44,7 +44,11 @@ func requireClosed(node any) error {
 			}
 		}
 	}
-	for _, key := range []string{"items", "prefixItems", "additionalProperties", "anyOf", "oneOf", "allOf"} {
+	for _, key := range []string{
+		"items", "prefixItems", "additionalProperties", "anyOf", "oneOf", "allOf",
+		"not", "if", "then", "else", "contains", "propertyNames",
+		"unevaluatedItems", "unevaluatedProperties",
+	} {
 		if err := requireClosedValue(m[key]); err != nil {
 			return err
 		}

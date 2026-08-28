@@ -348,19 +348,6 @@ func ThinkingMarkedInName(model string) bool {
 	return strings.Contains(strings.ToLower(model), "thinking")
 }
 
-func stripPlatformPrefix(model string) string {
-	for {
-		idx := strings.Index(model, ".")
-		if idx <= 0 {
-			return model
-		}
-		if !isAlpha(model[:idx]) {
-			return model
-		}
-		model = model[idx+1:]
-	}
-}
-
 func isAlpha(s string) bool {
 	for i := range len(s) {
 		if s[i] < 'a' || s[i] > 'z' {

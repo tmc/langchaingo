@@ -163,10 +163,10 @@ func ClaudeClampBudget(model string, budget int) int {
 // ClaudeMaxTokensForBudget returns a ceiling that still leaves the answer room
 // once the budget is spent.
 func ClaudeMaxTokensForBudget(budget, maxTokens int) int {
-	if budget <= 0 {
+	if budget <= 0 || maxTokens > budget {
 		return maxTokens
 	}
-	return max(budget*2, maxTokens)
+	return budget * 2
 }
 
 // budgetEffortClaude are budget-thinking models that also accept an effort

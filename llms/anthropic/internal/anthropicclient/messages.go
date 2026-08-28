@@ -378,12 +378,18 @@ type MessageEvent struct {
 	Err      error
 }
 
+const (
+	initialStreamBuffer = 64 * 1024
+	maxStreamLine       = 8 * 1024 * 1024
+)
+
 func parseStreamingMessageResponse(
 	ctx context.Context,
 	r *http.Response,
 	payload *messagePayload,
 ) (*MessageResponsePayload, error) {
 	scanner := bufio.NewScanner(r.Body)
+	scanner.Buffer(make([]byte, 0, initialStreamBuffer), maxStreamLine)
 	eventChan := make(chan MessageEvent)
 
 	go func() {
@@ -416,7 +422,8 @@ func parseStreamingMessageResponse(
 			}
 			response, err = processStreamEvent(ctx, event, payload, response, eventChan)
 			if err != nil {
-				eventChan <- MessageEvent{Response: nil, Err: fmt.Errorf("failed to process stream event: %w", err)}
+				partial := response
+				eventChan <- MessageEvent{Response: &partial, Err: fmt.Errorf("failed to process stream event: %w", err)}
 				return
 			}
 		}
@@ -428,7 +435,10 @@ func parseStreamingMessageResponse(
 	var lastResponse *MessageResponsePayload
 	for event := range eventChan {
 		if event.Err != nil {
-			return nil, event.Err
+			if event.Response != nil {
+				lastResponse = event.Response
+			}
+			return lastResponse, event.Err
 		}
 		lastResponse = event.Response
 	}
