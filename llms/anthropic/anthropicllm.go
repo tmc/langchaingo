@@ -30,36 +30,8 @@ var (
 	ErrUnsupportedContentType   = errors.New("unsupported content type")
 )
 
-// ErrModelRefusal is returned when the model declines to respond (Anthropic
-// stop_reason "refusal"), e.g. a creative model such as Claude Fable 5 hitting a
-// content boundary. It is distinct from an empty or failed response; any refusal
-// text the model returned is in Message. Category and Explanation carry the API's
-// stop_details so callers can pick a fallback by classifier. InputTokens counts
-// only the uncached input: the whole billed prompt is the sum of the three input
-// counts.
-type ErrModelRefusal struct {
-	Message                  string
-	Category                 string
-	Explanation              string
-	InputTokens              int
-	OutputTokens             int
-	CacheCreationInputTokens int
-	CacheReadInputTokens     int
-}
-
-func (e *ErrModelRefusal) Error() string {
-	msg := "anthropic: model refused to respond"
-	if e.Category != "" {
-		msg += " (" + e.Category + ")"
-	}
-	if e.Explanation != "" {
-		msg += " (" + e.Explanation + ")"
-	}
-	if e.Message != "" {
-		msg += ": " + e.Message
-	}
-	return msg
-}
+// ErrModelRefusal is the shared refusal error, aliased for callers of this door.
+type ErrModelRefusal = llms.ErrModelRefusal
 
 const (
 	RoleUser      = "user"
@@ -362,6 +334,22 @@ func anthropicTextContent(contents []anthropicclient.Content) string {
 	return b.String()
 }
 
+func anthropicRefusal(result *anthropicclient.MessageResponsePayload) *ErrModelRefusal {
+	refusal := &ErrModelRefusal{
+		Provider:                 "anthropic",
+		Message:                  anthropicTextContent(result.Content),
+		InputTokens:              result.Usage.InputTokens,
+		OutputTokens:             result.Usage.OutputTokens,
+		CacheCreationInputTokens: result.Usage.CacheCreationInputTokens,
+		CacheReadInputTokens:     result.Usage.CacheReadInputTokens,
+	}
+	if result.StopDetails != nil {
+		refusal.Category = result.StopDetails.Category
+		refusal.Explanation = result.StopDetails.Explanation
+	}
+	return refusal
+}
+
 // processAnthropicResponse converts Anthropic API response to standard ContentResponse
 func processAnthropicResponse(result *anthropicclient.MessageResponsePayload) (*llms.ContentResponse, error) {
 	if result == nil {
@@ -371,18 +359,7 @@ func processAnthropicResponse(result *anthropicclient.MessageResponsePayload) (*
 	// typed error carrying any text the model returned, so callers can tell "the
 	// model declined" from "no response" (an empty refusal would otherwise look empty).
 	if result.StopReason == "refusal" {
-		refusal := &ErrModelRefusal{
-			Message:                  anthropicTextContent(result.Content),
-			InputTokens:              result.Usage.InputTokens,
-			OutputTokens:             result.Usage.OutputTokens,
-			CacheCreationInputTokens: result.Usage.CacheCreationInputTokens,
-			CacheReadInputTokens:     result.Usage.CacheReadInputTokens,
-		}
-		if result.StopDetails != nil {
-			refusal.Category = result.StopDetails.Category
-			refusal.Explanation = result.StopDetails.Explanation
-		}
-		return nil, refusal
+		return nil, anthropicRefusal(result)
 	}
 	if len(result.Content) == 0 && result.StopReason == "" {
 		return nil, ErrEmptyResponse

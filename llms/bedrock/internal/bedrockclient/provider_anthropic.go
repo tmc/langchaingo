@@ -158,8 +158,14 @@ type anthropicTextGenerationOutput struct {
 	// One of: ["end_turn", "max_tokens", "stop_sequence", "tool_use"]
 	StopReason string `json:"stop_reason"`
 	// Which custom stop sequence was matched, if any.
-	StopSequence string         `json:"stop_sequence"`
-	Usage        anthropicUsage `json:"usage"`
+	StopSequence string                `json:"stop_sequence"`
+	StopDetails  *anthropicStopDetails `json:"stop_details,omitempty"`
+	Usage        anthropicUsage        `json:"usage"`
+}
+
+type anthropicStopDetails struct {
+	Category    string `json:"category,omitempty"`
+	Explanation string `json:"explanation,omitempty"`
 }
 
 type anthropicUsage struct {
@@ -359,6 +365,21 @@ func createAnthropicCompletion(ctx context.Context,
 
 	contentResp := &llms.ContentResponse{
 		Choices: Contentchoices,
+	}
+	if output.StopReason == "refusal" {
+		refusal := &llms.ErrModelRefusal{
+			Provider:                 "bedrock",
+			Message:                  textContent,
+			InputTokens:              int(output.Usage.InputTokens),
+			OutputTokens:             int(output.Usage.OutputTokens),
+			CacheCreationInputTokens: int(output.Usage.CacheCreationInputTokens),
+			CacheReadInputTokens:     int(output.Usage.CacheReadInputTokens),
+		}
+		if output.StopDetails != nil {
+			refusal.Category = output.StopDetails.Category
+			refusal.Explanation = output.StopDetails.Explanation
+		}
+		return contentResp, refusal
 	}
 	if err := validateStructuredResponse(options.StructuredOutput, modelID, contentResp); err != nil {
 		return contentResp, err

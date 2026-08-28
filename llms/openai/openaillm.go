@@ -125,6 +125,10 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 
 	response := o.processResponse(result)
 
+	if refusal := refusalFrom(result); refusal != nil {
+		return response, refusal
+	}
+
 	if err := llms.CheckTruncation(response, opts); err != nil {
 		return response, err
 	}
@@ -435,6 +439,21 @@ func (o *LLM) addToolsToRequest(req *openaiclient.ChatRequest, opts llms.CallOpt
 		req.Tools = append(req.Tools, t)
 	}
 
+	return nil
+}
+
+func refusalFrom(result *openaiclient.ChatCompletionResponse) *llms.ErrModelRefusal {
+	for _, c := range result.Choices {
+		if c.Message.Refusal == "" {
+			continue
+		}
+		return &llms.ErrModelRefusal{
+			Provider:     "openai",
+			Message:      c.Message.Refusal,
+			InputTokens:  result.Usage.PromptTokens,
+			OutputTokens: result.Usage.CompletionTokens,
+		}
+	}
 	return nil
 }
 
