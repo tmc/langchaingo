@@ -72,7 +72,7 @@ func ForcesToolUse(choice any) bool {
 // tool", which every door spells differently.
 func ForcedToolName(choice any) (name string, forced bool) {
 	kind, name := ClassifyToolChoice(choice)
-	switch kind {
+	switch kind { //nolint:exhaustive // the kinds that leave the choice to the model are not forcing
 	case ToolChoiceNamed:
 		return name, true
 	case ToolChoiceAny:

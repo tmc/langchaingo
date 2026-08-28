@@ -34,7 +34,7 @@ func turnLimitErr(t *testing.T, model string, msgs []llms.MessageContent, opts .
 	return err
 }
 
-func askedFor(text string) []llms.MessageContent {
+func askedFor(text string) []llms.MessageContent { //nolint:unparam // every caller asks the same thing today
 	return []llms.MessageContent{llms.TextParts(llms.ChatMessageTypeHuman, text)}
 }
 

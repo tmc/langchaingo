@@ -3,7 +3,6 @@ package huggingface
 import (
 	"context"
 	"errors"
-	"github.com/vxcontrol/langchaingo/callbacks"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -11,6 +10,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/vxcontrol/langchaingo/callbacks"
 	"github.com/vxcontrol/langchaingo/llms"
 )
 

@@ -12,8 +12,8 @@ import (
 	"github.com/vxcontrol/langchaingo/llms/bedrock"
 )
 
-func TestConverseKeepsAForcedChoiceInEveryNotation(t *testing.T) {
-	t.Parallel()
+func converseChoiceOnWire(t *testing.T, choice any) string {
+	t.Helper()
 
 	const answer = `{"output":{"message":{"role":"assistant","content":[{"text":"ok"}]}},` +
 		`"stopReason":"end_turn","usage":{"inputTokens":1,"outputTokens":1,"totalTokens":2}}`
@@ -27,9 +27,8 @@ func TestConverseKeepsAForcedChoiceInEveryNotation(t *testing.T) {
 		},
 	}
 
-	capture := func(t *testing.T, choice any) string {
-		t.Helper()
-		var body string
+	var body string
+	{
 		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			b, _ := io.ReadAll(r.Body)
 			body = string(b)
@@ -51,6 +50,10 @@ func TestConverseKeepsAForcedChoiceInEveryNotation(t *testing.T) {
 		}
 		return body
 	}
+}
+
+func TestConverseKeepsAForcedChoiceInEveryNotation(t *testing.T) {
+	t.Parallel()
 
 	for _, tc := range []struct {
 		name   string
@@ -96,12 +99,16 @@ func TestConverseKeepsAForcedChoiceInEveryNotation(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			body := capture(t, tc.choice)
+			body := converseChoiceOnWire(t, tc.choice)
 			if !strings.Contains(body, tc.want) {
 				t.Fatalf("wire must carry %s, got body: %s", tc.want, body)
 			}
 		})
 	}
+}
+
+func TestConverseOffersNoToolWhenTheCallerForbidsThem(t *testing.T) {
+	t.Parallel()
 
 	for _, tc := range []struct {
 		name   string
@@ -114,7 +121,7 @@ func TestConverseKeepsAForcedChoiceInEveryNotation(t *testing.T) {
 		t.Run("forbidding tools offers the model none: "+tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			body := capture(t, tc.choice)
+			body := converseChoiceOnWire(t, tc.choice)
 			if strings.Contains(body, `"toolConfig"`) {
 				t.Fatalf("a forbidden tool must not be offered at all, got body: %s", body)
 			}
