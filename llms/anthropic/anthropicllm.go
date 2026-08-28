@@ -367,7 +367,7 @@ func processAnthropicResponse(result *anthropicclient.MessageResponsePayload) (*
 		}
 		return nil, refusal
 	}
-	if len(result.Content) == 0 {
+	if len(result.Content) == 0 && result.StopReason == "" {
 		return nil, ErrEmptyResponse
 	}
 
@@ -1013,12 +1013,15 @@ func getFloatPointer(f float64) *float64 {
 }
 
 func anthropicToolChoice(choice any) any {
-	name, forced := llms.ForcedToolName(choice)
-	switch {
-	case forced && name != "":
+	switch kind, name := llms.ClassifyToolChoice(choice); kind {
+	case llms.ToolChoiceNamed:
 		return anthropicclient.ToolChoice{Type: "tool", Name: name}
-	case forced:
+	case llms.ToolChoiceAny:
 		return anthropicclient.ToolChoice{Type: "any"}
+	case llms.ToolChoiceAuto:
+		return anthropicclient.ToolChoice{Type: "auto"}
+	case llms.ToolChoiceNone:
+		return anthropicclient.ToolChoice{Type: "none"}
 	default:
 		return choice
 	}

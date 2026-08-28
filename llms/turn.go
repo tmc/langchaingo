@@ -2,51 +2,83 @@ package llms
 
 import "github.com/vxcontrol/langchaingo/llms/reasoning"
 
+// ToolChoiceKind is what a tool choice asks of the model, apart from the
+// spelling the door expects. Doors translate it into their own wire shape.
+type ToolChoiceKind int
+
+const (
+	// ToolChoiceUnset means the caller picked nothing, so the door sends nothing.
+	ToolChoiceUnset ToolChoiceKind = iota
+	// ToolChoiceAuto leaves the decision to the model.
+	ToolChoiceAuto
+	// ToolChoiceNone forbids every tool.
+	ToolChoiceNone
+	// ToolChoiceAny demands a tool call without naming one.
+	ToolChoiceAny
+	// ToolChoiceNamed demands the tool the caller named.
+	ToolChoiceNamed
+)
+
+// ClassifyToolChoice reads every spelling the doors accept and reports what was
+// asked, naming the tool when the caller picked one.
+func ClassifyToolChoice(choice any) (ToolChoiceKind, string) {
+	kindOf := func(t string, name string) (ToolChoiceKind, string) {
+		switch t {
+		case "auto":
+			return ToolChoiceAuto, ""
+		case "none":
+			return ToolChoiceNone, ""
+		case "tool", "function":
+			if name != "" {
+				return ToolChoiceNamed, name
+			}
+			return ToolChoiceAny, ""
+		case "any", "required":
+			return ToolChoiceAny, ""
+		}
+		return ToolChoiceUnset, ""
+	}
+
+	switch c := choice.(type) {
+	case string:
+		return kindOf(c, "")
+	case ToolChoice:
+		return kindOf(c.Type, functionName(c.Function))
+	case *ToolChoice:
+		if c == nil {
+			return ToolChoiceUnset, ""
+		}
+		return kindOf(c.Type, functionName(c.Function))
+	case map[string]any:
+		t, _ := c["type"].(string)
+		name, _ := c["name"].(string)
+		if fn, ok := c["function"].(map[string]any); ok {
+			name, _ = fn["name"].(string)
+		}
+		return kindOf(t, name)
+	}
+	return ToolChoiceUnset, ""
+}
+
 // ForcesToolUse reports whether a tool choice demands a tool call rather than
 // leaving the decision to the model.
 func ForcesToolUse(choice any) bool {
-	forced := func(t string) bool {
-		switch t {
-		case "any", "tool", "function", "required":
-			return true
-		}
-		return false
-	}
-	switch c := choice.(type) {
-	case string:
-		return forced(c)
-	case ToolChoice:
-		return forced(c.Type)
-	case *ToolChoice:
-		return c != nil && forced(c.Type)
-	case map[string]any:
-		t, _ := c["type"].(string)
-		return forced(t)
-	}
-	return false
+	kind, _ := ClassifyToolChoice(choice)
+	return kind == ToolChoiceAny || kind == ToolChoiceNamed
 }
 
 // ForcedToolName reports whether the choice demands a tool call, and names the
 // tool when the caller picked one. An empty name with forced=true means "any
 // tool", which every door spells differently.
 func ForcedToolName(choice any) (name string, forced bool) {
-	if !ForcesToolUse(choice) {
-		return "", false
+	kind, name := ClassifyToolChoice(choice)
+	switch kind {
+	case ToolChoiceNamed:
+		return name, true
+	case ToolChoiceAny:
+		return "", true
 	}
-	switch c := choice.(type) {
-	case ToolChoice:
-		return functionName(c.Function), true
-	case *ToolChoice:
-		return functionName(c.Function), true
-	case map[string]any:
-		if fn, ok := c["function"].(map[string]any); ok {
-			n, _ := fn["name"].(string)
-			return n, true
-		}
-		n, _ := c["name"].(string)
-		return n, true
-	}
-	return "", true
+	return "", false
 }
 
 func functionName(fn *FunctionReference) string {

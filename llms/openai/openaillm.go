@@ -643,12 +643,15 @@ func webSearchOptionsFromCallOptions(opts *llms.WebSearchOptions) *openaiclient.
 }
 
 func openaiToolChoice(choice any) any {
-	name, forced := llms.ForcedToolName(choice)
-	switch {
-	case forced && name != "":
+	switch kind, name := llms.ClassifyToolChoice(choice); kind {
+	case llms.ToolChoiceNamed:
 		return llms.ToolChoice{Type: "function", Function: &llms.FunctionReference{Name: name}}
-	case forced:
+	case llms.ToolChoiceAny:
 		return "required"
+	case llms.ToolChoiceAuto:
+		return "auto"
+	case llms.ToolChoiceNone:
+		return "none"
 	default:
 		return choice
 	}

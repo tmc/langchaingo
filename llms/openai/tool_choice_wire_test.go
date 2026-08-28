@@ -93,16 +93,28 @@ func TestToolChoiceReachesTheWireInTheChatCompletionsSpelling(t *testing.T) {
 		})
 	}
 
-	t.Run("a choice the model owns is left alone", func(t *testing.T) {
-		t.Parallel()
+	for _, tc := range []struct {
+		name   string
+		choice any
+		want   string
+	}{
+		{"auto as a bare string", "auto", "auto"},
+		{"auto as a struct", llms.ToolChoice{Type: "auto"}, "auto"},
+		{"auto as a raw map", map[string]any{"type": "auto"}, "auto"},
+		{"none as a bare string", "none", "none"},
+		{"none as a struct", llms.ToolChoice{Type: "none"}, "none"},
+	} {
+		t.Run("a choice the model owns reaches the wire as a string: "+tc.name, func(t *testing.T) {
+			t.Parallel()
 
-		payload := captureChatRequest(t,
-			llms.WithTools([]llms.Tool{tool}), llms.WithToolChoice("auto"))
+			payload := captureChatRequest(t,
+				llms.WithTools([]llms.Tool{tool}), llms.WithToolChoice(tc.choice))
 
-		if got := payload["tool_choice"]; got != "auto" {
-			t.Fatalf("tool_choice = %#v, want %q", got, "auto")
-		}
-	})
+			if got := payload["tool_choice"]; got != tc.want {
+				t.Fatalf("tool_choice = %#v, want %q", got, tc.want)
+			}
+		})
+	}
 
 	t.Run("no choice sends no field", func(t *testing.T) {
 		t.Parallel()
