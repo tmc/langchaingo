@@ -187,6 +187,10 @@ func generateCompletionsContent(ctx context.Context, o *LLM, messages []llms.Mes
 }
 
 func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.MessageContent, opts *llms.CallOptions) (*llms.ContentResponse, error) { //nolint:lll,funlen,cyclop
+	if err := opts.ValidateReasoning(); err != nil {
+		return nil, err
+	}
+
 	chatMessages, systemPrompt, err := processMessages(messages)
 	if err != nil {
 		return nil, fmt.Errorf("anthropic: failed to process messages: %w", err)

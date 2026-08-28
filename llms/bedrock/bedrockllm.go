@@ -108,6 +108,10 @@ func (l *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		return nil, err
 	}
 
+	if err := opts.ValidateReasoning(); err != nil {
+		return nil, err
+	}
+
 	if err := checkAnthropicTurnLimits(&opts, messages); err != nil {
 		return nil, err
 	}

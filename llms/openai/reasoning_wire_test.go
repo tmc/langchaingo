@@ -12,6 +12,10 @@ import (
 )
 
 func sendModernReasoningForWire(t *testing.T, effort llms.ReasoningEffort, tokens int) string {
+	return sendModernReasoningForModel(t, "gpt-5", effort, tokens)
+}
+
+func sendModernReasoningForModel(t *testing.T, model string, effort llms.ReasoningEffort, tokens int) string {
 	t.Helper()
 
 	const completion = `{"id":"x","object":"chat.completion","created":1,"model":"m",` +
@@ -27,7 +31,7 @@ func sendModernReasoningForWire(t *testing.T, effort llms.ReasoningEffort, token
 	}))
 	t.Cleanup(srv.Close)
 
-	llm, err := New(WithBaseURL(srv.URL), WithToken("test"), WithModel("gpt-5"),
+	llm, err := New(WithBaseURL(srv.URL), WithToken("test"), WithModel(model),
 		WithModernReasoningFormat(), WithUsingReasoningMaxTokens())
 	if err != nil {
 		t.Fatalf("New() error: %v", err)
@@ -82,5 +86,19 @@ func TestModernReasoningSendsNoBudgetItCannotCompute(t *testing.T) {
 				t.Errorf("want no %s on the wire, got body: %s", tc.absent, body)
 			}
 		})
+	}
+}
+
+func TestTheBudgetOnTheWireRespectsTheVendorFloor(t *testing.T) {
+	t.Parallel()
+
+	body := sendModernReasoningForModel(t, "claude-sonnet-4-5", llms.ReasoningNone, 100)
+	if !strings.Contains(body, `"max_tokens":1024`) {
+		t.Fatalf("a budget under the vendor floor must be raised to it, got body: %s", body)
+	}
+
+	untouched := sendModernReasoningForModel(t, "gpt-5", llms.ReasoningNone, 100)
+	if !strings.Contains(untouched, `"max_tokens":100`) {
+		t.Fatalf("the floor is Anthropic's alone, got body: %s", untouched)
 	}
 }

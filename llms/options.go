@@ -1,6 +1,7 @@
 package llms
 
 import (
+	"fmt"
 	"github.com/vxcontrol/langchaingo/llms/streaming"
 )
 
@@ -29,10 +30,11 @@ const (
 type ReasoningEffort string
 
 const (
-	ReasoningHigh   ReasoningEffort = "high"
-	ReasoningMedium ReasoningEffort = "medium"
-	ReasoningLow    ReasoningEffort = "low"
-	ReasoningNone   ReasoningEffort = ""
+	ReasoningHigh    ReasoningEffort = "high"
+	ReasoningMedium  ReasoningEffort = "medium"
+	ReasoningLow     ReasoningEffort = "low"
+	ReasoningNone    ReasoningEffort = ""
+	ReasoningMinimal ReasoningEffort = "minimal"
 	// ReasoningXHigh and ReasoningMax are the top reasoning efforts. Anthropic models
 	// carry them via WithAdaptiveReasoning (max since Claude 4.6, xhigh since Opus 4.7);
 	// OpenAI-compatible providers that expose them (e.g. GPT-5.5, GLM-5.2) accept them
@@ -156,6 +158,22 @@ func (r *ReasoningConfig) GetEffort(maxTokens int) ReasoningEffort {
 	}
 
 	return ReasoningNone
+}
+
+// ValidateReasoning reports an effort no door accepts.
+func (o *CallOptions) ValidateReasoning() error {
+	if o == nil || o.Reasoning == nil {
+		return nil
+	}
+	switch o.Reasoning.Effort {
+	case ReasoningNone, ReasoningMinimal, ReasoningLow,
+		ReasoningMedium, ReasoningHigh, ReasoningXHigh, ReasoningMax:
+		return nil
+	}
+	return &Error{
+		Code:    ErrCodeInvalidRequest,
+		Message: fmt.Sprintf("unknown reasoning effort %q", string(o.Reasoning.Effort)),
+	}
 }
 
 // GetTokens returns the number of tokens to use for reasoning based on kept values inside.
