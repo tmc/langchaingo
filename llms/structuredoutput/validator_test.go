@@ -147,3 +147,25 @@ func TestCompileStillAcceptsInternalAndDraftRefs(t *testing.T) {
 		}
 	}
 }
+
+func TestTheValidatorAdmitsTheNullableSpellingTheDoorsSendOnTheWire(t *testing.T) {
+	t.Parallel()
+
+	schema := json.RawMessage(`{"type":"object","additionalProperties":false,` +
+		`"properties":{"a":{"type":"string","nullable":true}},"required":["a"]}`)
+
+	compiled, err := structuredoutput.Compile(schema)
+	if err != nil {
+		t.Fatalf("Compile() error: %v", err)
+	}
+
+	if err := compiled.ValidateText(`{"a":null}`); err != nil {
+		t.Fatalf("a null the schema declared nullable must validate, got: %v", err)
+	}
+	if err := compiled.ValidateText(`{"a":"x"}`); err != nil {
+		t.Fatalf("the declared type must still validate, got: %v", err)
+	}
+	if err := compiled.ValidateText(`{"a":7}`); err == nil {
+		t.Fatal("nullable widens the type by null alone, not by every type")
+	}
+}
