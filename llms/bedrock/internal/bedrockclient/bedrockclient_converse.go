@@ -167,27 +167,34 @@ func (c *ConverseClient) buildConverseInput(input *ConverseInput) (*bedrockrunti
 			inferenceConfig.Temperature = nil
 			inferenceConfig.TopP = nil
 		}
-		setBudget := func() {
-			if tokens := reasoning.ClaudeClampBudget(input.ModelID,
-				input.ReasoningConfig.GetTokens(maxTokens)); tokens > 0 {
-				additionalModelFields.Thinking = &converseThinkingPayload{Type: "enabled", BudgetTokens: tokens}
-				if reasoning.ClaudeSupportsEffortWithBudget(input.ModelID, reasoning.ProviderBedrock) {
-					effort := reasoning.ClaudeClampEffort(input.ModelID, string(input.ReasoningConfig.GetEffort(maxTokens)))
-					additionalModelFields.OutputConfig = &converseOutputConfig{Effort: effort}
-				}
-				// Budget thinking requires temperature=1.0 and rejects top_p.
-				if isAnthropicModelID(input.ModelID) {
-					inferenceConfig.Temperature = aws.Float32(1.0)
-					inferenceConfig.TopP = nil
+		setBudget := func() error {
+			tokens := reasoning.ClaudeClampBudget(input.ModelID, input.ReasoningConfig.GetTokens(maxTokens))
+			if tokens <= 0 {
+				return &reasoning.ErrEffortHasNoBudget{
+					Model:  input.ModelID,
+					Effort: string(input.ReasoningConfig.GetEffort(maxTokens)),
 				}
 			}
+			additionalModelFields.Thinking = &converseThinkingPayload{Type: "enabled", BudgetTokens: tokens}
+			if reasoning.ClaudeSupportsEffortWithBudget(input.ModelID, reasoning.ProviderBedrock) {
+				effort := reasoning.ClaudeClampEffort(input.ModelID, string(input.ReasoningConfig.GetEffort(maxTokens)))
+				additionalModelFields.OutputConfig = &converseOutputConfig{Effort: effort}
+			}
+			// Budget thinking requires temperature=1.0 and rejects top_p.
+			if isAnthropicModelID(input.ModelID) {
+				inferenceConfig.Temperature = aws.Float32(1.0)
+				inferenceConfig.TopP = nil
+			}
+			return nil
 		}
 		switch reasoning.ResolveMechanism(input.ModelID, input.ReasoningConfig.Adaptive,
 			isAnthropicModelID(input.ModelID), c.supportsReasoning(input.ModelID)) {
 		case reasoning.MechanismAdaptive:
 			setAdaptive()
 		case reasoning.MechanismBudget:
-			setBudget()
+			if err := setBudget(); err != nil {
+				return nil, err
+			}
 		}
 		if additionalModelFields.Thinking != nil {
 			converseInput.AdditionalModelRequestFields = document.NewLazyDocument(additionalModelFields)

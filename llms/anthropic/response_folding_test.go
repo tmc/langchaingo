@@ -11,6 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/vxcontrol/langchaingo/llms"
+	"github.com/vxcontrol/langchaingo/llms/reasoning"
 )
 
 // serveAnthropic's returned pointer holds the request body only once
@@ -53,7 +54,7 @@ func TestEveryTextBlockOfATurnReachesTheChoice(t *testing.T) {
 	assert.Len(t, got.Choices[0].ToolCalls, 1)
 }
 
-func TestAnEffortWithNoBudgetSendsNoThinking(t *testing.T) {
+func TestAnEffortWithNoBudgetIsRefused(t *testing.T) {
 	t.Parallel()
 
 	const resp = `{"id":"x","type":"message","role":"assistant","model":"m",` +
@@ -67,13 +68,33 @@ func TestAnEffortWithNoBudgetSendsNoThinking(t *testing.T) {
 
 	_, err = llm.GenerateContent(context.Background(),
 		[]llms.MessageContent{llms.TextParts(llms.ChatMessageTypeHuman, "hi")},
-		llms.WithReasoning(llms.ReasoningEffort("minimal"), 0))
+		llms.WithReasoning(llms.ReasoningMinimal, 0))
+
+	var refused *reasoning.ErrEffortHasNoBudget
+	require.ErrorAs(t, err, &refused)
+	assert.Equal(t, string(llms.ReasoningMinimal), refused.Effort)
+	assert.Empty(t, *sent, "the refusal must land before the request leaves")
+}
+
+func TestAnEffortWithNoBudgetStillTravelsWhenTokensAreExplicit(t *testing.T) {
+	t.Parallel()
+
+	const resp = `{"id":"x","type":"message","role":"assistant","model":"m",` +
+		`"content":[{"type":"text","text":"ok"}],"stop_reason":"end_turn",` +
+		`"usage":{"input_tokens":1,"output_tokens":1}}`
+
+	srv, sent := serveAnthropic(t, resp)
+
+	llm, err := New(WithBaseURL(srv.URL), WithToken("t"), WithModel("claude-sonnet-4-5-20250929"))
 	require.NoError(t, err)
 
-	assert.NotContains(t, *sent, `"budget_tokens":-1`,
-		"an effort the budget table does not map must not travel as a negative budget")
-	assert.NotContains(t, *sent, `"thinking"`,
-		"no budget means no thinking payload, as on both Bedrock doors")
+	_, err = llm.GenerateContent(context.Background(),
+		[]llms.MessageContent{llms.TextParts(llms.ChatMessageTypeHuman, "hi")},
+		llms.WithReasoning(llms.ReasoningEffort("minimal"), 2048), llms.WithMaxTokens(8000))
+	require.NoError(t, err)
+
+	assert.Contains(t, *sent, `"budget_tokens":2048`,
+		"an explicit budget answers the question the effort could not")
 }
 
 func TestABudgetedEffortStillSendsThinking(t *testing.T) {

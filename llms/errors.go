@@ -230,3 +230,38 @@ var (
 	// ErrTruncated is returned when an answer stopped at the output token limit.
 	ErrTruncated = &Error{Code: ErrCodeTruncated}
 )
+
+// ErrModelRefusal is returned when the model declines to respond rather than
+// failing: Anthropic reports it as stop_reason "refusal", OpenAI as a refusal
+// message under Structured Outputs. It is distinct from an empty or failed
+// response; any refusal text the model returned is in Message. Category and
+// Explanation carry the vendor's classification where it sends one. InputTokens
+// counts only the uncached input: the whole billed prompt is the sum of the
+// three input counts.
+type ErrModelRefusal struct {
+	Provider                 string
+	Message                  string
+	Category                 string
+	Explanation              string
+	InputTokens              int
+	OutputTokens             int
+	CacheCreationInputTokens int
+	CacheReadInputTokens     int
+}
+
+func (e *ErrModelRefusal) Error() string {
+	msg := "model refused to respond"
+	if e.Provider != "" {
+		msg = e.Provider + ": " + msg
+	}
+	if e.Category != "" {
+		msg += " (" + e.Category + ")"
+	}
+	if e.Explanation != "" {
+		msg += " (" + e.Explanation + ")"
+	}
+	if e.Message != "" {
+		msg += ": " + e.Message
+	}
+	return msg
+}
