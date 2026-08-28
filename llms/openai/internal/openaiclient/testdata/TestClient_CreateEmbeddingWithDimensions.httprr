@@ -1,5 +1,5 @@
 httprr trace v1
-270 6491
+270 6475
 POST https://api.openai.com/v1/embeddings HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
@@ -18,7 +18,7 @@ Date: Tue, 10 Mar 2026 15:26:14 GMT
 Openai-Model: text-embedding-3-small
 Openai-Organization: lcgo-tst
 Openai-Processing-Ms: 100
-Openai-Project: proj_pf0r5emOzUBDExmxgmWVPVjK
+Openai-Project: proj_lcgo-tst
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload

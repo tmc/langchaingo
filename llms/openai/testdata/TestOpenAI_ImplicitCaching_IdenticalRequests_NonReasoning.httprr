@@ -1,5 +1,5 @@
 httprr trace v1
-16739 1580
+16739 1564
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
@@ -16,7 +16,7 @@ Content-Type: application/json
 Date: Tue, 27 Jan 2026 14:10:02 GMT
 Openai-Organization: lcgo-tst
 Openai-Processing-Ms: 273
-Openai-Project: proj_pf0r5emOzUBDExmxgmWVPVjK
+Openai-Project: proj_lcgo-tst
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
@@ -66,7 +66,7 @@ X-Request-Id: req_fde37f6a0b5942719d967bafdb71e3fa
   "service_tier": "default",
   "system_fingerprint": "fp_376a7ccef1"
 }
-16739 1583
+16739 1567
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
@@ -83,7 +83,7 @@ Content-Type: application/json
 Date: Tue, 27 Jan 2026 14:10:34 GMT
 Openai-Organization: lcgo-tst
 Openai-Processing-Ms: 221
-Openai-Project: proj_pf0r5emOzUBDExmxgmWVPVjK
+Openai-Project: proj_lcgo-tst
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload

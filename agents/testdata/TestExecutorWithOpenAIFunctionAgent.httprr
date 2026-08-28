@@ -1,5 +1,5 @@
 httprr trace v1
-1176 1913
+1176 1897
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
@@ -16,7 +16,7 @@ Content-Type: application/json
 Date: Thu, 22 Jan 2026 11:36:31 GMT
 Openai-Organization: lcgo-tst
 Openai-Processing-Ms: 1138
-Openai-Project: proj_pf0r5emOzUBDExmxgmWVPVjK
+Openai-Project: proj_lcgo-tst
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
@@ -453,7 +453,7 @@ X-Xss-Protection: 1; mode=block
       "10": "https://serpapi.com/search.json?device=desktop&engine=google&gl=us&google_domain=google.com&hl=en&q=Go+programming+language+version+1.0+release+date&start=90"
     }
   }
-}1619 1647
+}1619 1631
 POST https://api.openai.com/v1/chat/completions HTTP/1.1
 Host: api.openai.com
 User-Agent: langchaingo-httprr
@@ -470,7 +470,7 @@ Content-Type: application/json
 Date: Thu, 22 Jan 2026 11:36:36 GMT
 Openai-Organization: lcgo-tst
 Openai-Processing-Ms: 759
-Openai-Project: proj_pf0r5emOzUBDExmxgmWVPVjK
+Openai-Project: proj_lcgo-tst
 Openai-Version: 2020-10-01
 Server: cloudflare
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
