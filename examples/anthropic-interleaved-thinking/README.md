@@ -64,6 +64,6 @@ The example displays detailed token usage:
 
 ## Requirements
 
-- Claude 3.7 Sonnet model (`claude-3-7-sonnet-20250219`)
+- Claude Sonnet 4.5 model (`claude-sonnet-4-5`)
 - Valid Anthropic API key
 - Interleaved thinking feature access

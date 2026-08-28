@@ -14,7 +14,7 @@ and reuse them across multiple requests. This can significantly reduce:
 ## Requirements
 
 - Minimum cacheable content: **32,768 tokens** (~24,000 words)
-- Supported models: gemini-2.0-flash-exp and other Gemini 2.0+ models
+- Supported models: gemini-2.5-pro and other Gemini 2.0+ models
 - Google API key
 
 ## How It Works
@@ -70,7 +70,7 @@ Caching is particularly valuable when:
 ```go
 cached, err := helper.CreateCachedContent(
     ctx,
-    "gemini-2.0-flash-exp",   // Model name
+    "gemini-2.5-pro",         // Model name
     messages,                 // Content to cache
     1*time.Hour,              // TTL
     "my-cache-name",          // Display name

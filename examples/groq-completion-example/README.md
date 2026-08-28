@@ -9,7 +9,7 @@ Hello there! 👋 This example demonstrates how to use the Groq API with LangCha
 
 2. **Groq LLM Configuration**:
    - It sets up a Large Language Model (LLM) client using Groq's API, which is compatible with the OpenAI interface.
-   - The model used is "llama3-8b-8192", a powerful language model hosted by Groq.
+   - The model used is "moonshotai/kimi-k2-instruct", hosted by Groq.
 
 3. **Text Generation**:
    - The example prompts the model to "Write a long poem about how golang is a fantastic language."
