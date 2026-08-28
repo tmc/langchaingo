@@ -60,6 +60,21 @@ func TestClaudeTurnLimitsOnTheOpenAITransport(t *testing.T) {
 		}
 	})
 
+	t.Run("a generation that also thinks adaptively is not refused", func(t *testing.T) {
+		t.Parallel()
+		if err := turnLimitErr(t, "claude-opus-4-6", askedFor("hi"), thinking, forced); err != nil {
+			t.Errorf("this generation answers an effort adaptively, so a forced tool is fine, got %v", err)
+		}
+	})
+
+	t.Run("an effort with no budget is not refused", func(t *testing.T) {
+		t.Parallel()
+		if err := turnLimitErr(t, "claude-sonnet-4-5", askedFor("hi"),
+			llms.WithReasoning(llms.ReasoningEffort("minimal"), 0), forced); err != nil {
+			t.Errorf("an effort the budget mapper rejects sends no thinking, so nothing is refused, got %v", err)
+		}
+	})
+
 	t.Run("the OpenAI spelling of a forced tool is refused too", func(t *testing.T) {
 		t.Parallel()
 		for _, choice := range []any{

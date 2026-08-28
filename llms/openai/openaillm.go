@@ -96,7 +96,8 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		opt(&opts)
 	}
 
-	if err := llms.CheckClaudeTurnLimits(o.effectiveModel(opts), opts, messages); err != nil {
+	sendsBudget := o.client.UseReasoningMaxTokens && opts.Reasoning.Tokens != 0
+	if err := llms.CheckClaudeTurnLimitsOnWire(o.effectiveModel(opts), opts, messages, sendsBudget); err != nil {
 		return nil, err
 	}
 

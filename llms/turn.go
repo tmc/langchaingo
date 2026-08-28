@@ -101,9 +101,25 @@ func HasAssistantPrefill(messages []MessageContent) bool {
 // wire: manual (budget) thinking combined with a forced tool choice, and a
 // conversation that ends on an assistant turn.
 func CheckClaudeTurnLimits(model string, opts CallOptions, messages []MessageContent) error {
-	budgetThinking := opts.Reasoning.ResolveMode() == ReasoningOn &&
+	return CheckClaudeTurnLimitsOnWire(model, opts, messages, true)
+}
+
+// CheckClaudeTurnLimitsOnWire is CheckClaudeTurnLimits for a door that knows
+// whether its own request carries a manual thinking budget; a door that sends
+// only an effort passes false.
+func CheckClaudeTurnLimitsOnWire(
+	model string,
+	opts CallOptions,
+	messages []MessageContent,
+	sendsManualThinking bool,
+) error {
+	budget := reasoning.ClaudeClampBudget(model, opts.Reasoning.GetTokens(opts.GetMaxTokens()))
+	budgetOnly := reasoning.ClaudeReasoningKindFor(model) == reasoning.ClaudeReasoningBudgetOnly
+	budgetThinking := (sendsManualThinking || budgetOnly) &&
+		opts.Reasoning.ResolveMode() == ReasoningOn &&
 		reasoning.ClaudeSupportsThinking(model) &&
-		!reasoning.ResolveClaudeAdaptive(model, opts.Reasoning.Adaptive)
+		!reasoning.ResolveClaudeAdaptive(model, opts.Reasoning.Adaptive) &&
+		budget > 0
 	if budgetThinking && ForcesToolUse(opts.ToolChoice) {
 		return &reasoning.ErrForcedToolUseWithThinking{Model: model}
 	}

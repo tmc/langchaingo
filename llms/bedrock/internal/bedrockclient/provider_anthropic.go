@@ -107,6 +107,8 @@ type anthropicTextGenerationInput struct {
 	StopSequences []string `json:"stop_sequences,omitempty"`
 	// Tools available for the model to use. Optional
 	Tools []anthropicTool `json:"tools,omitempty"`
+	// ToolChoice constrains which tool the model may call. Optional
+	ToolChoice any `json:"tool_choice,omitempty"`
 	// Thinking configuration for reasoning models. Optional
 	Thinking *anthropicThinkingPayload `json:"thinking,omitempty"`
 	// OutputConfig carries the adaptive-thinking effort. It is a top-level
@@ -249,6 +251,7 @@ func createAnthropicCompletion(ctx context.Context,
 		TopK:             options.GetTopK(),
 		StopSequences:    options.StopWords,
 		Tools:            tools,
+		ToolChoice:       anthropicToolChoiceOnWire(options.ToolChoice),
 	}
 
 	if err := applyAnthropicReasoning(&input, options.Reasoning, modelID, maxTokens); err != nil {
@@ -361,6 +364,21 @@ func createAnthropicCompletion(ctx context.Context,
 		return contentResp, err
 	}
 	return contentResp, nil
+}
+
+func anthropicToolChoiceOnWire(choice any) any {
+	switch kind, name := llms.ClassifyToolChoice(choice); kind {
+	case llms.ToolChoiceNamed:
+		return map[string]any{"type": "tool", "name": name}
+	case llms.ToolChoiceAny:
+		return map[string]any{"type": "any"}
+	case llms.ToolChoiceAuto:
+		return map[string]any{"type": "auto"}
+	case llms.ToolChoiceNone:
+		return map[string]any{"type": "none"}
+	default:
+		return nil
+	}
 }
 
 func mergeAnthropicUsage(into anthropicUsage, updates ...anthropicUsage) anthropicUsage {
