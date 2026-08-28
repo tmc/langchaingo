@@ -230,6 +230,11 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 					Effort: reasoning.ClaudeClampEffort(model, string(opts.Reasoning.GetEffort(opts.GetMaxTokens()))),
 				}
 			}
+		} else {
+			return nil, &reasoning.ErrEffortHasNoBudget{
+				Model:  model,
+				Effort: string(opts.Reasoning.GetEffort(opts.GetMaxTokens())),
+			}
 		}
 	case llms.ReasoningOff:
 		switch reasoning.ResolveOff(model, reasoning.ProviderAnthropic) { //nolint:exhaustive // only Claude-relevant wires are handled; others are a no-op

@@ -791,27 +791,30 @@ func applyAnthropicReasoning(
 		input.TopP = 0
 		input.TopK = 0
 	}
-	setBudget := func() {
-		if tokens := reasoning.ClaudeClampBudget(modelID, cfg.GetTokens(maxTokens)); tokens > 0 {
-			input.Thinking = &anthropicThinkingPayload{Type: "enabled", BudgetTokens: tokens}
-			if reasoning.ClaudeSupportsEffortWithBudget(modelID, reasoning.ProviderBedrock) {
-				input.OutputConfig = &anthropicOutputConfig{Effort: reasoning.ClaudeClampEffort(modelID, string(cfg.GetEffort(maxTokens)))}
-			}
-			// Budget thinking requires temperature=1.0 and rejects top_p/top_k.
-			input.Temperature = 1.0
-			if reasoning.ClaudeRejectsSampling(modelID) {
-				input.Temperature = 0
-			}
-			input.TopP = 0
-			input.TopK = 0
+	setBudget := func() error {
+		tokens := reasoning.ClaudeClampBudget(modelID, cfg.GetTokens(maxTokens))
+		if tokens <= 0 {
+			return &reasoning.ErrEffortHasNoBudget{Model: modelID, Effort: string(cfg.GetEffort(maxTokens))}
 		}
+		input.Thinking = &anthropicThinkingPayload{Type: "enabled", BudgetTokens: tokens}
+		if reasoning.ClaudeSupportsEffortWithBudget(modelID, reasoning.ProviderBedrock) {
+			input.OutputConfig = &anthropicOutputConfig{Effort: reasoning.ClaudeClampEffort(modelID, string(cfg.GetEffort(maxTokens)))}
+		}
+		// Budget thinking requires temperature=1.0 and rejects top_p/top_k.
+		input.Temperature = 1.0
+		if reasoning.ClaudeRejectsSampling(modelID) {
+			input.Temperature = 0
+		}
+		input.TopP = 0
+		input.TopK = 0
+		return nil
 	}
 
 	switch reasoning.ResolveMechanism(modelID, cfg.Adaptive, true, supportsAnthropicReasoning(modelID)) {
 	case reasoning.MechanismAdaptive:
 		setAdaptive()
 	case reasoning.MechanismBudget:
-		setBudget()
+		return setBudget()
 	}
 	return nil
 }

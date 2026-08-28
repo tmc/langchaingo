@@ -21,3 +21,16 @@ func (e *ErrForcedToolUseWithThinking) Error() string {
 		"model %q runs manual thinking, which rejects a forced tool choice; use tool_choice auto or none",
 		e.Model)
 }
+
+// ErrEffortHasNoBudget reports that reasoning was asked for with an effort that
+// does not map to a token budget, on a model whose only thinking wire is one.
+type ErrEffortHasNoBudget struct {
+	Model  string
+	Effort string
+}
+
+func (e *ErrEffortHasNoBudget) Error() string {
+	return fmt.Sprintf(
+		"model %q thinks by token budget, and effort %q maps to none; pass an explicit budget or an effort from low to max",
+		e.Model, e.Effort)
+}
