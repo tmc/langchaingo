@@ -143,8 +143,7 @@ func (c *ConverseClient) buildConverseInput(input *ConverseInput) (*bedrockrunti
 		converseInput.System = systemPrompts
 	}
 
-	// Add tool configuration if tools are provided
-	if len(input.Tools) > 0 {
+	if kind, _ := llms.ClassifyToolChoice(input.ToolChoice); len(input.Tools) > 0 && kind != llms.ToolChoiceNone {
 		toolConfig, err := c.convertToolsToToolConfig(input.Tools, input.ToolChoice)
 		if err != nil {
 			return nil, fmt.Errorf("failed to convert tools: %w", err)
@@ -639,11 +638,10 @@ func (c *ConverseClient) convertToolsToToolConfig(tools []llms.Tool, choice any)
 // converseToolChoice carries the caller's choice to the wire. An unset or
 // unrecognized choice leaves the decision to the model.
 func converseToolChoice(choice any) types.ToolChoice {
-	name, forced := llms.ForcedToolName(choice)
-	switch {
-	case forced && name != "":
+	switch kind, name := llms.ClassifyToolChoice(choice); kind {
+	case llms.ToolChoiceNamed:
 		return &types.ToolChoiceMemberTool{Value: types.SpecificToolChoice{Name: &name}}
-	case forced:
+	case llms.ToolChoiceAny:
 		return &types.ToolChoiceMemberAny{}
 	default:
 		return &types.ToolChoiceMemberAuto{}
