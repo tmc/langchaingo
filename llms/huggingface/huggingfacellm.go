@@ -75,7 +75,10 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		},
 	}
 	if err := llms.CheckTruncation(resp, *opts); err != nil {
-		return nil, err
+		if o.CallbacksHandler != nil {
+			o.CallbacksHandler.HandleLLMError(ctx, err)
+		}
+		return resp, err
 	}
 	return resp, nil
 }
