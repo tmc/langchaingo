@@ -687,6 +687,11 @@ func parseChatResponse(body io.Reader) (*ChatCompletionResponse, error) {
 	return &response, nil
 }
 
+const (
+	initialStreamBuffer = 64 * 1024
+	maxStreamLine       = 8 * 1024 * 1024
+)
+
 func parseStreamingChatResponse(
 	ctx context.Context,
 	r *http.Response,
@@ -694,6 +699,7 @@ func parseStreamingChatResponse(
 ) (*ChatCompletionResponse, error) {
 	// Parse response
 	scanner := bufio.NewScanner(r.Body)
+	scanner.Buffer(make([]byte, 0, initialStreamBuffer), maxStreamLine)
 	responseChan := make(chan StreamedChatResponsePayload)
 
 	go func() {

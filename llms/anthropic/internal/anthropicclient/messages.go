@@ -378,12 +378,18 @@ type MessageEvent struct {
 	Err      error
 }
 
+const (
+	initialStreamBuffer = 64 * 1024
+	maxStreamLine       = 8 * 1024 * 1024
+)
+
 func parseStreamingMessageResponse(
 	ctx context.Context,
 	r *http.Response,
 	payload *messagePayload,
 ) (*MessageResponsePayload, error) {
 	scanner := bufio.NewScanner(r.Body)
+	scanner.Buffer(make([]byte, 0, initialStreamBuffer), maxStreamLine)
 	eventChan := make(chan MessageEvent)
 
 	go func() {
