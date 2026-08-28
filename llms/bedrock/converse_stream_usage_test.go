@@ -45,10 +45,10 @@ func TestConverseStreamReportsTheSameCountersAsTheWholeAnswer(t *testing.T) {
 	require.Len(t, resp.Choices, 1)
 
 	info := resp.Choices[0].GenerationInfo
-	assert.Equal(t, int32(304), info["CompletionTokens"])
-	assert.Equal(t, int32(3919), info["TotalTokens"])
-	assert.Equal(t, int32(3602), info["CacheReadInputTokens"])
-	assert.Equal(t, int32(3602), info["PromptCachedTokens"])
-	assert.Equal(t, int32(300), info["CacheCreationInputTokens"])
-	assert.Equal(t, int32(3915), info["PromptTokens"])
+	assert.Equal(t, 304, info["CompletionTokens"])
+	assert.Equal(t, 3919, info["TotalTokens"])
+	assert.Equal(t, 3602, info["CacheReadInputTokens"])
+	assert.Equal(t, 3602, info["PromptCachedTokens"])
+	assert.Equal(t, 300, info["CacheCreationInputTokens"])
+	assert.Equal(t, 3915, info["PromptTokens"])
 }

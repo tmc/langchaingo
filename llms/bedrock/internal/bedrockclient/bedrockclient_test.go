@@ -736,27 +736,12 @@ func TestAnthropicStreamingResponseChunk(t *testing.T) {
 			name: "message_start chunk",
 			chunk: streamingCompletionResponseChunk{
 				Type: "message_start",
-				Message: struct {
-					ID           string `json:"id"`
-					Type         string `json:"type"`
-					Role         string `json:"role"`
-					Content      []any  `json:"content"`
-					Model        string `json:"model"`
-					StopReason   any    `json:"stop_reason"`
-					StopSequence any    `json:"stop_sequence"`
-					Usage        struct {
-						InputTokens  int32 `json:"input_tokens"`
-						OutputTokens int32 `json:"output_tokens"`
-					} `json:"usage"`
-				}{
+				Message: anthropicStreamMessage{
 					ID:    "msg-123",
 					Type:  "message",
 					Role:  "assistant",
 					Model: "claude-3",
-					Usage: struct {
-						InputTokens  int32 `json:"input_tokens"`
-						OutputTokens int32 `json:"output_tokens"`
-					}{
+					Usage: anthropicUsage{
 						InputTokens: 25,
 					},
 				},

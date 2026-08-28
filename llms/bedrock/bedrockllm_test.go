@@ -1362,12 +1362,12 @@ func testReasoningWorkflow( //nolint:funlen
 		return fmt.Errorf("empty reasoning content")
 	}
 
-	if got, ok := choice.GenerationInfo["ReasoningTokens"].(int32); !ok || got <= 0 {
-		return fmt.Errorf("an answer that reasoned must report ReasoningTokens, got %v",
+	if got, ok := choice.GenerationInfo["ReasoningTokens"].(int); !ok || got <= 0 {
+		return fmt.Errorf("an answer that reasoned must report ReasoningTokens as an int, got %#v",
 			choice.GenerationInfo["ReasoningTokens"])
 	}
-	if got, ok := choice.GenerationInfo["CompletionTokens"].(int32); !ok || got <= 0 {
-		return fmt.Errorf("an answer that reasoned must report CompletionTokens, got %v",
+	if got, ok := choice.GenerationInfo["CompletionTokens"].(int); !ok || got <= 0 {
+		return fmt.Errorf("an answer that reasoned must report CompletionTokens as an int, got %#v",
 			choice.GenerationInfo["CompletionTokens"])
 	}
 
@@ -3218,20 +3218,20 @@ func TestCreateClientWithBearerTokenCredentials(t *testing.T) {
 func requireUsageAddsUp(t *testing.T, info map[string]any) {
 	t.Helper()
 
-	prompt, ok := info["PromptTokens"].(int32)
+	prompt, ok := info["PromptTokens"].(int)
 	if !ok {
-		t.Fatalf("PromptTokens missing or not int32: %#v", info["PromptTokens"])
+		t.Fatalf("PromptTokens missing or not int: %#v", info["PromptTokens"])
 	}
-	completion, ok := info["CompletionTokens"].(int32)
+	completion, ok := info["CompletionTokens"].(int)
 	if !ok {
-		t.Fatalf("CompletionTokens missing or not int32: %#v", info["CompletionTokens"])
+		t.Fatalf("CompletionTokens missing or not int: %#v", info["CompletionTokens"])
 	}
-	cached, _ := info["CacheReadInputTokens"].(int32)
-	created, _ := info["CacheCreationInputTokens"].(int32)
+	cached, _ := info["CacheReadInputTokens"].(int)
+	created, _ := info["CacheCreationInputTokens"].(int)
 	if cached+created == 0 {
 		t.Fatalf("this recording carries no cache tokens, so it cannot show whether they are counted: %#v", info)
 	}
-	total, ok := info["TotalTokens"].(int32)
+	total, ok := info["TotalTokens"].(int)
 	if !ok {
 		total = prompt + completion
 	}

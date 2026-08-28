@@ -832,29 +832,29 @@ func applyConverseUsage(info map[string]any, usage *types.TokenUsage) {
 		return
 	}
 
-	var promptTokens int32
+	var promptTokens int
 	if usage.InputTokens != nil {
-		info["input_tokens"] = *usage.InputTokens
-		promptTokens += *usage.InputTokens
+		info["input_tokens"] = int(*usage.InputTokens)
+		promptTokens += int(*usage.InputTokens)
 	}
 	if usage.OutputTokens != nil {
-		info["output_tokens"] = *usage.OutputTokens
-		info["CompletionTokens"] = *usage.OutputTokens
+		info["output_tokens"] = int(*usage.OutputTokens)
+		info["CompletionTokens"] = int(*usage.OutputTokens)
 	}
 	if usage.TotalTokens != nil {
-		info["total_tokens"] = *usage.TotalTokens
-		info["TotalTokens"] = *usage.TotalTokens
+		info["total_tokens"] = int(*usage.TotalTokens)
+		info["TotalTokens"] = int(*usage.TotalTokens)
 	}
 	if usage.CacheReadInputTokens != nil {
-		info["cacheReadInputTokens"] = *usage.CacheReadInputTokens
-		info["CacheReadInputTokens"] = *usage.CacheReadInputTokens
-		info["PromptCachedTokens"] = *usage.CacheReadInputTokens
-		promptTokens += *usage.CacheReadInputTokens
+		info["cacheReadInputTokens"] = int(*usage.CacheReadInputTokens)
+		info["CacheReadInputTokens"] = int(*usage.CacheReadInputTokens)
+		info["PromptCachedTokens"] = int(*usage.CacheReadInputTokens)
+		promptTokens += int(*usage.CacheReadInputTokens)
 	}
 	if usage.CacheWriteInputTokens != nil {
-		info["cacheWriteInputTokens"] = *usage.CacheWriteInputTokens
-		info["CacheCreationInputTokens"] = *usage.CacheWriteInputTokens
-		promptTokens += *usage.CacheWriteInputTokens
+		info["cacheWriteInputTokens"] = int(*usage.CacheWriteInputTokens)
+		info["CacheCreationInputTokens"] = int(*usage.CacheWriteInputTokens)
+		promptTokens += int(*usage.CacheWriteInputTokens)
 	}
 	info["PromptTokens"] = promptTokens
 }

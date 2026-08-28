@@ -343,29 +343,15 @@ func createAnthropicCompletion(ctx context.Context,
 	}
 
 	// Create single choice with all content
-	promptTokens := output.Usage.InputTokens +
-		output.Usage.CacheCreationInputTokens + output.Usage.CacheReadInputTokens
 	choice := &llms.ContentChoice{
-		Content:    textContent,
-		Reasoning:  processReasoning(reasoningContent, signature),
-		ToolCalls:  toolCalls,
-		StopReason: output.StopReason,
-		Truncated:  llms.IsTruncated(output.StopReason),
-		GenerationInfo: map[string]any{
-			"input_tokens":     output.Usage.InputTokens,
-			"output_tokens":    output.Usage.OutputTokens,
-			"PromptTokens":     promptTokens,
-			"CompletionTokens": output.Usage.OutputTokens,
-			"TotalTokens":      promptTokens + output.Usage.OutputTokens,
-			// Cache metrics
-			"CacheReadInputTokens":                output.Usage.CacheReadInputTokens,
-			"CacheCreationInputTokens":            output.Usage.CacheCreationInputTokens,
-			"CacheCreationEphemeral5mInputTokens": output.Usage.CacheCreation.Ephemeral5mInputTokens,
-			"CacheCreationEphemeral1hInputTokens": output.Usage.CacheCreation.Ephemeral1hInputTokens,
-			"PromptCachedTokens":                  output.Usage.CacheReadInputTokens,
-			"ReasoningTokens":                     output.Usage.OutputTokensDetails.ThinkingTokens,
-		},
+		Content:        textContent,
+		Reasoning:      processReasoning(reasoningContent, signature),
+		ToolCalls:      toolCalls,
+		StopReason:     output.StopReason,
+		Truncated:      llms.IsTruncated(output.StopReason),
+		GenerationInfo: map[string]any{},
 	}
+	applyAnthropicUsage(choice.GenerationInfo, output.Usage)
 	Contentchoices = append(Contentchoices, choice)
 
 	contentResp := &llms.ContentResponse{
@@ -375,6 +361,54 @@ func createAnthropicCompletion(ctx context.Context,
 		return contentResp, err
 	}
 	return contentResp, nil
+}
+
+func mergeAnthropicUsage(into anthropicUsage, updates ...anthropicUsage) anthropicUsage {
+	for _, u := range updates {
+		if u.InputTokens != 0 {
+			into.InputTokens = u.InputTokens
+		}
+		if u.OutputTokens != 0 {
+			into.OutputTokens = u.OutputTokens
+		}
+		if u.CacheCreationInputTokens != 0 {
+			into.CacheCreationInputTokens = u.CacheCreationInputTokens
+		}
+		if u.CacheReadInputTokens != 0 {
+			into.CacheReadInputTokens = u.CacheReadInputTokens
+		}
+		if u.CacheCreation.Ephemeral5mInputTokens != 0 {
+			into.CacheCreation.Ephemeral5mInputTokens = u.CacheCreation.Ephemeral5mInputTokens
+		}
+		if u.CacheCreation.Ephemeral1hInputTokens != 0 {
+			into.CacheCreation.Ephemeral1hInputTokens = u.CacheCreation.Ephemeral1hInputTokens
+		}
+		if u.OutputTokensDetails.ThinkingTokens != 0 {
+			into.OutputTokensDetails.ThinkingTokens = u.OutputTokensDetails.ThinkingTokens
+		}
+	}
+	return into
+}
+
+func applyAnthropicUsage(info map[string]any, usage anthropicUsage) {
+	if info == nil {
+		return
+	}
+
+	promptTokens := int(usage.InputTokens) +
+		int(usage.CacheCreationInputTokens) + int(usage.CacheReadInputTokens)
+
+	info["input_tokens"] = int(usage.InputTokens)
+	info["output_tokens"] = int(usage.OutputTokens)
+	info["PromptTokens"] = promptTokens
+	info["CompletionTokens"] = int(usage.OutputTokens)
+	info["TotalTokens"] = promptTokens + int(usage.OutputTokens)
+	info["CacheReadInputTokens"] = int(usage.CacheReadInputTokens)
+	info["CacheCreationInputTokens"] = int(usage.CacheCreationInputTokens)
+	info["CacheCreationEphemeral5mInputTokens"] = int(usage.CacheCreation.Ephemeral5mInputTokens)
+	info["CacheCreationEphemeral1hInputTokens"] = int(usage.CacheCreation.Ephemeral1hInputTokens)
+	info["PromptCachedTokens"] = int(usage.CacheReadInputTokens)
+	info["ReasoningTokens"] = int(usage.OutputTokensDetails.ThinkingTokens)
 }
 
 func processReasoning(reasoningContent string, signature []byte) *reasoning.ContentReasoning {
@@ -412,20 +446,19 @@ type streamingCompletionResponseChunk struct {
 		InvocationLatency int32 `json:"invocationLatency"`
 		FirstByteLatency  int32 `json:"firstByteLatency"`
 	} `json:"amazon-bedrock-invocationMetrics"`
-	Usage   anthropicUsage `json:"usage"`
-	Message struct {
-		ID           string `json:"id"`
-		Type         string `json:"type"`
-		Role         string `json:"role"`
-		Content      []any  `json:"content"`
-		Model        string `json:"model"`
-		StopReason   any    `json:"stop_reason"`
-		StopSequence any    `json:"stop_sequence"`
-		Usage        struct {
-			InputTokens  int32 `json:"input_tokens"`
-			OutputTokens int32 `json:"output_tokens"`
-		} `json:"usage"`
-	} `json:"message"`
+	Usage   anthropicUsage         `json:"usage"`
+	Message anthropicStreamMessage `json:"message"`
+}
+
+type anthropicStreamMessage struct {
+	ID           string         `json:"id"`
+	Type         string         `json:"type"`
+	Role         string         `json:"role"`
+	Content      []any          `json:"content"`
+	Model        string         `json:"model"`
+	StopReason   any            `json:"stop_reason"`
+	StopSequence any            `json:"stop_sequence"`
+	Usage        anthropicUsage `json:"usage"`
 }
 
 func parseStreamingCompletionResponse(ctx context.Context, client *bedrockruntime.Client, modelInput *bedrockruntime.InvokeModelWithResponseStreamInput, options llms.CallOptions) (*llms.ContentResponse, error) {
@@ -441,6 +474,7 @@ func parseStreamingCompletionResponse(ctx context.Context, client *bedrockruntim
 	defer streaming.CallWithDone(ctx, options.StreamingFunc) //nolint:errcheck
 
 	contentchoices := []*llms.ContentChoice{{GenerationInfo: map[string]any{}}}
+	var usage anthropicUsage
 	var streamedContent strings.Builder
 	var currentToolCall *streaming.ToolCall
 	var toolCalls []llms.ToolCall
@@ -460,9 +494,8 @@ func parseStreamingCompletionResponse(ctx context.Context, client *bedrockruntim
 
 			switch resp.Type {
 			case "message_start":
-				contentchoices[0].GenerationInfo["input_tokens"] = resp.Message.Usage.InputTokens
-				contentchoices[0].GenerationInfo["PromptTokens"] = resp.Message.Usage.InputTokens
-				contentchoices[0].GenerationInfo["TotalTokens"] = resp.Message.Usage.InputTokens
+				usage = mergeAnthropicUsage(usage, resp.Message.Usage, resp.Usage)
+				applyAnthropicUsage(contentchoices[0].GenerationInfo, usage)
 			case "content_block_start":
 				if resp.ContentBlock.Type == "tool_use" {
 					currentToolCall = &streaming.ToolCall{
@@ -528,25 +561,8 @@ func parseStreamingCompletionResponse(ctx context.Context, client *bedrockruntim
 			case "message_delta":
 				contentchoices[0].StopReason = resp.Delta.StopReason
 				contentchoices[0].Truncated = llms.IsTruncated(resp.Delta.StopReason)
-				inputTokens := resp.Message.Usage.InputTokens
-				outputTokens := resp.Message.Usage.OutputTokens
-				if inputTokens == 0 {
-					inputTokens = resp.Usage.InputTokens
-				}
-				if outputTokens == 0 {
-					outputTokens = resp.Usage.OutputTokens
-				}
-				if inputTokens == 0 {
-					if v, ok := contentchoices[0].GenerationInfo["input_tokens"].(int32); ok {
-						inputTokens = v
-					}
-				}
-				if thinkingTokens := resp.Usage.OutputTokensDetails.ThinkingTokens; thinkingTokens != 0 {
-					contentchoices[0].GenerationInfo["ReasoningTokens"] = thinkingTokens
-				}
-				contentchoices[0].GenerationInfo["output_tokens"] = outputTokens
-				contentchoices[0].GenerationInfo["CompletionTokens"] = outputTokens
-				contentchoices[0].GenerationInfo["TotalTokens"] = inputTokens + outputTokens
+				usage = mergeAnthropicUsage(usage, resp.Message.Usage, resp.Usage)
+				applyAnthropicUsage(contentchoices[0].GenerationInfo, usage)
 			}
 		}
 	}
