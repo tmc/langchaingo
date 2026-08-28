@@ -708,6 +708,7 @@ func (c *ConverseClient) processStreamingResponse(ctx context.Context, response 
 	var signature bytes.Buffer
 	var toolCalls []llms.ToolCall
 	var stopReason string
+	var usage *types.TokenUsage
 	currentToolCalls := make(map[int32]*converseToolCallBuilder) // Track streaming tool calls by content block index
 
 	defer streaming.CallWithDone(ctx, callback)
@@ -790,6 +791,8 @@ func (c *ConverseClient) processStreamingResponse(ctx context.Context, response 
 				toolCalls = append(toolCalls, currentToolCalls[index].toolCall())
 			}
 			currentToolCalls = nil
+		case *types.ConverseStreamOutputMemberMetadata:
+			usage = e.Value.Usage
 		}
 	}
 
@@ -810,12 +813,45 @@ func (c *ConverseClient) processStreamingResponse(ctx context.Context, response 
 		StopReason:     stopReason,
 		Truncated:      llms.IsTruncated(stopReason),
 	}
+	applyConverseUsage(choice.GenerationInfo, usage)
 
 	result := &llms.ContentResponse{
 		Choices: []*llms.ContentChoice{choice},
 	}
 
 	return result, nil
+}
+
+func applyConverseUsage(info map[string]any, usage *types.TokenUsage) {
+	if info == nil || usage == nil {
+		return
+	}
+
+	var promptTokens int32
+	if usage.InputTokens != nil {
+		info["input_tokens"] = *usage.InputTokens
+		promptTokens += *usage.InputTokens
+	}
+	if usage.OutputTokens != nil {
+		info["output_tokens"] = *usage.OutputTokens
+		info["CompletionTokens"] = *usage.OutputTokens
+	}
+	if usage.TotalTokens != nil {
+		info["total_tokens"] = *usage.TotalTokens
+		info["TotalTokens"] = *usage.TotalTokens
+	}
+	if usage.CacheReadInputTokens != nil {
+		info["cacheReadInputTokens"] = *usage.CacheReadInputTokens
+		info["CacheReadInputTokens"] = *usage.CacheReadInputTokens
+		info["PromptCachedTokens"] = *usage.CacheReadInputTokens
+		promptTokens += *usage.CacheReadInputTokens
+	}
+	if usage.CacheWriteInputTokens != nil {
+		info["cacheWriteInputTokens"] = *usage.CacheWriteInputTokens
+		info["CacheCreationInputTokens"] = *usage.CacheWriteInputTokens
+		promptTokens += *usage.CacheWriteInputTokens
+	}
+	info["PromptTokens"] = promptTokens
 }
 
 func (c *ConverseClient) processReasoning(reasoningContent string, signature []byte) *reasoning.ContentReasoning {
@@ -897,35 +933,7 @@ func (c *ConverseClient) convertConverseResponse(response *bedrockruntime.Conver
 	choice.StopReason = string(response.StopReason)
 	choice.Truncated = llms.IsTruncated(string(response.StopReason))
 
-	// Add usage information
-	if response.Usage != nil {
-		var promptTokens int32
-		if response.Usage.InputTokens != nil {
-			choice.GenerationInfo["input_tokens"] = *response.Usage.InputTokens
-			promptTokens += *response.Usage.InputTokens
-		}
-		if response.Usage.OutputTokens != nil {
-			choice.GenerationInfo["output_tokens"] = *response.Usage.OutputTokens
-			choice.GenerationInfo["CompletionTokens"] = *response.Usage.OutputTokens
-		}
-		if response.Usage.TotalTokens != nil {
-			choice.GenerationInfo["total_tokens"] = *response.Usage.TotalTokens
-			choice.GenerationInfo["TotalTokens"] = *response.Usage.TotalTokens
-		}
-		// Add cache metrics if available
-		if response.Usage.CacheReadInputTokens != nil {
-			choice.GenerationInfo["cacheReadInputTokens"] = *response.Usage.CacheReadInputTokens
-			choice.GenerationInfo["CacheReadInputTokens"] = *response.Usage.CacheReadInputTokens
-			choice.GenerationInfo["PromptCachedTokens"] = *response.Usage.CacheReadInputTokens
-			promptTokens += *response.Usage.CacheReadInputTokens
-		}
-		if response.Usage.CacheWriteInputTokens != nil {
-			choice.GenerationInfo["cacheWriteInputTokens"] = *response.Usage.CacheWriteInputTokens
-			choice.GenerationInfo["CacheCreationInputTokens"] = *response.Usage.CacheWriteInputTokens
-			promptTokens += *response.Usage.CacheWriteInputTokens
-		}
-		choice.GenerationInfo["PromptTokens"] = promptTokens
-	}
+	applyConverseUsage(choice.GenerationInfo, response.Usage)
 
 	return &llms.ContentResponse{
 		Choices: []*llms.ContentChoice{choice},
