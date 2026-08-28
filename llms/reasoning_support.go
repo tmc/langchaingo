@@ -25,7 +25,8 @@ type ReasoningSupport struct {
 	CannotDisable bool
 	// RejectsSampling is set for models that reject temperature/top_p while thinking.
 	RejectsSampling bool
-	// Efforts are the effort tiers worth offering; nil when unknown.
+	// Efforts are the effort tiers worth offering; empty both when the model is
+	// unknown and when it takes none, so read Mechanism before offering a control.
 	Efforts []ReasoningEffort
 	// Mechanism reports whether the model takes an effort level, a token budget
 	// or either; ReasoningMechanismUnknown when unclassified.

@@ -353,3 +353,19 @@ func TestGoogleHintNamesItsMechanism(t *testing.T) {
 		}
 	}
 }
+
+func TestABudgetModelWithNoEffortTierIsKnownAndEmpty(t *testing.T) {
+	t.Parallel()
+
+	support := ReasoningSupportFor("claude-sonnet-4-5", reasoning.ProviderAnthropic)
+
+	if !support.Known {
+		t.Fatal("the model is classified, so Known must stay true")
+	}
+	if len(support.Efforts) != 0 {
+		t.Fatalf("a model that takes no effort must offer none, got %v", support.Efforts)
+	}
+	if support.Mechanism != ReasoningMechanismBudget {
+		t.Fatalf("Mechanism must tell the caller what to offer instead, got %v", support.Mechanism)
+	}
+}

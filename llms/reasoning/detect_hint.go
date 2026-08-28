@@ -27,7 +27,7 @@ func likelyReasoningFamily(m string) bool {
 
 	switch {
 	case strings.HasPrefix(m, "gpt-"):
-		return !openAIPreReasoning(m)
+		return !openAIPreReasoning(m) && !strings.Contains(m, "-chat-latest")
 	case isOSeries(m):
 		return true
 	case strings.HasPrefix(m, "claude-"):
@@ -43,7 +43,12 @@ func likelyReasoningFamily(m string) bool {
 }
 
 func namesNonTextModality(m string) bool {
-	return strings.Contains(m, "embedding") || strings.Contains(m, "image")
+	for _, modality := range []string{"embedding", "image", "audio", "realtime", "tts", "whisper", "transcribe"} {
+		if strings.Contains(m, modality) {
+			return true
+		}
+	}
+	return false
 }
 
 // openAIPreReasoning matches the GPT generations below the GPT-5 line, where

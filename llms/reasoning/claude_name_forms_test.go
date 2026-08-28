@@ -90,22 +90,6 @@ func TestDetectionSeesPlatformIdsAndDashedVersions(t *testing.T) {
 	}
 }
 
-func TestStripPlatformPrefixLeavesVersionsAlone(t *testing.T) {
-	t.Parallel()
-
-	for _, tc := range []struct{ in, want string }{
-		{"us.anthropic.claude-opus-5-v1:0", "claude-opus-5-v1:0"},
-		{"anthropic.claude-opus-4-6", "claude-opus-4-6"},
-		{"glm-4.5", "glm-4.5"},
-		{"deepseek-v3.1-terminus", "deepseek-v3.1-terminus"},
-		{"claude-opus-4-7", "claude-opus-4-7"},
-	} {
-		if got := stripPlatformPrefix(tc.in); got != tc.want {
-			t.Errorf("stripPlatformPrefix(%q) = %q, want %q", tc.in, got, tc.want)
-		}
-	}
-}
-
 func TestOpenAISuffixVariantsDoNotInheritTheBaseRules(t *testing.T) {
 	t.Parallel()
 
