@@ -1082,15 +1082,30 @@ func TestResolveThinkingConfigRefusesAnEffortThatMapsToNothing(t *testing.T) {
 	t.Parallel()
 
 	for _, model := range []string{"gemini-2.5-flash", "gemini-3-pro-preview"} {
-		for _, effort := range []llms.ReasoningEffort{llms.ReasoningMinimal, "banana"} {
-			tc, err := resolveThinkingConfig(model,
-				&llms.ReasoningConfig{Effort: effort}, 8000)
-			var budgetErr *reasoning.ErrEffortHasNoBudget
-			require.ErrorAs(t, err, &budgetErr, "%s on %s must not pass silently", effort, model)
-			assert.Equal(t, string(effort), budgetErr.Effort)
-			assert.Nil(t, tc)
-		}
+		tc, err := resolveThinkingConfig(model,
+			&llms.ReasoningConfig{Effort: "banana"}, 8000)
+		var budgetErr *reasoning.ErrEffortHasNoBudget
+		require.ErrorAs(t, err, &budgetErr, "an unknown effort on %s must not pass silently", model)
+		assert.Equal(t, "banana", budgetErr.Effort)
+		assert.Nil(t, tc)
 	}
+
+	tc, err := resolveThinkingConfig("gemini-2.5-flash",
+		&llms.ReasoningConfig{Effort: llms.ReasoningMinimal}, 8000)
+	var budgetErr *reasoning.ErrEffortHasNoBudget
+	require.ErrorAs(t, err, &budgetErr, "minimal has no budget, and 2.5 has only budgets")
+	assert.Nil(t, tc)
+}
+
+func TestResolveThinkingConfigClampsMinimalToTheLowestLevel(t *testing.T) {
+	t.Parallel()
+
+	tc, err := resolveThinkingConfig("gemini-3-pro-preview",
+		&llms.ReasoningConfig{Effort: llms.ReasoningMinimal}, 8000)
+	require.NoError(t, err)
+	require.NotNil(t, tc)
+	assert.Equal(t, genai.ThinkingLevelLow, tc.ThinkingLevel)
+	assert.True(t, tc.IncludeThoughts)
 }
 
 func TestResolveThinkingConfig(t *testing.T) {

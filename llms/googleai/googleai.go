@@ -1144,7 +1144,7 @@ func checkEmptyStream(
 // the caller falls back to a budget or the model default.
 func thinkingLevelForEffort(effort llms.ReasoningEffort) genai.ThinkingLevel {
 	switch effort {
-	case llms.ReasoningLow:
+	case llms.ReasoningMinimal, llms.ReasoningLow:
 		return genai.ThinkingLevelLow
 	case llms.ReasoningMedium:
 		return genai.ThinkingLevelMedium
