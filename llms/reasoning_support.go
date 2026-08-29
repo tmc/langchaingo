@@ -101,7 +101,7 @@ func ReasoningSupportFor(model string, p reasoning.Provider) ReasoningSupport {
 			// always on, hence not disablable, on Bedrock).
 			CannotDisable:   reasoning.ResolveOff(model, p) == reasoning.OffUnsupported,
 			RejectsSampling: reasoning.ClaudeRejectsSampling(model),
-			Efforts:         toReasoningEfforts(reasoning.ClaudeEffortsFor(model)),
+			Efforts:         toReasoningEfforts(reasoning.ClaudeEffortsFor(model, p)),
 			Mechanism:       claudeMechanism(reasoning.ClaudeReasoningKindFor(model)),
 			DefaultOn:       boolPtr(reasoning.ClaudeThinkingDefaultsOn(model)),
 		}

@@ -369,3 +369,30 @@ func TestABudgetModelWithNoEffortTierIsKnownAndEmpty(t *testing.T) {
 		t.Fatalf("Mechanism must tell the caller what to offer instead, got %v", support.Mechanism)
 	}
 }
+
+func TestAdvertisedEffortsFollowTheWireOfEachProvider(t *testing.T) {
+	t.Parallel()
+
+	const opus45 = "us.anthropic.claude-opus-4-5-20251101-v1:0"
+
+	for _, tc := range []struct {
+		provider reasoning.Provider
+		want     bool
+	}{
+		{reasoning.ProviderAnthropic, true},
+		{reasoning.ProviderBedrock, false},
+	} {
+		sends := reasoning.ClaudeSupportsEffortWithBudget(opus45, tc.provider)
+		if sends != tc.want {
+			t.Fatalf("wire assumption changed: ClaudeSupportsEffortWithBudget(%v) = %v", tc.provider, sends)
+		}
+
+		efforts := ReasoningSupportFor(opus45, tc.provider).Efforts
+		if sends && len(efforts) == 0 {
+			t.Errorf("%v sends an effort with the budget, so the hint must list some", tc.provider)
+		}
+		if !sends && len(efforts) > 0 {
+			t.Errorf("%v never sends an effort for this model, yet the hint advertises %v", tc.provider, efforts)
+		}
+	}
+}
