@@ -146,24 +146,30 @@ func parseMetaStreamingResponse(ctx context.Context, client *bedrockruntime.Clie
 
 	contentchoices := []*llms.ContentChoice{{GenerationInfo: map[string]any{}}}
 	var streamedContent strings.Builder
+	var streamErr error
+
+DoStream:
 	for e := range stream.Events() {
 		if err = stream.Err(); err != nil {
-			return nil, err
+			streamErr = err
+			break DoStream
 		}
 
 		if v, ok := e.(*types.ResponseStreamMemberChunk); ok {
 			var resp metaStreamingResponseChunk
 			err := json.NewDecoder(bytes.NewReader(v.Value.Bytes)).Decode(&resp)
 			if err != nil {
-				return nil, err
+				streamErr = err
+				break DoStream
 			}
 
 			// Send text chunk if available
 			if resp.Generation != "" {
-				if err = streaming.CallWithText(ctx, options.StreamingFunc, resp.Generation); err != nil {
-					return nil, err
-				}
 				streamedContent.WriteString(resp.Generation)
+				if err = streaming.CallWithText(ctx, options.StreamingFunc, resp.Generation); err != nil {
+					streamErr = err
+					break DoStream
+				}
 			}
 
 			// Set completion reason
@@ -187,12 +193,10 @@ func parseMetaStreamingResponse(ctx context.Context, client *bedrockruntime.Clie
 		}
 	}
 	if err = stream.Err(); err != nil {
-		return nil, err
+		streamErr = err
 	}
 
 	contentchoices[0].Content = streamedContent.String()
 
-	return &llms.ContentResponse{
-		Choices: contentchoices,
-	}, nil
+	return &llms.ContentResponse{Choices: contentchoices}, streamErr
 }

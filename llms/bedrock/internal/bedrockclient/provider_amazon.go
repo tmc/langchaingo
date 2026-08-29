@@ -162,24 +162,30 @@ func parseAmazonStreamingResponse(ctx context.Context, client *bedrockruntime.Cl
 
 	contentchoices := []*llms.ContentChoice{{GenerationInfo: map[string]any{}}}
 	var streamedContent strings.Builder
+	var streamErr error
+
+DoStream:
 	for e := range stream.Events() {
 		if err = stream.Err(); err != nil {
-			return nil, err
+			streamErr = err
+			break DoStream
 		}
 
 		if v, ok := e.(*types.ResponseStreamMemberChunk); ok {
 			var resp amazonStreamingResponseChunk
 			err := json.NewDecoder(bytes.NewReader(v.Value.Bytes)).Decode(&resp)
 			if err != nil {
-				return nil, err
+				streamErr = err
+				break DoStream
 			}
 
 			// Send text chunk if available
 			if resp.OutputText != "" {
-				if err = streaming.CallWithText(ctx, options.StreamingFunc, resp.OutputText); err != nil {
-					return nil, err
-				}
 				streamedContent.WriteString(resp.OutputText)
+				if err = streaming.CallWithText(ctx, options.StreamingFunc, resp.OutputText); err != nil {
+					streamErr = err
+					break DoStream
+				}
 			}
 
 			// Set completion reason
@@ -203,12 +209,10 @@ func parseAmazonStreamingResponse(ctx context.Context, client *bedrockruntime.Cl
 		}
 	}
 	if err = stream.Err(); err != nil {
-		return nil, err
+		streamErr = err
 	}
 
 	contentchoices[0].Content = streamedContent.String()
 
-	return &llms.ContentResponse{
-		Choices: contentchoices,
-	}, nil
+	return &llms.ContentResponse{Choices: contentchoices}, streamErr
 }

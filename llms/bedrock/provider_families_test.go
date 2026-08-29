@@ -2,6 +2,7 @@ package bedrock_test
 
 import (
 	"context"
+	"errors"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -125,6 +126,37 @@ func TestANonClaudeFamilyReportsTruncationAndKeepsItsWholeAnswer(t *testing.T) {
 						key, resp.Choices[0].GenerationInfo[key])
 				}
 			}
+		})
+
+		t.Run(tc.name+"/consumer gives up mid-stream", func(t *testing.T) {
+			t.Parallel()
+
+			srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				_, _ = io.Copy(io.Discard, r.Body)
+				w.Header().Set("Content-Type", "application/vnd.amazon.eventstream")
+				enc := eventstream.NewEncoder()
+				for _, chunk := range tc.chunks {
+					writeLegacyChunk(t, w, enc, chunk)
+				}
+			}))
+			t.Cleanup(srv.Close)
+
+			llm := bedrockLLMAgainst(t, srv, bedrock.WithModel(tc.model))
+			gaveUp := errors.New("consumer gave up")
+			resp, err := llm.GenerateContent(context.Background(),
+				[]llms.MessageContent{llms.TextParts(llms.ChatMessageTypeHuman, "how many rooms are free?")},
+				llms.WithStreamingFunc(func(_ context.Context, chunk streaming.Chunk) error {
+					if chunk.Type == streaming.ChunkTypeText {
+						return gaveUp
+					}
+					return nil
+				}))
+
+			require.ErrorIs(t, err, gaveUp)
+			require.NotNil(t, resp, "the text already handed to the consumer must travel with the error")
+			require.Len(t, resp.Choices, 1)
+			assert.NotEmpty(t, resp.Choices[0].Content,
+				"the chunk the consumer refused was still delivered, so it belongs in the answer")
 		})
 
 		t.Run(tc.name+"/streamed answer", func(t *testing.T) {
