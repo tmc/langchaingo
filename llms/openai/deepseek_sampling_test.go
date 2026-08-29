@@ -1,0 +1,74 @@
+package openai
+
+import (
+	"context"
+	"encoding/json"
+	"io"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
+	"github.com/vxcontrol/langchaingo/llms"
+)
+
+func captureDeepSeekRequest(t *testing.T, model string, opts ...llms.CallOption) map[string]any {
+	t.Helper()
+
+	var body map[string]any
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		raw, err := io.ReadAll(r.Body)
+		if err != nil {
+			t.Errorf("read request: %v", err)
+			return
+		}
+		if err := json.Unmarshal(raw, &body); err != nil {
+			t.Errorf("decode request: %v", err)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = io.WriteString(w, `{"id":"1","object":"chat.completion","created":1,"model":"m",`+
+			`"choices":[{"index":0,"message":{"role":"assistant","content":"ok"},"finish_reason":"stop"}],`+
+			`"usage":{"prompt_tokens":1,"completion_tokens":1,"total_tokens":2}}`)
+	}))
+	defer server.Close()
+
+	llm, err := New(WithBaseURL(server.URL), WithToken("token"), WithModel(model))
+	if err != nil {
+		t.Fatalf("new client: %v", err)
+	}
+	if _, err := llm.GenerateContent(context.Background(),
+		[]llms.MessageContent{llms.TextParts(llms.ChatMessageTypeHuman, "hi")}, opts...); err != nil {
+		t.Fatalf("generate: %v", err)
+	}
+	return body
+}
+
+func TestDeepSeekV32KeepsCallerSamplingUntilThinkingIsAsked(t *testing.T) {
+	t.Parallel()
+
+	for _, model := range []string{"deepseek-v3.2", "deepseek.v3.2", "us.deepseek.v3.2", "deepseek-v3.2-exp"} {
+		body := captureDeepSeekRequest(t, model, llms.WithTemperature(0.25), llms.WithTopP(0.3))
+
+		if got, want := body["temperature"], 0.25; got != want {
+			t.Errorf("%s: temperature = %v, want %v", model, got, want)
+		}
+		if got, ok := body["top_p"]; !ok || got != 0.3 {
+			t.Errorf("%s: top_p = %v (present %v), want 0.3", model, got, ok)
+		}
+	}
+}
+
+func TestDeepSeekV32PinsSamplingOnceAnEffortReachesTheWire(t *testing.T) {
+	t.Parallel()
+
+	body := captureDeepSeekRequest(t, "deepseek-v3.2",
+		llms.WithTemperature(0.25), llms.WithTopP(0.3),
+		llms.WithReasoning(llms.ReasoningHigh, 0))
+
+	if got, want := body["temperature"], 1.0; got != want {
+		t.Errorf("temperature = %v, want %v", got, want)
+	}
+	if _, ok := body["top_p"]; ok {
+		t.Errorf("top_p = %v, want it dropped", body["top_p"])
+	}
+}
