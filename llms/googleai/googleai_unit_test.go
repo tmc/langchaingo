@@ -347,23 +347,46 @@ func TestConvertTools(t *testing.T) { //nolint:funlen // comprehensive test //no
 		assert.Nil(t, result)
 	})
 
-	t.Run("missing properties in parameters", func(t *testing.T) {
+	t.Run("zero-argument function tool", func(t *testing.T) {
 		tools := []llms.Tool{
 			{
 				Type: "function",
 				Function: &llms.FunctionDefinition{
-					Name:        "test",
-					Description: "test function",
+					Name:        "get_current_time",
+					Description: "Get the current time",
 					Parameters: map[string]any{
 						"type": "object",
-						// missing properties
+					},
+				},
+			},
+		}
+		result, err := convertTools(tools)
+		assert.NoError(t, err)
+		assert.Len(t, result, 1)
+		assert.Len(t, result[0].FunctionDeclarations, 1)
+
+		funcDecl := result[0].FunctionDeclarations[0]
+		assert.Equal(t, "get_current_time", funcDecl.Name)
+		assert.Equal(t, "TypeObject", funcDecl.Parameters.Type.String())
+		assert.Empty(t, funcDecl.Parameters.Properties)
+	})
+
+	t.Run("invalid properties type", func(t *testing.T) {
+		tools := []llms.Tool{
+			{
+				Type: "function",
+				Function: &llms.FunctionDefinition{
+					Name: "test",
+					Parameters: map[string]any{
+						"type":       "object",
+						"properties": "invalid",
 					},
 				},
 			},
 		}
 		result, err := convertTools(tools)
 		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "expected to find a map of properties")
+		assert.Contains(t, err.Error(), "expected map for properties")
 		assert.Nil(t, result)
 	})
 

@@ -404,32 +404,34 @@ func convertTools(tools []llms.Tool) ([]*genai.Tool, error) {
 			schema.Type = convertToolSchemaType(tyString)
 		}
 
-		paramProperties, ok := params["properties"].(map[string]any)
-		if !ok {
-			return nil, fmt.Errorf("tool [%d]: expected to find a map of properties", i)
-		}
-
-		schema.Properties = make(map[string]*genai.Schema)
-		for propName, propValue := range paramProperties {
-			valueMap, ok := propValue.(map[string]any)
+		if properties, ok := params["properties"]; ok {
+			paramProperties, ok := properties.(map[string]any)
 			if !ok {
-				return nil, fmt.Errorf("tool [%d], property [%v]: expect to find a value map", i, propName)
+				return nil, fmt.Errorf("tool [%d]: expected to find a map of properties", i)
 			}
-			schema.Properties[propName] = &genai.Schema{}
 
-			if ty, ok := valueMap["type"]; ok {
-				tyString, ok := ty.(string)
+			schema.Properties = make(map[string]*genai.Schema)
+			for propName, propValue := range paramProperties {
+				valueMap, ok := propValue.(map[string]any)
 				if !ok {
-					return nil, fmt.Errorf("tool [%d]: expected string for type", i)
+					return nil, fmt.Errorf("tool [%d], property [%v]: expect to find a value map", i, propName)
 				}
-				schema.Properties[propName].Type = convertToolSchemaType(tyString)
-			}
-			if desc, ok := valueMap["description"]; ok {
-				descString, ok := desc.(string)
-				if !ok {
-					return nil, fmt.Errorf("tool [%d]: expected string for description", i)
+				schema.Properties[propName] = &genai.Schema{}
+
+				if ty, ok := valueMap["type"]; ok {
+					tyString, ok := ty.(string)
+					if !ok {
+						return nil, fmt.Errorf("tool [%d]: expected string for type", i)
+					}
+					schema.Properties[propName].Type = convertToolSchemaType(tyString)
 				}
-				schema.Properties[propName].Description = descString
+				if desc, ok := valueMap["description"]; ok {
+					descString, ok := desc.(string)
+					if !ok {
+						return nil, fmt.Errorf("tool [%d]: expected string for description", i)
+					}
+					schema.Properties[propName].Description = descString
+				}
 			}
 		}
 
