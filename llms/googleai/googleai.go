@@ -508,6 +508,9 @@ StreamEnd:
 
 func convertResponse(resp *genai.GenerateContentResponse) (*llms.ContentResponse, error) {
 	if len(resp.Candidates) == 0 {
+		if err := blockedPromptError(resp.PromptFeedback); err != nil {
+			return nil, err
+		}
 		return nil, ErrNoContentInResponse
 	}
 
@@ -1103,6 +1106,21 @@ func resolveThinkingConfig(model string, cfg *llms.ReasoningConfig, maxTokens in
 }
 
 // checkEmptyStream reports an output limit too small to start an answer.
+func blockedPromptError(feedback *genai.GenerateContentResponsePromptFeedback) error {
+	if feedback == nil || feedback.BlockReason == "" {
+		return nil
+	}
+	message := "the model returned no candidates: the prompt was blocked (" + string(feedback.BlockReason) + ")"
+	if feedback.BlockReasonMessage != "" {
+		message += ": " + feedback.BlockReasonMessage
+	}
+	return &llms.Error{
+		Code:     llms.ErrCodeContentFilter,
+		Message:  message,
+		Provider: providerGoogleAI,
+	}
+}
+
 func checkEmptyStream(
 	lastCandidate *genai.Candidate,
 	blockReason *genai.GenerateContentResponsePromptFeedback,
@@ -1115,16 +1133,8 @@ func checkEmptyStream(
 	if choice.Content != "" || len(choice.ToolCalls) > 0 {
 		return nil
 	}
-	if blockReason != nil {
-		message := "the model returned no candidates: the prompt was blocked (" + string(blockReason.BlockReason) + ")"
-		if blockReason.BlockReasonMessage != "" {
-			message += ": " + blockReason.BlockReasonMessage
-		}
-		return &llms.Error{
-			Code:     llms.ErrCodeContentFilter,
-			Message:  message,
-			Provider: providerGoogleAI,
-		}
+	if err := blockedPromptError(blockReason); err != nil {
+		return err
 	}
 	if opts == nil || opts.MaxTokens == nil || *opts.MaxTokens <= 0 {
 		return nil
