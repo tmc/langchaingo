@@ -74,3 +74,29 @@ func TestAStructuredOutputRefusalKeepsBothItsTypes(t *testing.T) {
 
 	require.NotNil(t, resp)
 }
+
+func TestARefusalReportsTheUncachedInputSeparately(t *testing.T) {
+	t.Parallel()
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = io.Copy(io.Discard, r.Body)
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = io.WriteString(w, `{"id":"x","object":"chat.completion","created":1,"model":"gpt-4o",
+			"choices":[{"index":0,"message":{"role":"assistant","content":"",
+			"refusal":"I can't help with that."},"finish_reason":"stop"}],
+			"usage":{"prompt_tokens":100,"completion_tokens":7,"total_tokens":107,
+			"prompt_tokens_details":{"cached_tokens":80}}}`)
+	}))
+	t.Cleanup(srv.Close)
+
+	llm := newUnitLLM(t, WithBaseURL(srv.URL), WithModel("gpt-4o"))
+	_, err := llm.GenerateContent(context.Background(),
+		[]llms.MessageContent{llms.TextParts(llms.ChatMessageTypeHuman, "hi")})
+
+	var refusal *llms.ErrModelRefusal
+	require.ErrorAs(t, err, &refusal)
+	assert.Equal(t, 20, refusal.InputTokens, "InputTokens counts only the uncached input")
+	assert.Equal(t, 80, refusal.CacheReadInputTokens)
+	assert.Equal(t, 100, refusal.InputTokens+refusal.CacheCreationInputTokens+refusal.CacheReadInputTokens,
+		"the three input counts must add up to the billed prompt")
+}

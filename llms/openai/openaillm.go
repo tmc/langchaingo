@@ -462,11 +462,13 @@ func refusalFrom(result *openaiclient.ChatCompletionResponse) (*llms.ErrModelRef
 		if c.Message.Refusal == "" {
 			continue
 		}
+		cached := result.Usage.PromptTokensDetails.CachedTokens
 		return &llms.ErrModelRefusal{
-			Provider:     "openai",
-			Message:      c.Message.Refusal,
-			InputTokens:  result.Usage.PromptTokens,
-			OutputTokens: result.Usage.CompletionTokens,
+			Provider:             "openai",
+			Message:              c.Message.Refusal,
+			InputTokens:          result.Usage.PromptTokens - cached,
+			OutputTokens:         result.Usage.CompletionTokens,
+			CacheReadInputTokens: cached,
 		}, i
 	}
 	return nil, 0
