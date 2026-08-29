@@ -62,3 +62,32 @@ func TestAReasoningOnlyStreamIsNotThrownAway(t *testing.T) {
 	require.NotNil(t, resp.Choices[0].Reasoning)
 	assert.Contains(t, resp.Choices[0].Reasoning.Content, "counting the ")
 }
+
+func TestABrokenStreamStillCarriesTheThinkingItDelivered(t *testing.T) {
+	t.Parallel()
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = io.Copy(io.Discard, r.Body)
+		w.Header().Set("Content-Type", "application/x-ndjson")
+		_, _ = io.WriteString(w, `{"model":"llama3","created_at":"2026-08-21T09:00:00Z",`+
+			`"message":{"role":"assistant","content":"","thinking":"counting the free rooms"},"done":false}`+"\n")
+		if f, ok := w.(http.Flusher); ok {
+			f.Flush()
+		}
+		_, _ = io.WriteString(w, "{not json at all\n")
+	}))
+	t.Cleanup(srv.Close)
+
+	llm, err := New(WithServerURL(srv.URL), WithModel("llama3"))
+	require.NoError(t, err)
+
+	resp, err := llm.GenerateContent(context.Background(),
+		[]llms.MessageContent{llms.TextParts(llms.ChatMessageTypeHuman, "how many rooms are free?")},
+		llms.WithStreamingFunc(func(context.Context, streaming.Chunk) error { return nil }))
+
+	require.Error(t, err, "an undecodable line is not a finished answer")
+	require.NotNil(t, resp, "handleChat assembles thinking even when the message carries no content")
+	require.Len(t, resp.Choices, 1)
+	require.NotNil(t, resp.Choices[0].Reasoning)
+	assert.Equal(t, "counting the free rooms", resp.Choices[0].Reasoning.Content)
+}

@@ -53,6 +53,32 @@ func TestBedrockRefusesTheSameTurnsAsThePrimaryDoor(t *testing.T) {
 			}
 		})
 
+		t.Run(name+"/a forced tool with a manual budget is refused on a generation that also does adaptive", func(t *testing.T) {
+			t.Parallel()
+			llm := truncationLLMWithBody(t, `{}`,
+				append([]bedrock.Option{bedrock.WithModel("us.anthropic.claude-opus-4-6-v1:0")}, opts...)...)
+			_, err := llm.GenerateContent(context.Background(), turnLimitMessages(llms.ChatMessageTypeHuman),
+				llms.WithReasoning(llms.ReasoningMedium, 2048),
+				llms.WithToolChoice(llms.ToolChoice{Type: "any"}))
+			var target *reasoning.ErrForcedToolUseWithThinking
+			if !errors.As(err, &target) {
+				t.Errorf("this door sends the budget itself, so the rule holds even off a budget-only generation: %v", err)
+			}
+		})
+
+		t.Run(name+"/a forced tool with adaptive thinking is allowed", func(t *testing.T) {
+			t.Parallel()
+			llm := truncationLLMWithBody(t, `{}`,
+				append([]bedrock.Option{bedrock.WithModel("us.anthropic.claude-sonnet-5-v1:0")}, opts...)...)
+			_, err := llm.GenerateContent(context.Background(), turnLimitMessages(llms.ChatMessageTypeHuman),
+				llms.WithAdaptiveReasoning(llms.ReasoningMedium),
+				llms.WithToolChoice(llms.ToolChoice{Type: "any"}))
+			var target *reasoning.ErrForcedToolUseWithThinking
+			if errors.As(err, &target) {
+				t.Errorf("adaptive thinking carries no manual budget, so the rule must not fire: %v", err)
+			}
+		})
+
 		t.Run(name+"/a non-Claude family is not refused for the same turn", func(t *testing.T) {
 			t.Parallel()
 			llm := truncationLLMWithBody(t, `{}`,

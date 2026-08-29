@@ -2,6 +2,7 @@ package cache
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/vxcontrol/langchaingo/llms"
@@ -173,4 +174,26 @@ func TestCache_Call_Streaming(t *testing.T) {
 	rq.True(mockCache.hit)
 	rq.True(stream)
 	rq.True(streamDone)
+}
+
+func TestAWarmCacheReturnsItsAnswerWhenTheConsumerGivesUp(t *testing.T) {
+	t.Parallel()
+
+	answer := &llms.ContentResponse{
+		Choices: []*llms.ContentChoice{{Content: "sixty rooms are free"}},
+	}
+	llm := New(newMockLLM(answer, nil), newMockCache())
+	msgs := []llms.MessageContent{llms.TextParts(llms.ChatMessageTypeHuman, "how many rooms are free?")}
+
+	_, err := llm.GenerateContent(context.Background(), msgs)
+	require.NoError(t, err, "the first call fills the cache")
+
+	gaveUp := errors.New("consumer gave up")
+	resp, err := llm.GenerateContent(context.Background(), msgs,
+		llms.WithStreamingFunc(func(context.Context, streaming.Chunk) error { return gaveUp }))
+
+	require.ErrorIs(t, err, gaveUp)
+	require.NotNil(t, resp, "the cached answer exists whether or not the consumer wanted it streamed")
+	require.Len(t, resp.Choices, 1)
+	require.Equal(t, "sixty rooms are free", resp.Choices[0].Content)
 }
