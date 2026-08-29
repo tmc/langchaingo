@@ -3,6 +3,7 @@ package structuredoutput
 import (
 	"encoding/json"
 	"fmt"
+	"slices"
 
 	"github.com/vxcontrol/langchaingo/llms"
 )
@@ -28,7 +29,12 @@ var (
 		"not", "if", "then", "else", "contains", "propertyNames",
 		"unevaluatedItems", "unevaluatedProperties",
 	}
+	closureExemptKeywords = []string{"not", "if", "then", "else", "propertyNames"}
 )
+
+func exemptFromClosure(keyword string) bool {
+	return slices.Contains(closureExemptKeywords, keyword)
+}
 
 func requireClosed(node any) error {
 	m, ok := node.(map[string]any)
@@ -54,6 +60,9 @@ func requireClosed(node any) error {
 		}
 	}
 	for _, key := range schemaValueKeywords {
+		if exemptFromClosure(key) {
+			continue
+		}
 		if err := requireClosedValue(m[key]); err != nil {
 			return err
 		}
