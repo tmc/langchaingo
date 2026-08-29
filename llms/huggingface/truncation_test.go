@@ -134,6 +134,43 @@ func TestFailOnTruncationOnTheInferenceDoor(t *testing.T) {
 type recordingCallbacks struct {
 	callbacks.SimpleHandler
 	errors int
+	starts int
+	ends   int
 }
 
 func (h *recordingCallbacks) HandleLLMError(context.Context, error) { h.errors++ }
+
+func (h *recordingCallbacks) HandleLLMGenerateContentStart(context.Context, []llms.MessageContent) {
+	h.starts++
+}
+
+func (h *recordingCallbacks) HandleLLMGenerateContentEnd(context.Context, *llms.ContentResponse) {
+	h.ends++
+}
+
+func TestAnAnsweredCallClosesTheCallbackPair(t *testing.T) {
+	t.Parallel()
+
+	srv, _ := serveJSON(t, `[{"generated_text":"sixty rooms are free","details":{"finish_reason":"stop"}}]`)
+	llm, err := New(WithToken("t"), WithURL(srv.URL), WithModel("m"))
+	if err != nil {
+		t.Fatalf("New() error: %v", err)
+	}
+	handler := &recordingCallbacks{}
+	llm.CallbacksHandler = handler
+
+	if _, err := llm.GenerateContent(context.Background(),
+		[]llms.MessageContent{llms.TextParts(llms.ChatMessageTypeHuman, "hi")}); err != nil {
+		t.Fatalf("GenerateContent() error: %v", err)
+	}
+
+	if handler.starts != 1 {
+		t.Fatalf("HandleLLMGenerateContentStart calls = %d, want 1", handler.starts)
+	}
+	if handler.ends != 1 {
+		t.Fatalf("an answered call must close the span it opened: End calls = %d, want 1", handler.ends)
+	}
+	if handler.errors != 0 {
+		t.Fatalf("HandleLLMError calls = %d, want 0", handler.errors)
+	}
+}

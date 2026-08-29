@@ -39,13 +39,9 @@ type ReasoningSupport struct {
 type ReasoningMechanism int
 
 const (
-	// ReasoningMechanismUnknown is a model whose mechanism this build does not classify.
 	ReasoningMechanismUnknown ReasoningMechanism = iota
-	// ReasoningMechanismAdaptive takes an effort level and decides how much to think.
 	ReasoningMechanismAdaptive
-	// ReasoningMechanismBudget takes a manual token budget.
 	ReasoningMechanismBudget
-	// ReasoningMechanismAdaptiveAndBudget accepts either mechanism.
 	ReasoningMechanismAdaptiveAndBudget
 )
 
@@ -101,7 +97,7 @@ func ReasoningSupportFor(model string, p reasoning.Provider) ReasoningSupport {
 			// always on, hence not disablable, on Bedrock).
 			CannotDisable:   reasoning.ResolveOff(model, p) == reasoning.OffUnsupported,
 			RejectsSampling: reasoning.ClaudeRejectsSampling(model),
-			Efforts:         toReasoningEfforts(reasoning.ClaudeEffortsFor(model)),
+			Efforts:         toReasoningEfforts(reasoning.ClaudeEffortsFor(model, p)),
 			Mechanism:       claudeMechanism(reasoning.ClaudeReasoningKindFor(model)),
 			DefaultOn:       boolPtr(reasoning.ClaudeThinkingDefaultsOn(model)),
 		}

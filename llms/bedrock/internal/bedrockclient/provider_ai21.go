@@ -219,12 +219,12 @@ func createAi21Completion(ctx context.Context, client *bedrockruntime.Client, mo
 			Truncated:  llms.IsTruncated(completion.FinishReason.Reason),
 			GenerationInfo: map[string]any{
 				"id":            output.ID,
-				"input_tokens":  int32(len(output.Prompt.Tokens)),
-				"output_tokens": int32(len(completion.Data.Tokens)),
+				"input_tokens":  len(output.Prompt.Tokens),
+				"output_tokens": len(completion.Data.Tokens),
 				// Standardized field names for cross-provider compatibility
-				"PromptTokens":     int32(len(output.Prompt.Tokens)),
-				"CompletionTokens": int32(len(completion.Data.Tokens)),
-				"TotalTokens":      int32(len(output.Prompt.Tokens)) + int32(len(completion.Data.Tokens)),
+				"PromptTokens":     len(output.Prompt.Tokens),
+				"CompletionTokens": len(completion.Data.Tokens),
+				"TotalTokens":      len(output.Prompt.Tokens) + len(completion.Data.Tokens),
 			},
 		}
 	}
@@ -296,9 +296,12 @@ func createAi21JambaCompletion(ctx context.Context, client *bedrockruntime.Clien
 			StopReason: choice.FinishReason,
 			Truncated:  llms.IsTruncated(choice.FinishReason),
 			GenerationInfo: map[string]any{
-				"id":            output.ID,
-				"input_tokens":  output.Usage.PromptTokens,
-				"output_tokens": output.Usage.CompletionTokens,
+				"id":               output.ID,
+				"input_tokens":     int(output.Usage.PromptTokens),
+				"output_tokens":    int(output.Usage.CompletionTokens),
+				"PromptTokens":     int(output.Usage.PromptTokens),
+				"CompletionTokens": int(output.Usage.CompletionTokens),
+				"TotalTokens":      int(output.Usage.TotalTokens),
 			},
 		}
 	}
@@ -320,24 +323,30 @@ func parseAi21StreamingResponse(ctx context.Context, client *bedrockruntime.Clie
 
 	contentchoices := []*llms.ContentChoice{{GenerationInfo: map[string]any{}}}
 	var streamedContent strings.Builder
+	var streamErr error
+
+DoStream:
 	for e := range stream.Events() {
 		if err = stream.Err(); err != nil {
-			return nil, err
+			streamErr = err
+			break DoStream
 		}
 
 		if v, ok := e.(*types.ResponseStreamMemberChunk); ok {
 			var resp ai21StreamingResponseChunk
 			err := json.NewDecoder(bytes.NewReader(v.Value.Bytes)).Decode(&resp)
 			if err != nil {
-				return nil, err
+				streamErr = err
+				break DoStream
 			}
 
 			// Send text chunk if available
 			if resp.Text != "" {
-				if err = streaming.CallWithText(ctx, options.StreamingFunc, resp.Text); err != nil {
-					return nil, err
-				}
 				streamedContent.WriteString(resp.Text)
+				if err = streaming.CallWithText(ctx, options.StreamingFunc, resp.Text); err != nil {
+					streamErr = err
+					break DoStream
+				}
 			}
 
 			// Set completion reason
@@ -361,12 +370,10 @@ func parseAi21StreamingResponse(ctx context.Context, client *bedrockruntime.Clie
 		}
 	}
 	if err = stream.Err(); err != nil {
-		return nil, err
+		streamErr = err
 	}
 
 	contentchoices[0].Content = streamedContent.String()
 
-	return &llms.ContentResponse{
-		Choices: contentchoices,
-	}, nil
+	return &llms.ContentResponse{Choices: contentchoices}, streamErr
 }

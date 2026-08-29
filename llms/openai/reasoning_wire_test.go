@@ -44,6 +44,35 @@ func sendModernReasoningForModel(t *testing.T, model string, effort llms.Reasoni
 	return body
 }
 
+func sendModernReasoningBody(t *testing.T, model string, effort llms.ReasoningEffort, tokens, maxTokens int) string {
+	t.Helper()
+
+	const completion = `{"id":"x","object":"chat.completion","created":1,"model":"m",` +
+		`"choices":[{"index":0,"message":{"role":"assistant","content":"ok"},"finish_reason":"stop"}],` +
+		`"usage":{"prompt_tokens":1,"completion_tokens":1,"total_tokens":2}}`
+
+	var body string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		b, _ := io.ReadAll(r.Body)
+		body = string(b)
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = io.WriteString(w, completion)
+	}))
+	t.Cleanup(srv.Close)
+
+	llm, err := New(WithBaseURL(srv.URL), WithToken("test"), WithModel(model),
+		WithModernReasoningFormat(), WithUsingReasoningMaxTokens())
+	if err != nil {
+		t.Fatalf("New() error: %v", err)
+	}
+	if _, err := llm.GenerateContent(context.Background(),
+		[]llms.MessageContent{llms.TextParts(llms.ChatMessageTypeHuman, "hi")},
+		llms.WithReasoning(effort, tokens), llms.WithMaxTokens(maxTokens)); err != nil {
+		t.Fatalf("GenerateContent() error: %v", err)
+	}
+	return body
+}
+
 func TestModernReasoningSendsNoBudgetItCannotCompute(t *testing.T) {
 	t.Parallel()
 
@@ -171,5 +200,16 @@ func TestBothDeepSeekReasonerNamesTurnThinkingOffTheSameWay(t *testing.T) {
 		if !strings.Contains(byOwnName, want) {
 			t.Fatalf("deepseek-reasoner must disable thinking like deepseek-r1, got: %s", byOwnName)
 		}
+	}
+}
+
+func TestABudgetLargerThanTheAnswerLimitRaisesTheLimit(t *testing.T) {
+	body := sendModernReasoningBody(t, "anthropic/claude-opus-4-5", llms.ReasoningNone, 100, 512)
+
+	if !strings.Contains(body, `"max_tokens":1024`) && !strings.Contains(body, `"max_completion_tokens":1024`) {
+		t.Fatalf("the floor raised the budget to 1024, so the answer limit must follow: %s", body)
+	}
+	if strings.Contains(body, `"max_completion_tokens":512`) || strings.Contains(body, `"max_tokens":512`) {
+		t.Fatalf("a 512-token answer limit leaves no room once a 1024-token budget is spent: %s", body)
 	}
 }

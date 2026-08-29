@@ -133,6 +133,27 @@ func finishVertexResponse(opts *llms.CallOptions, response *llms.ContentResponse
 }
 
 // convertCandidates converts a sequence of genai.Candidate to a response.
+func classifyVertexError(err error) error {
+	var blocked *genai.BlockedError
+	if !errors.As(err, &blocked) {
+		return err
+	}
+	message := "the model blocked the exchange"
+	if blocked.PromptFeedback != nil {
+		message = "the prompt was blocked (" + blocked.PromptFeedback.BlockReason.String() + ")"
+		if blocked.PromptFeedback.BlockReasonMessage != "" {
+			message += ": " + blocked.PromptFeedback.BlockReasonMessage
+		}
+	} else if blocked.Candidate != nil {
+		message = "the answer was blocked (" + blocked.Candidate.FinishReason.String() + ")"
+	}
+	return &llms.Error{
+		Code:     llms.ErrCodeContentFilter,
+		Message:  message,
+		Provider: "vertex",
+	}
+}
+
 func convertCandidates(candidates []*genai.Candidate, usage *genai.UsageMetadata) (*llms.ContentResponse, error) {
 	var contentResponse llms.ContentResponse
 
@@ -279,7 +300,7 @@ func generateFromSingleMessage(
 		// the complete response with a list of candidates.
 		resp, err := model.GenerateContent(ctx, convertedParts...)
 		if err != nil {
-			return nil, err
+			return nil, classifyVertexError(err)
 		}
 
 		if len(resp.Candidates) == 0 {
@@ -322,7 +343,7 @@ func generateFromMessages(
 	if opts.StreamingFunc == nil {
 		resp, err := session.SendMessage(ctx, reqContent.Parts...)
 		if err != nil {
-			return nil, err
+			return nil, classifyVertexError(err)
 		}
 
 		if len(resp.Candidates) == 0 {
@@ -357,7 +378,7 @@ DoStream:
 			break DoStream
 		}
 		if err != nil {
-			streamErr = fmt.Errorf("error in stream mode: %w", err)
+			streamErr = classifyVertexError(err)
 			break DoStream
 		}
 

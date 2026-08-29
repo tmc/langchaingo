@@ -11,7 +11,6 @@ func TestClaudeReasoningKindFor(t *testing.T) {
 		model string
 		want  ClaudeReasoningKind
 	}{
-		// Adaptive-only, first-party and Bedrock forms.
 		{"claude-opus-4-7", ClaudeReasoningAdaptiveOnly},
 		{"claude-opus-4-8", ClaudeReasoningAdaptiveOnly},
 		{"us.anthropic.claude-opus-4-8", ClaudeReasoningAdaptiveOnly},
@@ -21,11 +20,9 @@ func TestClaudeReasoningKindFor(t *testing.T) {
 		{"us.anthropic.claude-sonnet-5", ClaudeReasoningAdaptiveOnly},
 		{"claude-fable-5", ClaudeReasoningAdaptiveOnly},
 		{"claude-mythos-5", ClaudeReasoningAdaptiveOnly},
-		// Dual.
 		{"claude-opus-4-6", ClaudeReasoningAdaptiveAndBudget},
 		{"us.anthropic.claude-sonnet-4-6", ClaudeReasoningAdaptiveAndBudget},
 		{"claude-mythos-preview", ClaudeReasoningAdaptiveAndBudget},
-		// Budget-only.
 		{"claude-opus-4-5-20251101", ClaudeReasoningBudgetOnly},
 		{"claude-sonnet-4-5-20250929", ClaudeReasoningBudgetOnly},
 		{"us.anthropic.claude-haiku-4-5-20251001-v1:0", ClaudeReasoningBudgetOnly},
@@ -53,22 +50,25 @@ func TestClaudeReasoningKindFor(t *testing.T) {
 func TestClaudeEffortsFor(t *testing.T) {
 	t.Parallel()
 	cases := []struct {
-		model string
-		want  []string
+		model    string
+		provider Provider
+		want     []string
 	}{
-		{"claude-opus-5", []string{"low", "medium", "high", "xhigh", "max"}},
-		{"us.anthropic.claude-opus-4-7", []string{"low", "medium", "high", "xhigh", "max"}},
-		{"claude-opus-4-6", []string{"low", "medium", "high", "max"}},
-		{"claude-sonnet-4-6", []string{"low", "medium", "high", "max"}},
-		{"claude-mythos-preview", []string{"low", "medium", "high", "max"}},
-		{"claude-opus-4-5-20251101", []string{"low", "medium", "high"}},
-		{"claude-sonnet-4-5-20250929", nil},
-		{"us.anthropic.claude-haiku-4-5-20251001-v1:0", nil},
-		{"gpt-5.5", nil},
+		{"claude-opus-5", ProviderAnthropic, []string{"low", "medium", "high", "xhigh", "max"}},
+		{"us.anthropic.claude-opus-4-7", ProviderAnthropic, []string{"low", "medium", "high", "xhigh", "max"}},
+		{"claude-opus-4-6", ProviderAnthropic, []string{"low", "medium", "high", "max"}},
+		{"claude-sonnet-4-6", ProviderAnthropic, []string{"low", "medium", "high", "max"}},
+		{"claude-mythos-preview", ProviderAnthropic, []string{"low", "medium", "high", "max"}},
+		{"claude-opus-4-5-20251101", ProviderAnthropic, []string{"low", "medium", "high"}},
+		{"claude-sonnet-4-5-20250929", ProviderAnthropic, nil},
+		{"us.anthropic.claude-haiku-4-5-20251001-v1:0", ProviderAnthropic, nil},
+		{"gpt-5.5", ProviderAnthropic, nil},
+		{"claude-opus-4-5-20251101", ProviderBedrock, nil},
+		{"claude-opus-4-6", ProviderBedrock, []string{"low", "medium", "high", "max"}},
 	}
 	for _, tc := range cases {
-		if got := ClaudeEffortsFor(tc.model); !slices.Equal(got, tc.want) {
-			t.Errorf("ClaudeEffortsFor(%q) = %v, want %v", tc.model, got, tc.want)
+		if got := ClaudeEffortsFor(tc.model, tc.provider); !slices.Equal(got, tc.want) {
+			t.Errorf("ClaudeEffortsFor(%q, %v) = %v, want %v", tc.model, tc.provider, got, tc.want)
 		}
 	}
 }

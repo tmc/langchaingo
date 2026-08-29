@@ -109,11 +109,11 @@ var claudeEffortsByKind = map[ClaudeReasoningKind][]string{
 	ClaudeReasoningBudgetOnly:        {"low", "medium", "high"},
 }
 
-// ClaudeEffortsFor returns the effort levels the model's generation accepts, or
-// nil for a model this package does not classify.
-func ClaudeEffortsFor(model string) []string {
+// ClaudeEffortsFor returns the effort levels the model's generation accepts on
+// the given provider, or nil for a model this package does not classify.
+func ClaudeEffortsFor(model string, p Provider) []string {
 	kind := ClaudeReasoningKindFor(model)
-	if kind == ClaudeReasoningBudgetOnly && !containsAny(canonicalClaude(model), budgetEffortClaude) {
+	if kind == ClaudeReasoningBudgetOnly && !ClaudeSupportsEffortWithBudget(model, p) {
 		return nil
 	}
 	return slices.Clone(claudeEffortsByKind[kind])
