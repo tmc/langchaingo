@@ -361,10 +361,12 @@ func (g *GoogleAI) generateStreamingContent(
 
 	for chunk, err := range iter {
 		if err != nil {
-			return nil, fmt.Errorf("error generating content: %w", err)
+			streamErr = fmt.Errorf("error generating content: %w", err)
+			goto StreamEnd
 		}
 		if chunk == nil {
-			return nil, fmt.Errorf("unexpected case: chunk is nil")
+			streamErr = errors.New("unexpected case: chunk is nil")
+			goto StreamEnd
 		}
 
 		// Capture usage metadata from each chunk (last one will be the final)
