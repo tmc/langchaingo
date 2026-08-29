@@ -357,15 +357,23 @@ func (o *LLM) setReasoning(req *openaiclient.ChatRequest, opts llms.CallOptions)
 
 	// using modern reasoning format
 	if o.client.UseReasoningMaxTokens && opts.Reasoning.HasExplicitTokens() && reasoningTokens > 0 {
-		req.Reasoning = &openaiclient.ReasoningOptions{
-			MaxTokens: reasoning.ClaudeClampBudget(model, reasoningTokens),
-		}
+		budget := reasoning.ClaudeClampBudget(model, reasoningTokens)
+		req.Reasoning = &openaiclient.ReasoningOptions{MaxTokens: budget}
+		o.raiseAnswerLimitForBudget(req, budget)
 	} else if sendsEffort {
 		req.Reasoning = &openaiclient.ReasoningOptions{
 			Effort: reasoningEffort,
 		}
 	}
 	return wireEffortOf(sendsEffort, reasoningEffort), nil
+}
+
+func (o *LLM) raiseAnswerLimitForBudget(req *openaiclient.ChatRequest, budget int) {
+	for _, limit := range []*int{req.MaxCompletionTokens, req.MaxTokens} {
+		if limit != nil && *limit > 0 {
+			*limit = reasoning.ClaudeMaxTokensForBudget(budget, *limit)
+		}
+	}
 }
 
 // setReasoningOff sends the model's explicit disable token so a reasoning model
