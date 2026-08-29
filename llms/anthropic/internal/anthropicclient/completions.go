@@ -6,7 +6,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
 
@@ -97,6 +96,7 @@ type CompletionEvent struct {
 
 func parseStreamingCompletionResponse(ctx context.Context, r *http.Response, payload *completionPayload) (*CompletionResponsePayload, error) { // nolint:lll
 	scanner := bufio.NewScanner(r.Body)
+	scanner.Buffer(make([]byte, 0, initialStreamBuffer), maxStreamLine)
 	responseChan := make(chan CompletionEvent)
 	go func() {
 		defer close(responseChan)
@@ -118,7 +118,7 @@ func parseStreamingCompletionResponse(ctx context.Context, r *http.Response, pay
 			responseChan <- CompletionEvent{Response: streamPayload, Err: nil}
 		}
 		if err := scanner.Err(); err != nil {
-			log.Println("issue scanning response:", err)
+			responseChan <- CompletionEvent{Response: nil, Err: fmt.Errorf("failed to read stream: %w", err)}
 		}
 	}()
 	// Parse response
@@ -136,6 +136,9 @@ func parseStreamingCompletionResponse(ctx context.Context, r *http.Response, pay
 			return nil, fmt.Errorf("streaming func returned an error: %w", err)
 		}
 		lastResponse = streamResponse.Response
+	}
+	if lastResponse == nil {
+		return nil, ErrEmptyResponse
 	}
 	response.Model = lastResponse.Model
 	response.LogID = lastResponse.LogID
