@@ -809,7 +809,7 @@ DoStream:
 	}
 
 	if err := stream.Err(); err != nil {
-		return nil, fmt.Errorf("stream error: %w", err)
+		streamErr = fmt.Errorf("stream error: %w", err)
 	}
 
 	var sig []byte

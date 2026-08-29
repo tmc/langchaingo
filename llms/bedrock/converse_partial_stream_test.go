@@ -61,3 +61,30 @@ func TestConverseStreamKeepsWhatArrivedWhenTheConsumerGivesUp(t *testing.T) {
 	require.Len(t, resp.Choices, 1)
 	assert.Equal(t, "sixty rooms ", resp.Choices[0].Content)
 }
+
+func TestConverseStreamKeepsWhatArrivedWhenTheTransportBreaks(t *testing.T) {
+	t.Parallel()
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = io.Copy(io.Discard, r.Body)
+		w.Header().Set("Content-Type", "application/vnd.amazon.eventstream")
+		enc := eventstream.NewEncoder()
+		writeConverseEvent(t, w, enc, "messageStart", `{"role":"assistant"}`)
+		writeConverseEvent(t, w, enc, "contentBlockDelta",
+			`{"contentBlockIndex":0,"delta":{"text":"sixty rooms are free"}}`)
+		_, _ = w.Write([]byte("not an event stream frame at all"))
+	}))
+	t.Cleanup(srv.Close)
+
+	llm := bedrockLLMAgainst(t, srv,
+		bedrock.WithModel("anthropic.claude-sonnet-4-5-20250929-v1:0"), bedrock.WithConverseAPI())
+
+	resp, err := llm.GenerateContent(context.Background(),
+		[]llms.MessageContent{llms.TextParts(llms.ChatMessageTypeHuman, "how many rooms are free?")},
+		llms.WithStreamingFunc(func(context.Context, streaming.Chunk) error { return nil }))
+
+	require.Error(t, err, "a broken frame must not look like a completed answer")
+	require.NotNil(t, resp, "the text already delivered must travel with the error")
+	require.Len(t, resp.Choices, 1)
+	assert.Equal(t, "sixty rooms are free", resp.Choices[0].Content)
+}
