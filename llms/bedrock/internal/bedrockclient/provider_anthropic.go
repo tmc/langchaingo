@@ -287,7 +287,7 @@ func createAnthropicCompletion(ctx context.Context,
 		}
 		streamResp, err := parseStreamingCompletionResponse(ctx, client, modelInput, options)
 		if err != nil {
-			return nil, err
+			return streamResp, err
 		}
 		// Validate the assembled stream too — a structured-output guarantee must
 		// hold on both API paths.
@@ -622,9 +622,18 @@ func parseStreamingCompletionResponse(ctx context.Context, client *bedrockruntim
 
 	contentchoices[0].Content = streamedContent.String()
 
-	return &llms.ContentResponse{
-		Choices: contentchoices,
-	}, nil
+	response := &llms.ContentResponse{Choices: contentchoices}
+	if contentchoices[0].StopReason == "refusal" {
+		return response, &llms.ErrModelRefusal{
+			Provider:                 "bedrock",
+			Message:                  streamedContent.String(),
+			InputTokens:              int(usage.InputTokens),
+			OutputTokens:             int(usage.OutputTokens),
+			CacheCreationInputTokens: int(usage.CacheCreationInputTokens),
+			CacheReadInputTokens:     int(usage.CacheReadInputTokens),
+		}
+	}
+	return response, nil
 }
 
 func appendReasoning(reasoning *reasoning.ContentReasoning, reasoningContent string) *reasoning.ContentReasoning {
