@@ -100,7 +100,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		return nil, err
 	}
 
-	sendsBudget := o.client.UseReasoningMaxTokens && opts.Reasoning.Tokens != 0
+	sendsBudget := o.client.UseReasoningMaxTokens && opts.Reasoning.HasExplicitTokens()
 	if err := llms.CheckClaudeTurnLimitsOnWire(o.effectiveModel(opts), opts, messages, sendsBudget); err != nil {
 		return nil, err
 	}
@@ -338,7 +338,7 @@ func (o *LLM) setReasoning(req *openaiclient.ChatRequest, opts llms.CallOptions)
 	}
 
 	// using modern reasoning format
-	if o.client.UseReasoningMaxTokens && opts.Reasoning.Tokens != 0 && reasoningTokens > 0 {
+	if o.client.UseReasoningMaxTokens && opts.Reasoning.HasExplicitTokens() && reasoningTokens > 0 {
 		req.Reasoning = &openaiclient.ReasoningOptions{
 			MaxTokens: reasoning.ClaudeClampBudget(o.effectiveModel(opts), reasoningTokens),
 		}

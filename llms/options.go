@@ -124,6 +124,13 @@ func (r *ReasoningConfig) IsDisabled() bool {
 //   - (0, maxTokens/4) -> ReasoningLow
 //   - [maxTokens/4, maxTokens/3) -> ReasoningMedium
 //   - [maxTokens/3, inf) -> ReasoningHigh
+//
+// HasExplicitTokens reports whether the caller set a token budget of its own,
+// rather than leaving the budget to be derived from an effort.
+func (r *ReasoningConfig) HasExplicitTokens() bool {
+	return r != nil && r.Tokens != 0
+}
+
 func (r *ReasoningConfig) GetEffort(maxTokens int) ReasoningEffort {
 	if r == nil {
 		return ReasoningNone
