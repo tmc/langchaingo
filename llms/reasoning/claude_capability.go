@@ -119,11 +119,12 @@ func ClaudeEffortsFor(model string) []string {
 	return slices.Clone(claudeEffortsByKind[kind])
 }
 
-var claudeEffortRank = map[string]int{"low": 1, "medium": 2, "high": 3, "xhigh": 4, "max": 5}
+var claudeEffortRank = map[string]int{"minimal": 1, "low": 2, "medium": 3, "high": 4, "xhigh": 5, "max": 6}
 
-// ClaudeClampEffort lowers an effort the model's generation does not accept to
-// the highest one it does. An unclassified model and an unknown level pass
-// through unchanged.
+// ClaudeClampEffort moves an effort the model's generation does not accept to
+// the nearest one it does: down to the highest accepted level below it, or up
+// to the lowest accepted level when every one of them is higher. An
+// unclassified model and an unknown level pass through unchanged.
 func ClaudeClampEffort(model, effort string) string {
 	want, ok := claudeEffortRank[effort]
 	if !ok {
@@ -133,13 +134,21 @@ func ClaudeClampEffort(model, effort string) string {
 	if len(accepted) == 0 || slices.Contains(accepted, effort) {
 		return effort
 	}
-	best, bestRank := effort, 0
+	var below, lowest string
+	var belowRank, lowestRank int
 	for _, level := range accepted {
-		if rank := claudeEffortRank[level]; rank <= want && rank > bestRank {
-			best, bestRank = level, rank
+		rank := claudeEffortRank[level]
+		if rank <= want && rank > belowRank {
+			below, belowRank = level, rank
+		}
+		if lowestRank == 0 || rank < lowestRank {
+			lowest, lowestRank = level, rank
 		}
 	}
-	return best
+	if below == "" {
+		return lowest
+	}
+	return below
 }
 
 // ClaudeMinThinkingBudget is the smallest budget_tokens Anthropic accepts.
