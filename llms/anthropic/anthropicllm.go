@@ -309,7 +309,7 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 	}
 	response, err := processAnthropicResponse(result)
 	if err != nil {
-		return nil, err
+		return response, err
 	}
 	if err := llms.CheckTruncation(response, *opts); err != nil {
 		return response, err
@@ -354,12 +354,6 @@ func anthropicRefusal(result *anthropicclient.MessageResponsePayload) *ErrModelR
 func processAnthropicResponse(result *anthropicclient.MessageResponsePayload) (*llms.ContentResponse, error) {
 	if result == nil {
 		return nil, ErrEmptyResponse
-	}
-	// A refusal is a distinct outcome from an empty/failed response: surface it as a
-	// typed error carrying any text the model returned, so callers can tell "the
-	// model declined" from "no response" (an empty refusal would otherwise look empty).
-	if result.StopReason == "refusal" {
-		return nil, anthropicRefusal(result)
 	}
 	if len(result.Content) == 0 && result.StopReason == "" {
 		return nil, ErrEmptyResponse
@@ -440,9 +434,11 @@ func processAnthropicResponse(result *anthropicclient.MessageResponsePayload) (*
 		},
 	}
 
-	return &llms.ContentResponse{
-		Choices: []*llms.ContentChoice{choice},
-	}, nil
+	response := &llms.ContentResponse{Choices: []*llms.ContentChoice{choice}}
+	if result.StopReason == "refusal" {
+		return response, anthropicRefusal(result)
+	}
+	return response, nil
 }
 
 func toolsToTools(tools []llms.Tool) []anthropicclient.Tool {
