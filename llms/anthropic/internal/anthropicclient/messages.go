@@ -417,7 +417,8 @@ func parseStreamingMessageResponse(
 			data := strings.TrimPrefix(line, "data: ")
 			event, err := parseStreamEvent(data)
 			if err != nil {
-				eventChan <- MessageEvent{Response: nil, Err: fmt.Errorf("failed to parse stream event: %w", err)}
+				partial := response
+				eventChan <- MessageEvent{Response: &partial, Err: fmt.Errorf("failed to parse stream event: %w", err)}
 				return
 			}
 			response, err = processStreamEvent(ctx, event, payload, response, eventChan)
@@ -428,7 +429,8 @@ func parseStreamingMessageResponse(
 			}
 		}
 		if err := scanner.Err(); err != nil {
-			eventChan <- MessageEvent{Response: nil, Err: fmt.Errorf("issue scanning response: %w", err)}
+			partial := response
+			eventChan <- MessageEvent{Response: &partial, Err: fmt.Errorf("issue scanning response: %w", err)}
 		}
 	}()
 
@@ -511,7 +513,8 @@ func processStreamEvent(ctx context.Context, event map[string]interface{}, paylo
 	case "ping":
 		// Nothing to do here
 	case "error":
-		eventChan <- MessageEvent{Response: nil, Err: fmt.Errorf("received error event: %v", event)}
+		partial := response
+		eventChan <- MessageEvent{Response: &partial, Err: fmt.Errorf("received error event: %v", event)}
 	default:
 		log.Printf("unknown event type: %s - %v", eventType, event)
 	}
