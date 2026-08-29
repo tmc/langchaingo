@@ -1078,6 +1078,21 @@ func TestResolveTemperature(t *testing.T) {
 	assert.Equal(t, 0.5, resolveTemperature("gemini-3-flash", sameAsDefault))
 }
 
+func TestResolveThinkingConfigRefusesAnEffortThatMapsToNothing(t *testing.T) {
+	t.Parallel()
+
+	for _, model := range []string{"gemini-2.5-flash", "gemini-3-pro-preview"} {
+		for _, effort := range []llms.ReasoningEffort{llms.ReasoningMinimal, "banana"} {
+			tc, err := resolveThinkingConfig(model,
+				&llms.ReasoningConfig{Effort: effort}, 8000)
+			var budgetErr *reasoning.ErrEffortHasNoBudget
+			require.ErrorAs(t, err, &budgetErr, "%s on %s must not pass silently", effort, model)
+			assert.Equal(t, string(effort), budgetErr.Effort)
+			assert.Nil(t, tc)
+		}
+	}
+}
+
 func TestResolveThinkingConfig(t *testing.T) {
 	t.Parallel()
 

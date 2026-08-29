@@ -1092,6 +1092,7 @@ func resolveThinkingConfig(model string, cfg *llms.ReasoningConfig, maxTokens in
 		if budget := int32(cfg.GetTokens(maxTokens)); budget > 0 {
 			return &genai.ThinkingConfig{ThinkingBudget: &budget, IncludeThoughts: true}, nil
 		}
+		return nil, &reasoning.ErrEffortHasNoBudget{Model: model, Effort: string(cfg.GetEffort(maxTokens))}
 	case llms.ReasoningOff:
 		switch reasoning.ResolveOff(model, reasoning.ProviderGoogleAI) {
 		case reasoning.OffZeroBudget:
