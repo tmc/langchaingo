@@ -203,7 +203,7 @@ func TestClaudePreThinkingStopsBelow37(t *testing.T) {
 	}
 }
 
-func TestClaudeClampEffortStepsDownNotUp(t *testing.T) {
+func TestClaudeClampEffortMovesToTheNearestAcceptedLevel(t *testing.T) {
 	t.Parallel()
 
 	for _, tc := range []struct{ model, effort, want string }{
@@ -216,6 +216,10 @@ func TestClaudeClampEffortStepsDownNotUp(t *testing.T) {
 		{"claude-haiku-4-5", "max", "high"},
 		{"claude-opus-4-6", "max", "max"},
 		{"claude-opus-4-6", "low", "low"},
+		{"claude-opus-4-6", "minimal", "low"},
+		{"claude-sonnet-5", "minimal", "low"},
+		{"claude-opus-4-5", "minimal", "low"},
+		{"grok-4", "minimal", "minimal"},
 		{"grok-4", "xhigh", "xhigh"},
 		{"claude-opus-4-6", "", ""},
 	} {

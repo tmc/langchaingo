@@ -809,7 +809,7 @@ DoStream:
 	}
 
 	if err := stream.Err(); err != nil {
-		return nil, fmt.Errorf("stream error: %w", err)
+		streamErr = fmt.Errorf("stream error: %w", err)
 	}
 
 	var sig []byte
@@ -954,29 +954,8 @@ func (c *ConverseClient) convertConverseResponse(response *bedrockruntime.Conver
 
 // Helper methods for model detection
 
-// supportsReasoning checks if the model supports reasoning
 func (c *ConverseClient) supportsReasoning(modelID string) bool {
-	// Claude 4+ and select non-Claude models support reasoning.
-	reasoningModels := []string{
-		"anthropic.claude-fable-5",
-		"anthropic.claude-sonnet-5",
-		"anthropic.claude-opus-5",
-		"anthropic.claude-opus-4-",
-		"anthropic.claude-sonnet-4-",
-		"anthropic.claude-haiku-4-",
-		"openai.gpt-oss-120b",
-		"openai.gpt-oss-20b",
-		"moonshot.kimi-k2-thinking",
-		"minimax.minimax-m2.5",
-		"minimax.minimax-m2.1",
-	}
-
-	for _, model := range reasoningModels {
-		if strings.Contains(modelID, model) {
-			return true
-		}
-	}
-	return false
+	return reasoning.IsReasoningModel(modelID)
 }
 
 // isAnthropicModelID reports whether the Bedrock model ID belongs to the Claude

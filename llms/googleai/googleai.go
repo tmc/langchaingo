@@ -361,10 +361,12 @@ func (g *GoogleAI) generateStreamingContent(
 
 	for chunk, err := range iter {
 		if err != nil {
-			return nil, fmt.Errorf("error generating content: %w", err)
+			streamErr = fmt.Errorf("error generating content: %w", err)
+			goto StreamEnd
 		}
 		if chunk == nil {
-			return nil, fmt.Errorf("unexpected case: chunk is nil")
+			streamErr = errors.New("unexpected case: chunk is nil")
+			goto StreamEnd
 		}
 
 		// Capture usage metadata from each chunk (last one will be the final)
@@ -1092,6 +1094,7 @@ func resolveThinkingConfig(model string, cfg *llms.ReasoningConfig, maxTokens in
 		if budget := int32(cfg.GetTokens(maxTokens)); budget > 0 {
 			return &genai.ThinkingConfig{ThinkingBudget: &budget, IncludeThoughts: true}, nil
 		}
+		return nil, &reasoning.ErrEffortHasNoBudget{Model: model, Effort: string(cfg.GetEffort(maxTokens))}
 	case llms.ReasoningOff:
 		switch reasoning.ResolveOff(model, reasoning.ProviderGoogleAI) {
 		case reasoning.OffZeroBudget:
@@ -1143,7 +1146,7 @@ func checkEmptyStream(
 // the caller falls back to a budget or the model default.
 func thinkingLevelForEffort(effort llms.ReasoningEffort) genai.ThinkingLevel {
 	switch effort {
-	case llms.ReasoningLow:
+	case llms.ReasoningMinimal, llms.ReasoningLow:
 		return genai.ThinkingLevelLow
 	case llms.ReasoningMedium:
 		return genai.ThinkingLevelMedium

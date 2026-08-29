@@ -39,22 +39,43 @@ func Compile(schema json.RawMessage) (*Compiled, error) {
 }
 
 func admitNullable(node any) any {
-	switch typed := node.(type) {
+	schema, ok := node.(map[string]any)
+	if !ok {
+		return node
+	}
+	for _, key := range schemaGroupKeywords {
+		group, ok := schema[key].(map[string]any)
+		if !ok {
+			continue
+		}
+		for name, member := range group {
+			group[name] = admitNullable(member)
+		}
+	}
+	for _, key := range schemaValueKeywords {
+		if value, ok := schema[key]; ok {
+			schema[key] = admitNullableValue(value)
+		}
+	}
+	if nullable, ok := schema["nullable"].(bool); ok && nullable {
+		if declared, ok := schema["type"]; ok {
+			schema["type"] = withNull(declared)
+		}
+	}
+	return schema
+}
+
+func admitNullableValue(value any) any {
+	switch typed := value.(type) {
 	case map[string]any:
-		for key, value := range typed {
-			typed[key] = admitNullable(value)
-		}
-		if nullable, ok := typed["nullable"].(bool); ok && nullable {
-			typed["type"] = withNull(typed["type"])
-		}
-		return typed
+		return admitNullable(typed)
 	case []any:
 		for i, item := range typed {
-			typed[i] = admitNullable(item)
+			typed[i] = admitNullableValue(item)
 		}
 		return typed
 	}
-	return node
+	return value
 }
 
 func withNull(declared any) any {

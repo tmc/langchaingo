@@ -293,6 +293,7 @@ func TestDefaultResponseScrubbers(t *testing.T) {
 	resp.Header.Set("Cf-Ray", "123456789-ABC")
 	resp.Header.Set("Set-Cookie", "session=secret")
 	resp.Header.Set("Openai-Organization", "org-123")
+	resp.Header.Set("Openai-Project", "proj_real-secret")
 
 	// Serialize response
 	var buf bytes.Buffer
@@ -311,6 +312,7 @@ func TestDefaultResponseScrubbers(t *testing.T) {
 	assert.Empty(t, scrubbedResp.Header.Get("Cf-Ray"))
 	assert.Empty(t, scrubbedResp.Header.Get("Set-Cookie"))
 	assert.Equal(t, "lcgo-tst", scrubbedResp.Header.Get("Openai-Organization"))
+	assert.Equal(t, "proj_lcgo-tst", scrubbedResp.Header.Get("Openai-Project"))
 }
 
 func TestEmbeddingJSONFormatter(t *testing.T) {

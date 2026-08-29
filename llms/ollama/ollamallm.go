@@ -165,7 +165,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	resp, err := o.handleChat(ctx, req, opts)
 	if err != nil {
 		partial := o.createContentResponse(resp)
-		if len(partial.Choices) == 0 || partial.Choices[0].Content == "" {
+		if len(partial.Choices) == 0 || isEmptyChoice(partial.Choices[0]) {
 			return nil, err
 		}
 		return partial, err
@@ -449,6 +449,10 @@ func (o *LLM) handleChat(ctx context.Context, req *api.ChatRequest, opts llms.Ca
 }
 
 // createContentResponse creates a LangChain content response from Ollama response.
+func isEmptyChoice(choice *llms.ContentChoice) bool {
+	return choice.Content == "" && len(choice.ToolCalls) == 0 && choice.Reasoning.IsEmpty()
+}
+
 func (o *LLM) createContentResponse(resp api.ChatResponse) *llms.ContentResponse {
 	contentReasoning, content := reasoning.SplitContentWithReasoning(resp.Message.Content)
 	contentReasoning.Content += resp.Message.Thinking

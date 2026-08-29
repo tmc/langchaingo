@@ -321,3 +321,31 @@ func TestApplyAnthropicReasoning_UnsetMaxTokensUsesTheSharedDefault(t *testing.T
 	assert.InDelta(t, float64(want), thinking["budget_tokens"], 0.5,
 		"an unset max-tokens must fall back to the same number every other caller gets")
 }
+
+func TestApplyAnthropicReasoning_ReachesTheClaude5Generation(t *testing.T) {
+	t.Parallel()
+
+	for _, modelID := range []string{
+		"us.anthropic.claude-sonnet-5-v1:0",
+		"us.anthropic.claude-opus-5-v1:0",
+		"us.anthropic.claude-fable-5-v1:0",
+	} {
+		t.Run(modelID, func(t *testing.T) {
+			t.Parallel()
+
+			input := anthropicTextGenerationInput{MaxTokens: 8000}
+			applyAnthropicReasoning(&input,
+				&llms.ReasoningConfig{Effort: llms.ReasoningMedium},
+				modelID, 8000)
+
+			fields := marshalAnthropicInput(t, input)
+			thinking, _ := fields["thinking"].(map[string]any)
+			require.NotNil(t, thinking, "legacy door asks this model to think")
+			assert.Equal(t, "adaptive", thinking["type"])
+			assert.Equal(t, "summarized", thinking["display"])
+
+			outputConfig, _ := fields["output_config"].(map[string]any)
+			assert.Equal(t, "medium", outputConfig["effort"])
+		})
+	}
+}

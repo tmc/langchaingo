@@ -169,3 +169,60 @@ func TestTheValidatorAdmitsTheNullableSpellingTheDoorsSendOnTheWire(t *testing.T
 		t.Fatal("nullable widens the type by null alone, not by every type")
 	}
 }
+
+func TestNullableWithoutADeclaredTypeStillCompiles(t *testing.T) {
+	t.Parallel()
+
+	schema := json.RawMessage(`{"type":"object","additionalProperties":false,` +
+		`"properties":{"a":{"nullable":true}},"required":["a"]}`)
+
+	compiled, err := structuredoutput.Compile(schema)
+	if err != nil {
+		t.Fatalf("Compile() error: %v", err)
+	}
+	for _, text := range []string{`{"a":null}`, `{"a":"x"}`, `{"a":7}`} {
+		if err := compiled.ValidateText(text); err != nil {
+			t.Fatalf("an undeclared type constrains nothing, %s must validate: %v", text, err)
+		}
+	}
+}
+
+func TestNullableLeavesInstanceLiteralsAlone(t *testing.T) {
+	t.Parallel()
+
+	schema := json.RawMessage(`{"type":"object","additionalProperties":false,` +
+		`"properties":{"a":{"enum":[{"nullable":true,"type":"widget"},"plain"]},` +
+		`"b":{"const":{"nullable":true,"type":"widget"}}},` +
+		`"required":["a","b"]}`)
+
+	compiled, err := structuredoutput.Compile(schema)
+	if err != nil {
+		t.Fatalf("Compile() error: %v", err)
+	}
+	literal := `{"nullable":true,"type":"widget"}`
+	if err := compiled.ValidateText(`{"a":` + literal + `,"b":` + literal + `}`); err != nil {
+		t.Fatalf("an enum or const literal is data, not a schema to widen: %v", err)
+	}
+}
+
+func TestNullableReachesNestedSubschemas(t *testing.T) {
+	t.Parallel()
+
+	schema := json.RawMessage(`{"type":"object","additionalProperties":false,` +
+		`"properties":{"list":{"type":"array","items":{"type":"string","nullable":true}},` +
+		`"pick":{"anyOf":[{"type":"integer","nullable":true}]},` +
+		`"ref":{"$ref":"#/$defs/leaf"}},` +
+		`"$defs":{"leaf":{"type":"string","nullable":true}},` +
+		`"required":["list","pick","ref"]}`)
+
+	compiled, err := structuredoutput.Compile(schema)
+	if err != nil {
+		t.Fatalf("Compile() error: %v", err)
+	}
+	if err := compiled.ValidateText(`{"list":[null],"pick":null,"ref":null}`); err != nil {
+		t.Fatalf("nullable must be admitted inside items, anyOf and $defs: %v", err)
+	}
+	if err := compiled.ValidateText(`{"list":[1],"pick":null,"ref":null}`); err == nil {
+		t.Fatal("nullable widens by null alone, the item type still holds")
+	}
+}

@@ -287,7 +287,7 @@ func createAnthropicCompletion(ctx context.Context,
 		}
 		streamResp, err := parseStreamingCompletionResponse(ctx, client, modelInput, options)
 		if err != nil {
-			return nil, err
+			return streamResp, err
 		}
 		// Validate the assembled stream too — a structured-output guarantee must
 		// hold on both API paths.
@@ -519,16 +519,20 @@ func parseStreamingCompletionResponse(ctx context.Context, client *bedrockruntim
 	var toolCalls []llms.ToolCall
 	var signature strings.Builder
 
+	var streamErr error
+
+DoStream:
 	for e := range stream.Events() {
 		if err = stream.Err(); err != nil {
-			return nil, err
+			streamErr = err
+			break DoStream
 		}
 
 		if v, ok := e.(*types.ResponseStreamMemberChunk); ok {
 			var resp streamingCompletionResponseChunk
-			err := json.NewDecoder(bytes.NewReader(v.Value.Bytes)).Decode(&resp)
-			if err != nil {
-				return nil, err
+			if err := json.NewDecoder(bytes.NewReader(v.Value.Bytes)).Decode(&resp); err != nil {
+				streamErr = err
+				break DoStream
 			}
 
 			switch resp.Type {
@@ -545,20 +549,22 @@ func parseStreamingCompletionResponse(ctx context.Context, client *bedrockruntim
 			case "content_block_delta":
 				switch resp.Delta.Type {
 				case "text_delta":
-					if err = streaming.CallWithText(ctx, options.StreamingFunc, resp.Delta.Text); err != nil {
-						return nil, err
-					}
 					streamedContent.WriteString(resp.Delta.Text)
+					if err = streaming.CallWithText(ctx, options.StreamingFunc, resp.Delta.Text); err != nil {
+						streamErr = err
+						break DoStream
+					}
 				case "thinking_delta":
 					if resp.Delta.Thinking != "" {
 						chunk := streaming.Chunk{
 							Type:      streaming.ChunkTypeReasoning,
 							Reasoning: &reasoning.ContentReasoning{Content: resp.Delta.Thinking},
 						}
-						if err = options.StreamingFunc(ctx, chunk); err != nil {
-							return nil, err
-						}
 						contentchoices[0].Reasoning = appendReasoning(contentchoices[0].Reasoning, resp.Delta.Thinking)
+						if err = options.StreamingFunc(ctx, chunk); err != nil {
+							streamErr = err
+							break DoStream
+						}
 					}
 					if resp.Delta.Signature != "" {
 						signature.WriteString(resp.Delta.Signature)
@@ -579,7 +585,8 @@ func parseStreamingCompletionResponse(ctx context.Context, client *bedrockruntim
 						if delta != "" {
 							deltaToolCall := streaming.NewToolCall(currentToolCall.ID, currentToolCall.Name, delta)
 							if err = streaming.CallWithToolCall(ctx, options.StreamingFunc, deltaToolCall); err != nil {
-								return nil, err
+								streamErr = err
+								break DoStream
 							}
 						}
 					}
@@ -606,7 +613,7 @@ func parseStreamingCompletionResponse(ctx context.Context, client *bedrockruntim
 		}
 	}
 	if err = stream.Err(); err != nil {
-		return nil, err
+		streamErr = err
 	}
 
 	// Add tool calls to the final response
@@ -622,9 +629,21 @@ func parseStreamingCompletionResponse(ctx context.Context, client *bedrockruntim
 
 	contentchoices[0].Content = streamedContent.String()
 
-	return &llms.ContentResponse{
-		Choices: contentchoices,
-	}, nil
+	response := &llms.ContentResponse{Choices: contentchoices}
+	if streamErr != nil {
+		return response, streamErr
+	}
+	if contentchoices[0].StopReason == "refusal" {
+		return response, &llms.ErrModelRefusal{
+			Provider:                 "bedrock",
+			Message:                  streamedContent.String(),
+			InputTokens:              int(usage.InputTokens),
+			OutputTokens:             int(usage.OutputTokens),
+			CacheCreationInputTokens: int(usage.CacheCreationInputTokens),
+			CacheReadInputTokens:     int(usage.CacheReadInputTokens),
+		}
+	}
+	return response, nil
 }
 
 func appendReasoning(reasoning *reasoning.ContentReasoning, reasoningContent string) *reasoning.ContentReasoning {
@@ -840,18 +859,6 @@ func applyAnthropicReasoning(
 	return nil
 }
 
-// supportsAnthropicReasoning checks if the model supports reasoning
 func supportsAnthropicReasoning(modelID string) bool {
-	reasoningModels := []string{
-		"anthropic.claude-opus-4-",
-		"anthropic.claude-sonnet-4-",
-		"anthropic.claude-haiku-4-",
-	}
-
-	for _, model := range reasoningModels {
-		if strings.Contains(modelID, model) {
-			return true
-		}
-	}
-	return false
+	return reasoning.IsReasoningModel(modelID)
 }

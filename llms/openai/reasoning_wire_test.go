@@ -102,3 +102,74 @@ func TestTheBudgetOnTheWireRespectsTheVendorFloor(t *testing.T) {
 		t.Fatalf("the floor is Anthropic's alone, got body: %s", untouched)
 	}
 }
+
+func TestABudgetTravelsToADoorThatRejectsTheEffortField(t *testing.T) {
+	t.Parallel()
+
+	for _, model := range []string{"kimi-k2.5", "qwen3-235b-a22b-thinking-2507", "qwq-32b"} {
+		t.Run(model, func(t *testing.T) {
+			t.Parallel()
+
+			body := sendModernReasoningForModel(t, model, llms.ReasoningNone, 4000)
+
+			if !strings.Contains(body, `"reasoning":{"max_tokens":4000}`) {
+				t.Fatalf("an explicit budget must reach a door that only rejects the effort field; body: %s", body)
+			}
+			if strings.Contains(body, `"effort"`) {
+				t.Fatalf("the effort field itself must stay off a door that rejects it; body: %s", body)
+			}
+		})
+	}
+}
+
+func TestTheEffortFieldStaysOffADoorThatRejectsIt(t *testing.T) {
+	t.Parallel()
+
+	body := sendModernReasoningForModel(t, "kimi-k2.5", llms.ReasoningHigh, 0)
+
+	if strings.Contains(body, `"effort"`) {
+		t.Fatalf("an effort-only request must not put the field on a door that rejects it; body: %s", body)
+	}
+}
+
+func disableReasoningForModel(t *testing.T, model string) string {
+	t.Helper()
+
+	const completion = `{"id":"x","object":"chat.completion","created":1,"model":"m",` +
+		`"choices":[{"index":0,"message":{"role":"assistant","content":"ok"},"finish_reason":"stop"}],` +
+		`"usage":{"prompt_tokens":1,"completion_tokens":1,"total_tokens":2}}`
+
+	var body string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		b, _ := io.ReadAll(r.Body)
+		body = string(b)
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = io.WriteString(w, completion)
+	}))
+	t.Cleanup(srv.Close)
+
+	llm, err := New(WithBaseURL(srv.URL), WithToken("test"), WithModel(model))
+	if err != nil {
+		t.Fatalf("New() error: %v", err)
+	}
+	if _, err := llm.GenerateContent(context.Background(),
+		[]llms.MessageContent{llms.TextParts(llms.ChatMessageTypeHuman, "hi")},
+		llms.WithReasoningDisabled()); err != nil {
+		t.Fatalf("GenerateContent() error: %v", err)
+	}
+	return body
+}
+
+func TestBothDeepSeekReasonerNamesTurnThinkingOffTheSameWay(t *testing.T) {
+	byOwnName := disableReasoningForModel(t, "deepseek-reasoner")
+	byFamilyName := disableReasoningForModel(t, "deepseek-r1")
+
+	for _, want := range []string{`"reasoning_effort":"none"`} {
+		if !strings.Contains(byFamilyName, want) {
+			t.Fatalf("deepseek-r1 request lost %s: %s", want, byFamilyName)
+		}
+		if !strings.Contains(byOwnName, want) {
+			t.Fatalf("deepseek-reasoner must disable thinking like deepseek-r1, got: %s", byOwnName)
+		}
+	}
+}

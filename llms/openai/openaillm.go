@@ -117,7 +117,10 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 
 	result, err := o.client.CreateChat(ctx, req)
 	if err != nil {
-		return nil, err
+		if result == nil || len(result.Choices) == 0 {
+			return nil, err
+		}
+		return o.processResponse(result), err
 	}
 	if len(result.Choices) == 0 {
 		return nil, ErrEmptyResponse
@@ -125,7 +128,15 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 
 	response := o.processResponse(result)
 
-	if refusal := refusalFrom(result); refusal != nil {
+	if refusal, choice := refusalFrom(result); refusal != nil {
+		if opts.StructuredOutput != nil {
+			return response, &ErrStructuredOutputRefusal{
+				Model:   o.effectiveModel(opts),
+				Choice:  choice,
+				Refusal: refusal.Message,
+				cause:   refusal,
+			}
+		}
 		return response, refusal
 	}
 
@@ -314,6 +325,13 @@ func (o *LLM) effectiveModel(opts llms.CallOptions) string {
 	return openaiclient.DefaultChatModel
 }
 
+func wireEffortOf(sent bool, effort llms.ReasoningEffort) string {
+	if !sent {
+		return ""
+	}
+	return string(effort)
+}
+
 // setReasoning writes the reasoning fields and reports the effort that reached the wire.
 func (o *LLM) setReasoning(req *openaiclient.ChatRequest, opts llms.CallOptions) (string, error) {
 	switch opts.Reasoning.ResolveMode() { //nolint:exhaustive // ReasoningOn is handled by the code after the switch
@@ -324,30 +342,30 @@ func (o *LLM) setReasoning(req *openaiclient.ChatRequest, opts llms.CallOptions)
 	}
 
 	model := o.effectiveModel(opts)
-	if !reasoning.AcceptsEffortWire(model) {
-		return "", nil
-	}
+	acceptsEffort := reasoning.AcceptsEffortWire(model)
 	effort := reasoning.OpenAIReasoningCapsFor(model).ClampEffort(string(opts.Reasoning.GetEffort(opts.GetMaxTokens())))
 	reasoningEffort := llms.ReasoningEffort(reasoning.ClaudeClampEffort(model, effort))
 	reasoningTokens := opts.Reasoning.GetTokens(opts.GetMaxTokens())
+	sendsEffort := acceptsEffort && reasoningEffort != llms.ReasoningNone
+
 	if !o.client.ModernReasoningFormat {
-		if reasoningEffort != llms.ReasoningNone {
+		if sendsEffort {
 			req.ReasoningEffort = &reasoningEffort
 		}
-		return string(reasoningEffort), nil
+		return wireEffortOf(sendsEffort, reasoningEffort), nil
 	}
 
 	// using modern reasoning format
 	if o.client.UseReasoningMaxTokens && opts.Reasoning.HasExplicitTokens() && reasoningTokens > 0 {
 		req.Reasoning = &openaiclient.ReasoningOptions{
-			MaxTokens: reasoning.ClaudeClampBudget(o.effectiveModel(opts), reasoningTokens),
+			MaxTokens: reasoning.ClaudeClampBudget(model, reasoningTokens),
 		}
-	} else if reasoningEffort != llms.ReasoningNone {
+	} else if sendsEffort {
 		req.Reasoning = &openaiclient.ReasoningOptions{
 			Effort: reasoningEffort,
 		}
 	}
-	return string(reasoningEffort), nil
+	return wireEffortOf(sendsEffort, reasoningEffort), nil
 }
 
 // setReasoningOff sends the model's explicit disable token so a reasoning model
@@ -442,19 +460,21 @@ func (o *LLM) addToolsToRequest(req *openaiclient.ChatRequest, opts llms.CallOpt
 	return nil
 }
 
-func refusalFrom(result *openaiclient.ChatCompletionResponse) *llms.ErrModelRefusal {
-	for _, c := range result.Choices {
+func refusalFrom(result *openaiclient.ChatCompletionResponse) (*llms.ErrModelRefusal, int) {
+	for i, c := range result.Choices {
 		if c.Message.Refusal == "" {
 			continue
 		}
+		cached := result.Usage.PromptTokensDetails.CachedTokens
 		return &llms.ErrModelRefusal{
-			Provider:     "openai",
-			Message:      c.Message.Refusal,
-			InputTokens:  result.Usage.PromptTokens,
-			OutputTokens: result.Usage.CompletionTokens,
-		}
+			Provider:             "openai",
+			Message:              c.Message.Refusal,
+			InputTokens:          result.Usage.PromptTokens - cached,
+			OutputTokens:         result.Usage.CompletionTokens,
+			CacheReadInputTokens: cached,
+		}, i
 	}
-	return nil
+	return nil, 0
 }
 
 // processResponse processes the OpenAI API response into a ContentResponse.

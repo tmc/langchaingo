@@ -174,7 +174,10 @@ func (c *Client) CreateChat(ctx context.Context, r *ChatRequest) (*ChatCompletio
 	}
 	resp, err := c.createChat(ctx, r)
 	if err != nil {
-		return nil, err
+		if resp == nil || len(resp.Choices) == 0 {
+			return nil, err
+		}
+		return resp, err
 	}
 	if len(resp.Choices) == 0 {
 		return nil, ErrEmptyResponse

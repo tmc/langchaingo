@@ -220,6 +220,7 @@ func namesReasoningModel(modelLower string) bool { //nolint:funlen // a flat cat
 
 	// DeepSeek reasoning models
 	if strings.Contains(modelLower, "deepseek-r1") ||
+		strings.Contains(modelLower, "deepseek-reasoner") ||
 		strings.Contains(modelLower, "deepseek-chat-v3") ||
 		strings.Contains(modelLower, "deepseek-v3.1-terminus") ||
 		strings.HasPrefix(modelLower, "deepseek-v3.2") ||
