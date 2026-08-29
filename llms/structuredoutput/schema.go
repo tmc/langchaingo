@@ -21,6 +21,15 @@ func RequireClosedObjects(schema json.RawMessage) error {
 	return requireClosed(node)
 }
 
+var (
+	schemaGroupKeywords = []string{"properties", "patternProperties", "$defs", "definitions", "dependentSchemas"}
+	schemaValueKeywords = []string{
+		"items", "prefixItems", "additionalProperties", "anyOf", "oneOf", "allOf",
+		"not", "if", "then", "else", "contains", "propertyNames",
+		"unevaluatedItems", "unevaluatedProperties",
+	}
+)
+
 func requireClosed(node any) error {
 	m, ok := node.(map[string]any)
 	if !ok {
@@ -35,7 +44,7 @@ func requireClosed(node any) error {
 				llms.ErrStructuredOutputConfig)
 		}
 	}
-	for _, key := range []string{"properties", "patternProperties", "$defs", "definitions", "dependentSchemas"} {
+	for _, key := range schemaGroupKeywords {
 		if group, ok := m[key].(map[string]any); ok {
 			for _, v := range group {
 				if err := requireClosedValue(v); err != nil {
@@ -44,11 +53,7 @@ func requireClosed(node any) error {
 			}
 		}
 	}
-	for _, key := range []string{
-		"items", "prefixItems", "additionalProperties", "anyOf", "oneOf", "allOf",
-		"not", "if", "then", "else", "contains", "propertyNames",
-		"unevaluatedItems", "unevaluatedProperties",
-	} {
+	for _, key := range schemaValueKeywords {
 		if err := requireClosedValue(m[key]); err != nil {
 			return err
 		}
