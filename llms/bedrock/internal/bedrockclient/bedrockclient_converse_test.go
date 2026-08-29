@@ -227,9 +227,16 @@ func TestConverseClient_ModelDetection(t *testing.T) {
 	assert.True(t, client.supportsReasoning("us.anthropic.claude-sonnet-4-5-20250929-v1:0"))
 	assert.True(t, client.supportsReasoning("minimax.minimax-m2.5"))
 	assert.True(t, client.supportsReasoning("minimax.minimax-m2.1"))
-	assert.False(t, client.supportsReasoning("minimax.minimax-m2"))
+	assert.True(t, client.supportsReasoning("minimax.minimax-m2"))
+	assert.True(t, client.supportsReasoning("us.deepseek.r1-v1:0"))
+	assert.True(t, client.supportsReasoning("deepseek.v3.2"))
+	assert.True(t, client.supportsReasoning("zai.glm-4.7"))
+	assert.True(t, client.supportsReasoning("moonshotai.kimi-k2.5"))
+	assert.True(t, client.supportsReasoning("us.amazon.nova-2-lite-v1:0"))
 	assert.False(t, client.supportsReasoning("us.amazon.nova-pro-v1:0"))
 	assert.False(t, client.supportsReasoning("anthropic.claude-3-sonnet-20240229-v1:0"))
+	assert.False(t, client.supportsReasoning("meta.llama3-70b-instruct-v1:0"))
+	assert.False(t, client.supportsReasoning("cohere.command-r-plus-v1:0"))
 }
 
 func TestConverseClient_InferenceConfiguration(t *testing.T) {
@@ -1165,4 +1172,51 @@ func TestConverseBudgetPinsTemperatureOnlyForClaude(t *testing.T) {
 		require.NotNil(t, cfg.Temperature, "the caller's temperature must survive")
 		assert.InDelta(t, 0.2, *cfg.Temperature, 0.0001)
 	})
+}
+
+func TestConverseClient_ReasoningReachesNonClaudeThinkers(t *testing.T) {
+	for _, modelID := range []string{
+		"us.deepseek.r1-v1:0",
+		"zai.glm-4.7",
+		"us.amazon.nova-2-lite-v1:0",
+	} {
+		t.Run(modelID, func(t *testing.T) {
+			mockClient := &MockBedrockRuntimeClient{}
+			client := NewConverseClient(mockClient)
+
+			var capturedInput *bedrockruntime.ConverseInput
+			mockClient.On("Converse", mock.Anything, mock.MatchedBy(func(input *bedrockruntime.ConverseInput) bool {
+				capturedInput = input
+				return true
+			}), mock.Anything).Return(&bedrockruntime.ConverseOutput{
+				Output: &types.ConverseOutputMemberMessage{
+					Value: types.Message{
+						Role:    types.ConversationRoleAssistant,
+						Content: []types.ContentBlock{&types.ContentBlockMemberText{Value: "ok"}},
+					},
+				},
+			}, nil)
+
+			input := &ConverseInput{
+				ModelID:         modelID,
+				Messages:        []Message{{Role: llms.ChatMessageTypeHuman, Content: "Hello", Type: "text"}},
+				MaxTokens:       ptr(8000),
+				ReasoningConfig: &llms.ReasoningConfig{Effort: llms.ReasoningMedium},
+			}
+
+			_, err := client.CreateCompletionConverse(t.Context(), input)
+			require.NoError(t, err)
+
+			require.NotNil(t, capturedInput.AdditionalModelRequestFields,
+				"a thinking model gets a thinking request")
+			raw, err := capturedInput.AdditionalModelRequestFields.MarshalSmithyDocument()
+			require.NoError(t, err)
+			var fields map[string]any
+			require.NoError(t, json.Unmarshal(raw, &fields))
+			thinking, _ := fields["thinking"].(map[string]any)
+			require.NotNil(t, thinking)
+			assert.Equal(t, "enabled", thinking["type"])
+			assert.EqualValues(t, 2666, thinking["budget_tokens"])
+		})
+	}
 }

@@ -840,18 +840,6 @@ func applyAnthropicReasoning(
 	return nil
 }
 
-// supportsAnthropicReasoning checks if the model supports reasoning
 func supportsAnthropicReasoning(modelID string) bool {
-	reasoningModels := []string{
-		"anthropic.claude-opus-4-",
-		"anthropic.claude-sonnet-4-",
-		"anthropic.claude-haiku-4-",
-	}
-
-	for _, model := range reasoningModels {
-		if strings.Contains(modelID, model) {
-			return true
-		}
-	}
-	return false
+	return reasoning.IsReasoningModel(modelID)
 }
