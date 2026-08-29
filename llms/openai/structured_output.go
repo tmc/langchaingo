@@ -20,7 +20,11 @@ type ErrStructuredOutputRefusal struct {
 	Model   string
 	Choice  int
 	Refusal string
+
+	cause error
 }
+
+func (e *ErrStructuredOutputRefusal) Unwrap() error { return e.cause }
 
 func (e *ErrStructuredOutputRefusal) Error() string {
 	return fmt.Sprintf("openai structured output: model refused (model=%s choice=%d): %s", e.Model, e.Choice, e.Refusal)
@@ -72,10 +76,6 @@ func (o *LLM) validateStructuredResponse(result *openaiclient.ChatCompletionResp
 	}
 	model := o.effectiveModel(opts)
 	for i, c := range result.Choices {
-		// A refusal is a distinct typed outcome, never a JSON-validation error.
-		if c.Message.Refusal != "" {
-			return &ErrStructuredOutputRefusal{Model: model, Choice: i, Refusal: c.Message.Refusal}
-		}
 		if c.FinishReason != openaiclient.FinishReasonStop {
 			continue
 		}

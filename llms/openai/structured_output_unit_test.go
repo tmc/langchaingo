@@ -318,18 +318,6 @@ func TestValidateStructuredResponse(t *testing.T) {
 			t.Fatalf("want ErrStructuredOutputValidation, got %v", err)
 		}
 	})
-	t.Run("refusal is a typed refusal, not a validation error", func(t *testing.T) {
-		t.Parallel()
-		err := llm.validateStructuredResponse(mk(openaiclient.FinishReasonStop, "", "I cannot help with that"), opts)
-		var refusal *ErrStructuredOutputRefusal
-		if !errors.As(err, &refusal) {
-			t.Fatalf("want ErrStructuredOutputRefusal, got %v", err)
-		}
-		var ve *llms.ErrStructuredOutputValidation
-		if errors.As(err, &ve) {
-			t.Fatal("refusal must not surface as a validation error")
-		}
-	})
 	t.Run("length is not final json", func(t *testing.T) {
 		t.Parallel()
 		if err := llm.validateStructuredResponse(mk(openaiclient.FinishReasonLength, `{"answer"`, ""), opts); err != nil {

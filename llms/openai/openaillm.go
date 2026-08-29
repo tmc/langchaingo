@@ -125,7 +125,15 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 
 	response := o.processResponse(result)
 
-	if refusal := refusalFrom(result); refusal != nil {
+	if refusal, choice := refusalFrom(result); refusal != nil {
+		if opts.StructuredOutput != nil {
+			return response, &ErrStructuredOutputRefusal{
+				Model:   o.effectiveModel(opts),
+				Choice:  choice,
+				Refusal: refusal.Message,
+				cause:   refusal,
+			}
+		}
 		return response, refusal
 	}
 
@@ -449,8 +457,8 @@ func (o *LLM) addToolsToRequest(req *openaiclient.ChatRequest, opts llms.CallOpt
 	return nil
 }
 
-func refusalFrom(result *openaiclient.ChatCompletionResponse) *llms.ErrModelRefusal {
-	for _, c := range result.Choices {
+func refusalFrom(result *openaiclient.ChatCompletionResponse) (*llms.ErrModelRefusal, int) {
+	for i, c := range result.Choices {
 		if c.Message.Refusal == "" {
 			continue
 		}
@@ -459,9 +467,9 @@ func refusalFrom(result *openaiclient.ChatCompletionResponse) *llms.ErrModelRefu
 			Message:      c.Message.Refusal,
 			InputTokens:  result.Usage.PromptTokens,
 			OutputTokens: result.Usage.CompletionTokens,
-		}
+		}, i
 	}
-	return nil
+	return nil, 0
 }
 
 // processResponse processes the OpenAI API response into a ContentResponse.
