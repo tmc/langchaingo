@@ -1131,7 +1131,7 @@ func TestAmazonReasoningConverseAPI(t *testing.T) {
 	for _, model := range reasoningModels {
 		t.Logf("Testing reasoning with model: %s", model)
 
-		err := testReasoningWorkflow(ctx, t, llm, model, nil)
+		err := testReasoningWorkflow(ctx, t, llm, model, nil, false)
 		if err != nil {
 			t.Errorf("Reasoning failed for model %s: %v", model, err)
 		}
@@ -1168,7 +1168,7 @@ func TestAmazonReasoningLegacyAPI(t *testing.T) {
 	for _, model := range reasoningModels {
 		t.Logf("Testing reasoning with model: %s", model)
 
-		err := testReasoningWorkflow(ctx, t, llm, model, nil)
+		err := testReasoningWorkflow(ctx, t, llm, model, nil, true)
 		if err != nil {
 			t.Errorf("Reasoning failed for model %s: %v", model, err)
 		}
@@ -1223,7 +1223,7 @@ func TestAmazonReasoningStreamingConverseAPI(t *testing.T) {
 			return nil
 		}
 
-		err := testReasoningWorkflow(ctx, t, llm, model, streamingValidator)
+		err := testReasoningWorkflow(ctx, t, llm, model, streamingValidator, false)
 		if err != nil {
 			t.Errorf("Streaming reasoning failed for model %s: %v", model, err)
 		}
@@ -1267,7 +1267,7 @@ func TestAmazonReasoningStreamingLegacyAPI(t *testing.T) {
 			return nil
 		}
 
-		err := testReasoningWorkflow(ctx, t, llm, model, streamingValidator)
+		err := testReasoningWorkflow(ctx, t, llm, model, streamingValidator, true)
 		if err != nil {
 			t.Errorf("Streaming reasoning failed for model %s: %v", model, err)
 		}
@@ -1280,6 +1280,7 @@ func testReasoningWorkflow( //nolint:funlen
 	llm *bedrock.LLM,
 	model string,
 	streamingValidator func(reasoningChunks []string) error,
+	countsThinkingTokens bool,
 ) error {
 	t.Logf("Testing reasoning workflow for model: %s", model)
 
@@ -1362,9 +1363,16 @@ func testReasoningWorkflow( //nolint:funlen
 		return fmt.Errorf("empty reasoning content")
 	}
 
-	if got, ok := choice.GenerationInfo["ReasoningTokens"].(int); !ok || got <= 0 {
-		return fmt.Errorf("an answer that reasoned must report ReasoningTokens as an int, got %#v",
-			choice.GenerationInfo["ReasoningTokens"])
+	reasoningTokens, hasReasoningTokens := choice.GenerationInfo["ReasoningTokens"]
+	switch {
+	case countsThinkingTokens:
+		if got, ok := reasoningTokens.(int); !ok || got <= 0 {
+			return fmt.Errorf("an answer that reasoned must report ReasoningTokens as an int, got %#v",
+				reasoningTokens)
+		}
+	case hasReasoningTokens:
+		return fmt.Errorf("this door's usage carries no thinking count, so none must be invented, got %#v",
+			reasoningTokens)
 	}
 	if got, ok := choice.GenerationInfo["CompletionTokens"].(int); !ok || got <= 0 {
 		return fmt.Errorf("an answer that reasoned must report CompletionTokens as an int, got %#v",
