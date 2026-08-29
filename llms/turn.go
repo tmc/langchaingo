@@ -7,15 +7,10 @@ import "github.com/vxcontrol/langchaingo/llms/reasoning"
 type ToolChoiceKind int
 
 const (
-	// ToolChoiceUnset means the caller picked nothing, so the door sends nothing.
 	ToolChoiceUnset ToolChoiceKind = iota
-	// ToolChoiceAuto leaves the decision to the model.
 	ToolChoiceAuto
-	// ToolChoiceNone forbids every tool.
 	ToolChoiceNone
-	// ToolChoiceAny demands a tool call without naming one.
 	ToolChoiceAny
-	// ToolChoiceNamed demands the tool the caller named.
 	ToolChoiceNamed
 )
 

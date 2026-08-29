@@ -4,11 +4,8 @@ package reasoning
 type Mechanism int
 
 const (
-	// MechanismNone sends no thinking configuration at all.
 	MechanismNone Mechanism = iota
-	// MechanismAdaptive lets the model size its own thinking from an effort.
 	MechanismAdaptive
-	// MechanismBudget gives the model a token budget to think within.
 	MechanismBudget
 )
 

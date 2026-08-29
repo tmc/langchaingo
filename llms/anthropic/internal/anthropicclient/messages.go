@@ -112,7 +112,6 @@ type Tool struct {
 	CacheControl *CacheControl `json:"cache_control,omitempty"`
 }
 
-// ToolChoice used for the request message payload.
 type ToolChoice struct {
 	Type string `json:"type"`
 	Name string `json:"name,omitempty"`

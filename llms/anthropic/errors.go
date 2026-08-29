@@ -84,7 +84,4 @@ func MapError(err error) error {
 // ending with an assistant turn.
 type ErrAssistantPrefillUnsupported = reasoning.ErrAssistantPrefillUnsupported
 
-// ErrForcedToolUseWithThinking reports the documented gap that manual (budget)
-// thinking accepts only tool_choice "auto" or "none": forcing a tool with "any"
-// or a named tool is rejected. Adaptive thinking has no such limit.
 type ErrForcedToolUseWithThinking = reasoning.ErrForcedToolUseWithThinking

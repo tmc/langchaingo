@@ -39,13 +39,9 @@ type ReasoningSupport struct {
 type ReasoningMechanism int
 
 const (
-	// ReasoningMechanismUnknown is a model whose mechanism this build does not classify.
 	ReasoningMechanismUnknown ReasoningMechanism = iota
-	// ReasoningMechanismAdaptive takes an effort level and decides how much to think.
 	ReasoningMechanismAdaptive
-	// ReasoningMechanismBudget takes a manual token budget.
 	ReasoningMechanismBudget
-	// ReasoningMechanismAdaptiveAndBudget accepts either mechanism.
 	ReasoningMechanismAdaptiveAndBudget
 )
 

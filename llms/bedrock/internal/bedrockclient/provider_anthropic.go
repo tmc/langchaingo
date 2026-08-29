@@ -106,9 +106,8 @@ type anthropicTextGenerationInput struct {
 	// Sequences that will cause the model to stop generating tokens. Optional
 	StopSequences []string `json:"stop_sequences,omitempty"`
 	// Tools available for the model to use. Optional
-	Tools []anthropicTool `json:"tools,omitempty"`
-	// ToolChoice constrains which tool the model may call. Optional
-	ToolChoice any `json:"tool_choice,omitempty"`
+	Tools      []anthropicTool `json:"tools,omitempty"`
+	ToolChoice any             `json:"tool_choice,omitempty"`
 	// Thinking configuration for reasoning models. Optional
 	Thinking *anthropicThinkingPayload `json:"thinking,omitempty"`
 	// OutputConfig carries the adaptive-thinking effort. It is a top-level

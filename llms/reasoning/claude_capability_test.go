@@ -11,7 +11,6 @@ func TestClaudeReasoningKindFor(t *testing.T) {
 		model string
 		want  ClaudeReasoningKind
 	}{
-		// Adaptive-only, first-party and Bedrock forms.
 		{"claude-opus-4-7", ClaudeReasoningAdaptiveOnly},
 		{"claude-opus-4-8", ClaudeReasoningAdaptiveOnly},
 		{"us.anthropic.claude-opus-4-8", ClaudeReasoningAdaptiveOnly},
@@ -21,11 +20,9 @@ func TestClaudeReasoningKindFor(t *testing.T) {
 		{"us.anthropic.claude-sonnet-5", ClaudeReasoningAdaptiveOnly},
 		{"claude-fable-5", ClaudeReasoningAdaptiveOnly},
 		{"claude-mythos-5", ClaudeReasoningAdaptiveOnly},
-		// Dual.
 		{"claude-opus-4-6", ClaudeReasoningAdaptiveAndBudget},
 		{"us.anthropic.claude-sonnet-4-6", ClaudeReasoningAdaptiveAndBudget},
 		{"claude-mythos-preview", ClaudeReasoningAdaptiveAndBudget},
-		// Budget-only.
 		{"claude-opus-4-5-20251101", ClaudeReasoningBudgetOnly},
 		{"claude-sonnet-4-5-20250929", ClaudeReasoningBudgetOnly},
 		{"us.anthropic.claude-haiku-4-5-20251001-v1:0", ClaudeReasoningBudgetOnly},
