@@ -519,16 +519,20 @@ func parseStreamingCompletionResponse(ctx context.Context, client *bedrockruntim
 	var toolCalls []llms.ToolCall
 	var signature strings.Builder
 
+	var streamErr error
+
+DoStream:
 	for e := range stream.Events() {
 		if err = stream.Err(); err != nil {
-			return nil, err
+			streamErr = err
+			break DoStream
 		}
 
 		if v, ok := e.(*types.ResponseStreamMemberChunk); ok {
 			var resp streamingCompletionResponseChunk
-			err := json.NewDecoder(bytes.NewReader(v.Value.Bytes)).Decode(&resp)
-			if err != nil {
-				return nil, err
+			if err := json.NewDecoder(bytes.NewReader(v.Value.Bytes)).Decode(&resp); err != nil {
+				streamErr = err
+				break DoStream
 			}
 
 			switch resp.Type {
@@ -545,20 +549,22 @@ func parseStreamingCompletionResponse(ctx context.Context, client *bedrockruntim
 			case "content_block_delta":
 				switch resp.Delta.Type {
 				case "text_delta":
-					if err = streaming.CallWithText(ctx, options.StreamingFunc, resp.Delta.Text); err != nil {
-						return nil, err
-					}
 					streamedContent.WriteString(resp.Delta.Text)
+					if err = streaming.CallWithText(ctx, options.StreamingFunc, resp.Delta.Text); err != nil {
+						streamErr = err
+						break DoStream
+					}
 				case "thinking_delta":
 					if resp.Delta.Thinking != "" {
 						chunk := streaming.Chunk{
 							Type:      streaming.ChunkTypeReasoning,
 							Reasoning: &reasoning.ContentReasoning{Content: resp.Delta.Thinking},
 						}
-						if err = options.StreamingFunc(ctx, chunk); err != nil {
-							return nil, err
-						}
 						contentchoices[0].Reasoning = appendReasoning(contentchoices[0].Reasoning, resp.Delta.Thinking)
+						if err = options.StreamingFunc(ctx, chunk); err != nil {
+							streamErr = err
+							break DoStream
+						}
 					}
 					if resp.Delta.Signature != "" {
 						signature.WriteString(resp.Delta.Signature)
@@ -579,7 +585,8 @@ func parseStreamingCompletionResponse(ctx context.Context, client *bedrockruntim
 						if delta != "" {
 							deltaToolCall := streaming.NewToolCall(currentToolCall.ID, currentToolCall.Name, delta)
 							if err = streaming.CallWithToolCall(ctx, options.StreamingFunc, deltaToolCall); err != nil {
-								return nil, err
+								streamErr = err
+								break DoStream
 							}
 						}
 					}
@@ -606,7 +613,7 @@ func parseStreamingCompletionResponse(ctx context.Context, client *bedrockruntim
 		}
 	}
 	if err = stream.Err(); err != nil {
-		return nil, err
+		streamErr = err
 	}
 
 	// Add tool calls to the final response
@@ -623,6 +630,9 @@ func parseStreamingCompletionResponse(ctx context.Context, client *bedrockruntim
 	contentchoices[0].Content = streamedContent.String()
 
 	response := &llms.ContentResponse{Choices: contentchoices}
+	if streamErr != nil {
+		return response, streamErr
+	}
 	if contentchoices[0].StopReason == "refusal" {
 		return response, &llms.ErrModelRefusal{
 			Provider:                 "bedrock",
