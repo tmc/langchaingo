@@ -201,7 +201,7 @@ func TestAModelThatRejectsSamplingGetsNoSamplingAtAll(t *testing.T) {
 	}
 }
 
-func TestOptInThinkingKeepsSamplingUntilAsked(t *testing.T) {
+func TestOptInThinkingKeepsSamplingWhateverIsAsked(t *testing.T) {
 	t.Parallel()
 
 	runSamplingCases(t, []samplingCase{
@@ -212,13 +212,12 @@ func TestOptInThinkingKeepsSamplingUntilAsked(t *testing.T) {
 			present: []string{`"temperature":0.3`, `"top_p":0.7`},
 		},
 		{
-			name:  "an effort puts the request on the thinking terms",
+			name:  "an effort does not cost the caller their sampling",
 			model: "mistral-medium-3",
 			opts: []llms.CallOption{
 				llms.WithTemperature(0.3), llms.WithTopP(0.7), llms.WithReasoning(llms.ReasoningMedium, 0),
 			},
-			present: []string{`"temperature":1`, `"reasoning_effort":"medium"`},
-			absent:  []string{`"top_p"`},
+			present: []string{`"temperature":0.3`, `"top_p":0.7`, `"reasoning_effort":"medium"`},
 		},
 		{
 			name:    "the provider-prefixed spelling resolves the same",
@@ -245,10 +244,61 @@ func TestOptInThinkingKeepsSamplingUntilAsked(t *testing.T) {
 			present: []string{`"temperature":0.3`},
 		},
 		{
-			name:    "a family that reasons unasked keeps the pin",
+			name:    "a family that reasons unasked still keeps the caller's sampling",
 			model:   "hy3-preview",
-			opts:    []llms.CallOption{llms.WithTemperature(0.3)},
+			opts:    []llms.CallOption{llms.WithTemperature(0.3), llms.WithTopP(0.7)},
+			present: []string{`"temperature":0.3`, `"top_p":0.7`},
+		},
+	})
+}
+
+func TestOnlyModelsWhoseVendorRefusesLoseTheirSampling(t *testing.T) {
+	t.Parallel()
+
+	runSamplingCases(t, []samplingCase{
+		{
+			name:    "o3 is pinned: the vendor accepts only the default temperature",
+			model:   "o3",
+			opts:    []llms.CallOption{llms.WithTemperature(0.25), llms.WithTopP(0.3)},
 			present: []string{`"temperature":1`},
+			absent:  []string{`"top_p"`},
+		},
+		{
+			name:    "gpt-5-mini is pinned for the same reason",
+			model:   "gpt-5-mini",
+			opts:    []llms.CallOption{llms.WithTemperature(0.25), llms.WithTopP(0.3)},
+			present: []string{`"temperature":1`},
+			absent:  []string{`"top_p"`},
+		},
+		{
+			name:    "grok keeps both: the vendor takes them alongside thinking",
+			model:   "grok-4",
+			opts:    []llms.CallOption{llms.WithTemperature(0.25), llms.WithTopP(0.3)},
+			present: []string{`"temperature":0.25`, `"top_p":0.3`},
+		},
+		{
+			name:    "glm keeps both",
+			model:   "glm-4.6",
+			opts:    []llms.CallOption{llms.WithTemperature(0.25), llms.WithTopP(0.3)},
+			present: []string{`"temperature":0.25`, `"top_p":0.3`},
+		},
+		{
+			name:    "kimi keeps both",
+			model:   "kimi-k2-thinking",
+			opts:    []llms.CallOption{llms.WithTemperature(0.25), llms.WithTopP(0.3)},
+			present: []string{`"temperature":0.25`, `"top_p":0.3`},
+		},
+		{
+			name:    "minimax keeps both",
+			model:   "minimax-m2",
+			opts:    []llms.CallOption{llms.WithTemperature(0.25), llms.WithTopP(0.3)},
+			present: []string{`"temperature":0.25`, `"top_p":0.3`},
+		},
+		{
+			name:    "deepseek-r1 keeps both",
+			model:   "deepseek-r1",
+			opts:    []llms.CallOption{llms.WithTemperature(0.25), llms.WithTopP(0.3)},
+			present: []string{`"temperature":0.25`, `"top_p":0.3`},
 		},
 	})
 }

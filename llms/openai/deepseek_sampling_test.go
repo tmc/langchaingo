@@ -58,17 +58,20 @@ func TestDeepSeekV32KeepsCallerSamplingUntilThinkingIsAsked(t *testing.T) {
 	}
 }
 
-func TestDeepSeekV32PinsSamplingOnceAnEffortReachesTheWire(t *testing.T) {
+func TestDeepSeekV32KeepsSamplingEvenWithAnEffortOnTheWire(t *testing.T) {
 	t.Parallel()
 
 	body := captureDeepSeekRequest(t, "deepseek-v3.2",
 		llms.WithTemperature(0.25), llms.WithTopP(0.3),
 		llms.WithReasoning(llms.ReasoningHigh, 0))
 
-	if got, want := body["temperature"], 1.0; got != want {
+	if got, want := body["temperature"], 0.25; got != want {
 		t.Errorf("temperature = %v, want %v", got, want)
 	}
-	if _, ok := body["top_p"]; ok {
-		t.Errorf("top_p = %v, want it dropped", body["top_p"])
+	if got, ok := body["top_p"]; !ok || got != 0.3 {
+		t.Errorf("top_p = %v (present %v), want 0.3", got, ok)
+	}
+	if got, want := body["reasoning_effort"], "high"; got != want {
+		t.Errorf("reasoning_effort = %v, want %v", got, want)
 	}
 }
