@@ -314,6 +314,13 @@ func (o *LLM) effectiveModel(opts llms.CallOptions) string {
 	return openaiclient.DefaultChatModel
 }
 
+func wireEffortOf(sent bool, effort llms.ReasoningEffort) string {
+	if !sent {
+		return ""
+	}
+	return string(effort)
+}
+
 // setReasoning writes the reasoning fields and reports the effort that reached the wire.
 func (o *LLM) setReasoning(req *openaiclient.ChatRequest, opts llms.CallOptions) (string, error) {
 	switch opts.Reasoning.ResolveMode() { //nolint:exhaustive // ReasoningOn is handled by the code after the switch
@@ -324,30 +331,30 @@ func (o *LLM) setReasoning(req *openaiclient.ChatRequest, opts llms.CallOptions)
 	}
 
 	model := o.effectiveModel(opts)
-	if !reasoning.AcceptsEffortWire(model) {
-		return "", nil
-	}
+	acceptsEffort := reasoning.AcceptsEffortWire(model)
 	effort := reasoning.OpenAIReasoningCapsFor(model).ClampEffort(string(opts.Reasoning.GetEffort(opts.GetMaxTokens())))
 	reasoningEffort := llms.ReasoningEffort(reasoning.ClaudeClampEffort(model, effort))
 	reasoningTokens := opts.Reasoning.GetTokens(opts.GetMaxTokens())
+	sendsEffort := acceptsEffort && reasoningEffort != llms.ReasoningNone
+
 	if !o.client.ModernReasoningFormat {
-		if reasoningEffort != llms.ReasoningNone {
+		if sendsEffort {
 			req.ReasoningEffort = &reasoningEffort
 		}
-		return string(reasoningEffort), nil
+		return wireEffortOf(sendsEffort, reasoningEffort), nil
 	}
 
 	// using modern reasoning format
 	if o.client.UseReasoningMaxTokens && opts.Reasoning.HasExplicitTokens() && reasoningTokens > 0 {
 		req.Reasoning = &openaiclient.ReasoningOptions{
-			MaxTokens: reasoning.ClaudeClampBudget(o.effectiveModel(opts), reasoningTokens),
+			MaxTokens: reasoning.ClaudeClampBudget(model, reasoningTokens),
 		}
-	} else if reasoningEffort != llms.ReasoningNone {
+	} else if sendsEffort {
 		req.Reasoning = &openaiclient.ReasoningOptions{
 			Effort: reasoningEffort,
 		}
 	}
-	return string(reasoningEffort), nil
+	return wireEffortOf(sendsEffort, reasoningEffort), nil
 }
 
 // setReasoningOff sends the model's explicit disable token so a reasoning model

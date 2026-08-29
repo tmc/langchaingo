@@ -102,3 +102,32 @@ func TestTheBudgetOnTheWireRespectsTheVendorFloor(t *testing.T) {
 		t.Fatalf("the floor is Anthropic's alone, got body: %s", untouched)
 	}
 }
+
+func TestABudgetTravelsToADoorThatRejectsTheEffortField(t *testing.T) {
+	t.Parallel()
+
+	for _, model := range []string{"kimi-k2.5", "qwen3-235b-a22b-thinking-2507", "qwq-32b"} {
+		t.Run(model, func(t *testing.T) {
+			t.Parallel()
+
+			body := sendModernReasoningForModel(t, model, llms.ReasoningNone, 4000)
+
+			if !strings.Contains(body, `"reasoning":{"max_tokens":4000}`) {
+				t.Fatalf("an explicit budget must reach a door that only rejects the effort field; body: %s", body)
+			}
+			if strings.Contains(body, `"effort"`) {
+				t.Fatalf("the effort field itself must stay off a door that rejects it; body: %s", body)
+			}
+		})
+	}
+}
+
+func TestTheEffortFieldStaysOffADoorThatRejectsIt(t *testing.T) {
+	t.Parallel()
+
+	body := sendModernReasoningForModel(t, "kimi-k2.5", llms.ReasoningHigh, 0)
+
+	if strings.Contains(body, `"effort"`) {
+		t.Fatalf("an effort-only request must not put the field on a door that rejects it; body: %s", body)
+	}
+}
