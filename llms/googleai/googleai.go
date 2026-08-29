@@ -474,13 +474,8 @@ StreamEnd:
 		metadata["PromptCachedTokens"] = int(lastUsageMetadata.CachedContentTokenCount)
 		metadata["CacheReadInputTokens"] = int(lastUsageMetadata.CachedContentTokenCount)
 
-		// Cache-related token information (if available)
-		if lastUsageMetadata.CachedContentTokenCount > 0 {
-			metadata["CacheCreationInputTokens"] = max(int(lastUsageMetadata.PromptTokenCount-lastUsageMetadata.CachedContentTokenCount), 0)
-			metadata["PromptTokens"] = metadata["CacheCreationInputTokens"] // Google AI includes cached tokens in the prompt count
-		} else {
-			metadata["CacheCreationInputTokens"] = 0
-		}
+		metadata["CacheCreationInputTokens"] = max(
+			int(lastUsageMetadata.PromptTokenCount-lastUsageMetadata.CachedContentTokenCount), 0)
 	}
 
 	// Carry the finish reason so structured-output validation runs on a normal
