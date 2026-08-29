@@ -407,7 +407,7 @@ func (o *LLM) applySamplingPolicy(req *openaiclient.ChatRequest, opts llms.CallO
 	}
 
 	switch {
-	case thinkingRuns(model, opts, wireEffort):
+	case refusesSamplingWhileThinking(model, opts, wireEffort):
 		if req.Temperature != nil {
 			temperature := 1.0
 			req.Temperature = &temperature
@@ -417,9 +417,16 @@ func (o *LLM) applySamplingPolicy(req *openaiclient.ChatRequest, opts llms.CallO
 		req.TopP = nil
 	}
 
-	if isThinkingOnTheWire(wireEffort) {
+	if isThinkingOnTheWire(wireEffort) && refusesSamplingWhileThinking(model, opts, wireEffort) {
 		req.TopP = nil
 	}
+}
+
+func refusesSamplingWhileThinking(model string, opts llms.CallOptions, wireEffort string) bool {
+	if !thinkingRuns(model, opts, wireEffort) {
+		return false
+	}
+	return reasoning.OpenAIReasoningCapsFor(model).Known || reasoning.ClaudeSupportsThinking(model)
 }
 
 // thinkingRuns reports whether the model reasons on this request: an effort

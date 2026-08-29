@@ -912,16 +912,16 @@ var reasoningTemperatureCases = []struct {
 		expectedTemperature: 0.0,
 	},
 	{
-		name:                "deepseek-r1 reasoning model adjusts temperature",
+		name:                "deepseek-r1 reasons but its vendor takes the caller's temperature",
 		model:               "deepseek-r1",
 		temperature:         0.8,
-		expectedTemperature: 1.0,
+		expectedTemperature: 0.8,
 	},
 	{
-		name:                "gemini-2.5-flash reasoning model adjusts temperature",
+		name:                "gemini-2.5-flash reasons but its vendor takes the caller's temperature",
 		model:               "gemini-2.5-flash-thinking-exp",
 		temperature:         0.3,
-		expectedTemperature: 1.0,
+		expectedTemperature: 0.3,
 	},
 	{
 		name:                "claude-3.7-sonnet thinks only when asked and keeps the temperature",
