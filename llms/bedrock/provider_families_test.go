@@ -17,19 +17,21 @@ import (
 )
 
 type familyCase struct {
-	name       string
-	model      string
-	whole      string
-	chunks     []string
-	wantText   string
-	wantReason string
+	name        string
+	model       string
+	whole       string
+	chunks      []string
+	wantText    string
+	wantReason  string
+	hasCounters bool
 }
 
 func nonClaudeFamilies() []familyCase {
 	return []familyCase{
 		{
-			name:  "amazon",
-			model: "amazon.titan-text-express-v1",
+			name:        "amazon",
+			hasCounters: true,
+			model:       "amazon.titan-text-express-v1",
 			whole: `{"inputTextTokenCount":5,"results":[{"tokenCount":3,"outputText":"sixty rooms",` +
 				`"completionReason":"LENGTH"}]}`,
 			chunks: []string{
@@ -40,12 +42,13 @@ func nonClaudeFamilies() []familyCase {
 			wantReason: "LENGTH",
 		},
 		{
-			name:       "meta",
-			model:      "meta.llama3-70b-instruct-v1:0",
-			whole:      `{"generation":"sixty rooms","prompt_token_count":5,"generation_token_count":3,"stop_reason":"length"}`,
-			chunks:     []string{`{"generation":"sixty "}`, `{"generation":"rooms","stop_reason":"length"}`},
-			wantText:   "sixty rooms",
-			wantReason: "length",
+			name:        "meta",
+			hasCounters: true,
+			model:       "meta.llama3-70b-instruct-v1:0",
+			whole:       `{"generation":"sixty rooms","prompt_token_count":5,"generation_token_count":3,"stop_reason":"length"}`,
+			chunks:      []string{`{"generation":"sixty "}`, `{"generation":"rooms","stop_reason":"length"}`},
+			wantText:    "sixty rooms",
+			wantReason:  "length",
 		},
 		{
 			name:  "cohere",
@@ -60,8 +63,9 @@ func nonClaudeFamilies() []familyCase {
 			wantReason: "MAX_TOKENS",
 		},
 		{
-			name:  "ai21",
-			model: "ai21.jamba-1-5-large-v1:0",
+			name:        "ai21",
+			hasCounters: true,
+			model:       "ai21.jamba-1-5-large-v1:0",
 			whole: `{"id":"x","choices":[{"index":0,"message":{"role":"assistant","content":"sixty rooms"},` +
 				`"finish_reason":"length"}],"usage":{"prompt_tokens":5,"completion_tokens":3,"total_tokens":8}}`,
 			chunks: []string{
@@ -80,8 +84,9 @@ func nonClaudeFamilies() []familyCase {
 			wantReason: "length",
 		},
 		{
-			name:  "nova",
-			model: "us.amazon.nova-pro-v1:0",
+			name:        "nova",
+			hasCounters: true,
+			model:       "us.amazon.nova-pro-v1:0",
 			whole: `{"output":{"message":{"content":[{"text":"sixty rooms"}],"role":"assistant"}},` +
 				`"stopReason":"max_tokens","usage":{"inputTokens":5,"outputTokens":3,"totalTokens":8}}`,
 			chunks: []string{
@@ -112,6 +117,14 @@ func TestANonClaudeFamilyReportsTruncationAndKeepsItsWholeAnswer(t *testing.T) {
 			assert.Equal(t, tc.wantReason, resp.Choices[0].StopReason)
 			assert.True(t, resp.Choices[0].Truncated,
 				"a stop reason meaning the output limit must set Truncated")
+
+			if tc.hasCounters {
+				for _, key := range []string{"PromptTokens", "CompletionTokens"} {
+					_, ok := resp.Choices[0].GenerationInfo[key].(int)
+					assert.True(t, ok, "%s must be an int, as the Claude doors report it, got %#v",
+						key, resp.Choices[0].GenerationInfo[key])
+				}
+			}
 		})
 
 		t.Run(tc.name+"/streamed answer", func(t *testing.T) {

@@ -136,8 +136,8 @@ func createAmazonCompletion(ctx context.Context,
 				"input_tokens":  output.InputTextTokenCount,
 				"output_tokens": result.TokenCount,
 				// Standardized field names for cross-provider compatibility
-				"PromptTokens":     output.InputTextTokenCount,
-				"CompletionTokens": result.TokenCount,
+				"PromptTokens":     int(output.InputTextTokenCount),
+				"CompletionTokens": int(result.TokenCount),
 				"TotalTokens":      output.InputTextTokenCount + result.TokenCount,
 			},
 		}

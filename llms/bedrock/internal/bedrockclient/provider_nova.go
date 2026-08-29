@@ -229,8 +229,8 @@ func createNovaCompletion(ctx context.Context,
 				"input_tokens":  output.Usage.InputTokens,
 				"output_tokens": output.Usage.OutputTokens,
 				// Standardized field names for cross-provider compatibility
-				"PromptTokens":     output.Usage.InputTokens,
-				"CompletionTokens": output.Usage.OutputTokens,
+				"PromptTokens":     int(output.Usage.InputTokens),
+				"CompletionTokens": int(output.Usage.OutputTokens),
 				"TotalTokens":      output.Usage.InputTokens + output.Usage.OutputTokens,
 			},
 		}
