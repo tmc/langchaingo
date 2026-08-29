@@ -117,7 +117,10 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 
 	result, err := o.client.CreateChat(ctx, req)
 	if err != nil {
-		return nil, err
+		if result == nil || len(result.Choices) == 0 {
+			return nil, err
+		}
+		return o.processResponse(result), err
 	}
 	if len(result.Choices) == 0 {
 		return nil, ErrEmptyResponse

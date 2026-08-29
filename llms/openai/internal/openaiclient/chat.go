@@ -790,9 +790,13 @@ func combineStreamingChatResponse(
 		toolCallNameCache = make(map[string]string) // Cache tool call names by ID for streaming
 	)
 
+	var streamErr error
+
+DoStream:
 	for streamResponse := range responseChan {
 		if streamResponse.Error != nil {
-			return nil, streamResponse.Error
+			streamErr = streamResponse.Error
+			break DoStream
 		}
 
 		updateChatUsage(&response.Usage, streamResponse.Usage)
@@ -829,10 +833,12 @@ func combineStreamingChatResponse(
 
 			reasoning := &reasoning.ContentReasoning{Content: reasoningContent}
 			if err := streaming.CallWithReasoning(ctx, payload.StreamingFunc, reasoning); err != nil {
-				return nil, fmt.Errorf("streaming reasoning func returned an error: %w", err)
+				streamErr = fmt.Errorf("streaming reasoning func returned an error: %w", err)
+				break DoStream
 			}
 			if err := streaming.CallWithText(ctx, payload.StreamingFunc, content); err != nil {
-				return nil, fmt.Errorf("streaming text func returned an error: %w", err)
+				streamErr = fmt.Errorf("streaming text func returned an error: %w", err)
+				break DoStream
 			}
 
 			if choice.Delta.FunctionCall != nil {
@@ -841,7 +847,8 @@ func combineStreamingChatResponse(
 
 				toolCall := streaming.NewToolCall("", functionCall.Name, functionCall.Arguments)
 				if err := streaming.CallWithToolCall(ctx, payload.StreamingFunc, toolCall); err != nil {
-					return nil, fmt.Errorf("streaming tool call func returned an error: %w", err)
+					streamErr = fmt.Errorf("streaming tool call func returned an error: %w", err)
+					break DoStream
 				}
 			}
 
@@ -850,7 +857,8 @@ func combineStreamingChatResponse(
 
 				toolCall := streaming.NewToolCall(toolCall.ID, toolCall.Function.Name, toolCall.Function.Arguments)
 				if err := streaming.CallWithToolCall(ctx, payload.StreamingFunc, toolCall); err != nil {
-					return nil, fmt.Errorf("streaming tool call func returned an error: %w", err)
+					streamErr = fmt.Errorf("streaming tool call func returned an error: %w", err)
+					break DoStream
 				}
 			}
 		}
@@ -862,7 +870,7 @@ func combineStreamingChatResponse(
 
 	removeEmptyToolCalls(&response)
 
-	return &response, nil
+	return &response, streamErr
 }
 
 // streamedText collects one choice's text across deltas.
