@@ -31,10 +31,16 @@ func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOptio
 }
 
 // GenerateContent implements the Model interface.
-func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) { //nolint: lll, cyclop, whitespace
-
+func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (resp *llms.ContentResponse, err error) { //nolint:lll,cyclop,nonamedreturns
 	if o.CallbacksHandler != nil {
 		o.CallbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
+		defer func() {
+			if err != nil {
+				o.CallbacksHandler.HandleLLMError(ctx, err)
+			} else {
+				o.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, resp)
+			}
+		}()
 	}
 
 	model := defaultModel
@@ -59,13 +65,10 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		Seed:              opts.GetSeed(),
 	})
 	if err != nil {
-		if o.CallbacksHandler != nil {
-			o.CallbacksHandler.HandleLLMError(ctx, err)
-		}
 		return nil, err
 	}
 
-	resp := &llms.ContentResponse{
+	resp = &llms.ContentResponse{
 		Choices: []*llms.ContentChoice{
 			{
 				Content:    result.Text,
@@ -74,10 +77,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 			},
 		},
 	}
-	if err := llms.CheckTruncation(resp, *opts); err != nil {
-		if o.CallbacksHandler != nil {
-			o.CallbacksHandler.HandleLLMError(ctx, err)
-		}
+	if err = llms.CheckTruncation(resp, *opts); err != nil {
 		return resp, err
 	}
 	return resp, nil
