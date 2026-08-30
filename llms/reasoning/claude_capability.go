@@ -2,6 +2,7 @@ package reasoning
 
 import (
 	"slices"
+	"strconv"
 	"strings"
 )
 
@@ -39,6 +40,7 @@ var (
 	adaptiveOnlyClaude = []string{
 		"claude-opus-4-7", "claude-opus-4-8", "claude-opus-5",
 		"claude-sonnet-5", "claude-fable-5", "claude-mythos-5",
+		"claude-opus-latest", "claude-sonnet-latest", "claude-fable-latest",
 	}
 	dualClaude = []string{
 		"claude-opus-4-6", "claude-sonnet-4-6", "claude-mythos-preview",
@@ -46,7 +48,7 @@ var (
 	budgetOnlyClaude = []string{
 		"claude-opus-4-5", "claude-opus-4-1", "claude-opus-4-0", "claude-opus-4-2025",
 		"claude-sonnet-4-5", "claude-sonnet-4-0", "claude-sonnet-4-2025",
-		"claude-haiku-4-5",
+		"claude-haiku-4-5", "claude-haiku-latest",
 		"claude-3-7",
 	}
 )
@@ -83,10 +85,14 @@ func ClaudeSupportsThinking(model string) bool {
 // with effort xhigh/max on Opus 5, a constraint this package does not model
 // because this SDK never sends effort alongside a disable request).
 var (
-	alwaysOnClaude  = []string{"claude-fable-5", "claude-mythos-5", "claude-mythos-preview"}
+	alwaysOnClaude = []string{
+		"claude-fable-5", "claude-mythos-5", "claude-mythos-preview",
+		"claude-fable-latest",
+	}
 	defaultOnClaude = []string{
 		"claude-opus-5", "claude-sonnet-5",
 		"claude-fable-5", "claude-mythos-5", "claude-mythos-preview",
+		"claude-opus-latest", "claude-sonnet-latest", "claude-fable-latest",
 	}
 )
 
@@ -297,6 +303,7 @@ func ClaudePredatesAdaptive(model string) bool {
 var rejectsSamplingClaude = []string{
 	"claude-fable-5", "claude-mythos-5", "claude-mythos-preview",
 	"claude-opus-5", "claude-opus-4-8", "claude-opus-4-7", "claude-sonnet-5",
+	"claude-opus-latest", "claude-sonnet-latest", "claude-fable-latest",
 }
 
 // ClaudeRejectsSampling reports whether the model rejects temperature/top_p
@@ -320,7 +327,29 @@ func canonicalClaude(model string) string {
 		}
 		b.WriteByte(m[i])
 	}
-	return b.String()
+	return claudeTierFirst(b.String())
+}
+
+func claudeTierFirst(m string) string {
+	idx := strings.Index(m, "claude-")
+	if idx == -1 {
+		return m
+	}
+	head, rest := m[:idx+len("claude-")], m[idx+len("claude-"):]
+	parts := strings.Split(rest, "-")
+	if len(parts) < 2 || !isClaudeTier(parts[1]) {
+		return m
+	}
+	generation, err := strconv.Atoi(parts[0])
+	if err != nil || generation < 4 {
+		return m
+	}
+	reordered := append([]string{parts[1], parts[0]}, parts[2:]...)
+	return head + strings.Join(reordered, "-")
+}
+
+func isClaudeTier(s string) bool {
+	return s == "opus" || s == "sonnet" || s == "haiku"
 }
 
 func isDigit(c byte) bool { return c >= '0' && c <= '9' }

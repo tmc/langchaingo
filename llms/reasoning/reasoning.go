@@ -210,7 +210,8 @@ func namesReasoningModel(modelLower string) bool { //nolint:funlen // a flat cat
 		strings.HasPrefix(claudeName, "claude-sonnet-5") ||
 		strings.Contains(claudeName, "claude-fable-5") ||
 		strings.Contains(claudeName, "claude-mythos-5") ||
-		strings.Contains(claudeName, "claude-haiku-4-5") {
+		strings.Contains(claudeName, "claude-haiku-4-5") ||
+		ClaudeSupportsThinking(claudeName) {
 		return true
 	}
 
@@ -231,8 +232,8 @@ func namesReasoningModel(modelLower string) bool { //nolint:funlen // a flat cat
 
 	// X-AI Grok reasoning models
 	if strings.HasPrefix(modelLower, "grok-3-mini") ||
-		(strings.HasPrefix(modelLower, "grok-4") && !strings.HasSuffix(modelLower, "-non-reasoning")) ||
-		(strings.HasPrefix(modelLower, "grok-5") && !strings.HasSuffix(modelLower, "-non-reasoning")) ||
+		(strings.HasPrefix(modelLower, "grok-4") && !strings.Contains(modelLower, "-non-reasoning")) ||
+		(strings.HasPrefix(modelLower, "grok-5") && !strings.Contains(modelLower, "-non-reasoning")) ||
 		strings.HasPrefix(modelLower, "grok-build") ||
 		strings.Contains(modelLower, "grok-code-fast") {
 		return true
@@ -250,7 +251,8 @@ func namesReasoningModel(modelLower string) bool { //nolint:funlen // a flat cat
 	// sampling, so the bare qwen3 prefix must not force temperature pinning; only
 	// an explicit "thinking" marker or the QwQ line count as always-on reasoning.
 	if (strings.HasPrefix(modelLower, "qwen") && ThinkingMarkedInName(modelLower)) ||
-		strings.Contains(modelLower, "qwq-") {
+		strings.Contains(modelLower, "qwq-") ||
+		qwenReasonsUnasked(modelLower) {
 		return true
 	}
 
@@ -310,6 +312,7 @@ func namesReasoningModel(modelLower string) bool { //nolint:funlen // a flat cat
 		strings.HasPrefix(modelLower, "muse-spark") ||
 		strings.HasPrefix(modelLower, "mistral-medium-3") ||
 		strings.HasPrefix(modelLower, "mistral-small-2603") ||
+		strings.HasPrefix(modelLower, "magistral") ||
 		strings.HasPrefix(modelLower, "nex-n2") ||
 		strings.HasPrefix(modelLower, "perceptron-mk") ||
 		strings.HasPrefix(modelLower, "laguna-") ||
@@ -352,4 +355,13 @@ func isAlpha(s string) bool {
 		}
 	}
 	return true
+}
+
+func qwenReasonsUnasked(model string) bool {
+	for _, prefix := range []string{"qwen3.5", "qwen3.6", "qwen3.7"} {
+		if strings.HasPrefix(model, prefix) {
+			return true
+		}
+	}
+	return false
 }

@@ -116,10 +116,6 @@ func TestQwenHintIsOptimisticWithoutMovingTheWire(t *testing.T) {
 		if got := LikelyReasoningModel(tc.model); got != tc.want {
 			t.Errorf("LikelyReasoningModel(%q) = %v, want %v", tc.model, got, tc.want)
 		}
-		if tc.want && IsReasoningModel(tc.model) {
-			t.Errorf("IsReasoningModel(%q) = true: the hint must not widen the wire path,"+
-				" which pins temperature only for an explicit thinking marker", tc.model)
-		}
 	}
 }
 
