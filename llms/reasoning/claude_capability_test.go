@@ -252,6 +252,8 @@ func TestClaudePredatesAdaptive(t *testing.T) {
 		{"claude-opus-4-1-20250805", true},
 		{"claude-opus-4-20250514", true},
 		{"us.anthropic.claude-sonnet-4-20250514-v1:0", true},
+		{"claude-3-opus", true},
+		{"claude-4-opus-20250514", true},
 		{"claude-opus-4-5", false},
 		{"claude-sonnet-4-5", false},
 		{"claude-haiku-4-5", false},

@@ -2,6 +2,7 @@ package reasoning
 
 import (
 	"slices"
+	"strconv"
 	"strings"
 )
 
@@ -320,7 +321,29 @@ func canonicalClaude(model string) string {
 		}
 		b.WriteByte(m[i])
 	}
-	return b.String()
+	return claudeTierFirst(b.String())
+}
+
+func claudeTierFirst(m string) string {
+	idx := strings.Index(m, "claude-")
+	if idx == -1 {
+		return m
+	}
+	head, rest := m[:idx+len("claude-")], m[idx+len("claude-"):]
+	parts := strings.Split(rest, "-")
+	if len(parts) < 2 || !isClaudeTier(parts[1]) {
+		return m
+	}
+	generation, err := strconv.Atoi(parts[0])
+	if err != nil || generation < 4 {
+		return m
+	}
+	reordered := append([]string{parts[1], parts[0]}, parts[2:]...)
+	return head + strings.Join(reordered, "-")
+}
+
+func isClaudeTier(s string) bool {
+	return s == "opus" || s == "sonnet" || s == "haiku"
 }
 
 func isDigit(c byte) bool { return c >= '0' && c <= '9' }

@@ -653,6 +653,10 @@ func TestIsReasoningModel(t *testing.T) { //nolint:funlen
 		{"claude-haiku-4.5", true},
 		{"anthropic/claude-opus-4", true},
 		{"anthropic/claude-3.7-sonnet", true},
+		{"claude-4-opus", true},
+		{"claude-4-sonnet", true},
+		{"claude-4-opus-20250514", true},
+		{"anthropic/claude-4-sonnet-20250514", true},
 
 		// DeepSeek reasoning models
 		{"deepseek-r1", true},
