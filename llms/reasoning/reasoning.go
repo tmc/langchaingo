@@ -210,7 +210,8 @@ func namesReasoningModel(modelLower string) bool { //nolint:funlen // a flat cat
 		strings.HasPrefix(claudeName, "claude-sonnet-5") ||
 		strings.Contains(claudeName, "claude-fable-5") ||
 		strings.Contains(claudeName, "claude-mythos-5") ||
-		strings.Contains(claudeName, "claude-haiku-4-5") {
+		strings.Contains(claudeName, "claude-haiku-4-5") ||
+		ClaudeSupportsThinking(claudeName) {
 		return true
 	}
 

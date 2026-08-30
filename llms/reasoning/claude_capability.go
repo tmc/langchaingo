@@ -40,6 +40,7 @@ var (
 	adaptiveOnlyClaude = []string{
 		"claude-opus-4-7", "claude-opus-4-8", "claude-opus-5",
 		"claude-sonnet-5", "claude-fable-5", "claude-mythos-5",
+		"claude-opus-latest", "claude-sonnet-latest", "claude-fable-latest",
 	}
 	dualClaude = []string{
 		"claude-opus-4-6", "claude-sonnet-4-6", "claude-mythos-preview",
@@ -47,7 +48,7 @@ var (
 	budgetOnlyClaude = []string{
 		"claude-opus-4-5", "claude-opus-4-1", "claude-opus-4-0", "claude-opus-4-2025",
 		"claude-sonnet-4-5", "claude-sonnet-4-0", "claude-sonnet-4-2025",
-		"claude-haiku-4-5",
+		"claude-haiku-4-5", "claude-haiku-latest",
 		"claude-3-7",
 	}
 )
@@ -84,10 +85,14 @@ func ClaudeSupportsThinking(model string) bool {
 // with effort xhigh/max on Opus 5, a constraint this package does not model
 // because this SDK never sends effort alongside a disable request).
 var (
-	alwaysOnClaude  = []string{"claude-fable-5", "claude-mythos-5", "claude-mythos-preview"}
+	alwaysOnClaude = []string{
+		"claude-fable-5", "claude-mythos-5", "claude-mythos-preview",
+		"claude-fable-latest",
+	}
 	defaultOnClaude = []string{
 		"claude-opus-5", "claude-sonnet-5",
 		"claude-fable-5", "claude-mythos-5", "claude-mythos-preview",
+		"claude-opus-latest", "claude-sonnet-latest", "claude-fable-latest",
 	}
 )
 
@@ -298,6 +303,7 @@ func ClaudePredatesAdaptive(model string) bool {
 var rejectsSamplingClaude = []string{
 	"claude-fable-5", "claude-mythos-5", "claude-mythos-preview",
 	"claude-opus-5", "claude-opus-4-8", "claude-opus-4-7", "claude-sonnet-5",
+	"claude-opus-latest", "claude-sonnet-latest", "claude-fable-latest",
 }
 
 // ClaudeRejectsSampling reports whether the model rejects temperature/top_p

@@ -1321,3 +1321,29 @@ func TestBudgetThinkingDoesNotPinTemperatureOnAModelThatRejectsIt(t *testing.T) 
 		require.InDelta(t, 1.0, payload["temperature"], 0.0001)
 	})
 }
+
+func TestUnversionedAliasRunsItsTiersMechanism(t *testing.T) {
+	t.Parallel()
+
+	t.Run("an adaptive tier alias runs adaptive thinking", func(t *testing.T) {
+		t.Parallel()
+		payload, _ := captureMessagesRequestModel(t, "claude-opus-latest",
+			llms.WithReasoning(llms.ReasoningHigh, 0), llms.WithTemperature(0.3))
+
+		thinking, ok := payload["thinking"].(map[string]any)
+		require.True(t, ok, "thinking must reach the wire, got %v", payload)
+		require.Equal(t, "adaptive", thinking["type"])
+		require.NotContains(t, payload, "temperature",
+			"an adaptive-only model must not be sent temperature, got %v", payload)
+	})
+
+	t.Run("a budget tier alias keeps budget thinking", func(t *testing.T) {
+		t.Parallel()
+		payload, _ := captureMessagesRequestModel(t, "claude-haiku-latest",
+			llms.WithReasoning(llms.ReasoningHigh, 2048))
+
+		thinking, ok := payload["thinking"].(map[string]any)
+		require.True(t, ok, "thinking must reach the wire, got %v", payload)
+		require.Equal(t, "enabled", thinking["type"])
+	})
+}
