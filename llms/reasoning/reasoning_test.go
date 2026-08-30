@@ -777,9 +777,9 @@ func TestIsReasoningModel(t *testing.T) { //nolint:funlen
 		// and sampling is configurable, so temperature must not be pinned for them.
 		{"qwen3-14b", false},
 		{"qwen3-235b-a22b", false},
-		{"qwen3.5-9b", false},
-		{"qwen3.6-flash", false},
-		{"qwen3.7-max", false},
+		{"qwen3.5-9b", true},
+		{"qwen3.6-flash", true},
+		{"qwen3.7-max", true},
 		{"qwen/qwen3-32b", false},
 		{"kimi-k3", true},
 		{"moonshotai/kimi-k3", true},

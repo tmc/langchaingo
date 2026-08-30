@@ -34,9 +34,27 @@ func hasFamily(model, family string) bool {
 // family: Gemini 2.5, Gemini 3.x, or Gemma 4.
 func GeminiSupportsThinking(model string) bool {
 	m := baseModelName(model)
+	if geminiNonChatSurface(m) {
+		return false
+	}
 	return hasFamily(m, "gemini-2.5") ||
 		hasFamily(m, "gemini-3") ||
-		hasFamily(m, "gemma-4")
+		hasFamily(m, "gemma-4") ||
+		geminiUnversionedThinking(m)
+}
+
+func geminiNonChatSurface(model string) bool {
+	return strings.HasSuffix(model, "-tts") ||
+		strings.Contains(model, "-live-translate")
+}
+
+func geminiUnversionedThinking(model string) bool {
+	for _, prefix := range []string{"gemini-flash-latest", "gemini-flash-lite-latest", "gemini-robotics-er"} {
+		if strings.HasPrefix(model, prefix) {
+			return true
+		}
+	}
+	return false
 }
 
 // GeminiUsesThinkingLevel reports whether the model uses the qualitative
