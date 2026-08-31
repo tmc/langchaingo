@@ -142,7 +142,13 @@ func mandatoryThinking(model string) bool {
 			form == "glm-latest" ||
 			strings.HasPrefix(form, "kimi-k2-thinking") ||
 			strings.HasPrefix(form, "kimi-k2.7-code") ||
-			strings.HasPrefix(form, "gpt-oss") {
+			strings.HasPrefix(form, "gpt-oss") ||
+			strings.HasPrefix(form, "aion-") ||
+			strings.HasPrefix(form, "step-3") ||
+			strings.HasPrefix(form, "reka-flash-3") ||
+			strings.HasPrefix(form, "fugu-ultra") ||
+			strings.HasPrefix(form, "nex-n2") ||
+			strings.Contains(form, "trinity-large-thinking") {
 			return true
 		}
 	}

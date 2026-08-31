@@ -380,3 +380,22 @@ func TestOllamaTagSpellingResolvesLikeTheHyphenOne(t *testing.T) {
 		}
 	}
 }
+
+func TestFamiliesThatRefuseAnExplicitOff(t *testing.T) {
+	t.Parallel()
+
+	for _, model := range []string{
+		"aion-2.0", "aion-3.0", "aion-3.0-mini",
+		"step-3.5-flash", "step-3.7-flash",
+		"reka-flash-3", "fugu-ultra", "nex-n2-mini", "nex-n2-pro",
+		"arcee-ai/trinity-large-thinking",
+	} {
+		if got := ResolveOff(model, ProviderOpenAI); got != OffUnsupported {
+			t.Errorf("ResolveOff(%q) = %v, want OffUnsupported: the door refuses or ignores an explicit off", model, got)
+		}
+	}
+
+	if IsReasoningModel("aion-rp-llama-3.1-8b") {
+		t.Error("aion-rp is not a reasoning model and must stay out of the mandatory set")
+	}
+}
