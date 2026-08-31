@@ -126,7 +126,8 @@ func mandatoryThinking(model string) bool {
 		if strings.HasPrefix(form, "glm-5.3") ||
 			strings.HasPrefix(form, "grok-4.5") ||
 			strings.HasPrefix(form, "grok-4.6") ||
-			strings.HasPrefix(form, "minimax-m2") {
+			strings.HasPrefix(form, "minimax-m2") ||
+			form == "glm-latest" {
 			return true
 		}
 	}
