@@ -1263,3 +1263,34 @@ func TestProductionGeminiModels_ThinkingConfig(t *testing.T) {
 		})
 	}
 }
+
+func TestGenerationConfigCarriesSeedAndPenalties(t *testing.T) {
+	t.Parallel()
+
+	seed := 42
+	freq := 0.7
+	pres := -0.3
+	cfg := newGenerationConfig(llms.CallOptions{
+		Seed:             &seed,
+		FrequencyPenalty: &freq,
+		PresencePenalty:  &pres,
+	})
+
+	require.NotNil(t, cfg.Seed, "seed is a GenerationConfig field and must not be dropped")
+	assert.Equal(t, int32(42), *cfg.Seed)
+	require.NotNil(t, cfg.FrequencyPenalty)
+	assert.InDelta(t, 0.7, *cfg.FrequencyPenalty, 1e-6)
+	require.NotNil(t, cfg.PresencePenalty)
+	assert.InDelta(t, -0.3, *cfg.PresencePenalty, 1e-6)
+}
+
+func TestGenerationConfigLeavesUnsetSamplingAlone(t *testing.T) {
+	t.Parallel()
+
+	cfg := newGenerationConfig(llms.CallOptions{})
+
+	assert.Nil(t, cfg.Seed)
+	assert.Nil(t, cfg.FrequencyPenalty)
+	assert.Nil(t, cfg.PresencePenalty)
+	assert.Nil(t, cfg.Temperature)
+}
