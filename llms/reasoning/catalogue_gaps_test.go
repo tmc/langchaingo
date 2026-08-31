@@ -295,6 +295,8 @@ func TestNonChatNvidiaSurfacesAreNotReasoningModels(t *testing.T) {
 	t.Parallel()
 
 	for _, model := range []string{
+		"XiaomiMiMo/MiMo-V2.5-tts", "XiaomiMiMo/MiMo-V2.5-tts-voiceclone",
+		"XiaomiMiMo/MiMo-V2.5-tts-voicedesign",
 		"nvidia/Nemotron-3-Embed-8B", "nvidia/Nemotron-3-Embed-1B-BF16",
 		"nvidia/llama-nemotron-embed-vl-1b-v2", "nvidia/llama-nemotron-rerank-vl-1b-v2",
 		"nvidia/Nemotron-3.5-ASR-Streaming-Multilingual-0.6b",
@@ -306,6 +308,7 @@ func TestNonChatNvidiaSurfacesAreNotReasoningModels(t *testing.T) {
 	}
 
 	for _, model := range []string{
+		"XiaomiMiMo/MiMo-V2.5",
 		"nvidia/NVIDIA-Nemotron-Nano-9B-v2", "nvidia/nemotron-3-super-120b-a12b",
 		"nvidia/Nemotron-3-Nano-Omni-30B-A3B-Reasoning", "nvidia.nemotron-nano-9b-v2",
 	} {

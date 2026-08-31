@@ -322,7 +322,7 @@ func namesReasoningModel(modelLower string) bool { //nolint:funlen // a flat cat
 		strings.Contains(modelLower, "step3") ||
 		strings.Contains(modelLower, "hunyuan-a13b") ||
 		strings.Contains(modelLower, "chimera") ||
-		strings.Contains(modelLower, "mimo-v2") ||
+		(strings.Contains(modelLower, "mimo-v2") && !strings.Contains(modelLower, "-tts")) ||
 		strings.Contains(modelLower, "tongyi-deepresearch") {
 		return true
 	}
