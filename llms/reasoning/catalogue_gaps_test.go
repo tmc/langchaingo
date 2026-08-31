@@ -154,3 +154,26 @@ func TestMandatoryThinkingCannotBeDisabled(t *testing.T) {
 		}
 	}
 }
+
+func TestGoogleSurfacesThatRefuseThinkingStayOut(t *testing.T) {
+	t.Parallel()
+
+	for _, model := range []string{
+		"gemini-2.5-flash-preview-tts",
+		"gemini-2.5-pro-preview-tts",
+		"gemini-3.1-flash-tts-preview",
+		"gemini-3.5-transcribe",
+		"gemini-3.5-transcribe-live",
+	} {
+		if GeminiSupportsThinking(model) {
+			t.Errorf("GeminiSupportsThinking(%q) = true, but the vendor answers "+
+				"\"Thinking level is not supported for this model\"", model)
+		}
+	}
+
+	for _, model := range []string{"gemini-2.5-flash", "gemini-3.5-flash", "gemini-2.5-pro"} {
+		if !GeminiSupportsThinking(model) {
+			t.Errorf("GeminiSupportsThinking(%q) = false, want true", model)
+		}
+	}
+}

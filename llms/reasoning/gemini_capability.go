@@ -44,9 +44,10 @@ func GeminiSupportsThinking(model string) bool {
 }
 
 func geminiNonChatSurface(model string) bool {
-	return strings.HasSuffix(model, "-tts") ||
+	return strings.Contains(model, "-tts") ||
 		strings.Contains(model, "-live-translate") ||
-		strings.Contains(model, "-image")
+		strings.Contains(model, "-image") ||
+		strings.Contains(model, "transcribe")
 }
 
 func geminiUnversionedThinking(model string) bool {
