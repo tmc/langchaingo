@@ -177,3 +177,24 @@ func TestGoogleSurfacesThatRefuseThinkingStayOut(t *testing.T) {
 		}
 	}
 }
+
+func TestDeepSeekV31ReasonsOnlyWhenAsked(t *testing.T) {
+	t.Parallel()
+
+	for _, model := range []string{
+		"deepseek-v3.1", "deepseek-chat-v3.1", "deepseek-v3.1-terminus",
+	} {
+		if !IsReasoningModel(model) {
+			t.Errorf("IsReasoningModel(%q) = false, but an effort returns reasoning", model)
+		}
+		if !ThinkingOptIn(model) {
+			t.Errorf("ThinkingOptIn(%q) = false, but a bare call returns none", model)
+		}
+	}
+
+	for _, model := range []string{"deepseek-v3", "deepseek-v3-0324", "deepseek-chat-v3-0324"} {
+		if IsReasoningModel(model) {
+			t.Errorf("IsReasoningModel(%q) = true, but it answers zero both ways", model)
+		}
+	}
+}
