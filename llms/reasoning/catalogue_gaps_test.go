@@ -295,6 +295,8 @@ func TestNonChatNvidiaSurfacesAreNotReasoningModels(t *testing.T) {
 	t.Parallel()
 
 	for _, model := range []string{
+		"XiaomiMiMo/MiMo-V2.5-tts", "XiaomiMiMo/MiMo-V2.5-tts-voiceclone",
+		"XiaomiMiMo/MiMo-V2.5-tts-voicedesign",
 		"nvidia/Nemotron-3-Embed-8B", "nvidia/Nemotron-3-Embed-1B-BF16",
 		"nvidia/llama-nemotron-embed-vl-1b-v2", "nvidia/llama-nemotron-rerank-vl-1b-v2",
 		"nvidia/Nemotron-3.5-ASR-Streaming-Multilingual-0.6b",
@@ -306,6 +308,7 @@ func TestNonChatNvidiaSurfacesAreNotReasoningModels(t *testing.T) {
 	}
 
 	for _, model := range []string{
+		"XiaomiMiMo/MiMo-V2.5",
 		"nvidia/NVIDIA-Nemotron-Nano-9B-v2", "nvidia/nemotron-3-super-120b-a12b",
 		"nvidia/Nemotron-3-Nano-Omni-30B-A3B-Reasoning", "nvidia.nemotron-nano-9b-v2",
 	} {
@@ -375,5 +378,48 @@ func TestOllamaTagSpellingResolvesLikeTheHyphenOne(t *testing.T) {
 		if got := ResolveOff(model, ProviderOpenAI); got != OffUnsupported {
 			t.Errorf("ResolveOff(%q) = %v, want OffUnsupported like the hyphen spelling", model, got)
 		}
+	}
+}
+
+func TestFamiliesThatRefuseAnExplicitOff(t *testing.T) {
+	t.Parallel()
+
+	for _, model := range []string{
+		"aion-2.0", "aion-3.0", "aion-3.0-mini",
+		"step-3.5-flash", "step-3.7-flash",
+		"reka-flash-3", "fugu-ultra", "nex-n2-mini", "nex-n2-pro",
+		"arcee-ai/trinity-large-thinking",
+	} {
+		if got := ResolveOff(model, ProviderOpenAI); got != OffUnsupported {
+			t.Errorf("ResolveOff(%q) = %v, want OffUnsupported: the door refuses or ignores an explicit off", model, got)
+		}
+	}
+
+	if IsReasoningModel("aion-rp-llama-3.1-8b") {
+		t.Error("aion-rp is not a reasoning model and must stay out of the mandatory set")
+	}
+}
+
+func TestFamiliesMeasuredAgainstTheirBareCall(t *testing.T) {
+	t.Parallel()
+
+	for _, model := range []string{"lfm-2.5-2.6b", "liquid/lfm-2.5-2.6b:free", "seed-2-1-turbo", "bytedance-seed/seed-2-1-turbo"} {
+		if !IsReasoningModel(model) {
+			t.Errorf("IsReasoningModel(%q) = false, but a bare call already returns a reasoning block", model)
+		}
+		if ThinkingOptIn(model) {
+			t.Errorf("ThinkingOptIn(%q) = true, but the model reasons without being asked", model)
+		}
+	}
+
+	if got := ResolveOff("lfm-2.5-2.6b", ProviderOpenAI); got != OffUnsupported {
+		t.Errorf("ResolveOff(lfm-2.5) = %v, want OffUnsupported: the door answers 400 on an explicit off", got)
+	}
+	if got := ResolveOff("seed-2-1-turbo", ProviderOpenAI); got != OffEffortNone {
+		t.Errorf("ResolveOff(seed-2-1-turbo) = %v, want OffEffortNone: the off returns no reasoning", got)
+	}
+
+	if !ThinkingOptIn("ernie-4.5-vl-424b-a47b") {
+		t.Error("ThinkingOptIn(ernie-4.5) = false, but a bare call returns no reasoning and an effort turns it on")
 	}
 }
