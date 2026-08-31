@@ -267,6 +267,8 @@ type CallOptions struct {
 	FrequencyPenalty *float64 `json:"frequency_penalty,omitempty"`
 	// PresencePenalty is the presence penalty for sampling.
 	PresencePenalty *float64 `json:"presence_penalty,omitempty"`
+	// Verbosity asks the model for a shorter or longer answer.
+	Verbosity *string `json:"verbosity,omitempty"`
 
 	// Reasoning is the configuration for thinking of the model.
 	Reasoning *ReasoningConfig `json:"reasoning,omitempty"`
@@ -645,6 +647,13 @@ func WithOptions(options CallOptions) CallOption {
 func WithStreamingFunc(streamingFunc streaming.Callback) CallOption {
 	return func(o *CallOptions) {
 		o.StreamingFunc = streamingFunc
+	}
+}
+
+// WithVerbosity will add an option to ask for a shorter or longer answer.
+func WithVerbosity(verbosity string) CallOption {
+	return func(o *CallOptions) {
+		o.Verbosity = &verbosity
 	}
 }
 

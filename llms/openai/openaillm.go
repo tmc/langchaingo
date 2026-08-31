@@ -268,6 +268,7 @@ func (o *LLM) createChatRequest(chatMsgs []*ChatMessage, opts llms.CallOptions) 
 		FrequencyPenalty:     opts.FrequencyPenalty,
 		PresencePenalty:      opts.PresencePenalty,
 		RepetitionPenalty:    opts.RepetitionPenalty,
+		Verbosity:            opts.Verbosity,
 		ToolChoice:           openaiToolChoice(opts.ToolChoice),
 		FunctionCallBehavior: openaiclient.FunctionCallBehavior(opts.FunctionCallBehavior),
 		Seed:                 opts.Seed,
