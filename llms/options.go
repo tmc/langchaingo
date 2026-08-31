@@ -272,6 +272,10 @@ type CallOptions struct {
 	// InferenceSpeed picks the inference configuration. Not to be confused with
 	// Speed above, which is the voice rate of speech synthesis.
 	InferenceSpeed *string `json:"inference_speed,omitempty"`
+	// LogProbs asks for the log probability of each returned token.
+	LogProbs *bool `json:"logprobs,omitempty"`
+	// TopLogProbs is how many alternatives to report per position.
+	TopLogProbs *int `json:"top_logprobs,omitempty"`
 
 	// Reasoning is the configuration for thinking of the model.
 	Reasoning *ReasoningConfig `json:"reasoning,omitempty"`
@@ -650,6 +654,20 @@ func WithOptions(options CallOptions) CallOption {
 func WithStreamingFunc(streamingFunc streaming.Callback) CallOption {
 	return func(o *CallOptions) {
 		o.StreamingFunc = streamingFunc
+	}
+}
+
+// WithLogProbs will add an option to return the log probability of each token.
+func WithLogProbs(logProbs bool) CallOption {
+	return func(o *CallOptions) {
+		o.LogProbs = &logProbs
+	}
+}
+
+// WithTopLogProbs will add an option to report alternatives per position.
+func WithTopLogProbs(topLogProbs int) CallOption {
+	return func(o *CallOptions) {
+		o.TopLogProbs = &topLogProbs
 	}
 }
 

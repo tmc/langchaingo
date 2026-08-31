@@ -121,3 +121,44 @@ func TestStopStillTravelsToTheDoorsThatRefuseIt(t *testing.T) {
 		t.Fatalf("stop bounds the answer, so it is left to fail loudly rather than dropped, got body: %v", body)
 	}
 }
+
+func TestLogProbsReachTheWireAndYieldToThinking(t *testing.T) {
+	t.Parallel()
+
+	t.Run("asked", func(t *testing.T) {
+		t.Parallel()
+
+		body := captureDeepSeekRequest(t, "gpt-4.1", llms.WithLogProbs(true), llms.WithTopLogProbs(3))
+		if body["logprobs"] != true {
+			t.Errorf("logprobs must reach the wire, got body: %v", body)
+		}
+		if body["top_logprobs"] != float64(3) {
+			t.Errorf("top_logprobs must reach the wire, got body: %v", body)
+		}
+	})
+
+	t.Run("not asked", func(t *testing.T) {
+		t.Parallel()
+
+		body := captureDeepSeekRequest(t, "gpt-4.1")
+		if _, ok := body["logprobs"]; ok {
+			t.Errorf("an unset logprobs must stay off the wire, got body: %v", body)
+		}
+		if _, ok := body["top_logprobs"]; ok {
+			t.Errorf("an unset top_logprobs must stay off the wire, got body: %v", body)
+		}
+	})
+
+	t.Run("a thinking generation drops them like the sampling params", func(t *testing.T) {
+		t.Parallel()
+
+		body := captureDeepSeekRequest(t, "gpt-5.4",
+			llms.WithLogProbs(true), llms.WithTopLogProbs(3), llms.WithReasoning(llms.ReasoningHigh, 0))
+		if _, ok := body["logprobs"]; ok {
+			t.Errorf("gpt-5.4 takes logprobs only at the none effort, got body: %v", body)
+		}
+		if _, ok := body["top_logprobs"]; ok {
+			t.Errorf("gpt-5.4 takes top_logprobs only at the none effort, got body: %v", body)
+		}
+	})
+}
