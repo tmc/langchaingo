@@ -220,7 +220,7 @@ func namesReasoningModel(modelLower string) bool { //nolint:funlen // a flat cat
 	if strings.Contains(modelLower, "deepseek-r1") ||
 		strings.Contains(modelLower, "deepseek-reasoner") ||
 		strings.Contains(modelLower, "deepseek-chat-v3.") ||
-		strings.Contains(modelLower, "deepseek-v3.1-terminus") ||
+		strings.Contains(modelLower, "deepseek-v3.1") ||
 		strings.HasPrefix(modelLower, "deepseek-v3.2") ||
 		strings.HasPrefix(modelLower, "deepseek-v4") {
 		return true
@@ -341,7 +341,7 @@ func ThinkingOptIn(model string) bool {
 		return true
 	}
 	for _, form := range modelSpellings(model) {
-		for _, prefix := range []string{"mistral-medium-3", "mistral-small-2603", "solar-pro-3", "solar-pro4", "deepseek-v3.2"} {
+		for _, prefix := range []string{"mistral-medium-3", "mistral-small-2603", "solar-pro-3", "solar-pro4", "deepseek-v3.1", "deepseek-chat-v3.1", "deepseek-v3.2"} {
 			if strings.HasPrefix(form, prefix) {
 				return true
 			}
