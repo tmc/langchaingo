@@ -1,13 +1,13 @@
 httprr trace v1
-375 1629
+364 1629
 POST https://api.x.ai/v1/chat/completions HTTP/1.1
 Host: api.x.ai
 User-Agent: langchaingo-httprr
-Content-Length: 185
+Content-Length: 174
 Authorization: Bearer test-api-key
 Content-Type: application/json
 
-{"model":"grok-4.5","messages":[{"role":"user","content":"What is the factorial of 5? Show your work. Think before you answer."}],"max_completion_tokens":8192,"reasoning_effort":"high"}HTTP/2.0 200 OK
+{"model":"grok-4.5","messages":[{"role":"user","content":"What is the factorial of 5? Show your work. Think before you answer."}],"max_tokens":8192,"reasoning_effort":"high"}HTTP/2.0 200 OK
 Content-Length: 784
 Access-Control-Allow-Origin: *
 Access-Control-Expose-Headers: *

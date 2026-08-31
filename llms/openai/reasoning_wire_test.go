@@ -242,3 +242,55 @@ func TestVerbosityReachesTheWireOnlyWhenAsked(t *testing.T) {
 		}
 	})
 }
+
+func TestTheOutputLimitPicksTheFieldTheRouteUnderstands(t *testing.T) {
+	t.Parallel()
+
+	capture := func(t *testing.T, model string, opts ...llms.CallOption) string {
+		t.Helper()
+
+		var body string
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			raw, _ := io.ReadAll(r.Body)
+			body = string(raw)
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`{"id":"x","object":"chat.completion","created":1,"model":"m",` +
+				`"choices":[{"index":0,"message":{"role":"assistant","content":"ok"},"finish_reason":"stop"}],` +
+				`"usage":{"prompt_tokens":1,"completion_tokens":1,"total_tokens":2}}`))
+		}))
+		t.Cleanup(srv.Close)
+
+		llm, err := New(WithBaseURL(srv.URL), WithToken("test"), WithModel(model))
+		if err != nil {
+			t.Fatalf("New() error: %v", err)
+		}
+		all := append([]llms.CallOption{llms.WithMaxTokens(800)}, opts...)
+		if _, err := llm.GenerateContent(context.Background(),
+			[]llms.MessageContent{llms.TextParts(llms.ChatMessageTypeHuman, "hi")}, all...); err != nil {
+			t.Fatalf("GenerateContent() error: %v", err)
+		}
+		return body
+	}
+
+	for _, model := range []string{"grok-4-1-fast", "qwen3.5-35b-a3b", "dashscope/qwen3.7-plus", "qwq-32b"} {
+		body := capture(t, model)
+		if !strings.Contains(body, `"max_tokens":800`) {
+			t.Errorf("%s must receive max_tokens, got body: %s", model, body)
+		}
+		if strings.Contains(body, "max_completion_tokens") {
+			t.Errorf("%s must not receive max_completion_tokens, got body: %s", model, body)
+		}
+	}
+
+	for _, model := range []string{"gpt-5.4", "gpt-4.1", "o3", "claude-sonnet-4-5", "deepseek-v4-pro"} {
+		body := capture(t, model)
+		if !strings.Contains(body, `"max_completion_tokens":800`) {
+			t.Errorf("%s must keep max_completion_tokens, got body: %s", model, body)
+		}
+	}
+
+	body := capture(t, "gpt-5.4", WithLegacyMaxTokensField())
+	if !strings.Contains(body, `"max_tokens":800`) {
+		t.Errorf("the explicit option must still win, got body: %s", body)
+	}
+}
