@@ -90,3 +90,17 @@ func TestQwenCoderKeepsTheBareCallUntouched(t *testing.T) {
 		t.Fatalf("the coder line is not a hybrid, got enable_thinking=%v", got)
 	}
 }
+
+func TestQwenHybridHonoursDisabledThinkingOnAStream(t *testing.T) {
+	t.Parallel()
+
+	body, err := captureQwenRequest(t, "dashscope/qwen3-8b",
+		llms.WithStreamingFunc(func(context.Context, streaming.Chunk) error { return nil }),
+		llms.WithReasoningDisabled())
+	if err != nil {
+		t.Fatalf("generate: %v", err)
+	}
+	if got, ok := body["enable_thinking"]; !ok || got != false {
+		t.Fatalf("an explicit disable must reach the wire, got %v (present=%v)", got, ok)
+	}
+}
