@@ -96,6 +96,7 @@ type messagePayload struct {
 	Temperature *float64      `json:"temperature,omitempty"`
 	TopP        *float64      `json:"top_p,omitempty"`
 	TopK        *int          `json:"top_k,omitempty"`
+	Speed       *string       `json:"speed,omitempty"`
 	Tools       []Tool        `json:"tools,omitempty"`
 	ToolChoice  any           `json:"tool_choice,omitempty"`
 
@@ -252,6 +253,7 @@ type MessageResponsePayload struct {
 			ThinkingTokens int `json:"thinking_tokens,omitempty"`
 		} `json:"output_tokens_details,omitempty"`
 		ServiceTier string `json:"service_tier,omitempty"`
+		Speed       string `json:"speed,omitempty"`
 	} `json:"usage"`
 }
 

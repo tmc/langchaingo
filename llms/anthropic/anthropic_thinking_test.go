@@ -1389,3 +1389,56 @@ func TestTopKReachesTheWireAndYieldsToThinking(t *testing.T) {
 		}
 	})
 }
+
+func TestFastModeTravelsWithItsBetaHeader(t *testing.T) {
+	t.Parallel()
+
+	t.Run("asked", func(t *testing.T) {
+		t.Parallel()
+
+		body, header := captureMessagesRequestModel(t, "claude-opus-5", llms.WithInferenceSpeed("fast"))
+		if body["speed"] != "fast" {
+			t.Fatalf("the speed field must reach the wire, got body: %v", body)
+		}
+		if !strings.Contains(header.Get("Anthropic-Beta"), "fast-mode-2026-02-01") {
+			t.Fatalf("the beta header must ride along, got: %q", header.Get("Anthropic-Beta"))
+		}
+	})
+
+	t.Run("not asked", func(t *testing.T) {
+		t.Parallel()
+
+		body, header := captureMessagesRequestModel(t, "claude-opus-5")
+		if _, ok := body["speed"]; ok {
+			t.Fatalf("an unset speed must stay off the wire, got body: %v", body)
+		}
+		if strings.Contains(header.Get("Anthropic-Beta"), "fast-mode") {
+			t.Fatalf("the beta header must stay off too, got: %q", header.Get("Anthropic-Beta"))
+		}
+	})
+}
+
+func TestTheServedSpeedReachesTheCaller(t *testing.T) {
+	t.Parallel()
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"id":"msg_test","type":"message","role":"assistant",` +
+			`"model":"claude-opus-5","content":[{"type":"text","text":"ok"}],"stop_reason":"end_turn",` +
+			`"usage":{"input_tokens":1,"output_tokens":1,"speed":"standard"}}`))
+	}))
+	t.Cleanup(srv.Close)
+
+	llm, err := anthropic.New(anthropic.WithToken("test-key"), anthropic.WithBaseURL(srv.URL),
+		anthropic.WithModel("claude-opus-4-6"))
+	require.NoError(t, err)
+
+	resp, err := llm.GenerateContent(context.Background(),
+		[]llms.MessageContent{{Role: llms.ChatMessageTypeHuman, Parts: []llms.ContentPart{llms.TextPart("hi")}}},
+		llms.WithInferenceSpeed("fast"))
+	require.NoError(t, err)
+	require.Len(t, resp.Choices, 1)
+
+	assert.Equal(t, "standard", resp.Choices[0].GenerationInfo["InferenceSpeed"],
+		"a model that quietly serves the standard speed must be visible to the caller")
+}

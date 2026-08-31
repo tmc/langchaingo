@@ -269,6 +269,9 @@ type CallOptions struct {
 	PresencePenalty *float64 `json:"presence_penalty,omitempty"`
 	// Verbosity asks the model for a shorter or longer answer.
 	Verbosity *string `json:"verbosity,omitempty"`
+	// InferenceSpeed picks the inference configuration. Not to be confused with
+	// Speed above, which is the voice rate of speech synthesis.
+	InferenceSpeed *string `json:"inference_speed,omitempty"`
 
 	// Reasoning is the configuration for thinking of the model.
 	Reasoning *ReasoningConfig `json:"reasoning,omitempty"`
@@ -647,6 +650,13 @@ func WithOptions(options CallOptions) CallOption {
 func WithStreamingFunc(streamingFunc streaming.Callback) CallOption {
 	return func(o *CallOptions) {
 		o.StreamingFunc = streamingFunc
+	}
+}
+
+// WithInferenceSpeed will add an option to pick the inference configuration.
+func WithInferenceSpeed(speed string) CallOption {
+	return func(o *CallOptions) {
+		o.InferenceSpeed = &speed
 	}
 }
 
