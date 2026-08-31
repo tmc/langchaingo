@@ -87,3 +87,28 @@ func TestChatVariantsKeepTheTemperatureTheCallerSet(t *testing.T) {
 		}
 	}
 }
+
+func TestPenaltiesStayOffTheDoorsThatRefuseThem(t *testing.T) {
+	t.Parallel()
+
+	for _, model := range []string{
+		"grok-4.6", "grok-4-1-fast", "grok-4-1-fast-non-reasoning", "grok-3-mini-beta", "xai/grok-4.6",
+	} {
+		body := captureDeepSeekRequest(t, model,
+			llms.WithFrequencyPenalty(0.5), llms.WithPresencePenalty(0.5))
+		if _, ok := body["frequency_penalty"]; ok {
+			t.Errorf("%s answers that it does not support the parameter, got body: %v", model, body)
+		}
+		if _, ok := body["presence_penalty"]; ok {
+			t.Errorf("%s answers that it does not support the parameter, got body: %v", model, body)
+		}
+	}
+
+	for _, model := range []string{"gpt-5.4", "deepseek-v4-pro", "glm-5.2", "mistral-medium-latest"} {
+		body := captureDeepSeekRequest(t, model,
+			llms.WithFrequencyPenalty(0.5), llms.WithPresencePenalty(0.5))
+		if body["frequency_penalty"] != 0.5 || body["presence_penalty"] != 0.5 {
+			t.Errorf("%s takes both penalties and must keep receiving them, got body: %v", model, body)
+		}
+	}
+}

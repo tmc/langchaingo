@@ -1239,16 +1239,3 @@ func TestXAI_ImplicitCaching_Conversation_WithTools(t *testing.T) { //nolint:fun
 // rejects presence_penalty when used together with reasoning, as documented
 // by xAI: "presencePenalty, frequencyPenalty, and stop cannot be used with
 // reasoning models. Requests that include them return an error."
-func TestXAI_ReasoningModel_RejectsPenalties(t *testing.T) {
-	t.Parallel()
-
-	llm := newTestXAIClient(t, WithModel("grok-4.5"))
-
-	msgs := []llms.MessageContent{
-		{Role: llms.ChatMessageTypeHuman, Parts: []llms.ContentPart{llms.TextPart("Say hi")}},
-	}
-
-	_, err := llm.GenerateContent(t.Context(), msgs, llms.WithMaxTokens(256), llms.WithPresencePenalty(0.5))
-	require.ErrorContains(t, err, "presencePenalty",
-		"xAI must reject presence_penalty combined with a reasoning model")
-}

@@ -277,6 +277,11 @@ func (o *LLM) createChatRequest(chatMsgs []*ChatMessage, opts llms.CallOptions) 
 		ExtraBody:            getExtraBody(&opts),
 	}
 
+	if reasoning.RejectsPenalties(o.effectiveModel(opts)) {
+		req.FrequencyPenalty = nil
+		req.PresencePenalty = nil
+	}
+
 	if isLegacyMaxTokensField(&opts) || reasoning.UsesLegacyMaxTokens(o.effectiveModel(opts)) {
 		req.MaxTokens = opts.MaxTokens
 	} else {
