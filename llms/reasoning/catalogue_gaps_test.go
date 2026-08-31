@@ -83,3 +83,34 @@ func TestQwenTakesNoEffortOnTheWire(t *testing.T) {
 		}
 	}
 }
+
+func TestMeasuredModelsSplitByWhenTheyReason(t *testing.T) {
+	t.Parallel()
+
+	alwaysOn := []string{
+		"gpt-latest", "grok-latest", "glm-latest", "kimi-latest",
+		"hy4-preview", "qwen3.8-flash", "qwen3.8-max",
+		"ling-3.0-flash", "longcat-2.0",
+	}
+	for _, model := range alwaysOn {
+		if !IsReasoningModel(model) {
+			t.Errorf("IsReasoningModel(%q) = false, want true", model)
+		}
+		if ThinkingOptIn(model) {
+			t.Errorf("ThinkingOptIn(%q) = true, but a bare call already returns reasoning", model)
+		}
+	}
+
+	if !IsReasoningModel("solar-pro4") {
+		t.Error(`IsReasoningModel("solar-pro4") = false, want true`)
+	}
+	if !ThinkingOptIn("solar-pro4") {
+		t.Error(`ThinkingOptIn("solar-pro4") = false, but a bare call returns no reasoning until an effort asks`)
+	}
+
+	for _, model := range []string{"gpt-mini-latest", "qwen3-max", "qwen3-coder-plus"} {
+		if IsReasoningModel(model) {
+			t.Errorf("IsReasoningModel(%q) = true, but neither a bare call nor an effort returns reasoning", model)
+		}
+	}
+}
