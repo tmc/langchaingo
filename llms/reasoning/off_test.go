@@ -21,12 +21,17 @@ func TestResolveOff(t *testing.T) {
 		{"gemini-2.5-flash", ProviderGoogleAI, OffZeroBudget},
 		{"gemini-2.5-flash-lite", ProviderGoogleAI, OffOmit},
 		{"gemini-2.5-pro", ProviderGoogleAI, OffUnsupported}, // Pro cannot disable thinking
-		{"gemini-3.1-pro", ProviderGoogleAI, OffUnsupported}, // 3.x has no full off
+		{"gemini-3.1-pro", ProviderGoogleAI, OffUnsupported},
 		{"gemini-3.1-pro-preview", ProviderGoogleAI, OffUnsupported},
 		{"gemini-3.1-pro-preview-customtools", ProviderGoogleAI, OffUnsupported},
 		{"gemini-3.1-flash-lite", ProviderGoogleAI, OffOmit},
-		{"gemini-3.5-flash", ProviderGoogleAI, OffUnsupported},
-		{"gemini-3-flash", ProviderGoogleAI, OffUnsupported},
+		{"gemini-3-flash", ProviderGoogleAI, OffZeroBudget},
+		{"gemini-3-flash-preview", ProviderGoogleAI, OffZeroBudget},
+		{"gemini-3.5-flash", ProviderGoogleAI, OffZeroBudget},
+		{"models/gemini-3.5-flash", ProviderGoogleAI, OffZeroBudget},
+		{"gemini-3.6-flash", ProviderGoogleAI, OffUnsupported},
+		{"gemini-3.7-flash", ProviderGoogleAI, OffUnsupported},
+		{"gemini-3.5-pro", ProviderGoogleAI, OffUnsupported},
 		{"gemma-4-31b-it", ProviderGoogleAI, OffZeroBudget},
 		{"gemma-4-26b-a4b-it", ProviderGoogleAI, OffZeroBudget},
 		// Pre-thinking Gemini/Gemma never think: omit rather than send budget:0.

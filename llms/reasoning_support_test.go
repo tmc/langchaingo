@@ -225,7 +225,7 @@ func TestReasoningSupportFor(t *testing.T) { //nolint:funlen // table-driven tes
 			model         string
 			cannotDisable bool
 		}{
-			{"gemini-3.5-flash", true},
+			{"gemini-3.5-flash", false},
 			{"gemini-3.1-pro-preview", true},
 			{"gemini-3.1-pro-preview-customtools", true},
 			{"gemini-3.1-flash-lite", false},
