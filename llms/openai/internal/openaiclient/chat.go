@@ -57,6 +57,7 @@ type ChatRequest struct {
 	FrequencyPenalty    *float64       `json:"frequency_penalty,omitempty"`
 	PresencePenalty     *float64       `json:"presence_penalty,omitempty"`
 	RepetitionPenalty   *float64       `json:"repetition_penalty,omitempty"`
+	Verbosity           *string        `json:"verbosity,omitempty"`
 	Seed                *int           `json:"seed,omitempty"`
 
 	// ReasoningEffort enables reasoning mode for models that support it.

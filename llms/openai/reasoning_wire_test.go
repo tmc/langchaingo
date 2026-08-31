@@ -197,3 +197,48 @@ func TestABudgetLargerThanTheAnswerLimitRaisesTheLimit(t *testing.T) {
 		t.Fatalf("a 512-token answer limit leaves no room once a 1024-token budget is spent: %s", body)
 	}
 }
+
+func TestVerbosityReachesTheWireOnlyWhenAsked(t *testing.T) {
+	t.Parallel()
+
+	capture := func(t *testing.T, opts ...llms.CallOption) string {
+		t.Helper()
+
+		var body string
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			raw, _ := io.ReadAll(r.Body)
+			body = string(raw)
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`{"id":"x","object":"chat.completion","created":1,"model":"m",` +
+				`"choices":[{"index":0,"message":{"role":"assistant","content":"ok"},"finish_reason":"stop"}],` +
+				`"usage":{"prompt_tokens":1,"completion_tokens":1,"total_tokens":2}}`))
+		}))
+		t.Cleanup(srv.Close)
+
+		llm, err := New(WithBaseURL(srv.URL), WithToken("test"), WithModel("gpt-5.6"))
+		if err != nil {
+			t.Fatalf("New() error: %v", err)
+		}
+		if _, err := llm.GenerateContent(context.Background(),
+			[]llms.MessageContent{llms.TextParts(llms.ChatMessageTypeHuman, "hi")}, opts...); err != nil {
+			t.Fatalf("GenerateContent() error: %v", err)
+		}
+		return body
+	}
+
+	t.Run("asked", func(t *testing.T) {
+		t.Parallel()
+
+		if body := capture(t, llms.WithVerbosity("low")); !strings.Contains(body, `"verbosity":"low"`) {
+			t.Fatalf("verbosity must reach the wire, got body: %s", body)
+		}
+	})
+
+	t.Run("not asked", func(t *testing.T) {
+		t.Parallel()
+
+		if body := capture(t); strings.Contains(body, "verbosity") {
+			t.Fatalf("an unset verbosity must stay off the wire, got body: %s", body)
+		}
+	})
+}
