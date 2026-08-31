@@ -148,6 +148,7 @@ func mandatoryThinking(model string) bool {
 			strings.HasPrefix(form, "reka-flash-3") ||
 			strings.HasPrefix(form, "fugu-ultra") ||
 			strings.HasPrefix(form, "nex-n2") ||
+			strings.HasPrefix(form, "lfm-2.5") ||
 			strings.Contains(form, "trinity-large-thinking") {
 			return true
 		}

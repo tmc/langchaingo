@@ -399,3 +399,27 @@ func TestFamiliesThatRefuseAnExplicitOff(t *testing.T) {
 		t.Error("aion-rp is not a reasoning model and must stay out of the mandatory set")
 	}
 }
+
+func TestFamiliesMeasuredAgainstTheirBareCall(t *testing.T) {
+	t.Parallel()
+
+	for _, model := range []string{"lfm-2.5-2.6b", "liquid/lfm-2.5-2.6b:free", "seed-2-1-turbo", "bytedance-seed/seed-2-1-turbo"} {
+		if !IsReasoningModel(model) {
+			t.Errorf("IsReasoningModel(%q) = false, but a bare call already returns a reasoning block", model)
+		}
+		if ThinkingOptIn(model) {
+			t.Errorf("ThinkingOptIn(%q) = true, but the model reasons without being asked", model)
+		}
+	}
+
+	if got := ResolveOff("lfm-2.5-2.6b", ProviderOpenAI); got != OffUnsupported {
+		t.Errorf("ResolveOff(lfm-2.5) = %v, want OffUnsupported: the door answers 400 on an explicit off", got)
+	}
+	if got := ResolveOff("seed-2-1-turbo", ProviderOpenAI); got != OffEffortNone {
+		t.Errorf("ResolveOff(seed-2-1-turbo) = %v, want OffEffortNone: the off returns no reasoning", got)
+	}
+
+	if !ThinkingOptIn("ernie-4.5-vl-424b-a47b") {
+		t.Error("ThinkingOptIn(ernie-4.5) = false, but a bare call returns no reasoning and an effort turns it on")
+	}
+}

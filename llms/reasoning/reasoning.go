@@ -315,6 +315,8 @@ func namesReasoningModel(modelLower string) bool { //nolint:funlen // a flat cat
 		strings.Contains(modelLower, "seed-1.6") ||
 		strings.Contains(modelLower, "cogito-v2") ||
 		(strings.Contains(modelLower, "lfm-") && strings.Contains(modelLower, "-thinking")) ||
+		strings.HasPrefix(modelLower, "lfm-2.5") ||
+		strings.Contains(modelLower, "seed-2-1") ||
 		strings.Contains(modelLower, "deephermes") ||
 		strings.Contains(modelLower, "hermes-4-") ||
 		(strings.Contains(modelLower, "nemotron") && !nvidiaNonChatSurface(modelLower)) ||
@@ -362,7 +364,8 @@ func ThinkingOptIn(model string) bool {
 		return true
 	}
 	for _, form := range modelSpellings(model) {
-		if mistralReasons(form) || strings.HasPrefix(form, "magistral") {
+		if mistralReasons(form) || strings.HasPrefix(form, "magistral") ||
+			strings.HasPrefix(form, "ernie-4.5") {
 			return true
 		}
 		for _, prefix := range []string{"solar-pro-3", "solar-pro4", "deepseek-v3.1", "deepseek-chat-v3.1", "deepseek-v3.2"} {
