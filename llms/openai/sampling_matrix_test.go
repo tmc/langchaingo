@@ -136,6 +136,21 @@ func TestSamplingMatrix(t *testing.T) {
 		present: []string{`"temperature":1`},
 		absent:  []string{`"top_p"`, `"reasoning_effort"`},
 	}, {
+		name:  "thinking takes both penalties off the wire",
+		model: "gpt-5.4",
+		opts: []llms.CallOption{
+			llms.WithFrequencyPenalty(0.5), llms.WithPresencePenalty(0.4), high,
+		},
+		present: []string{`"reasoning_effort":"high"`},
+		absent:  []string{`"frequency_penalty"`, `"presence_penalty"`},
+	}, {
+		name:  "penalties ride along once thinking is switched off",
+		model: "gpt-5.5",
+		opts: []llms.CallOption{
+			llms.WithFrequencyPenalty(0.5), llms.WithPresencePenalty(0.4), off,
+		},
+		present: []string{`"frequency_penalty":0.5`, `"presence_penalty":0.4`, `"reasoning_effort":"none"`},
+	}, {
 		name:    "a non-reasoning model keeps everything",
 		model:   "gpt-4.1",
 		opts:    []llms.CallOption{temp, topP},
