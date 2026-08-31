@@ -251,3 +251,18 @@ func TestMiniMaxM2CannotStopThinking(t *testing.T) {
 		t.Error(`ResolveOff("minimax-m3") = OffUnsupported, but an explicit off returns no reasoning`)
 	}
 }
+
+func TestGLMLatestCannotStopThinking(t *testing.T) {
+	t.Parallel()
+
+	if got := ResolveOff("glm-latest", ProviderOpenAI); got != OffUnsupported {
+		t.Errorf("ResolveOff(\"glm-latest\") = %v, want OffUnsupported: an explicit off "+
+			"still returns reasoning, and the alias points at the mandatory 5.3 line", got)
+	}
+
+	for _, model := range []string{"glm-4.6", "glm-5", "glm-5.1", "glm-5.2"} {
+		if got := ResolveOff(model, ProviderOpenAI); got == OffUnsupported {
+			t.Errorf("ResolveOff(%q) = OffUnsupported, but an explicit off returns no reasoning", model)
+		}
+	}
+}
