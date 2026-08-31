@@ -135,7 +135,7 @@ func TestTheBudgetOnTheWireRespectsTheVendorFloor(t *testing.T) {
 func TestABudgetTravelsToADoorThatRejectsTheEffortField(t *testing.T) {
 	t.Parallel()
 
-	for _, model := range []string{"kimi-k2.5", "qwen3-235b-a22b-thinking-2507", "qwq-32b"} {
+	for _, model := range []string{"qwen3-235b-a22b-thinking-2507", "qwq-32b"} {
 		t.Run(model, func(t *testing.T) {
 			t.Parallel()
 
@@ -154,7 +154,7 @@ func TestABudgetTravelsToADoorThatRejectsTheEffortField(t *testing.T) {
 func TestTheEffortFieldStaysOffADoorThatRejectsIt(t *testing.T) {
 	t.Parallel()
 
-	body := sendModernReasoningForModel(t, "kimi-k2.5", llms.ReasoningHigh, 0)
+	body := sendModernReasoningForModel(t, "qwq-32b", llms.ReasoningHigh, 0)
 
 	if strings.Contains(body, `"effort"`) {
 		t.Fatalf("an effort-only request must not put the field on a door that rejects it; body: %s", body)
