@@ -197,7 +197,8 @@ func namesReasoningModel(modelLower string) bool { //nolint:funlen // a flat cat
 		strings.HasPrefix(modelLower, "gpt-oss-") ||
 		strings.HasPrefix(modelLower, "o1") ||
 		strings.HasPrefix(modelLower, "o3") ||
-		strings.HasPrefix(modelLower, "o4-mini") {
+		strings.HasPrefix(modelLower, "o4-mini") ||
+		modelLower == "gpt-latest" {
 		return true
 	}
 
@@ -235,7 +236,8 @@ func namesReasoningModel(modelLower string) bool { //nolint:funlen // a flat cat
 		(strings.HasPrefix(modelLower, "grok-4") && !strings.Contains(modelLower, "-non-reasoning")) ||
 		(strings.HasPrefix(modelLower, "grok-5") && !strings.Contains(modelLower, "-non-reasoning")) ||
 		strings.HasPrefix(modelLower, "grok-build") ||
-		strings.Contains(modelLower, "grok-code-fast") {
+		strings.Contains(modelLower, "grok-code-fast") ||
+		modelLower == "grok-latest" {
 		return true
 	}
 
@@ -243,7 +245,8 @@ func namesReasoningModel(modelLower string) bool { //nolint:funlen // a flat cat
 	if strings.HasPrefix(modelLower, "glm-4.5") ||
 		strings.HasPrefix(modelLower, "glm-4.6") ||
 		strings.HasPrefix(modelLower, "glm-4.7") ||
-		strings.HasPrefix(modelLower, "glm-5") {
+		strings.HasPrefix(modelLower, "glm-5") ||
+		modelLower == "glm-latest" {
 		return true
 	}
 
@@ -268,7 +271,8 @@ func namesReasoningModel(modelLower string) bool { //nolint:funlen // a flat cat
 			strings.Contains(modelLower, "2.6") ||
 			strings.Contains(modelLower, "2.7") ||
 			strings.Contains(modelLower, "k3") ||
-			strings.Contains(modelLower, "dev-72b")) {
+			strings.Contains(modelLower, "dev-72b")) ||
+		modelLower == "kimi-latest" {
 		return true
 	}
 
@@ -319,7 +323,11 @@ func namesReasoningModel(modelLower string) bool { //nolint:funlen // a flat cat
 		strings.HasPrefix(modelLower, "reka-flash-3") ||
 		strings.HasPrefix(modelLower, "fugu-ultra") ||
 		strings.HasPrefix(modelLower, "hy3") ||
+		strings.HasPrefix(modelLower, "hy4") ||
 		strings.HasPrefix(modelLower, "solar-pro-3") ||
+		strings.HasPrefix(modelLower, "solar-pro4") ||
+		strings.HasPrefix(modelLower, "ling-3.0") ||
+		strings.HasPrefix(modelLower, "longcat-2") ||
 		strings.Contains(modelLower, "trinity-large-thinking") {
 		return true
 	}
@@ -333,7 +341,7 @@ func ThinkingOptIn(model string) bool {
 		return true
 	}
 	for _, form := range modelSpellings(model) {
-		for _, prefix := range []string{"mistral-medium-3", "mistral-small-2603", "solar-pro-3", "deepseek-v3.2"} {
+		for _, prefix := range []string{"mistral-medium-3", "mistral-small-2603", "solar-pro-3", "solar-pro4", "deepseek-v3.2"} {
 			if strings.HasPrefix(form, prefix) {
 				return true
 			}
@@ -358,7 +366,7 @@ func isAlpha(s string) bool {
 }
 
 func qwenReasonsUnasked(model string) bool {
-	for _, prefix := range []string{"qwen3.5", "qwen3.6", "qwen3.7"} {
+	for _, prefix := range []string{"qwen3.5", "qwen3.6", "qwen3.7", "qwen3.8"} {
 		if strings.HasPrefix(model, prefix) {
 			return true
 		}
