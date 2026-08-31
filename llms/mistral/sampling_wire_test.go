@@ -73,3 +73,21 @@ func TestToolChoiceReachesTheMistralWire(t *testing.T) {
 		t.Error("a choice the vendor has no name for must not be guessed at")
 	}
 }
+
+func TestMistralDoesNotPinTheSeedWhenTheCallerDidNotAskForOne(t *testing.T) {
+	t.Parallel()
+
+	first, sentFirst := captureMistralRequest(t)["random_seed"]
+	second, sentSecond := captureMistralRequest(t)["random_seed"]
+	if sentFirst && sentSecond && first == second {
+		t.Fatalf("two seedless calls must not share a seed, both got %v", first)
+	}
+}
+
+func TestMistralKeepsTheSeedTheCallerAsksFor(t *testing.T) {
+	t.Parallel()
+
+	if got := captureMistralRequest(t, llms.WithSeed(7))["random_seed"]; got != float64(7) {
+		t.Fatalf("the caller's seed must reach the wire, got %v", got)
+	}
+}
