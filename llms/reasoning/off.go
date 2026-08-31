@@ -141,7 +141,8 @@ func mandatoryThinking(model string) bool {
 			strings.HasPrefix(form, "minimax-m2") ||
 			form == "glm-latest" ||
 			strings.HasPrefix(form, "kimi-k2-thinking") ||
-			strings.HasPrefix(form, "kimi-k2.7-code") {
+			strings.HasPrefix(form, "kimi-k2.7-code") ||
+			strings.HasPrefix(form, "gpt-oss") {
 			return true
 		}
 	}

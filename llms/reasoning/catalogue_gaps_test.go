@@ -351,3 +351,16 @@ func TestMagistralExpressesItsOffByOmission(t *testing.T) {
 		}
 	}
 }
+
+func TestGPTOSSCannotStopReasoning(t *testing.T) {
+	t.Parallel()
+
+	for _, model := range []string{
+		"gpt-oss-120b", "gpt-oss-20b", "openai/gpt-oss-120b",
+		"openai.gpt-oss-120b-1:0", "gpt-oss-safeguard-20b",
+	} {
+		if got := ResolveOff(model, ProviderOpenAI); got != OffUnsupported {
+			t.Errorf("ResolveOff(%q) = %v, want OffUnsupported: an explicit off still returns reasoning", model, got)
+		}
+	}
+}
