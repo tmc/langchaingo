@@ -117,19 +117,7 @@ func (g *GoogleAI) GenerateContent(
 		opts.Temperature = getFloatPointer(resolveTemperature(opts.GetModel(), g.opts))
 	}
 
-	// Build generation config
-	temperature := convertToFloat32Pointer(opts.Temperature)
-	topP := convertToFloat32Pointer(opts.TopP)
-	topK := convertIntToFloat32Pointer(opts.TopK)
-
-	config := &genai.GenerateContentConfig{
-		CandidateCount:  convertToInt32(opts.CandidateCount),
-		MaxOutputTokens: convertToInt32(opts.MaxTokens),
-		Temperature:     temperature,
-		TopP:            topP,
-		TopK:            topK,
-		StopSequences:   opts.StopWords,
-	}
+	config := newGenerationConfig(opts)
 
 	// Check for cached content
 	if opts.Metadata != nil {
@@ -1030,6 +1018,20 @@ func getIntPointer(i int) *int {
 
 func getFloatPointer(f float64) *float64 {
 	return &f
+}
+
+func newGenerationConfig(opts llms.CallOptions) *genai.GenerateContentConfig {
+	return &genai.GenerateContentConfig{
+		CandidateCount:   convertToInt32(opts.CandidateCount),
+		MaxOutputTokens:  convertToInt32(opts.MaxTokens),
+		Temperature:      convertToFloat32Pointer(opts.Temperature),
+		TopP:             convertToFloat32Pointer(opts.TopP),
+		TopK:             convertIntToFloat32Pointer(opts.TopK),
+		StopSequences:    opts.StopWords,
+		Seed:             convertToInt32Pointer(opts.Seed),
+		FrequencyPenalty: convertToFloat32Pointer(opts.FrequencyPenalty),
+		PresencePenalty:  convertToFloat32Pointer(opts.PresencePenalty),
+	}
 }
 
 func convertToFloat32Pointer(f *float64) *float32 {
