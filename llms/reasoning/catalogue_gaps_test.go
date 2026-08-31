@@ -266,3 +266,27 @@ func TestGLMLatestCannotStopThinking(t *testing.T) {
 		}
 	}
 }
+
+func TestKimiTakesEffortButNotAlwaysAnOff(t *testing.T) {
+	t.Parallel()
+
+	for _, model := range []string{
+		"kimi-k2.5", "kimi-k2.6", "kimi-k2.7-code", "kimi-k2-thinking", "kimi-k3",
+	} {
+		if !AcceptsEffortWire(model) {
+			t.Errorf("AcceptsEffortWire(%q) = false, but every route measured accepts an effort", model)
+		}
+	}
+
+	for _, model := range []string{"kimi-k2-thinking", "kimi-k2.7-code", "kimi-k2.7-code-highspeed"} {
+		if got := ResolveOff(model, ProviderOpenAI); got != OffUnsupported {
+			t.Errorf("ResolveOff(%q) = %v, want OffUnsupported: the vendor refuses an explicit off", model, got)
+		}
+	}
+
+	for _, model := range []string{"kimi-k2.5", "kimi-k2.6"} {
+		if got := ResolveOff(model, ProviderOpenAI); got == OffUnsupported {
+			t.Errorf("ResolveOff(%q) = OffUnsupported, but an explicit off returns no reasoning", model)
+		}
+	}
+}

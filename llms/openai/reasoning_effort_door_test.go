@@ -37,7 +37,7 @@ func TestReasoningEffortOmittedOnDoorsThatRejectIt(t *testing.T) {
 		return body, err
 	}
 
-	for _, model := range []string{"kimi-k2.7-code-highspeed", "kimi-k2.6", "qwen3-next-80b-a3b-thinking"} {
+	for _, model := range []string{"qwen3-next-80b-a3b-thinking"} {
 		t.Run(model+" drops a requested effort", func(t *testing.T) {
 			body, err := capture(t, model, llms.WithReasoning(llms.ReasoningMedium, 0))
 			if err != nil {
@@ -47,7 +47,9 @@ func TestReasoningEffortOmittedOnDoorsThatRejectIt(t *testing.T) {
 				t.Fatalf("%s must not receive reasoning_effort, got body: %s", model, body)
 			}
 		})
+	}
 
+	for _, model := range []string{"kimi-k2.7-code-highspeed", "kimi-k2-thinking", "qwen3-next-80b-a3b-thinking"} {
 		t.Run(model+" reports off as unsupported", func(t *testing.T) {
 			_, err := capture(t, model, llms.WithReasoningDisabled())
 			if err == nil {
@@ -55,6 +57,18 @@ func TestReasoningEffortOmittedOnDoorsThatRejectIt(t *testing.T) {
 			}
 			if !strings.Contains(err.Error(), "reasoning cannot be disabled") {
 				t.Fatalf("expected the typed disable error, got: %v", err)
+			}
+		})
+	}
+
+	for _, model := range []string{"kimi-k2.6", "kimi-k2.7-code-highspeed"} {
+		t.Run(model+" carries the effort to the wire", func(t *testing.T) {
+			body, err := capture(t, model, llms.WithReasoning(llms.ReasoningMedium, 0))
+			if err != nil {
+				t.Fatalf("GenerateContent() error: %v", err)
+			}
+			if !strings.Contains(body, `"reasoning_effort":"medium"`) {
+				t.Fatalf("%s accepts reasoning_effort and must receive it, got body: %s", model, body)
 			}
 		})
 	}
