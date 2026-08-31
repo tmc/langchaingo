@@ -423,3 +423,23 @@ func TestFamiliesMeasuredAgainstTheirBareCall(t *testing.T) {
 		t.Error("ThinkingOptIn(ernie-4.5) = false, but a bare call returns no reasoning and an effort turns it on")
 	}
 }
+
+func TestDeepSeekR1CannotStopReasoning(t *testing.T) {
+	t.Parallel()
+
+	for _, model := range []string{
+		"deepseek-r1", "deepseek-r1-0528", "deepseek/deepseek-r1", "deepseek-reasoner",
+		"deepseek-ai/DeepSeek-R1-Turbo", "azure/deepseek-r1",
+		"deepseek-ai/DeepSeek-R1-Distill-Qwen-32B",
+	} {
+		if got := ResolveOff(model, ProviderOpenAI); got != OffUnsupported {
+			t.Errorf("ResolveOff(%q) = %v, want OffUnsupported: the off is either refused or ignored", model, got)
+		}
+	}
+
+	for _, model := range []string{"deepseek-v3.1", "deepseek-v3.2", "deepseek-chat-v3.1"} {
+		if got := ResolveOff(model, ProviderOpenAI); got == OffUnsupported {
+			t.Errorf("ResolveOff(%q) = OffUnsupported, but the hybrids reason only when asked", model)
+		}
+	}
+}
