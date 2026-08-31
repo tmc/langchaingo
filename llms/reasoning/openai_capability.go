@@ -67,8 +67,12 @@ func OpenAIReasoningCapsFor(model string) OpenAIReasoningCaps {
 	return OpenAIReasoningCaps{Known: false}
 }
 
+func openAIChatVariant(m string) bool {
+	return strings.HasPrefix(m, "gpt-") && strings.Contains(m, "-chat")
+}
+
 func openAICapsForForm(m string) OpenAIReasoningCaps {
-	if strings.Contains(m, "-chat-latest") {
+	if openAIChatVariant(m) {
 		return OpenAIReasoningCaps{Known: false}
 	}
 	switch {

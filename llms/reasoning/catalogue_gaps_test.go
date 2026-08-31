@@ -443,3 +443,27 @@ func TestDeepSeekR1CannotStopReasoning(t *testing.T) {
 		}
 	}
 }
+
+func TestEveryChatSpellingOfTheGPTLineAgrees(t *testing.T) {
+	t.Parallel()
+
+	spellings := []string{
+		"gpt-5-chat", "gpt-5-chat-latest", "gpt-5.1-chat-latest", "gpt-5.2-chat",
+		"gpt-5.2-chat-latest", "gpt-5.3-chat-latest", "gpt-chat-latest",
+		"openai/gpt-5.2-chat", "azure/gpt-5-chat",
+	}
+	for _, model := range spellings {
+		if IsReasoningModel(model) {
+			t.Errorf("IsReasoningModel(%q) = true, but the chat variants answer without reasoning", model)
+		}
+		if caps := OpenAIReasoningCapsFor(model); caps.Known {
+			t.Errorf("OpenAIReasoningCapsFor(%q).Known = true, so the door would pin the caller's temperature", model)
+		}
+	}
+
+	for _, model := range []string{"deepseek-chat-v3.1", "deepseek-chat-v3.2", "gpt-5.2", "gpt-5.4"} {
+		if !IsReasoningModel(model) {
+			t.Errorf("IsReasoningModel(%q) = false: the chat filter reached past the GPT chat variants", model)
+		}
+	}
+}
