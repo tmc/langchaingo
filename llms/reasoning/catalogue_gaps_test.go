@@ -338,3 +338,16 @@ func TestMistralAliasesOfTheSameModelAgree(t *testing.T) {
 		}
 	}
 }
+
+func TestMagistralExpressesItsOffByOmission(t *testing.T) {
+	t.Parallel()
+
+	for _, model := range []string{"magistral-medium-latest", "magistral-small-latest", "mistral/magistral-medium-latest"} {
+		if !ThinkingOptIn(model) {
+			t.Errorf("ThinkingOptIn(%q) = false, but a bare call returns no reasoning", model)
+		}
+		if got := ResolveOff(model, ProviderOpenAI); got != OffOmit {
+			t.Errorf("ResolveOff(%q) = %v, want OffOmit: the none token starts a think block instead of stopping one", model, got)
+		}
+	}
+}

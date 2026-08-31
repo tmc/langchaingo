@@ -362,7 +362,7 @@ func ThinkingOptIn(model string) bool {
 		return true
 	}
 	for _, form := range modelSpellings(model) {
-		if mistralReasons(form) {
+		if mistralReasons(form) || strings.HasPrefix(form, "magistral") {
 			return true
 		}
 		for _, prefix := range []string{"solar-pro-3", "solar-pro4", "deepseek-v3.1", "deepseek-chat-v3.1", "deepseek-v3.2"} {
