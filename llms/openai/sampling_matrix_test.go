@@ -180,6 +180,18 @@ func TestClaudeSamplingMatrix(t *testing.T) {
 		present: []string{`"reasoning_effort":"high"`},
 		absent:  []string{`"reasoning_effort":"xhigh"`},
 	}, {
+		name:    "thinking takes top_k off the wire alongside top_p",
+		model:   "claude-sonnet-4-5",
+		opts:    []llms.CallOption{topP, llms.WithTopK(40), high},
+		present: []string{`"reasoning_effort":"high"`},
+		absent:  []string{`"top_p"`, `"top_k"`},
+	}, {
+		name:    "top_k rides along when nothing asked the model to think",
+		model:   "claude-sonnet-4-5",
+		opts:    []llms.CallOption{llms.WithTopK(40)},
+		present: []string{`"top_k":40`},
+		absent:  []string{`"reasoning_effort"`},
+	}, {
 		name:    "extra body overwrites a param the policy stripped",
 		model:   "claude-opus-4-7",
 		opts:    []llms.CallOption{temp, topP, WithExtraBody(map[string]any{"temperature": 0.7})},
