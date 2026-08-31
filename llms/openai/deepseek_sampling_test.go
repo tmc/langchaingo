@@ -112,3 +112,12 @@ func TestPenaltiesStayOffTheDoorsThatRefuseThem(t *testing.T) {
 		}
 	}
 }
+
+func TestStopStillTravelsToTheDoorsThatRefuseIt(t *testing.T) {
+	t.Parallel()
+
+	body := captureDeepSeekRequest(t, "grok-4.6", llms.WithStopWords([]string{"STOP"}))
+	if _, ok := body["stop"]; !ok {
+		t.Fatalf("stop bounds the answer, so it is left to fail loudly rather than dropped, got body: %v", body)
+	}
+}
