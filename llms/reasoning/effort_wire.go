@@ -5,8 +5,8 @@ import "strings"
 // AcceptsEffortWire reports whether the model's OpenAI-compatible door takes the
 // reasoning_effort field. A door that refuses it fails the whole request, so such
 // a model also has no way to spell "off": the disable token rides on this field.
-// RejectsPenalties reports whether the door answers "does not support
-// parameter" for frequency_penalty and presence_penalty.
+// RejectsPenalties reports whether frequency_penalty and presence_penalty
+// must stay off the wire.
 func RejectsPenalties(model string) bool {
 	for _, form := range modelSpellings(model) {
 		if strings.HasPrefix(form, "grok") {
