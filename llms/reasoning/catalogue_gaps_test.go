@@ -364,3 +364,16 @@ func TestGPTOSSCannotStopReasoning(t *testing.T) {
 		}
 	}
 }
+
+func TestOllamaTagSpellingResolvesLikeTheHyphenOne(t *testing.T) {
+	t.Parallel()
+
+	for _, model := range []string{"gpt-oss:120b", "gpt-oss:20b", "ollama_cloud/gpt-oss:120b"} {
+		if !IsReasoningModel(model) {
+			t.Errorf("IsReasoningModel(%q) = false, but the hyphen spelling of the same model is true", model)
+		}
+		if got := ResolveOff(model, ProviderOpenAI); got != OffUnsupported {
+			t.Errorf("ResolveOff(%q) = %v, want OffUnsupported like the hyphen spelling", model, got)
+		}
+	}
+}
