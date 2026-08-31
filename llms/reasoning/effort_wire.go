@@ -13,6 +13,11 @@ func AcceptsEffortWire(model string) bool {
 		if strings.Contains(form, "kimi-k2") {
 			return false
 		}
+		if strings.HasPrefix(form, "grok-code-fast") ||
+			strings.HasPrefix(form, "grok-build") ||
+			strings.HasPrefix(form, "grok-4.20") {
+			return false
+		}
 	}
 	return true
 }
