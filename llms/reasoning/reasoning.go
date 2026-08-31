@@ -187,6 +187,21 @@ func DefaultIsReasoningModel(model string) bool {
 	return false
 }
 
+func mistralReasons(model string) bool {
+	if model == "mistral-medium" {
+		return true
+	}
+	for _, prefix := range []string{
+		"mistral-medium-3", "mistral-medium-latest", "mistral-medium-2604",
+		"mistral-small-2603", "mistral-small-latest",
+	} {
+		if strings.HasPrefix(model, prefix) {
+			return true
+		}
+	}
+	return false
+}
+
 func nvidiaNonChatSurface(model string) bool {
 	return strings.Contains(model, "-embed-") ||
 		strings.Contains(model, "-rerank-") ||
@@ -321,8 +336,7 @@ func namesReasoningModel(modelLower string) bool { //nolint:funlen // a flat cat
 		strings.HasPrefix(modelLower, "mercury-2") ||
 		strings.HasPrefix(modelLower, "ring-2.6") ||
 		strings.HasPrefix(modelLower, "muse-spark") ||
-		strings.HasPrefix(modelLower, "mistral-medium-3") ||
-		strings.HasPrefix(modelLower, "mistral-small-2603") ||
+		mistralReasons(modelLower) ||
 		strings.HasPrefix(modelLower, "magistral") ||
 		strings.HasPrefix(modelLower, "nex-n2") ||
 		strings.HasPrefix(modelLower, "perceptron-mk") ||
@@ -348,7 +362,10 @@ func ThinkingOptIn(model string) bool {
 		return true
 	}
 	for _, form := range modelSpellings(model) {
-		for _, prefix := range []string{"mistral-medium-3", "mistral-small-2603", "solar-pro-3", "solar-pro4", "deepseek-v3.1", "deepseek-chat-v3.1", "deepseek-v3.2"} {
+		if mistralReasons(form) {
+			return true
+		}
+		for _, prefix := range []string{"solar-pro-3", "solar-pro4", "deepseek-v3.1", "deepseek-chat-v3.1", "deepseek-v3.2"} {
 			if strings.HasPrefix(form, prefix) {
 				return true
 			}

@@ -314,3 +314,27 @@ func TestNonChatNvidiaSurfacesAreNotReasoningModels(t *testing.T) {
 		}
 	}
 }
+
+func TestMistralAliasesOfTheSameModelAgree(t *testing.T) {
+	t.Parallel()
+
+	for _, model := range []string{
+		"mistral-medium-latest", "mistral-medium-2604", "mistral-medium", "mistral-medium-3-5",
+		"mistral-small-latest", "mistral-small-2603", "mistralai/mistral-medium-latest",
+	} {
+		if !IsReasoningModel(model) {
+			t.Errorf("IsReasoningModel(%q) = false, but the vendor reasons on an explicit effort", model)
+		}
+		if !ThinkingOptIn(model) {
+			t.Errorf("ThinkingOptIn(%q) = false, but a bare call returns no reasoning", model)
+		}
+	}
+
+	for _, model := range []string{
+		"mistral-medium-2505", "mistral-medium-2508", "mistral-large-latest", "mistral-large-2512",
+	} {
+		if IsReasoningModel(model) {
+			t.Errorf("IsReasoningModel(%q) = true, but the vendor answers 400 reasoning_effort is not enabled", model)
+		}
+	}
+}
