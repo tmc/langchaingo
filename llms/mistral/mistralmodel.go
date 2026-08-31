@@ -132,7 +132,12 @@ func mistralChatParamsFromCallOptions(callOpts *llms.CallOptions) sdk.ChatReques
 	chatOpts := sdk.DefaultChatRequestParams
 	chatOpts.MaxTokens = callOpts.GetMaxTokens()
 	chatOpts.Temperature = callOpts.GetTemperature()
+	chatOpts.TopP = callOpts.GetTopP()
 	chatOpts.RandomSeed = callOpts.GetSeed()
+	if callOpts.GetJSONMode() {
+		chatOpts.ResponseFormat = sdk.ResponseFormatJsonObject
+	}
+	chatOpts.ToolChoice = mistralToolChoice(callOpts.ToolChoice)
 	chatOpts.Tools = make([]sdk.Tool, 0)
 	if len(callOpts.Tools) > 0 {
 		for _, tool := range callOpts.Tools {
@@ -302,5 +307,18 @@ func setMistralChatMessageRole(msg *llms.MessageContent, chatMsg *sdk.ChatMessag
 		chatMsg.Role = "tool"
 	case llms.ChatMessageTypeSystem:
 		chatMsg.Role = "system"
+	}
+}
+
+func mistralToolChoice(choice any) string {
+	name, ok := choice.(string)
+	if !ok {
+		return ""
+	}
+	switch name {
+	case sdk.ToolChoiceAny, sdk.ToolChoiceAuto, sdk.ToolChoiceNone:
+		return name
+	default:
+		return ""
 	}
 }
