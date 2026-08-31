@@ -69,9 +69,6 @@ func ResolveOff(model string, p Provider) OffWire {
 
 	switch p {
 	case ProviderGoogleAI:
-		// Gemini 3.x and Gemini 2.5 Pro cannot be disabled (budget:0 is ignored /
-		// rejected); Gemini 2.5 Flash / Flash-Lite, Gemma 4, and unknowns disable
-		// via thinkingBudget:0.
 		if !GeminiCanDisable(model) {
 			return OffUnsupported
 		}

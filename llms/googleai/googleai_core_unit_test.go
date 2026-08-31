@@ -1047,7 +1047,7 @@ var productionGeminiModels = []struct {
 	usesThinkingLevel bool // Gemini 3.x uses thinking_level; 2.5 / Gemma use thinking_budget
 	disable           disableWire
 }{
-	{name: "gemini-3.5-flash", usesThinkingLevel: true, disable: disableUnsupported},
+	{name: "gemini-3.5-flash", usesThinkingLevel: true, disable: disableZeroBudget},
 	{name: "gemini-3.1-pro-preview", usesThinkingLevel: true, disable: disableUnsupported},
 	{name: "gemini-3.1-pro-preview-customtools", usesThinkingLevel: true, disable: disableUnsupported},
 	{name: "gemini-3.1-flash-lite", usesThinkingLevel: true, disable: disableOmit},
@@ -1132,7 +1132,7 @@ func TestResolveThinkingConfig(t *testing.T) {
 	})
 
 	t.Run("off on non-disablable model errors, no budget zero", func(t *testing.T) {
-		for _, model := range []string{"gemini-2.5-pro", "gemini-3.1-pro", "gemini-3-flash", "gemini-3.5-flash"} {
+		for _, model := range []string{"gemini-2.5-pro", "gemini-3.1-pro", "gemini-3.6-flash", "gemini-3.7-flash"} {
 			tc, err := resolveThinkingConfig(model, &llms.ReasoningConfig{Mode: llms.ReasoningOff}, 1000)
 			var offErr *reasoning.ErrReasoningOffUnsupported
 			require.ErrorAs(t, err, &offErr, "off on %s must be unsupported", model)

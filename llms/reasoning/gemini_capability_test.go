@@ -37,9 +37,12 @@ func TestGeminiCanDisable(t *testing.T) {
 		{"gemini-2.5-flash-lite", true},
 		{"gemma-4-31b-it", true},
 		{"gemini-2.5-pro", false},
-		{"gemini-3-flash-preview", false},
+		{"gemini-3-flash-preview", true},
 		{"gemini-3.1-pro-preview", false},
-		{"gemini-3.5-flash", false},
+		{"gemini-3.5-flash", true},
+		{"gemini-3.5-pro", false},
+		{"gemini-3.6-flash", false},
+		{"gemini-3.7-flash", false},
 		{"some-unknown-google-model", true}, // optimistic
 	}
 	for _, tc := range cases {
