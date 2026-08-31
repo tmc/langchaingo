@@ -232,3 +232,22 @@ func TestGrokGenerationsThatCannotStopThinking(t *testing.T) {
 		}
 	}
 }
+
+func TestMiniMaxM2CannotStopThinking(t *testing.T) {
+	t.Parallel()
+
+	for _, model := range []string{
+		"minimax-m2", "minimax-m2.1", "minimax-m2.5", "minimax-m2.7",
+		"minimax-m2.7-highspeed", "minimax.minimax-m2.5",
+	} {
+		if got := ResolveOff(model, ProviderOpenAI); got != OffUnsupported {
+			t.Errorf("ResolveOff(%q) = %v, want OffUnsupported: the vendor answers "+
+				"\"Reasoning is mandatory for this endpoint and cannot be disabled\", "+
+				"and the native route keeps thinking regardless", model, got)
+		}
+	}
+
+	if got := ResolveOff("minimax-m3", ProviderOpenAI); got == OffUnsupported {
+		t.Error(`ResolveOff("minimax-m3") = OffUnsupported, but an explicit off returns no reasoning`)
+	}
+}
