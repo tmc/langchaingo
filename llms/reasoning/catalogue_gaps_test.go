@@ -290,3 +290,27 @@ func TestKimiTakesEffortButNotAlwaysAnOff(t *testing.T) {
 		}
 	}
 }
+
+func TestNonChatNvidiaSurfacesAreNotReasoningModels(t *testing.T) {
+	t.Parallel()
+
+	for _, model := range []string{
+		"nvidia/Nemotron-3-Embed-8B", "nvidia/Nemotron-3-Embed-1B-BF16",
+		"nvidia/llama-nemotron-embed-vl-1b-v2", "nvidia/llama-nemotron-rerank-vl-1b-v2",
+		"nvidia/Nemotron-3.5-ASR-Streaming-Multilingual-0.6b",
+		"nvidia/Nemotron-Content-Safety-3.5", "nvidia/nemotron-3.5-content-safety",
+	} {
+		if IsReasoningModel(model) {
+			t.Errorf("IsReasoningModel(%q) = true, but the route serves no chat completion", model)
+		}
+	}
+
+	for _, model := range []string{
+		"nvidia/NVIDIA-Nemotron-Nano-9B-v2", "nvidia/nemotron-3-super-120b-a12b",
+		"nvidia/Nemotron-3-Nano-Omni-30B-A3B-Reasoning", "nvidia.nemotron-nano-9b-v2",
+	} {
+		if !IsReasoningModel(model) {
+			t.Errorf("IsReasoningModel(%q) = false, but the chat route still reasons", model)
+		}
+	}
+}

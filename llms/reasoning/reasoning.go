@@ -187,6 +187,13 @@ func DefaultIsReasoningModel(model string) bool {
 	return false
 }
 
+func nvidiaNonChatSurface(model string) bool {
+	return strings.Contains(model, "-embed-") ||
+		strings.Contains(model, "-rerank-") ||
+		strings.Contains(model, "-asr-") ||
+		strings.Contains(model, "content-safety")
+}
+
 func namesReasoningModel(modelLower string) bool { //nolint:funlen // a flat catalog of model-family prefix checks; splitting hurts readability
 	if strings.Contains(modelLower, "-chat-latest") {
 		return false
@@ -295,7 +302,7 @@ func namesReasoningModel(modelLower string) bool { //nolint:funlen // a flat cat
 		(strings.Contains(modelLower, "lfm-") && strings.Contains(modelLower, "-thinking")) ||
 		strings.Contains(modelLower, "deephermes") ||
 		strings.Contains(modelLower, "hermes-4-") ||
-		strings.Contains(modelLower, "nemotron") ||
+		(strings.Contains(modelLower, "nemotron") && !nvidiaNonChatSurface(modelLower)) ||
 		strings.Contains(modelLower, "intellect-3") ||
 		strings.Contains(modelLower, "step3") ||
 		strings.Contains(modelLower, "hunyuan-a13b") ||
