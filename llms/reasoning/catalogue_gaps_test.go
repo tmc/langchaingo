@@ -198,3 +198,37 @@ func TestDeepSeekV31ReasonsOnlyWhenAsked(t *testing.T) {
 		}
 	}
 }
+
+func TestGrokModelsThatTakeNoEffortOnTheWire(t *testing.T) {
+	t.Parallel()
+
+	for _, model := range []string{"grok-code-fast-1", "grok-code-fast", "grok-4.20", "grok-build-0.1"} {
+		if AcceptsEffortWire(model) {
+			t.Errorf("AcceptsEffortWire(%q) = true, but the vendor answers "+
+				"\"does not support parameter reasoningEffort\" to any effort", model)
+		}
+	}
+
+	for _, model := range []string{"grok-4", "grok-4.3", "grok-3-mini", "grok-4-1-fast-reasoning"} {
+		if !AcceptsEffortWire(model) {
+			t.Errorf("AcceptsEffortWire(%q) = false, but the vendor accepts an effort", model)
+		}
+	}
+}
+
+func TestGrokGenerationsThatCannotStopThinking(t *testing.T) {
+	t.Parallel()
+
+	for _, model := range []string{"grok-4.5", "grok-4.5-latest", "grok-4.6"} {
+		if got := ResolveOff(model, ProviderOpenAI); got != OffUnsupported {
+			t.Errorf("ResolveOff(%q) = %v, want OffUnsupported: the vendor answers "+
+				"\"This model does not support reasoning_effort value none\"", model, got)
+		}
+	}
+
+	for _, model := range []string{"grok-4", "grok-4.3", "grok-3-mini"} {
+		if got := ResolveOff(model, ProviderOpenAI); got == OffUnsupported {
+			t.Errorf("ResolveOff(%q) = OffUnsupported, but the vendor accepts an explicit off", model)
+		}
+	}
+}

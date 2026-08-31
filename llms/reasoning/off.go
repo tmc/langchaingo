@@ -123,7 +123,9 @@ func openAIMandatoryReasoning(model string) bool {
 
 func mandatoryThinking(model string) bool {
 	for _, form := range modelSpellings(model) {
-		if strings.HasPrefix(form, "glm-5.3") {
+		if strings.HasPrefix(form, "glm-5.3") ||
+			strings.HasPrefix(form, "grok-4.5") ||
+			strings.HasPrefix(form, "grok-4.6") {
 			return true
 		}
 	}
