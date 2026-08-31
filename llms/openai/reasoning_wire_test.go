@@ -161,44 +161,28 @@ func TestTheEffortFieldStaysOffADoorThatRejectsIt(t *testing.T) {
 	}
 }
 
-func disableReasoningForModel(t *testing.T, model string) string {
-	t.Helper()
+func TestBothDeepSeekReasonerNamesRefuseTheOffTheSameWay(t *testing.T) {
+	for _, model := range []string{"deepseek-reasoner", "deepseek-r1"} {
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`{"id":"x","object":"chat.completion","created":1,"model":"m",` +
+				`"choices":[{"index":0,"message":{"role":"assistant","content":"ok"},"finish_reason":"stop"}],` +
+				`"usage":{"prompt_tokens":1,"completion_tokens":1,"total_tokens":2}}`))
+		}))
+		t.Cleanup(srv.Close)
 
-	const completion = `{"id":"x","object":"chat.completion","created":1,"model":"m",` +
-		`"choices":[{"index":0,"message":{"role":"assistant","content":"ok"},"finish_reason":"stop"}],` +
-		`"usage":{"prompt_tokens":1,"completion_tokens":1,"total_tokens":2}}`
-
-	var body string
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		b, _ := io.ReadAll(r.Body)
-		body = string(b)
-		w.Header().Set("Content-Type", "application/json")
-		_, _ = io.WriteString(w, completion)
-	}))
-	t.Cleanup(srv.Close)
-
-	llm, err := New(WithBaseURL(srv.URL), WithToken("test"), WithModel(model))
-	if err != nil {
-		t.Fatalf("New() error: %v", err)
-	}
-	if _, err := llm.GenerateContent(context.Background(),
-		[]llms.MessageContent{llms.TextParts(llms.ChatMessageTypeHuman, "hi")},
-		llms.WithReasoningDisabled()); err != nil {
-		t.Fatalf("GenerateContent() error: %v", err)
-	}
-	return body
-}
-
-func TestBothDeepSeekReasonerNamesTurnThinkingOffTheSameWay(t *testing.T) {
-	byOwnName := disableReasoningForModel(t, "deepseek-reasoner")
-	byFamilyName := disableReasoningForModel(t, "deepseek-r1")
-
-	for _, want := range []string{`"reasoning_effort":"none"`} {
-		if !strings.Contains(byFamilyName, want) {
-			t.Fatalf("deepseek-r1 request lost %s: %s", want, byFamilyName)
+		llm, err := New(WithBaseURL(srv.URL), WithToken("test"), WithModel(model))
+		if err != nil {
+			t.Fatalf("New() error: %v", err)
 		}
-		if !strings.Contains(byOwnName, want) {
-			t.Fatalf("deepseek-reasoner must disable thinking like deepseek-r1, got: %s", byOwnName)
+		_, err = llm.GenerateContent(context.Background(),
+			[]llms.MessageContent{llms.TextParts(llms.ChatMessageTypeHuman, "hi")},
+			llms.WithReasoningDisabled())
+		if err == nil {
+			t.Fatalf("%s reasons whatever is asked, so the disable must return a typed error", model)
+		}
+		if !strings.Contains(err.Error(), "reasoning cannot be disabled") {
+			t.Fatalf("%s: expected the typed disable error, got: %v", model, err)
 		}
 	}
 }
