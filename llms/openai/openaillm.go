@@ -269,6 +269,8 @@ func (o *LLM) createChatRequest(chatMsgs []*ChatMessage, opts llms.CallOptions) 
 		PresencePenalty:      opts.PresencePenalty,
 		RepetitionPenalty:    opts.RepetitionPenalty,
 		Verbosity:            opts.Verbosity,
+		LogProbs:             opts.LogProbs != nil && *opts.LogProbs,
+		TopLogProbs:          derefInt(opts.TopLogProbs),
 		ToolChoice:           openaiToolChoice(opts.ToolChoice),
 		FunctionCallBehavior: openaiclient.FunctionCallBehavior(opts.FunctionCallBehavior),
 		Seed:                 opts.Seed,
@@ -419,6 +421,8 @@ func (o *LLM) applySamplingPolicy(req *openaiclient.ChatRequest, opts llms.CallO
 			req.Temperature = &temperature
 		}
 		req.TopP = nil
+		req.LogProbs = false
+		req.TopLogProbs = 0
 	case reasoning.ClaudeMutuallyExclusiveSampling(model) && req.Temperature != nil && req.TopP != nil:
 		req.TopP = nil
 	}
@@ -720,4 +724,11 @@ func openaiToolChoice(choice any) any {
 	default:
 		return choice
 	}
+}
+
+func derefInt(i *int) int {
+	if i == nil {
+		return 0
+	}
+	return *i
 }
