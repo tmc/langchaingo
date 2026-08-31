@@ -421,13 +421,10 @@ func (o *LLM) applySamplingPolicy(req *openaiclient.ChatRequest, opts llms.CallO
 			req.Temperature = &temperature
 		}
 		req.TopP = nil
+		req.TopK = nil
 		req.LogProbs = false
 		req.TopLogProbs = 0
 	case reasoning.ClaudeMutuallyExclusiveSampling(model) && req.Temperature != nil && req.TopP != nil:
-		req.TopP = nil
-	}
-
-	if isThinkingOnTheWire(wireEffort) && refusesSamplingWhileThinking(model, opts, wireEffort) {
 		req.TopP = nil
 	}
 }
