@@ -298,6 +298,16 @@ func contains(s, substr string) bool {
 	return len(s) >= len(substr) && s[0:len(substr)] == substr || len(s) > len(substr) && contains(s[1:], substr)
 }
 
+func mustChatParams(t *testing.T, callOpts *llms.CallOptions) sdk.ChatRequestParams {
+	t.Helper()
+
+	params, err := mistralChatParamsFromCallOptions(callOpts)
+	if err != nil {
+		t.Fatalf("mistralChatParamsFromCallOptions: %v", err)
+	}
+	return params
+}
+
 func TestMistralChatParamsFromCallOptions(t *testing.T) {
 	t.Run("basic options", func(t *testing.T) {
 		callOpts := &llms.CallOptions{
@@ -308,7 +318,7 @@ func TestMistralChatParamsFromCallOptions(t *testing.T) {
 			Seed:        getIntPointer(42),
 		}
 
-		result := mistralChatParamsFromCallOptions(callOpts)
+		result := mustChatParams(t, callOpts)
 
 		if result.Temperature != 0.7 {
 			t.Errorf("mistralChatParamsFromCallOptions() Temperature = %v, want %v", result.Temperature, 0.7)
@@ -344,7 +354,7 @@ func TestMistralChatParamsFromCallOptions(t *testing.T) {
 			},
 		}
 
-		result := mistralChatParamsFromCallOptions(callOpts)
+		result := mustChatParams(t, callOpts)
 
 		if len(result.Tools) != 1 {
 			t.Errorf("mistralChatParamsFromCallOptions() Tools length = %v, want %v", len(result.Tools), 1)
@@ -375,7 +385,7 @@ func TestMistralChatParamsFromCallOptions(t *testing.T) {
 			},
 		}
 
-		result := mistralChatParamsFromCallOptions(callOpts)
+		result := mustChatParams(t, callOpts)
 
 		if len(result.Tools) != 1 {
 			t.Errorf("mistralChatParamsFromCallOptions() Tools length = %v, want %v", len(result.Tools), 1)

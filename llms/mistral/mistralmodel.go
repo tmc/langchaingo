@@ -2,7 +2,11 @@ package mistral
 
 import (
 	"context"
+	"crypto/rand"
 	"errors"
+	"fmt"
+	"math"
+	"math/big"
 	"os"
 	"strings"
 
@@ -48,7 +52,10 @@ func New(opts ...Option) (*Model, error) {
 func (m *Model) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
 	callOptions := resolveDefaultOptions(sdk.DefaultChatRequestParams, m.clientOptions)
 	setCallOptions(options, callOptions)
-	mistralChatParams := mistralChatParamsFromCallOptions(callOptions)
+	mistralChatParams, err := mistralChatParamsFromCallOptions(callOptions)
+	if err != nil {
+		return "", err
+	}
 
 	messages := []sdk.ChatMessage{{
 		Role:    "user",
@@ -88,7 +95,10 @@ func (m *Model) GenerateContent(ctx context.Context, langchainMessages []llms.Me
 	callOptions := resolveDefaultOptions(sdk.DefaultChatRequestParams, m.clientOptions)
 	setCallOptions(options, callOptions)
 
-	chatOpts := mistralChatParamsFromCallOptions(callOptions)
+	chatOpts, err := mistralChatParamsFromCallOptions(callOptions)
+	if err != nil {
+		return nil, err
+	}
 
 	messages, err := convertToMistralChatMessages(langchainMessages)
 	if err != nil {
@@ -121,19 +131,21 @@ func resolveDefaultOptions(sdkDefaults sdk.ChatRequestParams, c *clientOptions) 
 		Temperature: &sdkDefaults.Temperature,
 		// TopP is the cumulative probability for top-p sampling.
 		TopP: &sdkDefaults.TopP,
-		// Seed is a seed for deterministic sampling.
-		Seed: &sdkDefaults.RandomSeed,
 		// Function defitions to include in the request.
 		Functions: make([]llms.FunctionDefinition, 0),
 	}
 }
 
-func mistralChatParamsFromCallOptions(callOpts *llms.CallOptions) sdk.ChatRequestParams {
+func mistralChatParamsFromCallOptions(callOpts *llms.CallOptions) (sdk.ChatRequestParams, error) {
 	chatOpts := sdk.DefaultChatRequestParams
 	chatOpts.MaxTokens = callOpts.GetMaxTokens()
 	chatOpts.Temperature = callOpts.GetTemperature()
 	chatOpts.TopP = callOpts.GetTopP()
-	chatOpts.RandomSeed = callOpts.GetSeed()
+	seed, err := seedForRequest(callOpts)
+	if err != nil {
+		return sdk.ChatRequestParams{}, err
+	}
+	chatOpts.RandomSeed = seed
 	if callOpts.GetJSONMode() {
 		chatOpts.ResponseFormat = sdk.ResponseFormatJsonObject
 	}
@@ -162,7 +174,18 @@ func mistralChatParamsFromCallOptions(callOpts *llms.CallOptions) sdk.ChatReques
 			})
 		}
 	}
-	return chatOpts
+	return chatOpts, nil
+}
+
+func seedForRequest(callOpts *llms.CallOptions) (int, error) {
+	if callOpts.Seed != nil {
+		return *callOpts.Seed, nil
+	}
+	n, err := rand.Int(rand.Reader, big.NewInt(math.MaxInt32))
+	if err != nil {
+		return 0, fmt.Errorf("mistral: drawing a seed: %w", err)
+	}
+	return int(n.Int64()), nil
 }
 
 func generateNonStreamingContent(m *Model, callOptions *llms.CallOptions, messages []sdk.ChatMessage, chatOpts sdk.ChatRequestParams) (*llms.ContentResponse, error) {
