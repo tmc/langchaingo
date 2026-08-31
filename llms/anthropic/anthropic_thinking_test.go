@@ -1347,3 +1347,45 @@ func TestUnversionedAliasRunsItsTiersMechanism(t *testing.T) {
 		require.Equal(t, "enabled", thinking["type"])
 	})
 }
+
+func TestTopKReachesTheWireAndYieldsToThinking(t *testing.T) {
+	t.Parallel()
+
+	t.Run("plain request carries it", func(t *testing.T) {
+		t.Parallel()
+
+		body, _ := captureMessagesRequestModel(t, "claude-sonnet-4-5", llms.WithTopK(20))
+		if body["top_k"] != float64(20) {
+			t.Fatalf("top_k must reach the wire, got body: %v", body)
+		}
+	})
+
+	t.Run("thinking unsets it", func(t *testing.T) {
+		t.Parallel()
+
+		body, _ := captureMessagesRequestModel(t, "claude-sonnet-4-5",
+			llms.WithTopK(20), llms.WithReasoning(llms.ReasoningNone, 1100))
+		if _, ok := body["top_k"]; ok {
+			t.Fatalf("the vendor answers `top_k` must be unset when thinking is enabled; got body: %v", body)
+		}
+	})
+
+	t.Run("adaptive thinking unsets it too", func(t *testing.T) {
+		t.Parallel()
+
+		body, _ := captureMessagesRequestModel(t, "claude-sonnet-5",
+			llms.WithTopK(20), llms.WithReasoning(llms.ReasoningHigh, 0))
+		if _, ok := body["top_k"]; ok {
+			t.Fatalf("adaptive thinking is thinking, so top_k must stay off the wire; got body: %v", body)
+		}
+	})
+
+	t.Run("a model that rejects sampling never gets it", func(t *testing.T) {
+		t.Parallel()
+
+		body, _ := captureMessagesRequestModel(t, "claude-sonnet-5", llms.WithTopK(20))
+		if _, ok := body["top_k"]; ok {
+			t.Fatalf("claude-sonnet-5 rejects sampling params, got body: %v", body)
+		}
+	})
+}

@@ -259,11 +259,12 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 		}
 	}
 
-	temperature, topP, maxTokens := opts.Temperature, opts.TopP, opts.GetMaxTokens()
+	temperature, topP, topK, maxTokens := opts.Temperature, opts.TopP, opts.TopK, opts.GetMaxTokens()
 	switch {
 	case thinking != nil && thinking.Type == "adaptive":
 		temperature = nil
 		topP = nil
+		topK = nil
 	case thinking != nil && thinking.Type == "enabled" && thinking.Budget > 0:
 		if !reasoning.ClaudeRejectsSampling(model) {
 			temperature = getFloatPointer(1.0)
@@ -271,11 +272,13 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 			temperature = nil
 		}
 		topP = nil
+		topK = nil
 		maxTokens = reasoning.ClaudeMaxTokensForBudget(thinking.Budget, maxTokens)
 	case reasoning.ClaudeRejectsSampling(model):
 		// Adaptive-only models reject sampling params even without thinking.
 		temperature = nil
 		topP = nil
+		topK = nil
 	case reasoning.ClaudeMutuallyExclusiveSampling(model) && temperature != nil && topP != nil:
 		topP = nil
 	}
@@ -288,6 +291,7 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 		StopWords:     opts.StopWords,
 		Temperature:   temperature,
 		TopP:          topP,
+		TopK:          topK,
 		Tools:         tools,
 		ToolChoice:    anthropicToolChoice(opts.ToolChoice),
 		Thinking:      thinking,

@@ -157,6 +157,7 @@ type MessageRequest struct {
 	Temperature  *float64         `json:"temperature,omitempty"`
 	MaxTokens    *int             `json:"max_tokens,omitempty"`
 	TopP         *float64         `json:"top_p,omitempty"`
+	TopK         *int             `json:"top_k,omitempty"`
 	Tools        []Tool           `json:"tools,omitempty"`
 	ToolChoice   any              `json:"tool_choice,omitempty"`
 	StopWords    []string         `json:"stop_sequences,omitempty"`
@@ -179,6 +180,7 @@ func (c *Client) CreateMessage(ctx context.Context, r *MessageRequest) (*Message
 		MaxTokens:     r.MaxTokens,
 		StopWords:     r.StopWords,
 		TopP:          r.TopP,
+		TopK:          r.TopK,
 		Tools:         r.Tools,
 		ToolChoice:    r.ToolChoice,
 		Stream:        r.Stream,
