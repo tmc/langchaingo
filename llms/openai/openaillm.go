@@ -284,6 +284,14 @@ func (o *LLM) createChatRequest(chatMsgs []*ChatMessage, opts llms.CallOptions) 
 		req.PresencePenalty = nil
 	}
 
+	if model := o.effectiveModel(opts); reasoning.QwenThinkingRequiresStream(model) && opts.StreamingFunc == nil {
+		if opts.Reasoning.ResolveMode() == llms.ReasoningOn {
+			return nil, &reasoning.ErrThinkingRequiresStream{Model: model}
+		}
+		thinkingOff := false
+		req.EnableThinking = &thinkingOff
+	}
+
 	if isLegacyMaxTokensField(&opts) || reasoning.UsesLegacyMaxTokens(o.effectiveModel(opts)) {
 		req.MaxTokens = opts.MaxTokens
 	} else {
