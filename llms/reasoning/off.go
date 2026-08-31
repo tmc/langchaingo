@@ -88,6 +88,9 @@ func ResolveOff(model string, p Provider) OffWire {
 		if mandatoryThinking(model) {
 			return OffUnsupported
 		}
+		if offByOmission(model) {
+			return OffOmit
+		}
 		// The disable token rides on the effort field, so a door that refuses that
 		// field cannot express "off" at all.
 		if caps := OpenAIReasoningCapsFor(model); caps.Known && !caps.CanDisable {
@@ -121,6 +124,15 @@ func openAIMandatoryReasoning(model string) bool {
 	return false
 }
 
+func offByOmission(model string) bool {
+	for _, form := range modelSpellings(model) {
+		if strings.HasPrefix(form, "magistral") {
+			return true
+		}
+	}
+	return false
+}
+
 func mandatoryThinking(model string) bool {
 	for _, form := range modelSpellings(model) {
 		if strings.HasPrefix(form, "glm-5.3") ||
@@ -129,7 +141,8 @@ func mandatoryThinking(model string) bool {
 			strings.HasPrefix(form, "minimax-m2") ||
 			form == "glm-latest" ||
 			strings.HasPrefix(form, "kimi-k2-thinking") ||
-			strings.HasPrefix(form, "kimi-k2.7-code") {
+			strings.HasPrefix(form, "kimi-k2.7-code") ||
+			strings.HasPrefix(form, "gpt-oss") {
 			return true
 		}
 	}

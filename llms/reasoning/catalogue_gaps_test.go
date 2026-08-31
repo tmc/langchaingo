@@ -290,3 +290,90 @@ func TestKimiTakesEffortButNotAlwaysAnOff(t *testing.T) {
 		}
 	}
 }
+
+func TestNonChatNvidiaSurfacesAreNotReasoningModels(t *testing.T) {
+	t.Parallel()
+
+	for _, model := range []string{
+		"nvidia/Nemotron-3-Embed-8B", "nvidia/Nemotron-3-Embed-1B-BF16",
+		"nvidia/llama-nemotron-embed-vl-1b-v2", "nvidia/llama-nemotron-rerank-vl-1b-v2",
+		"nvidia/Nemotron-3.5-ASR-Streaming-Multilingual-0.6b",
+		"nvidia/Nemotron-Content-Safety-3.5", "nvidia/nemotron-3.5-content-safety",
+	} {
+		if IsReasoningModel(model) {
+			t.Errorf("IsReasoningModel(%q) = true, but the route serves no chat completion", model)
+		}
+	}
+
+	for _, model := range []string{
+		"nvidia/NVIDIA-Nemotron-Nano-9B-v2", "nvidia/nemotron-3-super-120b-a12b",
+		"nvidia/Nemotron-3-Nano-Omni-30B-A3B-Reasoning", "nvidia.nemotron-nano-9b-v2",
+	} {
+		if !IsReasoningModel(model) {
+			t.Errorf("IsReasoningModel(%q) = false, but the chat route still reasons", model)
+		}
+	}
+}
+
+func TestMistralAliasesOfTheSameModelAgree(t *testing.T) {
+	t.Parallel()
+
+	for _, model := range []string{
+		"mistral-medium-latest", "mistral-medium-2604", "mistral-medium", "mistral-medium-3-5",
+		"mistral-small-latest", "mistral-small-2603", "mistralai/mistral-medium-latest",
+	} {
+		if !IsReasoningModel(model) {
+			t.Errorf("IsReasoningModel(%q) = false, but the vendor reasons on an explicit effort", model)
+		}
+		if !ThinkingOptIn(model) {
+			t.Errorf("ThinkingOptIn(%q) = false, but a bare call returns no reasoning", model)
+		}
+	}
+
+	for _, model := range []string{
+		"mistral-medium-2505", "mistral-medium-2508", "mistral-large-latest", "mistral-large-2512",
+	} {
+		if IsReasoningModel(model) {
+			t.Errorf("IsReasoningModel(%q) = true, but the vendor answers 400 reasoning_effort is not enabled", model)
+		}
+	}
+}
+
+func TestMagistralExpressesItsOffByOmission(t *testing.T) {
+	t.Parallel()
+
+	for _, model := range []string{"magistral-medium-latest", "magistral-small-latest", "mistral/magistral-medium-latest"} {
+		if !ThinkingOptIn(model) {
+			t.Errorf("ThinkingOptIn(%q) = false, but a bare call returns no reasoning", model)
+		}
+		if got := ResolveOff(model, ProviderOpenAI); got != OffOmit {
+			t.Errorf("ResolveOff(%q) = %v, want OffOmit: the none token starts a think block instead of stopping one", model, got)
+		}
+	}
+}
+
+func TestGPTOSSCannotStopReasoning(t *testing.T) {
+	t.Parallel()
+
+	for _, model := range []string{
+		"gpt-oss-120b", "gpt-oss-20b", "openai/gpt-oss-120b",
+		"openai.gpt-oss-120b-1:0", "gpt-oss-safeguard-20b",
+	} {
+		if got := ResolveOff(model, ProviderOpenAI); got != OffUnsupported {
+			t.Errorf("ResolveOff(%q) = %v, want OffUnsupported: an explicit off still returns reasoning", model, got)
+		}
+	}
+}
+
+func TestOllamaTagSpellingResolvesLikeTheHyphenOne(t *testing.T) {
+	t.Parallel()
+
+	for _, model := range []string{"gpt-oss:120b", "gpt-oss:20b", "ollama_cloud/gpt-oss:120b"} {
+		if !IsReasoningModel(model) {
+			t.Errorf("IsReasoningModel(%q) = false, but the hyphen spelling of the same model is true", model)
+		}
+		if got := ResolveOff(model, ProviderOpenAI); got != OffUnsupported {
+			t.Errorf("ResolveOff(%q) = %v, want OffUnsupported like the hyphen spelling", model, got)
+		}
+	}
+}

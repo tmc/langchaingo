@@ -187,6 +187,28 @@ func DefaultIsReasoningModel(model string) bool {
 	return false
 }
 
+func mistralReasons(model string) bool {
+	if model == "mistral-medium" {
+		return true
+	}
+	for _, prefix := range []string{
+		"mistral-medium-3", "mistral-medium-latest", "mistral-medium-2604",
+		"mistral-small-2603", "mistral-small-latest",
+	} {
+		if strings.HasPrefix(model, prefix) {
+			return true
+		}
+	}
+	return false
+}
+
+func nvidiaNonChatSurface(model string) bool {
+	return strings.Contains(model, "-embed-") ||
+		strings.Contains(model, "-rerank-") ||
+		strings.Contains(model, "-asr-") ||
+		strings.Contains(model, "content-safety")
+}
+
 func namesReasoningModel(modelLower string) bool { //nolint:funlen // a flat catalog of model-family prefix checks; splitting hurts readability
 	if strings.Contains(modelLower, "-chat-latest") {
 		return false
@@ -194,7 +216,7 @@ func namesReasoningModel(modelLower string) bool { //nolint:funlen // a flat cat
 
 	// OpenAI reasoning models
 	if strings.HasPrefix(modelLower, "gpt-5") ||
-		strings.HasPrefix(modelLower, "gpt-oss-") ||
+		strings.HasPrefix(modelLower, "gpt-oss") ||
 		strings.HasPrefix(modelLower, "o1") ||
 		strings.HasPrefix(modelLower, "o3") ||
 		strings.HasPrefix(modelLower, "o4-mini") ||
@@ -295,7 +317,7 @@ func namesReasoningModel(modelLower string) bool { //nolint:funlen // a flat cat
 		(strings.Contains(modelLower, "lfm-") && strings.Contains(modelLower, "-thinking")) ||
 		strings.Contains(modelLower, "deephermes") ||
 		strings.Contains(modelLower, "hermes-4-") ||
-		strings.Contains(modelLower, "nemotron") ||
+		(strings.Contains(modelLower, "nemotron") && !nvidiaNonChatSurface(modelLower)) ||
 		strings.Contains(modelLower, "intellect-3") ||
 		strings.Contains(modelLower, "step3") ||
 		strings.Contains(modelLower, "hunyuan-a13b") ||
@@ -314,8 +336,7 @@ func namesReasoningModel(modelLower string) bool { //nolint:funlen // a flat cat
 		strings.HasPrefix(modelLower, "mercury-2") ||
 		strings.HasPrefix(modelLower, "ring-2.6") ||
 		strings.HasPrefix(modelLower, "muse-spark") ||
-		strings.HasPrefix(modelLower, "mistral-medium-3") ||
-		strings.HasPrefix(modelLower, "mistral-small-2603") ||
+		mistralReasons(modelLower) ||
 		strings.HasPrefix(modelLower, "magistral") ||
 		strings.HasPrefix(modelLower, "nex-n2") ||
 		strings.HasPrefix(modelLower, "perceptron-mk") ||
@@ -341,7 +362,10 @@ func ThinkingOptIn(model string) bool {
 		return true
 	}
 	for _, form := range modelSpellings(model) {
-		for _, prefix := range []string{"mistral-medium-3", "mistral-small-2603", "solar-pro-3", "solar-pro4", "deepseek-v3.1", "deepseek-chat-v3.1", "deepseek-v3.2"} {
+		if mistralReasons(form) || strings.HasPrefix(form, "magistral") {
+			return true
+		}
+		for _, prefix := range []string{"solar-pro-3", "solar-pro4", "deepseek-v3.1", "deepseek-chat-v3.1", "deepseek-v3.2"} {
 			if strings.HasPrefix(form, prefix) {
 				return true
 			}
