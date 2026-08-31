@@ -403,7 +403,10 @@ func TestFamiliesThatRefuseAnExplicitOff(t *testing.T) {
 func TestFamiliesMeasuredAgainstTheirBareCall(t *testing.T) {
 	t.Parallel()
 
-	for _, model := range []string{"lfm-2.5-2.6b", "liquid/lfm-2.5-2.6b:free", "seed-2-1-turbo", "bytedance-seed/seed-2-1-turbo"} {
+	for _, model := range []string{
+		"lfm-2.5-2.6b", "liquid/lfm-2.5-2.6b:free", "seed-2-1-turbo", "bytedance-seed/seed-2-1-turbo",
+		"inkling", "inkling-small", "thinkingmachines/inkling", "openrouter/thinkingmachines/inkling-small:free",
+	} {
 		if !IsReasoningModel(model) {
 			t.Errorf("IsReasoningModel(%q) = false, but a bare call already returns a reasoning block", model)
 		}
@@ -421,6 +424,32 @@ func TestFamiliesMeasuredAgainstTheirBareCall(t *testing.T) {
 
 	if !ThinkingOptIn("ernie-4.5-vl-424b-a47b") {
 		t.Error("ThinkingOptIn(ernie-4.5) = false, but a bare call returns no reasoning and an effort turns it on")
+	}
+
+	if got := ResolveOff("thinkingmachines/inkling", ProviderOpenAI); got != OffEffortNone {
+		t.Errorf("ResolveOff(inkling) = %v, want OffEffortNone: the off returns no reasoning", got)
+	}
+}
+
+func TestTheThinkingMarkerNeedsAWordBoundary(t *testing.T) {
+	t.Parallel()
+
+	for _, model := range []string{
+		"kimi-k2-thinking", "qwen3-30b-a3b-thinking-2507", "Qwen3-235B-A22B-Thinking-2507",
+		"arcee-ai/trinity-large-thinking", "lfm-2-thinking",
+	} {
+		if !ThinkingMarkedInName(model) {
+			t.Errorf("ThinkingMarkedInName(%q) = false, but the name carries the marker as its own token", model)
+		}
+	}
+
+	for _, model := range []string{
+		"thinkingmachines/inkling", "openrouter/thinkingmachines/inkling-small:free",
+		"gpt-5.4", "claude-sonnet-4-5",
+	} {
+		if ThinkingMarkedInName(model) {
+			t.Errorf("ThinkingMarkedInName(%q) = true, but the marker only appears inside a longer word", model)
+		}
 	}
 }
 

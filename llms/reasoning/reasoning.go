@@ -317,6 +317,7 @@ func namesReasoningModel(modelLower string) bool { //nolint:funlen // a flat cat
 		(strings.Contains(modelLower, "lfm-") && strings.Contains(modelLower, "-thinking")) ||
 		strings.HasPrefix(modelLower, "lfm-2.5") ||
 		strings.Contains(modelLower, "seed-2-1") ||
+		strings.Contains(modelLower, "inkling") ||
 		strings.Contains(modelLower, "deephermes") ||
 		strings.Contains(modelLower, "hermes-4-") ||
 		(strings.Contains(modelLower, "nemotron") && !nvidiaNonChatSurface(modelLower)) ||
@@ -380,7 +381,24 @@ func ThinkingOptIn(model string) bool {
 // ThinkingMarkedInName reports whether the model name selects a routing variant
 // that already runs with thinking on, not merely a model capable of thinking.
 func ThinkingMarkedInName(model string) bool {
-	return strings.Contains(strings.ToLower(model), "thinking")
+	m := strings.ToLower(model)
+	const marker = "thinking"
+	for i := 0; i < len(m); {
+		idx := strings.Index(m[i:], marker)
+		if idx == -1 {
+			return false
+		}
+		start, end := i+idx, i+idx+len(marker)
+		if !letterAt(m, start-1) && !letterAt(m, end) {
+			return true
+		}
+		i = end
+	}
+	return false
+}
+
+func letterAt(s string, i int) bool {
+	return i >= 0 && i < len(s) && s[i] >= 'a' && s[i] <= 'z'
 }
 
 func isAlpha(s string) bool {
