@@ -75,3 +75,15 @@ func TestDeepSeekV32KeepsSamplingEvenWithAnEffortOnTheWire(t *testing.T) {
 		t.Errorf("reasoning_effort = %v, want %v", got, want)
 	}
 }
+
+func TestChatVariantsKeepTheTemperatureTheCallerSet(t *testing.T) {
+	t.Parallel()
+
+	for _, model := range []string{"gpt-5.2-chat", "gpt-5.2-chat-latest", "gpt-5-chat"} {
+		body := captureDeepSeekRequest(t, model,
+			llms.WithTemperature(0.3), llms.WithReasoning(llms.ReasoningHigh, 0))
+		if body["temperature"] != 0.3 {
+			t.Errorf("%s must keep the caller's temperature, got body: %v", model, body)
+		}
+	}
+}

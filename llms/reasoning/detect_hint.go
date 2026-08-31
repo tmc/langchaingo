@@ -27,7 +27,7 @@ func likelyReasoningFamily(m string) bool {
 
 	switch {
 	case strings.HasPrefix(m, "gpt-"):
-		return !openAIPreReasoning(m) && !strings.Contains(m, "-chat-latest")
+		return !openAIPreReasoning(m) && !openAIChatVariant(m)
 	case isOSeries(m):
 		return true
 	case strings.HasPrefix(m, "claude-"):

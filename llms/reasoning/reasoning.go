@@ -210,7 +210,7 @@ func nvidiaNonChatSurface(model string) bool {
 }
 
 func namesReasoningModel(modelLower string) bool { //nolint:funlen // a flat catalog of model-family prefix checks; splitting hurts readability
-	if strings.Contains(modelLower, "-chat-latest") {
+	if strings.Contains(modelLower, "-chat-latest") || openAIChatVariant(modelLower) {
 		return false
 	}
 
