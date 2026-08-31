@@ -662,7 +662,7 @@ func TestIsReasoningModel(t *testing.T) { //nolint:funlen
 		{"deepseek-r1", true},
 		{"deepseek-r1-0528", true},
 		{"deepseek-r1-distill-llama-70b", true},
-		{"deepseek-chat-v3-0324", true},
+		{"deepseek-chat-v3-0324", false},
 		{"deepseek-chat-v3.1", true},
 		{"deepseek-v3.1-terminus", true},
 		{"deepseek-v3.2", true},

@@ -114,3 +114,43 @@ func TestMeasuredModelsSplitByWhenTheyReason(t *testing.T) {
 		}
 	}
 }
+
+func TestModelsMeasuredNotToReasonStayOut(t *testing.T) {
+	t.Parallel()
+
+	for _, tc := range []struct {
+		model string
+		want  bool
+	}{
+		{"deepseek-chat-v3-0324", false},
+		{"deepseek-chat-v3.1", true},
+		{"minimax-m2-her", false},
+		{"minimax-m2", true},
+		{"minimax-m2.7", true},
+		{"aion-rp-llama-3.1-8b", false},
+		{"aion-2.0", true},
+		{"aion-3.0", true},
+		{"gemini-2.5-flash-image", false},
+		{"gemini-2.5-flash", true},
+	} {
+		if got := IsReasoningModel(tc.model); got != tc.want {
+			t.Errorf("IsReasoningModel(%q) = %v, want %v", tc.model, got, tc.want)
+		}
+	}
+}
+
+func TestMandatoryThinkingCannotBeDisabled(t *testing.T) {
+	t.Parallel()
+
+	for _, model := range []string{"glm-5.3", "glm-5.3-flash"} {
+		if got := ResolveOff(model, ProviderOpenAI); got != OffUnsupported {
+			t.Errorf("ResolveOff(%q) = %v, want OffUnsupported: the vendor answers "+
+				"\"Reasoning is mandatory\" to an explicit disable", model, got)
+		}
+	}
+	for _, model := range []string{"glm-4.6", "glm-5"} {
+		if got := ResolveOff(model, ProviderOpenAI); got == OffUnsupported {
+			t.Errorf("ResolveOff(%q) = OffUnsupported, but this generation was never measured to refuse a disable", model)
+		}
+	}
+}

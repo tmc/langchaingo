@@ -219,7 +219,7 @@ func namesReasoningModel(modelLower string) bool { //nolint:funlen // a flat cat
 	// DeepSeek reasoning models
 	if strings.Contains(modelLower, "deepseek-r1") ||
 		strings.Contains(modelLower, "deepseek-reasoner") ||
-		strings.Contains(modelLower, "deepseek-chat-v3") ||
+		strings.Contains(modelLower, "deepseek-chat-v3.") ||
 		strings.Contains(modelLower, "deepseek-v3.1-terminus") ||
 		strings.HasPrefix(modelLower, "deepseek-v3.2") ||
 		strings.HasPrefix(modelLower, "deepseek-v4") {
@@ -260,7 +260,7 @@ func namesReasoningModel(modelLower string) bool { //nolint:funlen // a flat cat
 	}
 
 	// Minimax reasoning models
-	if strings.HasPrefix(modelLower, "minimax-m") {
+	if strings.HasPrefix(modelLower, "minimax-m") && !strings.Contains(modelLower, "-her") {
 		return true
 	}
 
@@ -285,7 +285,7 @@ func namesReasoningModel(modelLower string) bool { //nolint:funlen // a flat cat
 	}
 
 	// Other reasoning models
-	if strings.Contains(modelLower, "aion-") ||
+	if (strings.Contains(modelLower, "aion-") && !strings.Contains(modelLower, "aion-rp")) ||
 		(strings.Contains(modelLower, "olmo-") && strings.Contains(modelLower, "-think")) ||
 		strings.Contains(modelLower, "nova-2-lite") ||
 		strings.Contains(modelLower, "trinity-mini") ||
