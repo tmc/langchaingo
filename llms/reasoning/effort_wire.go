@@ -5,6 +5,20 @@ import "strings"
 // AcceptsEffortWire reports whether the model's OpenAI-compatible door takes the
 // reasoning_effort field. A door that refuses it fails the whole request, so such
 // a model also has no way to spell "off": the disable token rides on this field.
+// UsesLegacyMaxTokens reports whether the output limit must travel as
+// max_tokens rather than max_completion_tokens.
+func UsesLegacyMaxTokens(model string) bool {
+	for _, form := range modelSpellings(model) {
+		if strings.HasPrefix(form, "grok") ||
+			strings.HasPrefix(form, "qwen") ||
+			strings.HasPrefix(form, "qwq") ||
+			strings.HasPrefix(form, "qvq") {
+			return true
+		}
+	}
+	return false
+}
+
 func AcceptsEffortWire(model string) bool {
 	for _, form := range modelSpellings(model) {
 		if strings.HasPrefix(form, "qwen") || strings.HasPrefix(form, "qwq") {

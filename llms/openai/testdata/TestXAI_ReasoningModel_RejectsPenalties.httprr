@@ -1,13 +1,13 @@
 httprr trace v1
-309 642
+298 642
 POST https://api.x.ai/v1/chat/completions HTTP/1.1
 Host: api.x.ai
 User-Agent: langchaingo-httprr
-Content-Length: 119
+Content-Length: 108
 Authorization: Bearer test-api-key
 Content-Type: application/json
 
-{"model":"grok-4.5","messages":[{"role":"user","content":"Say hi"}],"max_completion_tokens":256,"presence_penalty":0.5}HTTP/2.0 400 Bad Request
+{"model":"grok-4.5","messages":[{"role":"user","content":"Say hi"}],"max_tokens":256,"presence_penalty":0.5}HTTP/2.0 400 Bad Request
 Content-Length: 96
 Access-Control-Allow-Origin: *
 Access-Control-Expose-Headers: *
