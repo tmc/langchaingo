@@ -422,6 +422,8 @@ func (o *LLM) applySamplingPolicy(req *openaiclient.ChatRequest, opts llms.CallO
 		}
 		req.TopP = nil
 		req.TopK = nil
+		req.FrequencyPenalty = nil
+		req.PresencePenalty = nil
 		req.LogProbs = false
 		req.TopLogProbs = 0
 	case reasoning.ClaudeMutuallyExclusiveSampling(model) && req.Temperature != nil && req.TopP != nil:
