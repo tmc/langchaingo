@@ -292,6 +292,7 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 		Temperature:   temperature,
 		TopP:          topP,
 		TopK:          topK,
+		Speed:         opts.InferenceSpeed,
 		Tools:         tools,
 		ToolChoice:    anthropicToolChoice(opts.ToolChoice),
 		Thinking:      thinking,
@@ -431,6 +432,7 @@ func processAnthropicResponse(result *anthropicclient.MessageResponsePayload) (*
 			// Special fields for Anthropic cache creation
 			"CacheCreationEphemeral5mInputTokens": result.Usage.CacheCreation.Ephemeral5mInputTokens,
 			"CacheCreationEphemeral1hInputTokens": result.Usage.CacheCreation.Ephemeral1hInputTokens,
+			"InferenceSpeed":                      result.Usage.Speed,
 			// Special fields for Anthropic
 			"InputTokens":  result.Usage.InputTokens,
 			"OutputTokens": result.Usage.OutputTokens,
@@ -893,6 +895,8 @@ func handleToolMessage(msg llms.MessageContent) (anthropicclient.ChatMessage, er
 	return anthropicclient.ChatMessage{}, fmt.Errorf("anthropic: %w for tool message", ErrInvalidContentType)
 }
 
+const anthropicFastModeBeta = "fast-mode-2026-02-01"
+
 // extractBetaHeaders extracts beta headers from call options. thinking is the
 // mechanism actually resolved for this request (nil when no thinking), so the
 // interleaved-thinking beta keys off the real wire shape rather than the caller's
@@ -915,6 +919,10 @@ func extractBetaHeaders(opts *llms.CallOptions, thinking *anthropicclient.Thinki
 	// thinking interleaves natively and needs no header.
 	if thinking != nil && thinking.Type == "enabled" && len(opts.Tools) > 0 {
 		betaHeaders = appendIfMissing(betaHeaders, "interleaved-thinking-2025-05-14")
+	}
+
+	if opts.InferenceSpeed != nil {
+		betaHeaders = appendIfMissing(betaHeaders, anthropicFastModeBeta)
 	}
 
 	return betaHeaders
