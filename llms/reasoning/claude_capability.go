@@ -160,6 +160,18 @@ func ClaudeClampEffort(model, effort string) string {
 // ClaudeMinThinkingBudget is the smallest budget_tokens Anthropic accepts.
 const ClaudeMinThinkingBudget = 1024
 
+// ClaudeSpendsThinkingBudget reports whether the model pays for thinking out of a
+// budget that the answer limit has to exceed.
+func ClaudeSpendsThinkingBudget(model string) bool {
+	switch ClaudeReasoningKindFor(model) {
+	case ClaudeReasoningBudgetOnly, ClaudeReasoningAdaptiveAndBudget:
+		return true
+	case ClaudeReasoningUnknown, ClaudeReasoningAdaptiveOnly:
+		return false
+	}
+	return false
+}
+
 // ClaudeClampBudget raises a budget below the vendor floor up to it, and leaves
 // every other model and a zero budget untouched.
 func ClaudeClampBudget(model string, budget int) int {

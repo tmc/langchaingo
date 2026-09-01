@@ -208,18 +208,13 @@ func (r *ReasoningConfig) GetTokens(maxTokens int) int {
 		tokens = r.Tokens
 	} else {
 		switch r.Effort {
-		case ReasoningLow:
-			tokens = max(maxTokens/4, 1024)
-		case ReasoningMedium:
-			tokens = max(maxTokens/3, 2048)
-		case ReasoningHigh, ReasoningXHigh, ReasoningMax:
-			// no distinct token budget for xhigh/max; map them to the high budget.
-			tokens = max(maxTokens/2, 4096)
+		case ReasoningLow, ReasoningMedium, ReasoningHigh, ReasoningXHigh, ReasoningMax:
+			tokens = ReasoningEffortBudget(r.Effort, maxTokens)
 		case ReasoningNone:
 			if r.Adaptive || r.Mode == ReasoningOn {
 				// Adaptive, or an explicit ReasoningOn with no effort, defaults to the
 				// high budget so budget-mapping providers keep reasoning enabled.
-				tokens = max(maxTokens/2, 4096)
+				tokens = ReasoningEffortBudget(ReasoningHigh, maxTokens)
 			} else {
 				return 0 // disabled
 			}
@@ -229,6 +224,25 @@ func (r *ReasoningConfig) GetTokens(maxTokens int) int {
 	}
 
 	return min(min(tokens, maxTokens*2/3), MaxReasoningTokens)
+}
+
+// ReasoningEffortBudget reports the thinking budget an effort stands for, before
+// any answer limit caps it.
+func ReasoningEffortBudget(effort ReasoningEffort, maxTokens int) int {
+	if maxTokens <= 0 {
+		maxTokens = DefaultMaxTokens
+	}
+	switch effort {
+	case ReasoningLow:
+		return max(maxTokens/4, 1024)
+	case ReasoningMedium:
+		return max(maxTokens/3, 2048)
+	case ReasoningHigh, ReasoningXHigh, ReasoningMax:
+		// no distinct token budget for xhigh/max; map them to the high budget.
+		return max(maxTokens/2, 4096)
+	default:
+		return 0
+	}
 }
 
 // CallOptions is a set of options for calling models. Not all models support
