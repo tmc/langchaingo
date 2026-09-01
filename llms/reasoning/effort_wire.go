@@ -2,9 +2,6 @@ package reasoning
 
 import "strings"
 
-// AcceptsEffortWire reports whether the model's OpenAI-compatible door takes the
-// reasoning_effort field. A door that refuses it fails the whole request, so such
-// a model also has no way to spell "off": the disable token rides on this field.
 // RejectsPenalties reports whether frequency_penalty and presence_penalty
 // must stay off the wire.
 func RejectsPenalties(model string) bool {
@@ -14,6 +11,11 @@ func RejectsPenalties(model string) bool {
 		}
 	}
 	return false
+}
+
+// RejectsMinP reports whether min_p must stay off the wire.
+func RejectsMinP(model string) bool {
+	return isClaudeModel(model)
 }
 
 // UsesLegacyMaxTokens reports whether the output limit must travel as
@@ -30,6 +32,9 @@ func UsesLegacyMaxTokens(model string) bool {
 	return false
 }
 
+// AcceptsEffortWire reports whether the model's OpenAI-compatible door takes the
+// reasoning_effort field. A door that refuses it fails the whole request, so such
+// a model also has no way to spell "off": the disable token rides on this field.
 func AcceptsEffortWire(model string) bool {
 	for _, form := range modelSpellings(model) {
 		if strings.HasPrefix(form, "qwen") || strings.HasPrefix(form, "qwq") {

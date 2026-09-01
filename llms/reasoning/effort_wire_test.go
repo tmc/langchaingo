@@ -31,6 +31,30 @@ func TestAcceptsEffortWire(t *testing.T) {
 	}
 }
 
+func TestRejectsMinP(t *testing.T) {
+	t.Parallel()
+
+	for _, tc := range []struct {
+		model  string
+		reject bool
+	}{
+		{"claude-sonnet-4-5", true},
+		{"claude-sonnet-4-5-20250929", true},
+		{"anthropic/claude-sonnet-4.5", true},
+		{"us.anthropic.claude-opus-4-6-v1:0", true},
+		{"claude-opus-4-7", true},
+		{"claude-haiku-4-5", true},
+		{"gpt-5.5", false},
+		{"grok-4.6", false},
+		{"qwen3-32b", false},
+		{"deepseek-v3.2", false},
+	} {
+		if got := RejectsMinP(tc.model); got != tc.reject {
+			t.Errorf("RejectsMinP(%q) = %v, want %v", tc.model, got, tc.reject)
+		}
+	}
+}
+
 func TestResolveOffOnDoorsThatRejectEffort(t *testing.T) {
 	t.Parallel()
 

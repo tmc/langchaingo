@@ -428,8 +428,11 @@ func (o *LLM) writeDisableEffort(req *openaiclient.ChatRequest) {
 
 func (o *LLM) applySamplingPolicy(req *openaiclient.ChatRequest, opts llms.CallOptions, wireEffort string) {
 	model := o.effectiveModel(opts)
+	if reasoning.RejectsMinP(model) {
+		req.MinP = nil
+	}
 	if reasoning.ClaudeRejectsSampling(model) {
-		req.Temperature, req.TopP, req.TopK, req.MinP = nil, nil, nil, nil
+		req.Temperature, req.TopP, req.TopK = nil, nil, nil
 		return
 	}
 
