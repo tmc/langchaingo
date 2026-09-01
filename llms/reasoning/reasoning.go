@@ -277,6 +277,7 @@ func namesReasoningModel(modelLower string) bool { //nolint:funlen // a flat cat
 	// an explicit "thinking" marker or the QwQ line count as always-on reasoning.
 	if (strings.HasPrefix(modelLower, "qwen") && ThinkingMarkedInName(modelLower)) ||
 		strings.Contains(modelLower, "qwq-") ||
+		QwenThinkingRequiresStream(modelLower) ||
 		qwenReasonsUnasked(modelLower) {
 		return true
 	}

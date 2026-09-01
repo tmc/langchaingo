@@ -104,3 +104,19 @@ func TestQwenHybridHonoursDisabledThinkingOnAStream(t *testing.T) {
 		t.Fatalf("an explicit disable must reach the wire, got %v (present=%v)", got, ok)
 	}
 }
+
+func TestQwenHybridKeepsTheCallerSampling(t *testing.T) {
+	t.Parallel()
+
+	body, err := captureQwenRequest(t, "dashscope/qwen3-8b",
+		llms.WithTemperature(0.25), llms.WithTopP(0.3))
+	if err != nil {
+		t.Fatalf("generate: %v", err)
+	}
+	if got := body["temperature"]; got != 0.25 {
+		t.Fatalf("the caller's temperature must survive, got %v", got)
+	}
+	if got := body["top_p"]; got != 0.3 {
+		t.Fatalf("the caller's top_p must survive, got %v", got)
+	}
+}

@@ -32,6 +32,8 @@ const (
 	OffZeroBudget
 	// OffEffortNone → OpenAI reasoning_effort:"none".
 	OffEffortNone
+	// OffDisableDashScope → DashScope enable_thinking:false.
+	OffDisableDashScope
 	// OffUnsupported: a known mandatory-thinking model that cannot be disabled
 	// (adaptive-only Claude, OpenAI o-series). The adapter returns a typed error.
 	OffUnsupported
@@ -87,6 +89,9 @@ func ResolveOff(model string, p Provider) OffWire {
 		}
 		if offByOmission(model) {
 			return OffOmit
+		}
+		if QwenThinkingRequiresStream(model) {
+			return OffDisableDashScope
 		}
 		// The disable token rides on the effort field, so a door that refuses that
 		// field cannot express "off" at all.
