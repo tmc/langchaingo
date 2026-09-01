@@ -116,6 +116,9 @@ func openAIXHighCeiling(m string) bool {
 // asks them to.
 func OpenAIThinkingOptIn(model string) bool {
 	for _, form := range modelSpellings(model) {
+		if openAIProVariant(form) {
+			continue
+		}
 		for _, generation := range []string{"gpt-5.1", "gpt-5.2", "gpt-5.4"} {
 			if hasGeneration(form, generation) {
 				return true
