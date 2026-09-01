@@ -104,3 +104,51 @@ func TestQwenHybridHonoursDisabledThinkingOnAStream(t *testing.T) {
 		t.Fatalf("an explicit disable must reach the wire, got %v (present=%v)", got, ok)
 	}
 }
+
+func TestQwenHybridKeepsTheCallerSampling(t *testing.T) {
+	t.Parallel()
+
+	body, err := captureQwenRequest(t, "dashscope/qwen3-8b",
+		llms.WithTemperature(0.25), llms.WithTopP(0.3))
+	if err != nil {
+		t.Fatalf("generate: %v", err)
+	}
+	if got := body["temperature"]; got != 0.25 {
+		t.Fatalf("the caller's temperature must survive, got %v", got)
+	}
+	if got := body["top_p"]; got != 0.3 {
+		t.Fatalf("the caller's top_p must survive, got %v", got)
+	}
+}
+
+func TestQwenCommercialHybridTurnsThinkingOnWhenAsked(t *testing.T) {
+	t.Parallel()
+
+	body, err := captureQwenRequest(t, "dashscope/qwen-plus", llms.WithReasoning(llms.ReasoningHigh, 0))
+	if err != nil {
+		t.Fatalf("generate: %v", err)
+	}
+	if got, ok := body["enable_thinking"]; !ok || got != true {
+		t.Fatalf("asking for reasoning must turn the vendor flag on, got %v (present=%v)", got, ok)
+	}
+}
+
+func TestQwenCommercialHybridStaysQuietOtherwise(t *testing.T) {
+	t.Parallel()
+
+	for _, tc := range []struct {
+		name string
+		opts []llms.CallOption
+	}{
+		{"bare", nil},
+		{"disabled", []llms.CallOption{llms.WithReasoningDisabled()}},
+	} {
+		body, err := captureQwenRequest(t, "dashscope/qwen-plus", tc.opts...)
+		if err != nil {
+			t.Fatalf("%s: generate: %v", tc.name, err)
+		}
+		if got, ok := body["enable_thinking"]; ok {
+			t.Errorf("%s: the flag must stay off the wire, got %v", tc.name, got)
+		}
+	}
+}

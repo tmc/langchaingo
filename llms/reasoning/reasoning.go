@@ -277,6 +277,8 @@ func namesReasoningModel(modelLower string) bool { //nolint:funlen // a flat cat
 	// an explicit "thinking" marker or the QwQ line count as always-on reasoning.
 	if (strings.HasPrefix(modelLower, "qwen") && ThinkingMarkedInName(modelLower)) ||
 		strings.Contains(modelLower, "qwq-") ||
+		QwenThinkingRequiresStream(modelLower) ||
+		QwenThinkingEnabledByFlag(modelLower) ||
 		qwenReasonsUnasked(modelLower) {
 		return true
 	}
@@ -361,7 +363,7 @@ func namesReasoningModel(modelLower string) bool { //nolint:funlen // a flat cat
 
 // ThinkingOptIn reports whether the model reasons only when a request asks it to.
 func ThinkingOptIn(model string) bool {
-	if OpenAIThinkingOptIn(model) {
+	if OpenAIThinkingOptIn(model) || QwenThinkingEnabledByFlag(model) {
 		return true
 	}
 	for _, form := range modelSpellings(model) {

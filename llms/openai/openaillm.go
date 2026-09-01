@@ -285,14 +285,19 @@ func (o *LLM) createChatRequest(chatMsgs []*ChatMessage, opts llms.CallOptions) 
 	}
 
 	if model := o.effectiveModel(opts); reasoning.QwenThinkingRequiresStream(model) {
-		mode, streamed := opts.Reasoning.ResolveMode(), opts.StreamingFunc != nil
-		if !streamed && mode == llms.ReasoningOn {
-			return nil, &reasoning.ErrThinkingRequiresStream{Model: model}
-		}
-		if !streamed || mode == llms.ReasoningOff {
+		if opts.StreamingFunc == nil {
+			if opts.Reasoning.ResolveMode() == llms.ReasoningOn {
+				return nil, &reasoning.ErrThinkingRequiresStream{Model: model}
+			}
 			thinkingOff := false
 			req.EnableThinking = &thinkingOff
 		}
+	}
+
+	if model := o.effectiveModel(opts); reasoning.QwenThinkingEnabledByFlag(model) &&
+		opts.Reasoning.ResolveMode() == llms.ReasoningOn {
+		thinkingOn := true
+		req.EnableThinking = &thinkingOn
 	}
 
 	if isLegacyMaxTokensField(&opts) || reasoning.UsesLegacyMaxTokens(o.effectiveModel(opts)) {
@@ -405,6 +410,9 @@ func (o *LLM) setReasoningOff(req *openaiclient.ChatRequest, opts llms.CallOptio
 		return &reasoning.ErrReasoningOffUnsupported{Model: model}
 	case reasoning.OffEffortNone:
 		o.writeDisableEffort(req)
+	case reasoning.OffDisableDashScope:
+		thinkingOff := false
+		req.EnableThinking = &thinkingOff
 	}
 	return nil
 }

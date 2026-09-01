@@ -48,10 +48,15 @@ func TestNonChatGoogleSurfacesAreNotThinkingModels(t *testing.T) {
 	}
 }
 
-func TestQwen3StaysOutUntilEnableThinkingIsSent(t *testing.T) {
+func TestQwen3HybridsAreInTheCatalogueNowThatOffIsExpressible(t *testing.T) {
 	t.Parallel()
 
-	for _, model := range []string{"qwen3-32b", "qwen3-235b-a22b", "qwen3-vl-plus"} {
+	for _, model := range []string{"qwen3-32b", "qwen3-235b-a22b"} {
+		if !IsReasoningModel(model) {
+			t.Errorf("IsReasoningModel(%q) = false, want true", model)
+		}
+	}
+	for _, model := range []string{"qwen3-vl-plus", "qwen3-coder-plus"} {
 		if IsReasoningModel(model) {
 			t.Errorf("IsReasoningModel(%q) = true, want false", model)
 		}
@@ -108,7 +113,16 @@ func TestMeasuredModelsSplitByWhenTheyReason(t *testing.T) {
 		t.Error(`ThinkingOptIn("solar-pro4") = false, but a bare call returns no reasoning until an effort asks`)
 	}
 
-	for _, model := range []string{"gpt-mini-latest", "qwen3-max", "qwen3-coder-plus"} {
+	for _, model := range []string{"qwen-plus", "qwen-flash", "qwen3-max"} {
+		if !IsReasoningModel(model) {
+			t.Errorf("IsReasoningModel(%q) = false, want true", model)
+		}
+		if !ThinkingOptIn(model) {
+			t.Errorf("ThinkingOptIn(%q) = false, but a bare call returns no reasoning until the vendor flag asks", model)
+		}
+	}
+
+	for _, model := range []string{"gpt-mini-latest", "qwen3-coder-plus"} {
 		if IsReasoningModel(model) {
 			t.Errorf("IsReasoningModel(%q) = true, but neither a bare call nor an effort returns reasoning", model)
 		}
