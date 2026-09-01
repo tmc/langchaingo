@@ -920,6 +920,39 @@ func TestAnthropic_BudgetThinkingRequest(t *testing.T) {
 	assert.EqualValues(t, 4096, payload["max_tokens"]) // max(budget*2, maxTokens)
 }
 
+func TestAnthropic_AnswerLimitSurvivesInterleavedThinking(t *testing.T) {
+	t.Parallel()
+
+	tool := llms.Tool{Type: "function", Function: &llms.FunctionDefinition{
+		Name: "get_weather", Description: "weather",
+		Parameters: map[string]any{"type": "object", "properties": map[string]any{}},
+	}}
+	budgeted := func(extra ...llms.CallOption) []llms.CallOption {
+		return append([]llms.CallOption{llms.WithReasoning("", 4096), llms.WithMaxTokens(512)}, extra...)
+	}
+
+	for _, tc := range []struct {
+		name     string
+		opts     []llms.CallOption
+		wantBeta bool
+		want     float64
+	}{
+		{"tools put the beta on the wire", budgeted(llms.WithTools([]llms.Tool{tool})), true, 512},
+		{"the caller asks for interleaving without tools", budgeted(anthropic.WithInterleavedThinking()), true, 512},
+		{"no interleaving, the vendor checks the pair", budgeted(), false, 2048},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			payload, header := captureMessagesRequestModel(t, "claude-sonnet-4-5", tc.opts...)
+			gotBeta := strings.Contains(header.Get("anthropic-beta"), "interleaved-thinking-2025-05-14")
+			require.Equal(t, tc.wantBeta, gotBeta, "beta header: %q", header.Get("anthropic-beta"))
+			require.Equal(t, float64(1024), payload["thinking"].(map[string]any)["budget_tokens"])
+			require.Equal(t, tc.want, payload["max_tokens"])
+		})
+	}
+}
+
 func TestAnthropic_Haiku45MutuallyExclusiveSampling(t *testing.T) {
 	t.Parallel()
 
