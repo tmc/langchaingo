@@ -198,6 +198,109 @@ func TestABudgetLargerThanTheAnswerLimitRaisesTheLimit(t *testing.T) {
 	}
 }
 
+func captureWireWithClient(t *testing.T, model string, clientOpts []Option, callOpts ...llms.CallOption) string {
+	t.Helper()
+
+	const completion = `{"id":"x","object":"chat.completion","created":1,"model":"m",` +
+		`"choices":[{"index":0,"message":{"role":"assistant","content":"ok"},"finish_reason":"stop"}],` +
+		`"usage":{"prompt_tokens":1,"completion_tokens":1,"total_tokens":2}}`
+
+	var body string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		b, _ := io.ReadAll(r.Body)
+		body = string(b)
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = io.WriteString(w, completion)
+	}))
+	t.Cleanup(srv.Close)
+
+	opts := append([]Option{WithBaseURL(srv.URL), WithToken("test"), WithModel(model)}, clientOpts...)
+	llm, err := New(opts...)
+	if err != nil {
+		t.Fatalf("New() error: %v", err)
+	}
+	if _, err := llm.GenerateContent(context.Background(),
+		[]llms.MessageContent{llms.TextParts(llms.ChatMessageTypeHuman, "hi")}, callOpts...); err != nil {
+		t.Fatalf("GenerateContent() error: %v", err)
+	}
+	return body
+}
+
+func TestAnswerLimitClearsTheBudgetTheThinkingWillSpend(t *testing.T) {
+	t.Parallel()
+
+	const claude = "anthropic/claude-sonnet-4-5"
+	modern := []Option{WithModernReasoningFormat()}
+	budgetField := []Option{WithModernReasoningFormat(), WithUsingReasoningMaxTokens()}
+
+	for _, tc := range []struct {
+		name   string
+		client []Option
+		call   []llms.CallOption
+		want   string
+	}{
+		{"legacy format, effort carries the thinking", nil,
+			[]llms.CallOption{llms.WithReasoning("", 2048), llms.WithMaxTokens(512)}, `"max_completion_tokens":8192`},
+		{"modern format, effort carries the thinking", modern,
+			[]llms.CallOption{llms.WithReasoning("", 2048), llms.WithMaxTokens(512)}, `"max_completion_tokens":8192`},
+		{"an effort with no budget of its own", nil,
+			[]llms.CallOption{llms.WithReasoning(llms.ReasoningHigh, 0), llms.WithMaxTokens(512)}, `"max_completion_tokens":8192`},
+		{"a lower effort stands for a smaller budget", nil,
+			[]llms.CallOption{llms.WithReasoning(llms.ReasoningLow, 0), llms.WithMaxTokens(512)}, `"max_completion_tokens":2048`},
+		{"modern format, budget field carries the thinking", budgetField,
+			[]llms.CallOption{llms.WithReasoning("", 2048), llms.WithMaxTokens(512)}, `"max_completion_tokens":2048`},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			body := captureWireWithClient(t, claude, tc.client, tc.call...)
+			if strings.Contains(body, `"max_completion_tokens":512`) {
+				t.Errorf("a 512-token answer limit leaves no room once the thinking is paid for: %s", body)
+			}
+			if !strings.Contains(body, tc.want) {
+				t.Errorf("want %s on the wire, got body: %s", tc.want, body)
+			}
+		})
+	}
+}
+
+func TestAnswerLimitStaysWhereNothingSpendsABudget(t *testing.T) {
+	t.Parallel()
+
+	for _, tc := range []struct {
+		name  string
+		model string
+		call  []llms.CallOption
+	}{
+		{"a thinking model of another vendor", "gpt-5",
+			[]llms.CallOption{llms.WithReasoning(llms.ReasoningHigh, 0), llms.WithMaxTokens(512)}},
+		{"no reasoning asked at all", "anthropic/claude-sonnet-4-5",
+			[]llms.CallOption{llms.WithMaxTokens(512)}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			body := captureWireWithClient(t, tc.model, nil, tc.call...)
+			if !strings.Contains(body, `"max_completion_tokens":512`) {
+				t.Errorf("nothing spends a budget here, so the limit must reach the wire verbatim: %s", body)
+			}
+		})
+	}
+}
+
+func TestRaisingTheLimitDoesNotEditTheCallersOption(t *testing.T) {
+	t.Parallel()
+
+	reused := []llms.CallOption{llms.WithReasoning("", 2048), llms.WithMaxTokens(512)}
+	client := []Option{WithModernReasoningFormat(), WithUsingReasoningMaxTokens()}
+
+	first := captureWireWithClient(t, "anthropic/claude-sonnet-4-5", client, reused...)
+	second := captureWireWithClient(t, "anthropic/claude-sonnet-4-5", client, reused...)
+
+	if first != second {
+		t.Errorf("one call must not edit the option the next one reuses:\nfirst:  %s\nsecond: %s", first, second)
+	}
+	if !strings.Contains(second, `"reasoning":{"max_tokens":1024}`) {
+		t.Errorf("want the vendor floor budget on the reused call, got: %s", second)
+	}
+}
+
 func TestVerbosityReachesTheWireOnlyWhenAsked(t *testing.T) {
 	t.Parallel()
 
