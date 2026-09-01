@@ -294,6 +294,12 @@ func (o *LLM) createChatRequest(chatMsgs []*ChatMessage, opts llms.CallOptions) 
 		}
 	}
 
+	if model := o.effectiveModel(opts); reasoning.QwenThinkingEnabledByFlag(model) &&
+		opts.Reasoning.ResolveMode() == llms.ReasoningOn {
+		thinkingOn := true
+		req.EnableThinking = &thinkingOn
+	}
+
 	if isLegacyMaxTokensField(&opts) || reasoning.UsesLegacyMaxTokens(o.effectiveModel(opts)) {
 		req.MaxTokens = opts.MaxTokens
 	} else {

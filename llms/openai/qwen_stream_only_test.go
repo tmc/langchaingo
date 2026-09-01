@@ -120,3 +120,35 @@ func TestQwenHybridKeepsTheCallerSampling(t *testing.T) {
 		t.Fatalf("the caller's top_p must survive, got %v", got)
 	}
 }
+
+func TestQwenCommercialHybridTurnsThinkingOnWhenAsked(t *testing.T) {
+	t.Parallel()
+
+	body, err := captureQwenRequest(t, "dashscope/qwen-plus", llms.WithReasoning(llms.ReasoningHigh, 0))
+	if err != nil {
+		t.Fatalf("generate: %v", err)
+	}
+	if got, ok := body["enable_thinking"]; !ok || got != true {
+		t.Fatalf("asking for reasoning must turn the vendor flag on, got %v (present=%v)", got, ok)
+	}
+}
+
+func TestQwenCommercialHybridStaysQuietOtherwise(t *testing.T) {
+	t.Parallel()
+
+	for _, tc := range []struct {
+		name string
+		opts []llms.CallOption
+	}{
+		{"bare", nil},
+		{"disabled", []llms.CallOption{llms.WithReasoningDisabled()}},
+	} {
+		body, err := captureQwenRequest(t, "dashscope/qwen-plus", tc.opts...)
+		if err != nil {
+			t.Fatalf("%s: generate: %v", tc.name, err)
+		}
+		if got, ok := body["enable_thinking"]; ok {
+			t.Errorf("%s: the flag must stay off the wire, got %v", tc.name, got)
+		}
+	}
+}

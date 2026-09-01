@@ -827,7 +827,7 @@ func TestIsReasoningModel(t *testing.T) { //nolint:funlen
 		{"glm-latest", true},
 		{"kimi-latest", true},
 		{"gpt-mini-latest", false},
-		{"qwen3-max", false},
+		{"qwen3-max", true},
 		{"trinity-large-thinking", true},
 
 		// Non-reasoning models

@@ -127,6 +127,9 @@ func openAIMandatoryReasoning(model string) bool {
 }
 
 func offByOmission(model string) bool {
+	if QwenThinkingEnabledByFlag(model) {
+		return true
+	}
 	for _, form := range modelSpellings(model) {
 		if strings.HasPrefix(form, "magistral") {
 			return true

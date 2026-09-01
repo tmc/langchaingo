@@ -23,7 +23,7 @@ func TestQwenHybridsAreReasoningModels(t *testing.T) {
 			t.Errorf("IsReasoningModel(%q) = false, want true", model)
 		}
 	}
-	for _, model := range []string{"qwen3-coder-plus", "qwen3-vl-plus", "qwen3-max"} {
+	for _, model := range []string{"qwen3-coder-plus", "qwen3-vl-plus"} {
 		if IsReasoningModel(model) {
 			t.Errorf("IsReasoningModel(%q) = true, want false", model)
 		}
