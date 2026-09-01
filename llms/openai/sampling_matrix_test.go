@@ -228,6 +228,41 @@ func TestAModelThatRejectsSamplingGetsNoSamplingAtAll(t *testing.T) {
 	}
 }
 
+func TestMinPStaysOffTheWireForClaude(t *testing.T) {
+	t.Parallel()
+
+	minP := llms.WithMinP(0.05)
+	high := llms.WithReasoning(llms.ReasoningHigh, 0)
+
+	runSamplingCases(t, []samplingCase{{
+		name:   "a Claude model outside the rejects-sampling class still loses min_p",
+		model:  "claude-sonnet-4-5",
+		opts:   []llms.CallOption{minP},
+		absent: []string{`"min_p"`},
+	}, {
+		name:    "thinking does not put min_p back on the wire",
+		model:   "claude-sonnet-4-5",
+		opts:    []llms.CallOption{minP, high},
+		present: []string{`"reasoning_effort":"high"`},
+		absent:  []string{`"min_p"`},
+	}, {
+		name:   "the bedrock spelling of a Claude model loses it too",
+		model:  "us.anthropic.claude-sonnet-4-5-v1:0",
+		opts:   []llms.CallOption{minP},
+		absent: []string{`"min_p"`},
+	}, {
+		name:    "a thinking model of another vendor keeps min_p",
+		model:   "gpt-5.5",
+		opts:    []llms.CallOption{minP, high},
+		present: []string{`"min_p":0.05`},
+	}, {
+		name:    "a plain model keeps min_p",
+		model:   "gpt-4o",
+		opts:    []llms.CallOption{minP},
+		present: []string{`"min_p":0.05`},
+	}})
+}
+
 func TestOptInThinkingKeepsSamplingWhateverIsAsked(t *testing.T) {
 	t.Parallel()
 

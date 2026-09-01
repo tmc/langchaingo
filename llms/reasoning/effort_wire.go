@@ -13,6 +13,11 @@ func RejectsPenalties(model string) bool {
 	return false
 }
 
+// RejectsMinP reports whether min_p must stay off the wire.
+func RejectsMinP(model string) bool {
+	return isClaudeModel(model)
+}
+
 // UsesLegacyMaxTokens reports whether the output limit must travel as
 // max_tokens rather than max_completion_tokens.
 func UsesLegacyMaxTokens(model string) bool {
