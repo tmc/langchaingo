@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"slices"
 	"strings"
 	"time"
 
@@ -273,7 +274,9 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 		}
 		topP = nil
 		topK = nil
-		maxTokens = reasoning.ClaudeMaxTokensForBudget(thinking.Budget, maxTokens)
+		if !slices.Contains(betaHeaders, anthropicInterleavedThinkingBeta) {
+			maxTokens = reasoning.ClaudeMaxTokensForBudget(thinking.Budget, maxTokens)
+		}
 	case reasoning.ClaudeRejectsSampling(model):
 		// Adaptive-only models reject sampling params even without thinking.
 		temperature = nil
@@ -895,7 +898,10 @@ func handleToolMessage(msg llms.MessageContent) (anthropicclient.ChatMessage, er
 	return anthropicclient.ChatMessage{}, fmt.Errorf("anthropic: %w for tool message", ErrInvalidContentType)
 }
 
-const anthropicFastModeBeta = "fast-mode-2026-02-01"
+const (
+	anthropicFastModeBeta            = "fast-mode-2026-02-01"
+	anthropicInterleavedThinkingBeta = "interleaved-thinking-2025-05-14"
+)
 
 // extractBetaHeaders extracts beta headers from call options. thinking is the
 // mechanism actually resolved for this request (nil when no thinking), so the
@@ -918,7 +924,7 @@ func extractBetaHeaders(opts *llms.CallOptions, thinking *anthropicclient.Thinki
 	// Budget thinking + tools needs the interleaved-thinking beta; adaptive
 	// thinking interleaves natively and needs no header.
 	if thinking != nil && thinking.Type == "enabled" && len(opts.Tools) > 0 {
-		betaHeaders = appendIfMissing(betaHeaders, "interleaved-thinking-2025-05-14")
+		betaHeaders = appendIfMissing(betaHeaders, anthropicInterleavedThinkingBeta)
 	}
 
 	if opts.InferenceSpeed != nil {
