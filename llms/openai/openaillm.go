@@ -371,32 +371,44 @@ func (o *LLM) setReasoning(req *openaiclient.ChatRequest, opts llms.CallOptions)
 	reasoningEffort := llms.ReasoningEffort(reasoning.ClaudeClampEffort(model, effort))
 	reasoningTokens := opts.Reasoning.GetTokens(opts.GetMaxTokens())
 	sendsEffort := acceptsEffort && reasoningEffort != llms.ReasoningNone
+	budget := 0
+	if opts.Reasoning.HasExplicitTokens() && reasoningTokens > 0 {
+		budget = reasoning.ClaudeClampBudget(model, reasoningTokens)
+	}
+	effortBudget := 0
+	if reasoning.ClaudeSpendsThinkingBudget(model) {
+		effortBudget = llms.ReasoningEffortBudget(reasoningEffort, opts.GetMaxTokens())
+	}
 
 	if !o.client.ModernReasoningFormat {
 		if sendsEffort {
 			req.ReasoningEffort = &reasoningEffort
+			o.raiseAnswerLimitForBudget(req, effortBudget)
 		}
 		return wireEffortOf(sendsEffort, reasoningEffort), nil
 	}
 
 	// using modern reasoning format
-	if o.client.UseReasoningMaxTokens && opts.Reasoning.HasExplicitTokens() && reasoningTokens > 0 {
-		budget := reasoning.ClaudeClampBudget(model, reasoningTokens)
+	switch {
+	case o.client.UseReasoningMaxTokens && budget > 0:
 		req.Reasoning = &openaiclient.ReasoningOptions{MaxTokens: budget}
 		o.raiseAnswerLimitForBudget(req, budget)
-	} else if sendsEffort {
+	case sendsEffort:
 		req.Reasoning = &openaiclient.ReasoningOptions{
 			Effort: reasoningEffort,
 		}
+		o.raiseAnswerLimitForBudget(req, effortBudget)
 	}
 	return wireEffortOf(sendsEffort, reasoningEffort), nil
 }
 
 func (o *LLM) raiseAnswerLimitForBudget(req *openaiclient.ChatRequest, budget int) {
-	for _, limit := range []*int{req.MaxCompletionTokens, req.MaxTokens} {
-		if limit != nil && *limit > 0 {
-			*limit = reasoning.ClaudeMaxTokensForBudget(budget, *limit)
+	for _, limit := range []**int{&req.MaxCompletionTokens, &req.MaxTokens} {
+		if *limit == nil || **limit <= 0 {
+			continue
 		}
+		raised := reasoning.ClaudeMaxTokensForBudget(budget, **limit)
+		*limit = &raised
 	}
 }
 
