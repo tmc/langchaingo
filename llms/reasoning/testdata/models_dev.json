@@ -1,0 +1,5548 @@
+{
+ "alibaba": {
+  "deepseek-v4-flash-0731": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "toggle"
+    },
+    {
+     "type": "effort",
+     "values": [
+      "high",
+      "max"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1000000,
+    "output": 384000
+   }
+  },
+  "glm-5.2": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "none",
+      "minimal",
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1000000,
+    "output": 131072
+   }
+  },
+  "qvq-max": {
+   "reasoning": true,
+   "temperature": true,
+   "limit": {
+    "context": 131072,
+    "output": 8192
+   }
+  },
+  "qwen-flash": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "toggle"
+    },
+    {
+     "type": "budget_tokens"
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1000000,
+    "output": 32768
+   }
+  },
+  "qwen-max": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 32768,
+    "output": 8192
+   }
+  },
+  "qwen-mt-plus": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 16384,
+    "output": 8192
+   }
+  },
+  "qwen-mt-turbo": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 16384,
+    "output": 8192
+   }
+  },
+  "qwen-omni-turbo": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 32768,
+    "output": 2048
+   }
+  },
+  "qwen-omni-turbo-realtime": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 32768,
+    "output": 2048
+   }
+  },
+  "qwen-plus": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "toggle"
+    },
+    {
+     "type": "budget_tokens"
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1000000,
+    "output": 32768
+   }
+  },
+  "qwen-plus-character-ja": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 8192,
+    "output": 512
+   }
+  },
+  "qwen-turbo": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "toggle"
+    },
+    {
+     "type": "budget_tokens"
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1000000,
+    "output": 16384
+   }
+  },
+  "qwen-vl-max": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 131072,
+    "output": 8192
+   }
+  },
+  "qwen-vl-ocr": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 34096,
+    "output": 4096
+   }
+  },
+  "qwen-vl-plus": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 131072,
+    "output": 8192
+   }
+  },
+  "qwen2-5-14b-instruct": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 131072,
+    "output": 8192
+   }
+  },
+  "qwen2-5-32b-instruct": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 131072,
+    "output": 8192
+   }
+  },
+  "qwen2-5-72b-instruct": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 131072,
+    "output": 8192
+   }
+  },
+  "qwen2-5-7b-instruct": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 131072,
+    "output": 8192
+   }
+  },
+  "qwen2-5-omni-7b": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 32768,
+    "output": 2048
+   }
+  },
+  "qwen2-5-vl-72b-instruct": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 131072,
+    "output": 8192
+   }
+  },
+  "qwen2-5-vl-7b-instruct": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 131072,
+    "output": 8192
+   }
+  },
+  "qwen3-14b": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "toggle"
+    },
+    {
+     "type": "budget_tokens"
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 131072,
+    "output": 8192
+   }
+  },
+  "qwen3-235b-a22b": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "toggle"
+    },
+    {
+     "type": "budget_tokens"
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 131072,
+    "output": 16384
+   }
+  },
+  "qwen3-32b": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "toggle"
+    },
+    {
+     "type": "budget_tokens"
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 131072,
+    "output": 16384
+   }
+  },
+  "qwen3-8b": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "toggle"
+    },
+    {
+     "type": "budget_tokens"
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 131072,
+    "output": 8192
+   }
+  },
+  "qwen3-asr-flash": {
+   "reasoning": false,
+   "temperature": false,
+   "limit": {
+    "context": 53248,
+    "output": 4096
+   }
+  },
+  "qwen3-coder-30b-a3b-instruct": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 262144,
+    "output": 65536
+   }
+  },
+  "qwen3-coder-480b-a35b-instruct": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 262144,
+    "output": 65536
+   }
+  },
+  "qwen3-coder-flash": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 1000000,
+    "output": 65536
+   }
+  },
+  "qwen3-coder-plus": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 1048576,
+    "output": 65536
+   }
+  },
+  "qwen3-livetranslate-flash-realtime": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 53248,
+    "output": 4096
+   }
+  },
+  "qwen3-max": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 262144,
+    "output": 65536
+   }
+  },
+  "qwen3-next-80b-a3b-instruct": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 131072,
+    "output": 32768
+   }
+  },
+  "qwen3-next-80b-a3b-thinking": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "budget_tokens"
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 131072,
+    "output": 32768
+   }
+  },
+  "qwen3-omni-flash": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "toggle"
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 65536,
+    "output": 16384
+   }
+  },
+  "qwen3-omni-flash-realtime": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 65536,
+    "output": 16384
+   }
+  },
+  "qwen3-vl-235b-a22b": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "budget_tokens"
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 131072,
+    "output": 32768
+   }
+  },
+  "qwen3-vl-30b-a3b": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "budget_tokens"
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 131072,
+    "output": 32768
+   }
+  },
+  "qwen3-vl-plus": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "toggle"
+    },
+    {
+     "type": "budget_tokens"
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 262144,
+    "output": 32768
+   }
+  },
+  "qwen3.5-122b-a10b": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "toggle"
+    },
+    {
+     "type": "budget_tokens"
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 262144,
+    "output": 65536
+   }
+  },
+  "qwen3.5-27b": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "toggle"
+    },
+    {
+     "type": "budget_tokens"
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 262144,
+    "output": 65536
+   }
+  },
+  "qwen3.5-35b-a3b": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "toggle"
+    },
+    {
+     "type": "budget_tokens"
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 262144,
+    "output": 65536
+   }
+  },
+  "qwen3.5-397b-a17b": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "toggle"
+    },
+    {
+     "type": "budget_tokens"
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 262144,
+    "output": 65536
+   }
+  },
+  "qwen3.5-plus": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "toggle"
+    },
+    {
+     "type": "budget_tokens"
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1000000,
+    "output": 65536
+   }
+  },
+  "qwen3.6-27b": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "toggle"
+    },
+    {
+     "type": "budget_tokens"
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 262144,
+    "output": 65536
+   }
+  },
+  "qwen3.6-35b-a3b": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "toggle"
+    },
+    {
+     "type": "budget_tokens"
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 262144,
+    "output": 65536
+   }
+  },
+  "qwen3.6-flash": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "toggle"
+    },
+    {
+     "type": "budget_tokens"
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1000000,
+    "output": 65536
+   }
+  },
+  "qwen3.6-max-preview": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "toggle"
+    },
+    {
+     "type": "budget_tokens"
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 262144,
+    "output": 65536
+   }
+  },
+  "qwen3.6-plus": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "toggle"
+    },
+    {
+     "type": "budget_tokens"
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1000000,
+    "output": 65536
+   }
+  },
+  "qwen3.7-max": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "toggle"
+    },
+    {
+     "type": "budget_tokens"
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1000000,
+    "output": 65536
+   }
+  },
+  "qwen3.7-plus": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "toggle"
+    },
+    {
+     "type": "budget_tokens"
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1000000,
+    "output": 65536
+   }
+  },
+  "qwen3.8-flash": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "toggle"
+    },
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "xhigh"
+     ]
+    },
+    {
+     "type": "budget_tokens",
+     "max": 262144
+    }
+   ],
+   "limit": {
+    "context": 1000000,
+    "output": 131072
+   }
+  },
+  "qwen3.8-max": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "toggle"
+    },
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "xhigh"
+     ]
+    },
+    {
+     "type": "budget_tokens",
+     "min": 0,
+     "max": 262144
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1000000,
+    "output": 131072
+   }
+  },
+  "qwq-plus": {
+   "reasoning": true,
+   "temperature": true,
+   "limit": {
+    "context": 131072,
+    "output": 8192
+   }
+  }
+ },
+ "amazon-bedrock": {
+  "amazon.nova-2-lite-v1:0": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "toggle"
+    },
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 128000,
+    "output": 4096
+   }
+  },
+  "amazon.nova-lite-v1:0": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 300000,
+    "output": 8192
+   }
+  },
+  "amazon.nova-micro-v1:0": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 128000,
+    "output": 8192
+   }
+  },
+  "amazon.nova-pro-v1:0": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 300000,
+    "output": 8192
+   }
+  },
+  "anthropic.claude-fable-5": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 1000000,
+    "output": 128000
+   }
+  },
+  "anthropic.claude-fable-5-1": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 1000000,
+    "output": 128000
+   }
+  },
+  "anthropic.claude-haiku-4-5-20251001-v1:0": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "budget_tokens",
+     "min": 1024
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 200000,
+    "output": 64000
+   }
+  },
+  "anthropic.claude-opus-4-1-20250805-v1:0": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "budget_tokens",
+     "min": 1024
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 200000,
+    "output": 32000
+   }
+  },
+  "anthropic.claude-opus-4-5-20251101-v1:0": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high"
+     ]
+    },
+    {
+     "type": "budget_tokens",
+     "min": 1024
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 200000,
+    "output": 64000
+   }
+  },
+  "anthropic.claude-opus-4-6-v1": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high",
+      "max"
+     ]
+    },
+    {
+     "type": "budget_tokens",
+     "min": 1024
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1000000,
+    "output": 128000
+   }
+  },
+  "anthropic.claude-opus-4-7": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 1000000,
+    "output": 128000
+   }
+  },
+  "anthropic.claude-opus-4-8": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 1000000,
+    "output": 128000
+   }
+  },
+  "anthropic.claude-opus-5": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 1000000,
+    "output": 128000
+   }
+  },
+  "anthropic.claude-sonnet-4-5-20250929-v1:0": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "budget_tokens",
+     "min": 1024
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 200000,
+    "output": 64000
+   }
+  },
+  "anthropic.claude-sonnet-4-6": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high",
+      "max"
+     ]
+    },
+    {
+     "type": "budget_tokens",
+     "min": 1024
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1000000,
+    "output": 64000
+   }
+  },
+  "anthropic.claude-sonnet-5": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "toggle"
+    },
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 1000000,
+    "output": 128000
+   }
+  },
+  "au.anthropic.claude-haiku-4-5-20251001-v1:0": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "budget_tokens",
+     "min": 1024
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 200000,
+    "output": 64000
+   }
+  },
+  "au.anthropic.claude-opus-4-6-v1": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high",
+      "max"
+     ]
+    },
+    {
+     "type": "budget_tokens",
+     "min": 1024
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1000000,
+    "output": 128000
+   }
+  },
+  "au.anthropic.claude-opus-4-8": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 1000000,
+    "output": 128000
+   }
+  },
+  "au.anthropic.claude-opus-5": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 1000000,
+    "output": 128000
+   }
+  },
+  "au.anthropic.claude-sonnet-4-5-20250929-v1:0": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "budget_tokens",
+     "min": 1024
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 200000,
+    "output": 64000
+   }
+  },
+  "au.anthropic.claude-sonnet-4-6": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high",
+      "max"
+     ]
+    },
+    {
+     "type": "budget_tokens",
+     "min": 1024
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1000000,
+    "output": 128000
+   }
+  },
+  "au.anthropic.claude-sonnet-5": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "toggle"
+    },
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 1000000,
+    "output": 128000
+   }
+  },
+  "deepseek.r1-v1:0": {
+   "reasoning": true,
+   "temperature": true,
+   "limit": {
+    "context": 128000,
+    "output": 32768
+   }
+  },
+  "deepseek.v3-v1:0": {
+   "reasoning": true,
+   "temperature": true,
+   "limit": {
+    "context": 163840,
+    "output": 81920
+   }
+  },
+  "deepseek.v3.2": {
+   "reasoning": true,
+   "temperature": true,
+   "limit": {
+    "context": 163840,
+    "output": 81920
+   }
+  },
+  "eu.anthropic.claude-fable-5": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 1000000,
+    "output": 128000
+   }
+  },
+  "eu.anthropic.claude-haiku-4-5-20251001-v1:0": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "budget_tokens",
+     "min": 1024
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 200000,
+    "output": 64000
+   }
+  },
+  "eu.anthropic.claude-opus-4-5-20251101-v1:0": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high"
+     ]
+    },
+    {
+     "type": "budget_tokens",
+     "min": 1024
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 200000,
+    "output": 64000
+   }
+  },
+  "eu.anthropic.claude-opus-4-6-v1": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high",
+      "max"
+     ]
+    },
+    {
+     "type": "budget_tokens",
+     "min": 1024
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1000000,
+    "output": 128000
+   }
+  },
+  "eu.anthropic.claude-opus-4-7": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 1000000,
+    "output": 128000
+   }
+  },
+  "eu.anthropic.claude-opus-4-8": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 1000000,
+    "output": 128000
+   }
+  },
+  "eu.anthropic.claude-opus-5": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 1000000,
+    "output": 128000
+   }
+  },
+  "eu.anthropic.claude-sonnet-4-5-20250929-v1:0": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "budget_tokens",
+     "min": 1024
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 200000,
+    "output": 64000
+   }
+  },
+  "eu.anthropic.claude-sonnet-4-6": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high",
+      "max"
+     ]
+    },
+    {
+     "type": "budget_tokens",
+     "min": 1024
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1000000,
+    "output": 64000
+   }
+  },
+  "eu.anthropic.claude-sonnet-5": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "toggle"
+    },
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 1000000,
+    "output": 128000
+   }
+  },
+  "global.anthropic.claude-fable-5": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 1000000,
+    "output": 128000
+   }
+  },
+  "global.anthropic.claude-fable-5-1": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 1000000,
+    "output": 128000
+   }
+  },
+  "global.anthropic.claude-haiku-4-5-20251001-v1:0": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "budget_tokens",
+     "min": 1024
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 200000,
+    "output": 64000
+   }
+  },
+  "global.anthropic.claude-opus-4-5-20251101-v1:0": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high"
+     ]
+    },
+    {
+     "type": "budget_tokens",
+     "min": 1024
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 200000,
+    "output": 64000
+   }
+  },
+  "global.anthropic.claude-opus-4-6-v1": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high",
+      "max"
+     ]
+    },
+    {
+     "type": "budget_tokens",
+     "min": 1024
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1000000,
+    "output": 128000
+   }
+  },
+  "global.anthropic.claude-opus-4-7": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 1000000,
+    "output": 128000
+   }
+  },
+  "global.anthropic.claude-opus-4-8": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 1000000,
+    "output": 128000
+   }
+  },
+  "global.anthropic.claude-opus-5": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 1000000,
+    "output": 128000
+   }
+  },
+  "global.anthropic.claude-sonnet-4-5-20250929-v1:0": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "budget_tokens",
+     "min": 1024
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 200000,
+    "output": 64000
+   }
+  },
+  "global.anthropic.claude-sonnet-4-6": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high",
+      "max"
+     ]
+    },
+    {
+     "type": "budget_tokens",
+     "min": 1024
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1000000,
+    "output": 64000
+   }
+  },
+  "global.anthropic.claude-sonnet-5": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "toggle"
+    },
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 1000000,
+    "output": 128000
+   }
+  },
+  "global.openai.gpt-5.6-luna": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "none",
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 1050000,
+    "output": 128000
+   }
+  },
+  "global.openai.gpt-5.6-sol": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "none",
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 1050000,
+    "output": 128000
+   }
+  },
+  "global.openai.gpt-5.6-terra": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "none",
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 1050000,
+    "output": 128000
+   }
+  },
+  "google.gemma-3-12b-it": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 131072,
+    "output": 8192
+   }
+  },
+  "google.gemma-3-27b-it": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 202752,
+    "output": 8192
+   }
+  },
+  "google.gemma-3-4b-it": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 128000,
+    "output": 4096
+   }
+  },
+  "jp.anthropic.claude-haiku-4-5-20251001-v1:0": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "budget_tokens",
+     "min": 1024
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 200000,
+    "output": 64000
+   }
+  },
+  "jp.anthropic.claude-opus-4-7": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 1000000,
+    "output": 128000
+   }
+  },
+  "jp.anthropic.claude-opus-4-8": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 1000000,
+    "output": 128000
+   }
+  },
+  "jp.anthropic.claude-opus-5": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 1000000,
+    "output": 128000
+   }
+  },
+  "jp.anthropic.claude-sonnet-4-5-20250929-v1:0": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "budget_tokens",
+     "min": 1024
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 200000,
+    "output": 64000
+   }
+  },
+  "jp.anthropic.claude-sonnet-4-6": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high",
+      "max"
+     ]
+    },
+    {
+     "type": "budget_tokens",
+     "min": 1024
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1000000,
+    "output": 64000
+   }
+  },
+  "jp.anthropic.claude-sonnet-5": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "toggle"
+    },
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 1000000,
+    "output": 128000
+   }
+  },
+  "meta.llama3-1-70b-instruct-v1:0": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 128000,
+    "output": 4096
+   }
+  },
+  "meta.llama3-1-8b-instruct-v1:0": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 128000,
+    "output": 4096
+   }
+  },
+  "meta.llama3-3-70b-instruct-v1:0": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 128000,
+    "output": 4096
+   }
+  },
+  "meta.llama4-maverick-17b-instruct-v1:0": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 1000000,
+    "output": 16384
+   }
+  },
+  "meta.llama4-scout-17b-instruct-v1:0": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 3500000,
+    "output": 16384
+   }
+  },
+  "minimax.minimax-m2": {
+   "reasoning": true,
+   "temperature": true,
+   "limit": {
+    "context": 204608,
+    "output": 128000
+   }
+  },
+  "minimax.minimax-m2.1": {
+   "reasoning": true,
+   "temperature": true,
+   "limit": {
+    "context": 204800,
+    "output": 131072
+   }
+  },
+  "minimax.minimax-m2.5": {
+   "reasoning": true,
+   "temperature": true,
+   "limit": {
+    "context": 196608,
+    "output": 98304
+   }
+  },
+  "mistral.devstral-2-123b": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 256000,
+    "output": 8192
+   }
+  },
+  "mistral.magistral-small-2509": {
+   "reasoning": true,
+   "temperature": true,
+   "limit": {
+    "context": 128000,
+    "output": 40000
+   }
+  },
+  "mistral.ministral-3-14b-instruct": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 128000,
+    "output": 4096
+   }
+  },
+  "mistral.ministral-3-3b-instruct": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 256000,
+    "output": 8192
+   }
+  },
+  "mistral.ministral-3-8b-instruct": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 128000,
+    "output": 4096
+   }
+  },
+  "mistral.mistral-large-3-675b-instruct": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 256000,
+    "output": 8192
+   }
+  },
+  "mistral.pixtral-large-2502-v1:0": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 128000,
+    "output": 8192
+   }
+  },
+  "mistral.voxtral-mini-3b-2507": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 128000,
+    "output": 4096
+   }
+  },
+  "mistral.voxtral-small-24b-2507": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 32000,
+    "output": 8192
+   }
+  },
+  "moonshot.kimi-k2-thinking": {
+   "reasoning": true,
+   "temperature": true,
+   "limit": {
+    "context": 262143,
+    "output": 16000
+   }
+  },
+  "moonshotai.kimi-k2.5": {
+   "reasoning": true,
+   "temperature": true,
+   "limit": {
+    "context": 262143,
+    "output": 16000
+   }
+  },
+  "nvidia.nemotron-nano-12b-v2": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 128000,
+    "output": 4096
+   }
+  },
+  "nvidia.nemotron-nano-3-30b": {
+   "reasoning": true,
+   "temperature": true,
+   "limit": {
+    "context": 128000,
+    "output": 4096
+   }
+  },
+  "nvidia.nemotron-nano-9b-v2": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 128000,
+    "output": 4096
+   }
+  },
+  "nvidia.nemotron-super-3-120b": {
+   "reasoning": true,
+   "temperature": true,
+   "limit": {
+    "context": 262144,
+    "output": 131072
+   }
+  },
+  "openai.gpt-5.4": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "none",
+      "low",
+      "medium",
+      "high",
+      "xhigh"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 272000,
+    "output": 128000
+   }
+  },
+  "openai.gpt-5.5": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "none",
+      "low",
+      "medium",
+      "high",
+      "xhigh"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 272000,
+    "output": 128000
+   }
+  },
+  "openai.gpt-5.6-luna": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "none",
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 1050000,
+    "output": 128000
+   }
+  },
+  "openai.gpt-5.6-sol": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "none",
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 1050000,
+    "output": 128000
+   }
+  },
+  "openai.gpt-5.6-terra": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "none",
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 1050000,
+    "output": 128000
+   }
+  },
+  "openai.gpt-oss-120b": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 128000,
+    "output": 16384
+   }
+  },
+  "openai.gpt-oss-120b-1:0": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 128000,
+    "output": 16384
+   }
+  },
+  "openai.gpt-oss-20b": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 128000,
+    "output": 16384
+   }
+  },
+  "openai.gpt-oss-20b-1:0": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 128000,
+    "output": 16384
+   }
+  },
+  "openai.gpt-oss-safeguard-120b": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 128000,
+    "output": 16384
+   }
+  },
+  "openai.gpt-oss-safeguard-20b": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 128000,
+    "output": 16384
+   }
+  },
+  "qwen.qwen3-235b-a22b-2507-v1:0": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 262144,
+    "output": 131072
+   }
+  },
+  "qwen.qwen3-32b-v1:0": {
+   "reasoning": true,
+   "temperature": true,
+   "limit": {
+    "context": 16384,
+    "output": 16384
+   }
+  },
+  "qwen.qwen3-coder-30b-a3b-v1:0": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 262144,
+    "output": 131072
+   }
+  },
+  "qwen.qwen3-coder-480b-a35b-v1:0": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 131072,
+    "output": 65536
+   }
+  },
+  "qwen.qwen3-coder-next": {
+   "reasoning": true,
+   "temperature": true,
+   "limit": {
+    "context": 131072,
+    "output": 65536
+   }
+  },
+  "qwen.qwen3-next-80b-a3b": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 262000,
+    "output": 262000
+   }
+  },
+  "qwen.qwen3-vl-235b-a22b": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 262000,
+    "output": 262000
+   }
+  },
+  "us.anthropic.claude-fable-5": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 1000000,
+    "output": 128000
+   }
+  },
+  "us.anthropic.claude-fable-5-1": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 1000000,
+    "output": 128000
+   }
+  },
+  "us.anthropic.claude-haiku-4-5-20251001-v1:0": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "budget_tokens",
+     "min": 1024
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 200000,
+    "output": 64000
+   }
+  },
+  "us.anthropic.claude-opus-4-1-20250805-v1:0": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "budget_tokens",
+     "min": 1024
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 200000,
+    "output": 32000
+   }
+  },
+  "us.anthropic.claude-opus-4-5-20251101-v1:0": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high"
+     ]
+    },
+    {
+     "type": "budget_tokens",
+     "min": 1024
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 200000,
+    "output": 64000
+   }
+  },
+  "us.anthropic.claude-opus-4-6-v1": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high",
+      "max"
+     ]
+    },
+    {
+     "type": "budget_tokens",
+     "min": 1024
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1000000,
+    "output": 128000
+   }
+  },
+  "us.anthropic.claude-opus-4-7": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 1000000,
+    "output": 128000
+   }
+  },
+  "us.anthropic.claude-opus-4-8": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 1000000,
+    "output": 128000
+   }
+  },
+  "us.anthropic.claude-opus-5": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 1000000,
+    "output": 128000
+   }
+  },
+  "us.anthropic.claude-sonnet-4-5-20250929-v1:0": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "budget_tokens",
+     "min": 1024
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 200000,
+    "output": 64000
+   }
+  },
+  "us.anthropic.claude-sonnet-4-6": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high",
+      "max"
+     ]
+    },
+    {
+     "type": "budget_tokens",
+     "min": 1024
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1000000,
+    "output": 64000
+   }
+  },
+  "us.anthropic.claude-sonnet-5": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "toggle"
+    },
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 1000000,
+    "output": 128000
+   }
+  },
+  "us.deepseek.r1-v1:0": {
+   "reasoning": true,
+   "temperature": true,
+   "limit": {
+    "context": 128000,
+    "output": 32768
+   }
+  },
+  "us.meta.llama4-maverick-17b-instruct-v1:0": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 1000000,
+    "output": 16384
+   }
+  },
+  "us.meta.llama4-scout-17b-instruct-v1:0": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 3500000,
+    "output": 16384
+   }
+  },
+  "writer.palmyra-x4-v1:0": {
+   "reasoning": true,
+   "temperature": true,
+   "limit": {
+    "context": 122880,
+    "output": 8192
+   }
+  },
+  "writer.palmyra-x5-v1:0": {
+   "reasoning": true,
+   "temperature": true,
+   "limit": {
+    "context": 1040000,
+    "output": 8192
+   }
+  },
+  "xai.grok-4.3": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "none",
+      "low",
+      "medium",
+      "high"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1000000,
+    "output": 131072
+   }
+  },
+  "xai.grok-4.6": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high",
+      "xhigh"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 500000,
+    "output": 500000
+   }
+  },
+  "zai.glm-4.7": {
+   "reasoning": true,
+   "temperature": true,
+   "limit": {
+    "context": 204800,
+    "output": 131072
+   }
+  },
+  "zai.glm-4.7-flash": {
+   "reasoning": true,
+   "temperature": true,
+   "limit": {
+    "context": 200000,
+    "output": 131072
+   }
+  },
+  "zai.glm-5": {
+   "reasoning": true,
+   "temperature": true,
+   "limit": {
+    "context": 202752,
+    "output": 101376
+   }
+  }
+ },
+ "anthropic": {
+  "claude-fable-5": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 1000000,
+    "output": 128000
+   }
+  },
+  "claude-fable-5-1": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 1000000,
+    "output": 128000
+   }
+  },
+  "claude-haiku-4-5": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "budget_tokens",
+     "min": 1024
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 200000,
+    "output": 64000
+   }
+  },
+  "claude-haiku-4-5-20251001": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "budget_tokens",
+     "min": 1024
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 200000,
+    "output": 64000
+   }
+  },
+  "claude-opus-4-5": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high"
+     ]
+    },
+    {
+     "type": "budget_tokens",
+     "min": 1024
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 200000,
+    "output": 64000
+   }
+  },
+  "claude-opus-4-5-20251101": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high"
+     ]
+    },
+    {
+     "type": "budget_tokens",
+     "min": 1024
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 200000,
+    "output": 64000
+   }
+  },
+  "claude-opus-4-6": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high",
+      "max"
+     ]
+    },
+    {
+     "type": "budget_tokens",
+     "min": 1024
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1000000,
+    "output": 128000
+   }
+  },
+  "claude-opus-4-7": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 1000000,
+    "output": 128000
+   }
+  },
+  "claude-opus-4-8": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 1000000,
+    "output": 128000
+   }
+  },
+  "claude-opus-5": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 1000000,
+    "output": 128000
+   }
+  },
+  "claude-sonnet-4-5": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "budget_tokens",
+     "min": 1024
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1000000,
+    "output": 64000
+   }
+  },
+  "claude-sonnet-4-5-20250929": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "budget_tokens",
+     "min": 1024
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1000000,
+    "output": 64000
+   }
+  },
+  "claude-sonnet-4-6": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high",
+      "max"
+     ]
+    },
+    {
+     "type": "budget_tokens",
+     "min": 1024
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1000000,
+    "output": 128000
+   }
+  },
+  "claude-sonnet-5": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "toggle"
+    },
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 1000000,
+    "output": 128000
+   }
+  }
+ },
+ "deepseek": {
+  "deepseek-v4-flash": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "toggle"
+    },
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "high",
+      "max"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1000000,
+    "output": 384000
+   }
+  },
+  "deepseek-v4-flash-vision-exp": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "toggle"
+    },
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "high",
+      "max"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1000000,
+    "output": 384000
+   }
+  },
+  "deepseek-v4-pro": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "toggle"
+    },
+    {
+     "type": "effort",
+     "values": [
+      "high",
+      "max"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1000000,
+    "output": 384000
+   }
+  }
+ },
+ "google": {
+  "deep-research-max-preview-04-2026": {
+   "reasoning": true,
+   "temperature": true,
+   "limit": {
+    "context": 131072,
+    "output": 65536
+   }
+  },
+  "deep-research-preview-04-2026": {
+   "reasoning": true,
+   "temperature": true,
+   "limit": {
+    "context": 131072,
+    "output": 65536
+   }
+  },
+  "gemini-2.5-computer-use-preview-10-2025": {
+   "reasoning": true,
+   "temperature": true,
+   "limit": {
+    "context": 131072,
+    "output": 65536
+   }
+  },
+  "gemini-2.5-flash": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "toggle"
+    },
+    {
+     "type": "budget_tokens",
+     "min": 0,
+     "max": 24576
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1048576,
+    "output": 65536
+   }
+  },
+  "gemini-2.5-flash-image": {
+   "reasoning": true,
+   "temperature": true,
+   "limit": {
+    "context": 32768,
+    "output": 32768
+   }
+  },
+  "gemini-2.5-flash-lite": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "toggle"
+    },
+    {
+     "type": "budget_tokens",
+     "min": 512,
+     "max": 24576
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1048576,
+    "output": 65536
+   }
+  },
+  "gemini-2.5-flash-preview-tts": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 8192,
+    "output": 16384
+   }
+  },
+  "gemini-2.5-pro": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "budget_tokens",
+     "min": 128,
+     "max": 32768
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1048576,
+    "output": 65536
+   }
+  },
+  "gemini-2.5-pro-preview-tts": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 8192,
+    "output": 16384
+   }
+  },
+  "gemini-3-flash-preview": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "minimal",
+      "low",
+      "medium",
+      "high"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1048576,
+    "output": 65536
+   }
+  },
+  "gemini-3-pro-image": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "high"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 131072,
+    "output": 32768
+   }
+  },
+  "gemini-3-pro-image-preview": {
+   "reasoning": true,
+   "temperature": true,
+   "limit": {
+    "context": 131072,
+    "output": 32768
+   }
+  },
+  "gemini-3.1-flash-image": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "minimal",
+      "high"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 65536,
+    "output": 65536
+   }
+  },
+  "gemini-3.1-flash-image-preview": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "minimal",
+      "high"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 65536,
+    "output": 65536
+   }
+  },
+  "gemini-3.1-flash-lite": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "minimal",
+      "low",
+      "medium",
+      "high"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1048576,
+    "output": 65536
+   }
+  },
+  "gemini-3.1-flash-lite-image": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "minimal",
+      "high"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 65536,
+    "output": 65536
+   }
+  },
+  "gemini-3.1-flash-lite-preview": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "minimal",
+      "low",
+      "medium",
+      "high"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1048576,
+    "output": 65536
+   }
+  },
+  "gemini-3.1-flash-live-preview": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "minimal",
+      "low",
+      "medium",
+      "high"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 131072,
+    "output": 65536
+   }
+  },
+  "gemini-3.1-flash-tts-preview": {
+   "reasoning": true,
+   "temperature": true,
+   "limit": {
+    "context": 8192,
+    "output": 16384
+   }
+  },
+  "gemini-3.1-pro-preview": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1048576,
+    "output": 65536
+   }
+  },
+  "gemini-3.1-pro-preview-customtools": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1048576,
+    "output": 65536
+   }
+  },
+  "gemini-3.5-flash": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "minimal",
+      "low",
+      "medium",
+      "high"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1048576,
+    "output": 65536
+   }
+  },
+  "gemini-3.5-flash-lite": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "minimal",
+      "low",
+      "medium",
+      "high"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1048576,
+    "output": 65536
+   }
+  },
+  "gemini-3.5-live-translate-preview": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 16384,
+    "output": 32768
+   }
+  },
+  "gemini-3.6-flash": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "minimal",
+      "low",
+      "medium",
+      "high"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1048576,
+    "output": 65536
+   }
+  },
+  "gemini-3.7-flash": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1048576,
+    "output": 65536
+   }
+  },
+  "gemini-embedding-001": {
+   "reasoning": false,
+   "temperature": false,
+   "limit": {
+    "context": 2048,
+    "output": 1
+   }
+  },
+  "gemini-embedding-2": {
+   "reasoning": false,
+   "temperature": false,
+   "limit": {
+    "context": 8192,
+    "output": 1
+   }
+  },
+  "gemini-flash-latest": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1048576,
+    "output": 65536
+   }
+  },
+  "gemini-flash-lite-latest": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "minimal",
+      "low",
+      "medium",
+      "high"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1048576,
+    "output": 65536
+   }
+  },
+  "gemini-omni-flash-preview": {
+   "reasoning": true,
+   "temperature": true,
+   "limit": {
+    "context": 131072,
+    "output": 65536
+   }
+  },
+  "gemma-4-26b-a4b-it": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "toggle"
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 262144,
+    "output": 32768
+   }
+  },
+  "gemma-4-31b-it": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "toggle"
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 262144,
+    "output": 32768
+   }
+  },
+  "lyria-3-clip-preview": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 1048576,
+    "output": 65536
+   }
+  },
+  "lyria-3-pro-preview": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 1048576,
+    "output": 65536
+   }
+  },
+  "veo-3.1-fast-generate-preview": {
+   "reasoning": false,
+   "temperature": false,
+   "limit": {
+    "context": 480,
+    "output": 8192
+   }
+  },
+  "veo-3.1-generate-preview": {
+   "reasoning": false,
+   "temperature": false,
+   "limit": {
+    "context": 480,
+    "output": 8192
+   }
+  },
+  "veo-3.1-lite-generate-preview": {
+   "reasoning": false,
+   "temperature": false,
+   "limit": {
+    "context": 480,
+    "output": 8192
+   }
+  }
+ },
+ "google-vertex": {
+  "claude-fable-5-1@default": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 1000000,
+    "output": 128000
+   }
+  },
+  "claude-fable-5@default": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 1000000,
+    "output": 128000
+   }
+  },
+  "claude-haiku-4-5@20251001": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "budget_tokens",
+     "min": 1024
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 200000,
+    "output": 64000
+   }
+  },
+  "claude-opus-4-1@20250805": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "budget_tokens",
+     "min": 1024
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 200000,
+    "output": 32000
+   }
+  },
+  "claude-opus-4-5@20251101": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high"
+     ]
+    },
+    {
+     "type": "budget_tokens",
+     "min": 1024
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 200000,
+    "output": 64000
+   }
+  },
+  "claude-opus-4-6@default": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high",
+      "max"
+     ]
+    },
+    {
+     "type": "budget_tokens",
+     "min": 1024
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1000000,
+    "output": 128000
+   }
+  },
+  "claude-opus-4-7@default": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 1000000,
+    "output": 128000
+   }
+  },
+  "claude-opus-4-8@default": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 1000000,
+    "output": 128000
+   }
+  },
+  "claude-opus-4@20250514": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "budget_tokens",
+     "min": 1024
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 200000,
+    "output": 32000
+   }
+  },
+  "claude-opus-5@default": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 1000000,
+    "output": 128000
+   }
+  },
+  "claude-sonnet-4-5@20250929": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "budget_tokens",
+     "min": 1024
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 200000,
+    "output": 64000
+   }
+  },
+  "claude-sonnet-4-6@default": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high",
+      "max"
+     ]
+    },
+    {
+     "type": "budget_tokens",
+     "min": 1024
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1000000,
+    "output": 128000
+   }
+  },
+  "claude-sonnet-4@20250514": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "budget_tokens",
+     "min": 1024
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 200000,
+    "output": 64000
+   }
+  },
+  "claude-sonnet-5@default": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "toggle"
+    },
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 1000000,
+    "output": 128000
+   }
+  },
+  "deepseek-ai/deepseek-v3.1-maas": {
+   "reasoning": true,
+   "temperature": true,
+   "limit": {
+    "context": 163840,
+    "output": 32768
+   }
+  },
+  "deepseek-ai/deepseek-v3.2-maas": {
+   "reasoning": true,
+   "temperature": true,
+   "limit": {
+    "context": 163840,
+    "output": 65536
+   }
+  },
+  "gemini-2.5-flash": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "toggle"
+    },
+    {
+     "type": "budget_tokens",
+     "min": 0,
+     "max": 24576
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1048576,
+    "output": 65536
+   }
+  },
+  "gemini-2.5-flash-image": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 32768,
+    "output": 32768
+   }
+  },
+  "gemini-2.5-flash-lite": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "toggle"
+    },
+    {
+     "type": "budget_tokens",
+     "min": 512,
+     "max": 24576
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1048576,
+    "output": 65536
+   }
+  },
+  "gemini-2.5-flash-tts": {
+   "reasoning": false,
+   "temperature": false,
+   "limit": {
+    "context": 32768,
+    "output": 16384
+   }
+  },
+  "gemini-2.5-pro": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "budget_tokens",
+     "min": 128,
+     "max": 32768
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1048576,
+    "output": 65536
+   }
+  },
+  "gemini-2.5-pro-tts": {
+   "reasoning": false,
+   "temperature": false,
+   "limit": {
+    "context": 32768,
+    "output": 16384
+   }
+  },
+  "gemini-3-flash-preview": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "minimal",
+      "low",
+      "medium",
+      "high"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1048576,
+    "output": 65536
+   }
+  },
+  "gemini-3-pro-image": {
+   "reasoning": true,
+   "temperature": true,
+   "limit": {
+    "context": 65536,
+    "output": 32768
+   }
+  },
+  "gemini-3.1-flash-image": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "minimal",
+      "high"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 131072,
+    "output": 32768
+   }
+  },
+  "gemini-3.1-flash-lite": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "minimal",
+      "low",
+      "medium",
+      "high"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1048576,
+    "output": 65536
+   }
+  },
+  "gemini-3.1-flash-lite-preview": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "minimal",
+      "low",
+      "medium",
+      "high"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1048576,
+    "output": 65536
+   }
+  },
+  "gemini-3.1-pro-preview": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1048576,
+    "output": 65536
+   }
+  },
+  "gemini-3.1-pro-preview-customtools": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1048576,
+    "output": 65536
+   }
+  },
+  "gemini-3.5-flash": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "minimal",
+      "low",
+      "medium",
+      "high"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1048576,
+    "output": 65536
+   }
+  },
+  "gemini-3.5-flash-lite": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "minimal",
+      "low",
+      "medium",
+      "high"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1048576,
+    "output": 65536
+   }
+  },
+  "gemini-3.6-flash": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "minimal",
+      "low",
+      "medium",
+      "high"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1048576,
+    "output": 65536
+   }
+  },
+  "gemini-3.7-flash": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1048576,
+    "output": 65536
+   }
+  },
+  "gemini-embedding-001": {
+   "reasoning": false,
+   "temperature": false,
+   "limit": {
+    "context": 2048,
+    "output": 1
+   }
+  },
+  "gemini-flash-latest": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "minimal",
+      "low",
+      "medium",
+      "high"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1048576,
+    "output": 65536
+   }
+  },
+  "gemini-flash-lite-latest": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "minimal",
+      "low",
+      "medium",
+      "high"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1048576,
+    "output": 65536
+   }
+  },
+  "meta/llama-3.3-70b-instruct-maas": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 128000,
+    "output": 8192
+   }
+  },
+  "meta/llama-4-maverick-17b-128e-instruct-maas": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 524288,
+    "output": 8192
+   }
+  },
+  "moonshotai/kimi-k2-thinking-maas": {
+   "reasoning": true,
+   "temperature": true,
+   "limit": {
+    "context": 262144,
+    "output": 262144
+   }
+  },
+  "openai/gpt-oss-120b-maas": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 131072,
+    "output": 32768
+   }
+  },
+  "openai/gpt-oss-20b-maas": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 131072,
+    "output": 32768
+   }
+  },
+  "qwen/qwen3-235b-a22b-instruct-2507-maas": {
+   "reasoning": true,
+   "temperature": true,
+   "limit": {
+    "context": 262144,
+    "output": 16384
+   }
+  },
+  "zai-org/glm-4.7-maas": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "toggle"
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 200000,
+    "output": 128000
+   }
+  },
+  "zai-org/glm-5-maas": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "toggle"
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 202752,
+    "output": 131072
+   }
+  }
+ },
+ "minimax": {
+  "MiniMax-M2": {
+   "reasoning": true,
+   "temperature": true,
+   "limit": {
+    "context": 204800,
+    "output": 131072
+   }
+  },
+  "MiniMax-M2.1": {
+   "reasoning": true,
+   "temperature": true,
+   "limit": {
+    "context": 204800,
+    "output": 131072
+   }
+  },
+  "MiniMax-M2.5": {
+   "reasoning": true,
+   "temperature": true,
+   "limit": {
+    "context": 204800,
+    "output": 131072
+   }
+  },
+  "MiniMax-M2.5-highspeed": {
+   "reasoning": true,
+   "temperature": true,
+   "limit": {
+    "context": 204800,
+    "output": 131072
+   }
+  },
+  "MiniMax-M2.7": {
+   "reasoning": true,
+   "temperature": true,
+   "limit": {
+    "context": 204800,
+    "output": 131072
+   }
+  },
+  "MiniMax-M2.7-highspeed": {
+   "reasoning": true,
+   "temperature": true,
+   "limit": {
+    "context": 204800,
+    "output": 131072
+   }
+  },
+  "MiniMax-M3": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "toggle"
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1048576,
+    "output": 512000
+   }
+  }
+ },
+ "mistral": {
+  "codestral-latest": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 256000,
+    "output": 4096
+   }
+  },
+  "devstral-2512": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 262144,
+    "output": 262144
+   }
+  },
+  "devstral-latest": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 262144,
+    "output": 262144
+   }
+  },
+  "devstral-medium-2507": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 128000,
+    "output": 128000
+   }
+  },
+  "devstral-medium-latest": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 262144,
+    "output": 262144
+   }
+  },
+  "devstral-small-2505": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 128000,
+    "output": 128000
+   }
+  },
+  "devstral-small-2507": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 128000,
+    "output": 128000
+   }
+  },
+  "labs-devstral-small-2512": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 256000,
+    "output": 256000
+   }
+  },
+  "magistral-medium-latest": {
+   "reasoning": true,
+   "temperature": true,
+   "limit": {
+    "context": 128000,
+    "output": 16384
+   }
+  },
+  "magistral-small": {
+   "reasoning": true,
+   "temperature": true,
+   "limit": {
+    "context": 128000,
+    "output": 128000
+   }
+  },
+  "ministral-3b-latest": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 128000,
+    "output": 128000
+   }
+  },
+  "ministral-8b-latest": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 128000,
+    "output": 128000
+   }
+  },
+  "mistral-embed": {
+   "reasoning": false,
+   "temperature": false,
+   "limit": {
+    "context": 8000,
+    "output": 3072
+   }
+  },
+  "mistral-large-2411": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 131072,
+    "output": 16384
+   }
+  },
+  "mistral-large-2512": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 262144,
+    "output": 262144
+   }
+  },
+  "mistral-large-latest": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 262144,
+    "output": 262144
+   }
+  },
+  "mistral-medium-2505": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 131072,
+    "output": 131072
+   }
+  },
+  "mistral-medium-2508": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 262144,
+    "output": 262144
+   }
+  },
+  "mistral-medium-2604": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "none",
+      "high"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 262144,
+    "output": 262144
+   }
+  },
+  "mistral-medium-latest": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "none",
+      "high"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 262144,
+    "output": 262144
+   }
+  },
+  "mistral-nemo": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 128000,
+    "output": 128000
+   }
+  },
+  "mistral-small-2506": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 128000,
+    "output": 16384
+   }
+  },
+  "mistral-small-2603": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "none",
+      "high"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 256000,
+    "output": 256000
+   }
+  },
+  "mistral-small-latest": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "none",
+      "high"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 256000,
+    "output": 256000
+   }
+  },
+  "open-mistral-7b": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 8000,
+    "output": 8000
+   }
+  },
+  "open-mistral-nemo": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 128000,
+    "output": 128000
+   }
+  },
+  "open-mixtral-8x22b": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 64000,
+    "output": 64000
+   }
+  },
+  "open-mixtral-8x7b": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 32000,
+    "output": 32000
+   }
+  },
+  "pixtral-12b": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 128000,
+    "output": 128000
+   }
+  },
+  "pixtral-large-latest": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 128000,
+    "output": 128000
+   }
+  },
+  "voxtral-mini-latest": {
+   "reasoning": false,
+   "temperature": false,
+   "limit": {}
+  },
+  "voxtral-mini-tts-latest": {
+   "reasoning": false,
+   "temperature": false,
+   "limit": {}
+  },
+  "voxtral-small-latest": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 32000,
+    "output": 32000
+   }
+  },
+  "zai-glm-5-2": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "high",
+      "max"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1000000,
+    "output": 131072
+   }
+  }
+ },
+ "moonshotai": {
+  "kimi-k2-0711-preview": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 131072,
+    "output": 16384
+   }
+  },
+  "kimi-k2-0905-preview": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 262144,
+    "output": 262144
+   }
+  },
+  "kimi-k2-thinking": {
+   "reasoning": true,
+   "temperature": true,
+   "limit": {
+    "context": 262144,
+    "output": 262144
+   }
+  },
+  "kimi-k2-thinking-turbo": {
+   "reasoning": true,
+   "temperature": true,
+   "limit": {
+    "context": 262144,
+    "output": 262144
+   }
+  },
+  "kimi-k2-turbo-preview": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 262144,
+    "output": 262144
+   }
+  },
+  "kimi-k2.5": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "toggle"
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 262144,
+    "output": 262144
+   }
+  },
+  "kimi-k2.6": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "toggle"
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 262144,
+    "output": 262144
+   }
+  },
+  "kimi-k2.7-code": {
+   "reasoning": true,
+   "temperature": false,
+   "limit": {
+    "context": 262144,
+    "output": 262144
+   }
+  },
+  "kimi-k2.7-code-highspeed": {
+   "reasoning": true,
+   "temperature": false,
+   "limit": {
+    "context": 262144,
+    "output": 262144
+   }
+  },
+  "kimi-k3": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "toggle"
+    },
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "high",
+      "max"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 1048576,
+    "output": 131072
+   }
+  }
+ },
+ "openai": {
+  "chatgpt-image-latest": {
+   "reasoning": false,
+   "temperature": false,
+   "limit": {}
+  },
+  "gpt-3.5-turbo": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 16385,
+    "output": 4096
+   }
+  },
+  "gpt-4": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 8192,
+    "output": 8192
+   }
+  },
+  "gpt-4-turbo": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 128000,
+    "output": 4096
+   }
+  },
+  "gpt-4.1": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 1047576,
+    "output": 32768
+   }
+  },
+  "gpt-4.1-mini": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 1047576,
+    "output": 32768
+   }
+  },
+  "gpt-4.1-nano": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 1047576,
+    "output": 32768
+   }
+  },
+  "gpt-4o": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 128000,
+    "output": 16384
+   }
+  },
+  "gpt-4o-2024-05-13": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 128000,
+    "output": 4096
+   }
+  },
+  "gpt-4o-2024-08-06": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 128000,
+    "output": 16384
+   }
+  },
+  "gpt-4o-2024-11-20": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 128000,
+    "output": 16384
+   }
+  },
+  "gpt-4o-mini": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 128000,
+    "output": 16384
+   }
+  },
+  "gpt-5": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "minimal",
+      "low",
+      "medium",
+      "high"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 400000,
+    "output": 128000
+   }
+  },
+  "gpt-5-mini": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "minimal",
+      "low",
+      "medium",
+      "high"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 400000,
+    "output": 128000
+   }
+  },
+  "gpt-5-nano": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "minimal",
+      "low",
+      "medium",
+      "high"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 400000,
+    "output": 128000
+   }
+  },
+  "gpt-5-pro": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "high"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 400000,
+    "output": 272000
+   }
+  },
+  "gpt-5.1": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "none",
+      "low",
+      "medium",
+      "high"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 400000,
+    "output": 128000
+   }
+  },
+  "gpt-5.2": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "none",
+      "low",
+      "medium",
+      "high",
+      "xhigh"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 400000,
+    "output": 128000
+   }
+  },
+  "gpt-5.2-chat-latest": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "medium"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 128000,
+    "output": 16384
+   }
+  },
+  "gpt-5.2-pro": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "medium",
+      "high",
+      "xhigh"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 400000,
+    "output": 128000
+   }
+  },
+  "gpt-5.3-chat-latest": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 128000,
+    "output": 16384
+   }
+  },
+  "gpt-5.3-codex": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "none",
+      "low",
+      "medium",
+      "high",
+      "xhigh"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 400000,
+    "output": 128000
+   }
+  },
+  "gpt-5.3-codex-spark": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "none",
+      "low",
+      "medium",
+      "high",
+      "xhigh"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 128000,
+    "output": 32000
+   }
+  },
+  "gpt-5.4": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "none",
+      "low",
+      "medium",
+      "high",
+      "xhigh"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1050000,
+    "output": 128000
+   }
+  },
+  "gpt-5.4-mini": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "none",
+      "low",
+      "medium",
+      "high",
+      "xhigh"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 400000,
+    "output": 128000
+   }
+  },
+  "gpt-5.4-nano": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "none",
+      "low",
+      "medium",
+      "high",
+      "xhigh"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 400000,
+    "output": 128000
+   }
+  },
+  "gpt-5.4-pro": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "medium",
+      "high",
+      "xhigh"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 1050000,
+    "output": 128000
+   }
+  },
+  "gpt-5.5": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "none",
+      "low",
+      "medium",
+      "high",
+      "xhigh"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 1050000,
+    "output": 128000
+   }
+  },
+  "gpt-5.5-pro": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "medium",
+      "high",
+      "xhigh"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 1050000,
+    "output": 128000
+   }
+  },
+  "gpt-5.6": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "none",
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 1050000,
+    "output": 128000
+   }
+  },
+  "gpt-5.6-luna": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "none",
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 1050000,
+    "output": 128000
+   }
+  },
+  "gpt-5.6-sol": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "none",
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 1050000,
+    "output": 128000
+   }
+  },
+  "gpt-5.6-terra": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "none",
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 1050000,
+    "output": 128000
+   }
+  },
+  "gpt-image-1": {
+   "reasoning": false,
+   "temperature": false,
+   "limit": {}
+  },
+  "gpt-image-1-mini": {
+   "reasoning": false,
+   "temperature": false,
+   "limit": {}
+  },
+  "gpt-image-1.5": {
+   "reasoning": false,
+   "temperature": false,
+   "limit": {}
+  },
+  "gpt-image-2": {
+   "reasoning": false,
+   "temperature": false,
+   "limit": {}
+  },
+  "gpt-realtime-2.1": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "minimal",
+      "low",
+      "medium",
+      "high",
+      "xhigh"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 128000,
+    "output": 32000
+   }
+  },
+  "o1": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 200000,
+    "output": 100000
+   }
+  },
+  "o1-pro": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 200000,
+    "output": 100000
+   }
+  },
+  "o3": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 200000,
+    "output": 100000
+   }
+  },
+  "o3-mini": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 200000,
+    "output": 100000
+   }
+  },
+  "o3-pro": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 200000,
+    "output": 100000
+   }
+  },
+  "o4-mini": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high"
+     ]
+    }
+   ],
+   "temperature": false,
+   "limit": {
+    "context": 200000,
+    "output": 100000
+   }
+  },
+  "text-embedding-3-large": {
+   "reasoning": false,
+   "temperature": false,
+   "limit": {
+    "context": 8191,
+    "output": 3072
+   }
+  },
+  "text-embedding-3-small": {
+   "reasoning": false,
+   "temperature": false,
+   "limit": {
+    "context": 8191,
+    "output": 1536
+   }
+  },
+  "text-embedding-ada-002": {
+   "reasoning": false,
+   "temperature": false,
+   "limit": {
+    "context": 8192,
+    "output": 1536
+   }
+  }
+ },
+ "xai": {
+  "grok-4.20-0309-non-reasoning": {
+   "reasoning": false,
+   "temperature": true,
+   "limit": {
+    "context": 1000000,
+    "output": 30000
+   }
+  },
+  "grok-4.20-0309-reasoning": {
+   "reasoning": true,
+   "temperature": true,
+   "limit": {
+    "context": 1000000,
+    "output": 30000
+   }
+  },
+  "grok-4.20-multi-agent-0309": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high",
+      "xhigh"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1000000,
+    "output": 30000
+   }
+  },
+  "grok-4.3": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "none",
+      "low",
+      "medium",
+      "high"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1000000,
+    "output": 30000
+   }
+  },
+  "grok-4.5": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 500000,
+    "output": 500000
+   }
+  },
+  "grok-4.6": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high",
+      "xhigh"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 500000,
+    "output": 500000
+   }
+  },
+  "grok-build-0.1": {
+   "reasoning": true,
+   "temperature": true,
+   "limit": {
+    "context": 256000,
+    "output": 256000
+   }
+  },
+  "grok-imagine-image": {
+   "reasoning": false,
+   "temperature": false,
+   "limit": {
+    "context": 8000
+   }
+  },
+  "grok-imagine-image-2.0": {
+   "reasoning": false,
+   "temperature": false,
+   "limit": {
+    "context": 8000
+   }
+  },
+  "grok-imagine-image-quality": {
+   "reasoning": false,
+   "temperature": false,
+   "limit": {
+    "context": 8000
+   }
+  },
+  "grok-imagine-video": {
+   "reasoning": false,
+   "temperature": false,
+   "limit": {
+    "context": 1024
+   }
+  },
+  "grok-imagine-video-1.5": {
+   "reasoning": false,
+   "temperature": false,
+   "limit": {
+    "context": 1024
+   }
+  }
+ },
+ "zhipuai": {
+  "glm-4.5": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "toggle"
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 131072,
+    "output": 98304
+   }
+  },
+  "glm-4.5-air": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "toggle"
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 131072,
+    "output": 98304
+   }
+  },
+  "glm-4.5-flash": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "toggle"
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 131072,
+    "output": 98304
+   }
+  },
+  "glm-4.5v": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "toggle"
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 64000,
+    "output": 16384
+   }
+  },
+  "glm-4.6": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "toggle"
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 204800,
+    "output": 131072
+   }
+  },
+  "glm-4.6v": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "toggle"
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 128000,
+    "output": 32768
+   }
+  },
+  "glm-4.7": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "toggle"
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 204800,
+    "output": 131072
+   }
+  },
+  "glm-4.7-flash": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "toggle"
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 200000,
+    "output": 131072
+   }
+  },
+  "glm-4.7-flashx": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "toggle"
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 200000,
+    "output": 131072
+   }
+  },
+  "glm-5": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "toggle"
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 204800,
+    "output": 131072
+   }
+  },
+  "glm-5.1": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "toggle"
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 200000,
+    "output": 131072
+   }
+  },
+  "glm-5.2": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "high",
+      "max"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1000000,
+    "output": 131072
+   }
+  },
+  "glm-5.3": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "high",
+      "max"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1000000,
+    "output": 131072
+   }
+  },
+  "glm-5.3-flash": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "high",
+      "max"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1000000,
+    "output": 131072
+   }
+  },
+  "glm-5v-turbo": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "toggle"
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 200000,
+    "output": 131072
+   }
+  }
+ }
+}
