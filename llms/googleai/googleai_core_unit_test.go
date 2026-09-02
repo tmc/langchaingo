@@ -1097,7 +1097,7 @@ func TestResolveThinkingConfigRefusesAnEffortThatMapsToNothing(t *testing.T) {
 	assert.Nil(t, tc)
 }
 
-func TestResolveThinkingConfigClampsMinimalToTheLowestLevel(t *testing.T) {
+func TestResolveThinkingConfigClampsMinimalWhereTheModelRefusesIt(t *testing.T) {
 	t.Parallel()
 
 	tc, err := resolveThinkingConfig("gemini-3-pro-preview",
@@ -1166,6 +1166,27 @@ func TestResolveThinkingConfig(t *testing.T) {
 			assert.Equal(t, tc.want, got.ThinkingLevel, "effort %s -> level", tc.effort)
 			assert.Nil(t, got.ThinkingBudget, "level path must not also send a budget")
 			assert.True(t, got.IncludeThoughts)
+		}
+	})
+
+	t.Run("minimal reaches the wire only where the model takes it", func(t *testing.T) {
+		for _, tc := range []struct {
+			model string
+			want  genai.ThinkingLevel
+		}{
+			{"gemini-3-flash-preview", genai.ThinkingLevelMinimal},
+			{"gemini-3.1-flash-lite", genai.ThinkingLevelMinimal},
+			{"gemini-3.5-flash", genai.ThinkingLevelMinimal},
+			{"gemini-3.6-flash", genai.ThinkingLevelMinimal},
+			{"gemini-3.1-pro-preview", genai.ThinkingLevelLow},
+			{"gemini-3.7-flash", genai.ThinkingLevelLow},
+		} {
+			got, err := resolveThinkingConfig(tc.model,
+				&llms.ReasoningConfig{Effort: llms.ReasoningMinimal}, 8192)
+			require.NoError(t, err)
+			require.NotNil(t, got)
+			assert.Equal(t, tc.want, got.ThinkingLevel, "model %s -> level", tc.model)
+			assert.Nil(t, got.ThinkingBudget, "level path must not also send a budget")
 		}
 	})
 

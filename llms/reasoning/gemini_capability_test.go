@@ -133,3 +133,30 @@ func TestGeminiFlashLiteDisablesByOmitting(t *testing.T) {
 		}
 	}
 }
+
+func TestGeminiAcceptsMinimalLevel(t *testing.T) {
+	t.Parallel()
+	cases := []struct {
+		model string
+		want  bool
+	}{
+		{"gemini-3-flash-preview", true},
+		{"gemini-3.1-flash-lite", true},
+		{"gemini-3.1-flash-lite-preview", true},
+		{"gemini-3.5-flash", true},
+		{"gemini-3.5-flash-lite", true},
+		{"gemini-3.6-flash", true},
+		{"google/gemini-3.5-flash", true},
+		{"gemini-3.1-pro-preview", false},
+		{"gemini-3.1-pro-preview-customtools", false},
+		{"gemini-3.7-flash", false},
+		{"gemini-2.5-flash", false},
+		{"gemini-3.9-flash", false},
+		{"", false},
+	}
+	for _, tc := range cases {
+		if got := GeminiAcceptsMinimalLevel(tc.model); got != tc.want {
+			t.Errorf("GeminiAcceptsMinimalLevel(%q) = %v, want %v", tc.model, got, tc.want)
+		}
+	}
+}
