@@ -27,7 +27,7 @@ var knownDrift = map[string]string{
 	"openai/gpt-realtime-2.1":                  "не чат: This is not a chat model",
 	"amazon-bedrock/qwen.qwen3-32b-v1:0":       "думает только в стриме по просьбе, а предикат отвечает на вопрос о голом вызове",
 
-	"amazon-bedrock/deepseek.v3-v1:0": "НАШ ПРОБЕЛ: вендорное написание DeepSeek не нормализуется",
+	"amazon-bedrock/deepseek.v3-v1:0": "имени нет на Bedrock: The provided model identifier is invalid; линейка V3 замерена как нерассуждающая",
 
 	"alibaba/qvq-max":                                       "не измерено",
 	"alibaba/qwen-turbo":                                    "не измерено",
