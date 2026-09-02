@@ -1,0 +1,135 @@
+httprr trace v1
+474 806
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-haiku-4-5-20251001-v1%3A0/invoke HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 160
+Accept: */*
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"anthropic_version":"bedrock-2023-05-31","max_tokens":10,"messages":[{"role":"user","content":[{"type":"text","text":"Reply with 'Hello' and nothing else"}]}]}HTTP/2.0 200 OK
+Content-Length: 477
+Content-Type: application/json
+Date: Wed, 02 Sep 2026 20:47:06 GMT
+X-Amzn-Bedrock-Cache-Read-Input-Token-Count: 0
+X-Amzn-Bedrock-Input-Token-Count: 16
+X-Amzn-Bedrock-Invocation-Latency: 500
+X-Amzn-Bedrock-Output-Token-Count: 4
+X-Amzn-Requestid: a4dc6097-2b1e-42bf-bf97-88c372995562
+
+{"model":"anthropic.claude-haiku-4-5-20251001-v1:0","id":"msg_bdrk_wh4u6aw6qu2gqah4ppful45vkywyzyemprgtefizxh732d5hoz3a","type":"message","role":"assistant","content":[{"type":"text","text":"Hello"}],"stop_reason":"end_turn","stop_sequence":null,"stop_details":null,"usage":{"input_tokens":16,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":4,"service_tier":"standard"}}532 806
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-haiku-4-5-20251001-v1%3A0/invoke HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 218
+Accept: */*
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"anthropic_version":"bedrock-2023-05-31","max_tokens":1,"messages":[{"role":"user","content":[{"type":"text","text":"test"}]}],"tools":[{"name":"test_tool","description":"Test tool","input_schema":{"type":"object"}}]}HTTP/2.0 200 OK
+Content-Length: 476
+Content-Type: application/json
+Date: Wed, 02 Sep 2026 20:47:06 GMT
+X-Amzn-Bedrock-Cache-Read-Input-Token-Count: 0
+X-Amzn-Bedrock-Input-Token-Count: 535
+X-Amzn-Bedrock-Invocation-Latency: 518
+X-Amzn-Bedrock-Output-Token-Count: 1
+X-Amzn-Requestid: 002418b6-513b-4911-bb91-b5ef46314c5c
+
+{"model":"anthropic.claude-haiku-4-5-20251001-v1:0","id":"msg_bdrk_uuxq2tfquabirwllhxrgqqcjffdg2v6662vhhtdcs56dxgwouy5a","type":"message","role":"assistant","content":[{"type":"text","text":"I"}],"stop_reason":"max_tokens","stop_sequence":null,"stop_details":null,"usage":{"input_tokens":535,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1,"service_tier":"standard"}}471 803
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-haiku-4-5-20251001-v1%3A0/invoke HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 157
+Accept: */*
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"anthropic_version":"bedrock-2023-05-31","max_tokens":10,"messages":[{"role":"user","content":[{"type":"text","text":"Reply with 'OK' and nothing else"}]}]}HTTP/2.0 200 OK
+Content-Length: 474
+Content-Type: application/json
+Date: Wed, 02 Sep 2026 20:47:06 GMT
+X-Amzn-Bedrock-Cache-Read-Input-Token-Count: 0
+X-Amzn-Bedrock-Input-Token-Count: 16
+X-Amzn-Bedrock-Invocation-Latency: 591
+X-Amzn-Bedrock-Output-Token-Count: 4
+X-Amzn-Requestid: 670640a0-32ef-4214-b8dc-f53d4d22ec57
+
+{"model":"anthropic.claude-haiku-4-5-20251001-v1:0","id":"msg_bdrk_f4pcg2vuke2civlv73zfu7wohoxg2h4qv474ojfh7sxb3ezlvcoa","type":"message","role":"assistant","content":[{"type":"text","text":"OK"}],"stop_reason":"end_turn","stop_sequence":null,"stop_details":null,"usage":{"input_tokens":16,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":4,"service_tier":"standard"}}1660 805
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-haiku-4-5-20251001-v1%3A0/invoke HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 1345
+Accept: */*
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"anthropic_version":"bedrock-2023-05-31","max_tokens":10,"system":"This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. ","messages":[{"role":"user","content":[{"type":"text","text":"Say 'OK'"}]}]}HTTP/2.0 200 OK
+Content-Length: 475
+Content-Type: application/json
+Date: Wed, 02 Sep 2026 20:47:08 GMT
+X-Amzn-Bedrock-Cache-Read-Input-Token-Count: 0
+X-Amzn-Bedrock-Input-Token-Count: 263
+X-Amzn-Bedrock-Invocation-Latency: 495
+X-Amzn-Bedrock-Output-Token-Count: 4
+X-Amzn-Requestid: bfcfbe61-d78a-410c-80a3-ab8d4e2593c2
+
+{"model":"anthropic.claude-haiku-4-5-20251001-v1:0","id":"msg_bdrk_uclijdlxirdmpmcxz7cvkjd3lvosfzkuhdrkzx7ndjoxph355zga","type":"message","role":"assistant","content":[{"type":"text","text":"OK"}],"stop_reason":"end_turn","stop_sequence":null,"stop_details":null,"usage":{"input_tokens":263,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":4,"service_tier":"standard"}}449 816
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-haiku-4-5-20251001-v1%3A0/invoke HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 135
+Accept: */*
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"anthropic_version":"bedrock-2023-05-31","max_tokens":50,"messages":[{"role":"user","content":[{"type":"text","text":"Count to 5"}]}]}HTTP/2.0 200 OK
+Content-Length: 486
+Content-Type: application/json
+Date: Wed, 02 Sep 2026 20:47:08 GMT
+X-Amzn-Bedrock-Cache-Read-Input-Token-Count: 0
+X-Amzn-Bedrock-Input-Token-Count: 11
+X-Amzn-Bedrock-Invocation-Latency: 530
+X-Amzn-Bedrock-Output-Token-Count: 13
+X-Amzn-Requestid: b3ca3563-5dde-4332-9a15-afa571bbe8f5
+
+{"model":"anthropic.claude-haiku-4-5-20251001-v1:0","id":"msg_bdrk_hmcg4btrdjxsw2gvl4epzqzs4445j2s44snj7anqopcc73rtzweq","type":"message","role":"assistant","content":[{"type":"text","text":"1\n2\n3\n4\n5"}],"stop_reason":"end_turn","stop_sequence":null,"stop_details":null,"usage":{"input_tokens":11,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":13,"service_tier":"standard"}}694 915
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-haiku-4-5-20251001-v1%3A0/invoke HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 380
+Accept: */*
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"anthropic_version":"bedrock-2023-05-31","max_tokens":100,"messages":[{"role":"user","content":[{"type":"text","text":"What's the weather in San Francisco?"}]}],"tools":[{"name":"get_weather","description":"Get the weather for a location","input_schema":{"properties":{"location":{"description":"The city and country","type":"string"}},"required":["location"],"type":"object"}}]}HTTP/2.0 200 OK
+Content-Length: 584
+Content-Type: application/json
+Date: Wed, 02 Sep 2026 20:47:08 GMT
+X-Amzn-Bedrock-Cache-Read-Input-Token-Count: 0
+X-Amzn-Bedrock-Input-Token-Count: 574
+X-Amzn-Bedrock-Invocation-Latency: 741
+X-Amzn-Bedrock-Output-Token-Count: 58
+X-Amzn-Requestid: f0e3e16e-bff0-44df-88c6-546c70a9beb9
+
+{"model":"anthropic.claude-haiku-4-5-20251001-v1:0","id":"msg_bdrk_gbiiequh2nfh5sbpqxsije5in3zsssl4h3xhihj6rupxtlhemywq","type":"message","role":"assistant","content":[{"type":"tool_use","id":"toolu_bdrk_0188YEuvwmyEzV5Vz8QwfSbZ","name":"get_weather","input":{"location":"San Francisco, United States"}}],"stop_reason":"tool_use","stop_sequence":null,"stop_details":null,"usage":{"input_tokens":574,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":58,"service_tier":"standard"}}1660 805
+POST https://bedrock-runtime.us-east-1.amazonaws.com/model/us.anthropic.claude-haiku-4-5-20251001-v1%3A0/invoke HTTP/1.1
+Host: bedrock-runtime.us-east-1.amazonaws.com
+User-Agent: langchaingo-httprr
+Content-Length: 1345
+Accept: */*
+Authorization: AWS4-HMAC-SHA256 test-api-key
+Content-Type: application/json
+
+{"anthropic_version":"bedrock-2023-05-31","max_tokens":10,"system":"This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. This is cached context. ","messages":[{"role":"user","content":[{"type":"text","text":"Say 'OK'"}]}]}HTTP/2.0 200 OK
+Content-Length: 475
+Content-Type: application/json
+Date: Wed, 02 Sep 2026 20:47:09 GMT
+X-Amzn-Bedrock-Cache-Read-Input-Token-Count: 0
+X-Amzn-Bedrock-Input-Token-Count: 263
+X-Amzn-Bedrock-Invocation-Latency: 479
+X-Amzn-Bedrock-Output-Token-Count: 4
+X-Amzn-Requestid: bc23efc1-0aa9-4699-81f7-10924d909e94
+
+{"model":"anthropic.claude-haiku-4-5-20251001-v1:0","id":"msg_bdrk_ymzbfo4rwzbbqpulwpjgdfaue3jblgiidut7koxh7mrn2u4gwmuq","type":"message","role":"assistant","content":[{"type":"text","text":"OK"}],"stop_reason":"end_turn","stop_sequence":null,"stop_details":null,"usage":{"input_tokens":263,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":4,"service_tier":"standard"}}
