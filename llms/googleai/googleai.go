@@ -1087,7 +1087,7 @@ func resolveThinkingConfig(model string, cfg *llms.ReasoningConfig, maxTokens in
 		// thinking_level on Gemini 3.x (its native control, where thinking_budget is
 		// deprecated); an explicit budget or a 2.5 model still uses thinking_budget.
 		if cfg.Tokens <= 0 && reasoning.GeminiUsesThinkingLevel(model) {
-			if level := thinkingLevelForEffort(cfg.GetEffort(maxTokens)); level != "" {
+			if level := thinkingLevelForEffort(model, cfg.GetEffort(maxTokens)); level != "" {
 				return &genai.ThinkingConfig{ThinkingLevel: level, IncludeThoughts: true}, nil
 			}
 		}
@@ -1151,9 +1151,14 @@ func checkEmptyStream(
 // thinkingLevelForEffort maps a reasoning effort to a Gemini thinking_level.
 // xhigh/max collapse to HIGH (the top level); an unset effort returns empty so
 // the caller falls back to a budget or the model default.
-func thinkingLevelForEffort(effort llms.ReasoningEffort) genai.ThinkingLevel {
+func thinkingLevelForEffort(model string, effort llms.ReasoningEffort) genai.ThinkingLevel {
 	switch effort {
-	case llms.ReasoningMinimal, llms.ReasoningLow:
+	case llms.ReasoningMinimal:
+		if reasoning.GeminiAcceptsMinimalLevel(model) {
+			return genai.ThinkingLevelMinimal
+		}
+		return genai.ThinkingLevelLow
+	case llms.ReasoningLow:
 		return genai.ThinkingLevelLow
 	case llms.ReasoningMedium:
 		return genai.ThinkingLevelMedium

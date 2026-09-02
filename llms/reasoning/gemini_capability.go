@@ -66,6 +66,22 @@ func GeminiUsesThinkingLevel(model string) bool {
 	return hasFamily(baseModelName(model), "gemini-3")
 }
 
+// GeminiAcceptsMinimalLevel reports whether the model takes thinking_level
+// MINIMAL. A name this package has not measured reports false and falls back
+// to LOW, so extending this set means measuring first, not guessing.
+func GeminiAcceptsMinimalLevel(model string) bool {
+	m := baseModelName(model)
+	if !GeminiUsesThinkingLevel(m) || strings.Contains(m, "pro") {
+		return false
+	}
+	for _, family := range []string{"gemini-3.1", "gemini-3.5", "gemini-3.6"} {
+		if hasFamily(m, family) {
+			return true
+		}
+	}
+	return !strings.HasPrefix(m, "gemini-3.")
+}
+
 // geminiKnownNonThinking reports whether the model is a pre-thinking Gemini/Gemma
 // generation that never thinks (Gemini 1.x/2.0, Gemma 1–3), so it takes no thinking
 // control at all. Unclassified names are NOT matched, staying optimistic so a
