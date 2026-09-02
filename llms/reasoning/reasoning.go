@@ -270,7 +270,11 @@ func namesReasoningModel(modelLower string) bool { //nolint:funlen // a flat cat
 		strings.HasPrefix(glm, "glm-4.6") ||
 		strings.HasPrefix(glm, "glm-4.7") ||
 		strings.HasPrefix(glm, "glm-5") ||
-		glm == "glm-latest" {
+		glm == "glm-latest" || glm == "glm-flash-latest" {
+		return true
+	}
+
+	if strings.HasPrefix(modelLower, "labs-leanstral") {
 		return true
 	}
 
