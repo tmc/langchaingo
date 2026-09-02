@@ -31,7 +31,8 @@ func (e *ErrThinkingRequiresStream) Error() string {
 }
 
 var qwenFlagThinkers = map[string]bool{
-	"qwen-plus": true, "qwen-flash": true, "qwen3-max": true, "qwen3-vl-plus": true,
+	"qwen-plus": true, "qwen-flash": true, "qwen3-max": true,
+	"qwen3-vl-plus": true, "qwen3-vl-flash": true,
 }
 
 // QwenThinkingEnabledByFlag reports whether DashScope leaves the model's

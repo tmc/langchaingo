@@ -158,3 +158,36 @@ func TestAFinishedTurnWithNoBlockIsAnAnswer(t *testing.T) {
 		require.ErrorIs(t, err, anthropic.ErrEmptyResponse)
 	})
 }
+
+func TestFableTakesAForcedToolChoiceWithoutThinking(t *testing.T) {
+	t.Parallel()
+
+	const reply = `{"id":"x","type":"message","role":"assistant","model":"m",` +
+		`"content":[{"type":"text","text":"ok"}],"stop_reason":"end_turn",` +
+		`"usage":{"input_tokens":1,"output_tokens":1}}`
+
+	var sent string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		b, _ := io.ReadAll(r.Body)
+		sent = string(b)
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = io.WriteString(w, reply)
+	}))
+	t.Cleanup(srv.Close)
+
+	llm, err := anthropic.New(anthropic.WithToken("test"), anthropic.WithBaseURL(srv.URL),
+		anthropic.WithModel("claude-fable-5"))
+	require.NoError(t, err)
+
+	tool := llms.Tool{Type: "function", Function: &llms.FunctionDefinition{
+		Name: "calc", Description: "multiply",
+		Parameters: map[string]any{"type": "object", "properties": map[string]any{}},
+	}}
+
+	_, err = llm.GenerateContent(context.Background(),
+		[]llms.MessageContent{llms.TextParts(llms.ChatMessageTypeHuman, "17*23?")},
+		llms.WithTools([]llms.Tool{tool}), llms.WithToolChoice("any"))
+	require.NoError(t, err, "the vendor answers 200 with a tool call for any, auto and a named "+
+		"tool on this model, so a local refusal would take away working behaviour")
+	assert.Contains(t, sent, `"tool_choice":{"type":"any"}`)
+}

@@ -425,6 +425,8 @@ func (o *LLM) setReasoningOff(req *openaiclient.ChatRequest, opts llms.CallOptio
 	case reasoning.OffDisableDashScope:
 		thinkingOff := false
 		req.EnableThinking = &thinkingOff
+	case reasoning.OffDisableThinkingObject:
+		req.Thinking = &openaiclient.ThinkingOptions{Type: "disabled"}
 	}
 	return nil
 }

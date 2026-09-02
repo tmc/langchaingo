@@ -14,10 +14,7 @@ type mistralEntry struct {
 
 const mistralSnapshot = "testdata/mistral_models.json"
 
-var mistralKnownDrift = map[string]string{
-	"labs-leanstral-1-5":   "Labs-модель, вендор отказывает в обслуживании: замерить нельзя",
-	"labs-leanstral-1-5-1": "Labs-модель, вендор отказывает в обслуживании: замерить нельзя",
-}
+var mistralKnownDrift = map[string]string{}
 
 func readMistralListing(t *testing.T) map[string]mistralEntry {
 	t.Helper()

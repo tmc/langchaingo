@@ -157,3 +157,18 @@ func TestAGenerationDoesNotAnswerForALaterOne(t *testing.T) {
 		})
 	}
 }
+
+func TestTheDocumentedMaxEffortIsNotOnTheWireForGPT56(t *testing.T) {
+	t.Parallel()
+
+	for _, model := range []string{"gpt-5.6", "gpt-5.6-sol", "gpt-5.6-terra"} {
+		caps := OpenAIReasoningCapsFor(model)
+		if got := caps.ClampEffort("max"); got != "xhigh" {
+			t.Errorf("ClampEffort(%q, max) = %q, want xhigh: the vendor enumerates its own set as "+
+				"none, low, medium, high, xhigh and refuses max with 400", model, got)
+		}
+		if slices.Contains(caps.Efforts, "max") {
+			t.Errorf("%s advertises max, which the vendor refuses", model)
+		}
+	}
+}

@@ -20,6 +20,7 @@ func TestQwenThinkingRequiresStream(t *testing.T) {
 		{"qwen3-coder-plus", false},
 		{"qwen3-coder-30b-a3b-instruct", false},
 		{"qwen3-vl-plus", false},
+		{"qwen3-vl-flash", false},
 		{"qwen3-max", false},
 		{"qwen3-rerank", false},
 		{"qwen3-next-80b-a3b-thinking", false},

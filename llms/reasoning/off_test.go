@@ -51,3 +51,28 @@ func TestResolveOff(t *testing.T) {
 		}
 	}
 }
+
+func TestVendorsThatDisableWithAThinkingObject(t *testing.T) {
+	t.Parallel()
+
+	for _, model := range []string{
+		"glm-4.5", "glm-4.6", "glm-4.7", "glm-5", "glm-5-turbo", "glm-5.1", "minimax-m3",
+	} {
+		if got := ResolveOff(model, ProviderOpenAI); got != OffDisableThinkingObject {
+			t.Errorf("ResolveOff(%q) = %v, want the thinking object: the effort token is either "+
+				"ignored by the vendor or cut before it", model, got)
+		}
+	}
+
+	for model, want := range map[string]OffWire{
+		"glm-5.2":     OffEffortNone,
+		"glm-5.3":     OffUnsupported,
+		"minimax-m2":  OffUnsupported,
+		"kimi-k3":     OffEffortNone,
+		"deepseek-v4": OffEffortNone,
+	} {
+		if got := ResolveOff(model, ProviderOpenAI); got != want {
+			t.Errorf("ResolveOff(%q) = %v, want %v", model, got, want)
+		}
+	}
+}

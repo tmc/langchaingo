@@ -534,3 +534,20 @@ func TestTheMistralListingNamesWeMissed(t *testing.T) {
 		t.Error("the two live spellings of one model disagree")
 	}
 }
+
+func TestAliasNamesTheVendorListingsCarry(t *testing.T) {
+	t.Parallel()
+
+	if !IsReasoningModel("labs-leanstral-1-5") || !IsReasoningModel("labs-leanstral-1-5-1") {
+		t.Error("the Mistral listing marks labs-leanstral as reasoning, and the drift test " +
+			"carries it as an accounted divergence only because the vendor will not serve it")
+	}
+
+	if !IsReasoningModel("glm-flash-latest") {
+		t.Error("glm-flash-latest is the alias of glm-5.3-flash, which reasons")
+	}
+	if got := ResolveOff("glm-flash-latest", ProviderOpenAI); got != OffUnsupported {
+		t.Errorf("ResolveOff(glm-flash-latest) = %v, want unsupported: its target answers "+
+			"an explicit disable with 159 characters of reasoning", got)
+	}
+}
