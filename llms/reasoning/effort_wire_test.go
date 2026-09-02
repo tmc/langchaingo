@@ -75,3 +75,22 @@ func TestResolveOffOnDoorsThatRejectEffort(t *testing.T) {
 		}
 	}
 }
+
+func TestTheGrokBuildAliasThatIsReallyGrok45(t *testing.T) {
+	t.Parallel()
+
+	if !AcceptsEffortWire("grok-build-latest") {
+		t.Error("grok-build-latest drops the effort field, but the vendor answers low with 47 " +
+			"reasoning tokens and high with 73")
+	}
+	if got := ResolveOff("grok-build-latest", ProviderOpenAI); got != OffUnsupported {
+		t.Errorf("ResolveOff(grok-build-latest) = %v, want unsupported: the vendor refuses "+
+			"effort none on this model", got)
+	}
+
+	for _, model := range []string{"grok-build-0.1", "grok-code-fast-1"} {
+		if AcceptsEffortWire(model) {
+			t.Errorf("%s carries the effort field, but the vendor refuses it by name", model)
+		}
+	}
+}

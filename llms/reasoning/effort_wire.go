@@ -40,6 +40,9 @@ func AcceptsEffortWire(model string) bool {
 		if strings.HasPrefix(form, "qwen") || strings.HasPrefix(form, "qwq") {
 			return false
 		}
+		if form == "grok-build-latest" {
+			return true
+		}
 		if strings.HasPrefix(form, "grok-code-fast") ||
 			strings.HasPrefix(form, "grok-build") ||
 			strings.HasPrefix(form, "grok-4.20") {
