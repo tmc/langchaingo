@@ -68,7 +68,7 @@ func TestResolveOffOnDoorsThatRejectEffort(t *testing.T) {
 		{"kimi-k2-thinking", OffUnsupported},
 		{"kimi-k3", OffEffortNone},
 		{"deepseek-v4-pro", OffEffortNone},
-		{"glm-5-turbo", OffEffortNone},
+		{"glm-5-turbo", OffDisableThinkingObject},
 	} {
 		if got := ResolveOff(tc.model, ProviderOpenAI); got != tc.want {
 			t.Errorf("ResolveOff(%q, ProviderOpenAI) = %v, want %v", tc.model, got, tc.want)

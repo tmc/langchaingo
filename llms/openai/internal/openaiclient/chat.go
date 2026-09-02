@@ -41,25 +41,30 @@ type ReasoningOptions struct {
 	MaxTokens int                  `json:"max_tokens,omitempty"`
 }
 
+type ThinkingOptions struct {
+	Type string `json:"type"`
+}
+
 // ChatRequest is a request to complete a chat completion..
 type ChatRequest struct {
-	Model               string         `json:"model"`
-	Messages            []*ChatMessage `json:"messages"`
-	Temperature         *float64       `json:"temperature,omitempty"`
-	TopK                *int           `json:"top_k,omitempty"`
-	TopP                *float64       `json:"top_p,omitempty"`
-	MinP                *float64       `json:"min_p,omitempty"`
-	EnableThinking      *bool          `json:"enable_thinking,omitempty"`
-	MaxTokens           *int           `json:"max_tokens,omitempty"`
-	MaxCompletionTokens *int           `json:"max_completion_tokens,omitempty"`
-	N                   *int           `json:"n,omitempty"`
-	StopWords           []string       `json:"stop,omitempty"`
-	Stream              bool           `json:"stream,omitempty"`
-	FrequencyPenalty    *float64       `json:"frequency_penalty,omitempty"`
-	PresencePenalty     *float64       `json:"presence_penalty,omitempty"`
-	RepetitionPenalty   *float64       `json:"repetition_penalty,omitempty"`
-	Verbosity           *string        `json:"verbosity,omitempty"`
-	Seed                *int           `json:"seed,omitempty"`
+	Model               string           `json:"model"`
+	Messages            []*ChatMessage   `json:"messages"`
+	Temperature         *float64         `json:"temperature,omitempty"`
+	TopK                *int             `json:"top_k,omitempty"`
+	TopP                *float64         `json:"top_p,omitempty"`
+	MinP                *float64         `json:"min_p,omitempty"`
+	EnableThinking      *bool            `json:"enable_thinking,omitempty"`
+	Thinking            *ThinkingOptions `json:"thinking,omitempty"`
+	MaxTokens           *int             `json:"max_tokens,omitempty"`
+	MaxCompletionTokens *int             `json:"max_completion_tokens,omitempty"`
+	N                   *int             `json:"n,omitempty"`
+	StopWords           []string         `json:"stop,omitempty"`
+	Stream              bool             `json:"stream,omitempty"`
+	FrequencyPenalty    *float64         `json:"frequency_penalty,omitempty"`
+	PresencePenalty     *float64         `json:"presence_penalty,omitempty"`
+	RepetitionPenalty   *float64         `json:"repetition_penalty,omitempty"`
+	Verbosity           *string          `json:"verbosity,omitempty"`
+	Seed                *int             `json:"seed,omitempty"`
 
 	// ReasoningEffort enables reasoning mode for models that support it.
 	// Set this field when you want to use the legacy reasoning configuration.

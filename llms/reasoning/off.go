@@ -34,6 +34,8 @@ const (
 	OffEffortNone
 	// OffDisableDashScope → DashScope enable_thinking:false.
 	OffDisableDashScope
+	// OffDisableThinkingObject → thinking:{type:"disabled"} on an OpenAI-shaped door.
+	OffDisableThinkingObject
 	// OffUnsupported: a known mandatory-thinking model that cannot be disabled
 	// (adaptive-only Claude, OpenAI o-series). The adapter returns a typed error.
 	OffUnsupported
@@ -93,6 +95,9 @@ func ResolveOff(model string, p Provider) OffWire {
 		if QwenThinkingRequiresStream(model) {
 			return OffDisableDashScope
 		}
+		if disablesByThinkingObject(model) {
+			return OffDisableThinkingObject
+		}
 		// The disable token rides on the effort field, so a door that refuses that
 		// field cannot express "off" at all.
 		if caps := OpenAIReasoningCapsFor(model); caps.Known && !caps.CanDisable {
@@ -133,6 +138,23 @@ func offByOmission(model string) bool {
 	for _, form := range modelSpellings(model) {
 		if strings.HasPrefix(form, "magistral") {
 			return true
+		}
+	}
+	return false
+}
+
+func disablesByThinkingObject(model string) bool {
+	for _, form := range modelSpellings(model) {
+		if hasGeneration(form, "minimax-m3") {
+			return true
+		}
+		if hasGeneration(form, "glm-5.2") {
+			continue
+		}
+		for _, generation := range []string{"glm-4.5", "glm-4.6", "glm-4.7", "glm-5", "glm-5.1"} {
+			if hasGeneration(form, generation) {
+				return true
+			}
 		}
 	}
 	return false
