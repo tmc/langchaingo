@@ -91,3 +91,39 @@ data: {"type":"message_stop"}
 	require.NotEmpty(t, resp.Choices)
 	assert.Equal(t, "refusal", resp.Choices[0].StopReason)
 }
+
+func TestARefusalKeepsTheCacheBreakdownAndTheServiceTier(t *testing.T) {
+	t.Parallel()
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = io.Copy(io.Discard, r.Body)
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = io.WriteString(w, `{"id":"msg_x","type":"message","role":"assistant","model":"claude-opus-4-6",
+			"content":[{"type":"text","text":"I can't help with that."}],"stop_reason":"refusal",
+			"usage":{"input_tokens":11,"output_tokens":7,"cache_read_input_tokens":3,
+			"cache_creation_input_tokens":9,
+			"cache_creation":{"ephemeral_5m_input_tokens":4,"ephemeral_1h_input_tokens":5},
+			"service_tier":"priority","speed":"fast"}}`)
+	}))
+	t.Cleanup(srv.Close)
+
+	llm, err := anthropic.New(anthropic.WithToken("test-key"), anthropic.WithBaseURL(srv.URL),
+		anthropic.WithModel("claude-opus-4-6"))
+	require.NoError(t, err)
+
+	resp, err := llm.GenerateContent(context.Background(),
+		[]llms.MessageContent{llms.TextParts(llms.ChatMessageTypeHuman, "hi")})
+
+	var refusal *llms.ErrModelRefusal
+	require.ErrorAs(t, err, &refusal)
+	assert.Equal(t, 9, refusal.CacheCreationInputTokens)
+	assert.Equal(t, 3, refusal.CacheReadInputTokens)
+
+	require.NotNil(t, resp)
+	require.NotEmpty(t, resp.Choices)
+	info := resp.Choices[0].GenerationInfo
+	assert.Equal(t, 4, info["CacheCreationEphemeral5mInputTokens"])
+	assert.Equal(t, 5, info["CacheCreationEphemeral1hInputTokens"])
+	assert.Equal(t, "priority", info["ServiceTier"])
+	assert.Equal(t, "fast", info["InferenceSpeed"])
+}
