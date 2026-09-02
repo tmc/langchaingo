@@ -26,7 +26,7 @@ var ErrEmptyResponse = errors.New("empty response")
 
 // Client is a client for the Anthropic API.
 type Client struct {
-	token   string
+	auth    authorizer
 	Model   string
 	baseURL string
 
@@ -80,7 +80,7 @@ func WithAnthropicBetaHeader(val string) Option {
 func New(token string, model string, baseURL string, opts ...Option) (*Client, error) {
 	c := &Client{
 		Model:      model,
-		token:      token,
+		auth:       staticKey(token),
 		baseURL:    strings.TrimSuffix(baseURL, "/"),
 		httpClient: httputil.DefaultClient,
 	}
@@ -197,9 +197,11 @@ func (c *Client) CreateMessage(ctx context.Context, r *MessageRequest) (*Message
 	return resp, nil
 }
 
-func (c *Client) setHeaders(req *http.Request, betaHeaders []string) {
+func (c *Client) setHeaders(ctx context.Context, req *http.Request, betaHeaders []string) error {
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("x-api-key", c.token) //nolint:canonicalheader
+	if err := c.auth.authorize(ctx, req); err != nil {
+		return err
+	}
 
 	// This is necessary as per https://docs.anthropic.com/en/api/versioning
 	// If this changes frequently enough we should expose it as an option..
@@ -225,6 +227,8 @@ func (c *Client) setHeaders(req *http.Request, betaHeaders []string) {
 	if len(validHeaders) > 0 {
 		req.Header.Set("anthropic-beta", strings.Join(validHeaders, ",")) // nolint:canonicalheader
 	}
+
+	return nil
 }
 
 func (c *Client) do(ctx context.Context, path string, payloadBytes []byte) (*http.Response, error) {
@@ -249,7 +253,9 @@ func (c *Client) request(
 		return nil, fmt.Errorf("create request: %w", err)
 	}
 
-	c.setHeaders(req, betaHeaders)
+	if err := c.setHeaders(ctx, req, betaHeaders); err != nil {
+		return nil, err
+	}
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
