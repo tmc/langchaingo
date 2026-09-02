@@ -22,11 +22,13 @@ func TestLLM(t *testing.T) {
 	}
 
 	rr := httprr.OpenForTest(t, http.DefaultTransport)
-	defer rr.Close()
-
-	if !rr.Recording() {
-		t.Parallel()
-	}
+	// llmtest drives parallel subtests, which resume only after this function
+	// returns; a deferred Close would shut the recorder before they run.
+	t.Cleanup(func() {
+		if closeErr := rr.Close(); closeErr != nil {
+			t.Errorf("closing the recording: %v", closeErr)
+		}
+	})
 
 	client, err := setUpTestWithTransport(rr)
 	if err != nil {
