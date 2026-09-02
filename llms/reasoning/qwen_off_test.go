@@ -18,7 +18,7 @@ func TestQwenHybridsSpellOffWithTheDashScopeFlag(t *testing.T) {
 func TestQwenHybridsAreReasoningModels(t *testing.T) {
 	t.Parallel()
 
-	for _, model := range []string{"qwen3-8b", "qwen3-235b-a22b", "dashscope/qwen3-30b-a3b", "qwen3-vl-plus"} {
+	for _, model := range []string{"qwen3-8b", "qwen3-235b-a22b", "dashscope/qwen3-30b-a3b", "qwen3-vl-plus", "qwen3-vl-flash"} {
 		if !IsReasoningModel(model) {
 			t.Errorf("IsReasoningModel(%q) = false, want true", model)
 		}

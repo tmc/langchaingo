@@ -18,6 +18,7 @@ func TestQwenCommercialHybridsThinkOnlyWhenAsked(t *testing.T) {
 		{"qwen3.7-plus", false},
 		{"qwen3-coder-plus", false},
 		{"qwen3-vl-plus", true},
+		{"qwen3-vl-flash", true},
 		{"openrouter/qwen/qwen-plus", false},
 		{"qwen-plus-latest", false},
 	}
