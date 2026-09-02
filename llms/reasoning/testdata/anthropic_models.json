@@ -1,0 +1,142 @@
+{
+ "claude-fable-5": {
+  "effort_supported": true,
+  "efforts": [
+   "low",
+   "medium",
+   "high",
+   "xhigh",
+   "max"
+  ],
+  "thinking_types": [
+   "adaptive"
+  ],
+  "structured_outputs": true
+ },
+ "claude-fable-5-1": {
+  "effort_supported": true,
+  "efforts": [
+   "low",
+   "medium",
+   "high",
+   "xhigh",
+   "max"
+  ],
+  "thinking_types": [
+   "adaptive"
+  ],
+  "structured_outputs": true
+ },
+ "claude-haiku-4-5-20251001": {
+  "effort_supported": false,
+  "efforts": [],
+  "thinking_types": [
+   "enabled"
+  ],
+  "structured_outputs": true
+ },
+ "claude-opus-4-5-20251101": {
+  "effort_supported": true,
+  "efforts": [
+   "low",
+   "medium",
+   "high"
+  ],
+  "thinking_types": [
+   "enabled"
+  ],
+  "structured_outputs": true
+ },
+ "claude-opus-4-6": {
+  "effort_supported": true,
+  "efforts": [
+   "low",
+   "medium",
+   "high",
+   "max"
+  ],
+  "thinking_types": [
+   "enabled",
+   "adaptive"
+  ],
+  "structured_outputs": true
+ },
+ "claude-opus-4-7": {
+  "effort_supported": true,
+  "efforts": [
+   "low",
+   "medium",
+   "high",
+   "xhigh",
+   "max"
+  ],
+  "thinking_types": [
+   "adaptive"
+  ],
+  "structured_outputs": true
+ },
+ "claude-opus-4-8": {
+  "effort_supported": true,
+  "efforts": [
+   "low",
+   "medium",
+   "high",
+   "xhigh",
+   "max"
+  ],
+  "thinking_types": [
+   "adaptive"
+  ],
+  "structured_outputs": true
+ },
+ "claude-opus-5": {
+  "effort_supported": true,
+  "efforts": [
+   "low",
+   "medium",
+   "high",
+   "xhigh",
+   "max"
+  ],
+  "thinking_types": [
+   "adaptive"
+  ],
+  "structured_outputs": true
+ },
+ "claude-sonnet-4-5-20250929": {
+  "effort_supported": false,
+  "efforts": [],
+  "thinking_types": [
+   "enabled"
+  ],
+  "structured_outputs": true
+ },
+ "claude-sonnet-4-6": {
+  "effort_supported": true,
+  "efforts": [
+   "low",
+   "medium",
+   "high",
+   "max"
+  ],
+  "thinking_types": [
+   "enabled",
+   "adaptive"
+  ],
+  "structured_outputs": true
+ },
+ "claude-sonnet-5": {
+  "effort_supported": true,
+  "efforts": [
+   "low",
+   "medium",
+   "high",
+   "xhigh",
+   "max"
+  ],
+  "thinking_types": [
+   "adaptive"
+  ],
+  "structured_outputs": true
+ }
+}
