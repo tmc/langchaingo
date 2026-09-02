@@ -67,4 +67,5 @@
 package reasoning
 
 //go:generate go run ./internal/cmd/modelsdev -out testdata/models_dev.json
+//go:generate go run ./internal/cmd/anthropicmodels -out testdata/anthropic_models.json
 //go:generate go run ./internal/cmd/mistralmodels -out testdata/mistral_models.json

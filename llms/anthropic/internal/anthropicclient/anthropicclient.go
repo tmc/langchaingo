@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"slices"
 	"strings"
@@ -231,13 +232,19 @@ func (c *Client) do(ctx context.Context, path string, payloadBytes []byte) (*htt
 }
 
 func (c *Client) doWithHeaders(ctx context.Context, path string, payloadBytes []byte, betaHeaders []string) (*http.Response, error) {
+	return c.request(ctx, http.MethodPost, path, bytes.NewReader(payloadBytes), betaHeaders)
+}
+
+func (c *Client) request(
+	ctx context.Context, method, path string, body io.Reader, betaHeaders []string,
+) (*http.Response, error) {
 	if c.baseURL == "" {
 		c.baseURL = DefaultBaseURL
 	}
 
 	url := c.baseURL + path
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(payloadBytes))
+	req, err := http.NewRequestWithContext(ctx, method, url, body)
 	if err != nil {
 		return nil, fmt.Errorf("create request: %w", err)
 	}
