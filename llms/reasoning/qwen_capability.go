@@ -30,7 +30,9 @@ func (e *ErrThinkingRequiresStream) Error() string {
 	return fmt.Sprintf("reasoning on model %q is available only on a streaming call", e.Model)
 }
 
-var qwenFlagThinkers = map[string]bool{"qwen-plus": true, "qwen-flash": true, "qwen3-max": true}
+var qwenFlagThinkers = map[string]bool{
+	"qwen-plus": true, "qwen-flash": true, "qwen3-max": true, "qwen3-vl-plus": true,
+}
 
 // QwenThinkingEnabledByFlag reports whether DashScope leaves the model's
 // thinking off until enable_thinking:true asks for it.

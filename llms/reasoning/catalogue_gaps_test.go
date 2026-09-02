@@ -51,12 +51,12 @@ func TestNonChatGoogleSurfacesAreNotThinkingModels(t *testing.T) {
 func TestQwen3HybridsAreInTheCatalogueNowThatOffIsExpressible(t *testing.T) {
 	t.Parallel()
 
-	for _, model := range []string{"qwen3-32b", "qwen3-235b-a22b"} {
+	for _, model := range []string{"qwen3-32b", "qwen3-235b-a22b", "qwen3-vl-plus"} {
 		if !IsReasoningModel(model) {
 			t.Errorf("IsReasoningModel(%q) = false, want true", model)
 		}
 	}
-	for _, model := range []string{"qwen3-vl-plus", "qwen3-coder-plus"} {
+	for _, model := range []string{"qwen3-coder-plus"} {
 		if IsReasoningModel(model) {
 			t.Errorf("IsReasoningModel(%q) = true, want false", model)
 		}
@@ -80,7 +80,7 @@ func TestQwenTakesNoEffortOnTheWire(t *testing.T) {
 	t.Parallel()
 
 	for _, model := range []string{
-		"qwen3-32b", "qwen3-235b-a22b", "qwen3-vl-plus",
+		"qwen3-32b", "qwen3-235b-a22b",
 		"qwen3.5-35b-a3b", "qwen3.7-max", "dashscope/qwen3.7-max",
 	} {
 		if AcceptsEffortWire(model) {
