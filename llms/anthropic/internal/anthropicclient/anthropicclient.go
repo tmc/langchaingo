@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"slices"
 	"strings"
+	"time"
 
 	"github.com/vxcontrol/langchaingo/httputil"
 	"github.com/vxcontrol/langchaingo/llms/streaming"
@@ -72,6 +73,18 @@ func WithAnthropicBetaHeader(val string) Option {
 			opts.anthropicBetaHeaders = []string{}
 		}
 		opts.anthropicBetaHeaders = append(opts.anthropicBetaHeaders, val)
+		return nil
+	}
+}
+
+// WithFederation authenticates with short-lived tokens exchanged from the
+// workload's identity provider, instead of a static API key.
+func WithFederation(cfg FederationConfig) Option {
+	return func(c *Client) error {
+		if err := cfg.validate(); err != nil {
+			return err
+		}
+		c.auth = &federatedAuth{cfg: cfg, client: c, now: time.Now}
 		return nil
 	}
 }
