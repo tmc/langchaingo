@@ -510,3 +510,27 @@ func TestEveryChatSpellingOfTheGPTLineAgrees(t *testing.T) {
 		}
 	}
 }
+
+func TestTheMistralListingNamesWeMissed(t *testing.T) {
+	t.Parallel()
+
+	for _, model := range []string{
+		"mistral-vibe-cli-fast", "mistral-vibe-cli-latest", "mistral-vibe-cli-with-tools",
+	} {
+		if !IsReasoningModel(model) {
+			t.Errorf("IsReasoningModel(%q) = false, but the vendor reports reasoning and a live "+
+				"call with effort returns it", model)
+		}
+		if !ThinkingOptIn(model) {
+			t.Errorf("ThinkingOptIn(%q) = false, but a bare call returns no reasoning", model)
+		}
+	}
+
+	if !IsReasoningModel("zai-glm-5-2") {
+		t.Error("IsReasoningModel(\"zai-glm-5-2\") = false, but it is the same model as glm-5-2 " +
+			"under the spelling Mistral serves it")
+	}
+	if IsReasoningModel("zai-glm-5-2") != IsReasoningModel("glm-5-2") {
+		t.Error("the two live spellings of one model disagree")
+	}
+}

@@ -194,6 +194,7 @@ func mistralReasons(model string) bool {
 	for _, prefix := range []string{
 		"mistral-medium-3", "mistral-medium-latest", "mistral-medium-2604",
 		"mistral-small-2603", "mistral-small-latest",
+		"mistral-vibe-cli",
 	} {
 		if strings.HasPrefix(model, prefix) {
 			return true
@@ -264,11 +265,12 @@ func namesReasoningModel(modelLower string) bool { //nolint:funlen // a flat cat
 	}
 
 	// Z-AI GLM reasoning models (Zhipu AI)
-	if strings.HasPrefix(modelLower, "glm-4.5") ||
-		strings.HasPrefix(modelLower, "glm-4.6") ||
-		strings.HasPrefix(modelLower, "glm-4.7") ||
-		strings.HasPrefix(modelLower, "glm-5") ||
-		modelLower == "glm-latest" {
+	glm := strings.TrimPrefix(modelLower, "zai-")
+	if strings.HasPrefix(glm, "glm-4.5") ||
+		strings.HasPrefix(glm, "glm-4.6") ||
+		strings.HasPrefix(glm, "glm-4.7") ||
+		strings.HasPrefix(glm, "glm-5") ||
+		glm == "glm-latest" {
 		return true
 	}
 
