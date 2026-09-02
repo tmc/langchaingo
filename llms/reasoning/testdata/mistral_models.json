@@ -1,0 +1,386 @@
+{
+ "codestral-2508": {
+  "reasoning": false,
+  "aliases": [
+   "codestral-latest",
+   "mistral-code-fim-latest",
+   "mistral-code-latest"
+  ]
+ },
+ "codestral-embed": {
+  "reasoning": false,
+  "aliases": [
+   "codestral-embed-2505"
+  ]
+ },
+ "codestral-embed-2505": {
+  "reasoning": false,
+  "aliases": [
+   "codestral-embed"
+  ]
+ },
+ "codestral-latest": {
+  "reasoning": false,
+  "aliases": [
+   "codestral-2508",
+   "mistral-code-fim-latest",
+   "mistral-code-latest"
+  ]
+ },
+ "glm-5-2": {
+  "reasoning": true,
+  "aliases": [
+   "zai-glm-5-2"
+  ]
+ },
+ "labs-leanstral-1-5": {
+  "reasoning": true,
+  "aliases": [
+   "labs-leanstral-1-5-1"
+  ]
+ },
+ "labs-leanstral-1-5-1": {
+  "reasoning": true,
+  "aliases": [
+   "labs-leanstral-1-5"
+  ]
+ },
+ "magistral-medium-latest": {
+  "reasoning": true,
+  "aliases": [
+   "mistral-medium",
+   "mistral-medium-2604",
+   "mistral-medium-3",
+   "mistral-medium-3-5",
+   "mistral-medium-3.5",
+   "mistral-medium-latest",
+   "mistral-vibe-cli-latest",
+   "mistral-vibe-cli-with-tools"
+  ]
+ },
+ "magistral-small-latest": {
+  "reasoning": true,
+  "aliases": [
+   "mistral-small-2603",
+   "mistral-small-latest",
+   "mistral-vibe-cli-fast"
+  ]
+ },
+ "ministral-14b-2512": {
+  "reasoning": false,
+  "aliases": [
+   "ministral-14b-latest"
+  ]
+ },
+ "ministral-14b-latest": {
+  "reasoning": false,
+  "aliases": [
+   "ministral-14b-2512"
+  ]
+ },
+ "ministral-3b-2512": {
+  "reasoning": false,
+  "aliases": [
+   "ministral-3b-latest"
+  ]
+ },
+ "ministral-3b-latest": {
+  "reasoning": false,
+  "aliases": [
+   "ministral-3b-2512"
+  ]
+ },
+ "ministral-8b-2512": {
+  "reasoning": false,
+  "aliases": [
+   "ministral-8b-latest"
+  ]
+ },
+ "ministral-8b-latest": {
+  "reasoning": false,
+  "aliases": [
+   "ministral-8b-2512"
+  ]
+ },
+ "mistral-code-fim-latest": {
+  "reasoning": false,
+  "aliases": [
+   "codestral-2508",
+   "codestral-latest",
+   "mistral-code-latest"
+  ]
+ },
+ "mistral-code-latest": {
+  "reasoning": false,
+  "aliases": [
+   "codestral-2508",
+   "codestral-latest",
+   "mistral-code-fim-latest"
+  ]
+ },
+ "mistral-embed": {
+  "reasoning": false,
+  "aliases": [
+   "mistral-embed-2312"
+  ]
+ },
+ "mistral-embed-2312": {
+  "reasoning": false,
+  "aliases": [
+   "mistral-embed"
+  ]
+ },
+ "mistral-large-2512": {
+  "reasoning": false,
+  "aliases": [
+   "mistral-large-latest"
+  ]
+ },
+ "mistral-large-latest": {
+  "reasoning": false,
+  "aliases": [
+   "mistral-large-2512"
+  ]
+ },
+ "mistral-medium": {
+  "reasoning": true,
+  "aliases": [
+   "magistral-medium-latest",
+   "mistral-medium-2604",
+   "mistral-medium-3",
+   "mistral-medium-3-5",
+   "mistral-medium-3.5",
+   "mistral-medium-latest",
+   "mistral-vibe-cli-latest",
+   "mistral-vibe-cli-with-tools"
+  ]
+ },
+ "mistral-medium-2604": {
+  "reasoning": true,
+  "aliases": [
+   "magistral-medium-latest",
+   "mistral-medium",
+   "mistral-medium-3",
+   "mistral-medium-3-5",
+   "mistral-medium-3.5",
+   "mistral-medium-latest",
+   "mistral-vibe-cli-latest",
+   "mistral-vibe-cli-with-tools"
+  ]
+ },
+ "mistral-medium-3": {
+  "reasoning": true,
+  "aliases": [
+   "magistral-medium-latest",
+   "mistral-medium",
+   "mistral-medium-2604",
+   "mistral-medium-3-5",
+   "mistral-medium-3.5",
+   "mistral-medium-latest",
+   "mistral-vibe-cli-latest",
+   "mistral-vibe-cli-with-tools"
+  ]
+ },
+ "mistral-medium-3-5": {
+  "reasoning": true,
+  "aliases": [
+   "magistral-medium-latest",
+   "mistral-medium",
+   "mistral-medium-2604",
+   "mistral-medium-3",
+   "mistral-medium-3.5",
+   "mistral-medium-latest",
+   "mistral-vibe-cli-latest",
+   "mistral-vibe-cli-with-tools"
+  ]
+ },
+ "mistral-medium-3.5": {
+  "reasoning": true,
+  "aliases": [
+   "magistral-medium-latest",
+   "mistral-medium",
+   "mistral-medium-2604",
+   "mistral-medium-3",
+   "mistral-medium-3-5",
+   "mistral-medium-latest",
+   "mistral-vibe-cli-latest",
+   "mistral-vibe-cli-with-tools"
+  ]
+ },
+ "mistral-medium-latest": {
+  "reasoning": true,
+  "aliases": [
+   "magistral-medium-latest",
+   "mistral-medium",
+   "mistral-medium-2604",
+   "mistral-medium-3",
+   "mistral-medium-3-5",
+   "mistral-medium-3.5",
+   "mistral-vibe-cli-latest",
+   "mistral-vibe-cli-with-tools"
+  ]
+ },
+ "mistral-moderation-2603": {
+  "reasoning": false,
+  "aliases": null
+ },
+ "mistral-ocr-2512": {
+  "reasoning": false,
+  "aliases": [
+   "mistral-ocr-3",
+   "mistral-ocr-3-0"
+  ]
+ },
+ "mistral-ocr-3": {
+  "reasoning": false,
+  "aliases": [
+   "mistral-ocr-2512",
+   "mistral-ocr-3-0"
+  ]
+ },
+ "mistral-ocr-3-0": {
+  "reasoning": false,
+  "aliases": [
+   "mistral-ocr-2512",
+   "mistral-ocr-3"
+  ]
+ },
+ "mistral-ocr-4": {
+  "reasoning": false,
+  "aliases": [
+   "mistral-ocr-4-1",
+   "mistral-ocr-latest"
+  ]
+ },
+ "mistral-ocr-4-0": {
+  "reasoning": false,
+  "aliases": null
+ },
+ "mistral-ocr-4-1": {
+  "reasoning": false,
+  "aliases": [
+   "mistral-ocr-4",
+   "mistral-ocr-latest"
+  ]
+ },
+ "mistral-ocr-latest": {
+  "reasoning": false,
+  "aliases": [
+   "mistral-ocr-4",
+   "mistral-ocr-4-1"
+  ]
+ },
+ "mistral-small-2603": {
+  "reasoning": true,
+  "aliases": [
+   "magistral-small-latest",
+   "mistral-small-latest",
+   "mistral-vibe-cli-fast"
+  ]
+ },
+ "mistral-small-latest": {
+  "reasoning": true,
+  "aliases": [
+   "magistral-small-latest",
+   "mistral-small-2603",
+   "mistral-vibe-cli-fast"
+  ]
+ },
+ "mistral-vibe-cli-fast": {
+  "reasoning": true,
+  "aliases": [
+   "magistral-small-latest",
+   "mistral-small-2603",
+   "mistral-small-latest"
+  ]
+ },
+ "mistral-vibe-cli-latest": {
+  "reasoning": true,
+  "aliases": [
+   "magistral-medium-latest",
+   "mistral-medium",
+   "mistral-medium-2604",
+   "mistral-medium-3",
+   "mistral-medium-3-5",
+   "mistral-medium-3.5",
+   "mistral-medium-latest",
+   "mistral-vibe-cli-with-tools"
+  ]
+ },
+ "mistral-vibe-cli-with-tools": {
+  "reasoning": true,
+  "aliases": [
+   "magistral-medium-latest",
+   "mistral-medium",
+   "mistral-medium-2604",
+   "mistral-medium-3",
+   "mistral-medium-3-5",
+   "mistral-medium-3.5",
+   "mistral-medium-latest",
+   "mistral-vibe-cli-latest"
+  ]
+ },
+ "voxtral-mini-2602": {
+  "reasoning": false,
+  "aliases": [
+   "voxtral-mini-latest"
+  ]
+ },
+ "voxtral-mini-latest": {
+  "reasoning": false,
+  "aliases": [
+   "voxtral-mini-2602"
+  ]
+ },
+ "voxtral-mini-realtime-2602": {
+  "reasoning": false,
+  "aliases": [
+   "voxtral-mini-realtime-latest",
+   "voxtral-mini-transcribe-realtime-2602"
+  ]
+ },
+ "voxtral-mini-realtime-latest": {
+  "reasoning": false,
+  "aliases": [
+   "voxtral-mini-realtime-2602",
+   "voxtral-mini-transcribe-realtime-2602"
+  ]
+ },
+ "voxtral-mini-transcribe-realtime-2602": {
+  "reasoning": false,
+  "aliases": [
+   "voxtral-mini-realtime-2602",
+   "voxtral-mini-realtime-latest"
+  ]
+ },
+ "voxtral-mini-tts-2603": {
+  "reasoning": false,
+  "aliases": [
+   "voxtral-mini-tts-latest"
+  ]
+ },
+ "voxtral-mini-tts-latest": {
+  "reasoning": false,
+  "aliases": [
+   "voxtral-mini-tts-2603"
+  ]
+ },
+ "voxtral-small-2507": {
+  "reasoning": false,
+  "aliases": [
+   "voxtral-small-latest"
+  ]
+ },
+ "voxtral-small-latest": {
+  "reasoning": false,
+  "aliases": [
+   "voxtral-small-2507"
+  ]
+ },
+ "zai-glm-5-2": {
+  "reasoning": true,
+  "aliases": [
+   "glm-5-2"
+  ]
+ }
+}
