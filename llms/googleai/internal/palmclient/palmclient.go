@@ -35,6 +35,7 @@ const (
 type PaLMClient struct {
 	client             *aiplatform.PredictionClient
 	projectID          string
+	location		   string
 	embeddingModelName string
 	textModelName      string
 	chatModelName      string
@@ -67,6 +68,7 @@ func New(ctx context.Context, projectID, location string, opts ...Option) (*PaLM
 	return &PaLMClient{
 		client:             client,
 		projectID:          projectID,
+		location:           location,
 		embeddingModelName: pOpt.EmbeddingModelName,
 		textModelName:      pOpt.TextModelName,
 		chatModelName:      pOpt.ChatModelName,
@@ -296,7 +298,7 @@ func (c *PaLMClient) batchPredict(ctx context.Context, model string, prompts []s
 		instances = append(instances, structpb.NewStructValue(content))
 	}
 	resp, err := c.client.Predict(ctx, &aiplatformpb.PredictRequest{
-		Endpoint:   c.projectLocationPublisherModelPath(c.projectID, "us-central1", "google", model),
+		Endpoint:   c.projectLocationPublisherModelPath(c.projectID, c.location, "google", model),
 		Instances:  instances,
 		Parameters: structpb.NewStructValue(mergedParams),
 	})
@@ -335,7 +337,7 @@ func (c *PaLMClient) chat(ctx context.Context, r *ChatRequest) ([]*structpb.Valu
 		structpb.NewStructValue(instance),
 	}
 	resp, err := c.client.Predict(ctx, &aiplatformpb.PredictRequest{
-		Endpoint:   c.projectLocationPublisherModelPath(c.projectID, "us-central1", "google", c.chatModelName),
+		Endpoint:   c.projectLocationPublisherModelPath(c.projectID, c.location, "google", c.chatModelName),
 		Instances:  instances,
 		Parameters: structpb.NewStructValue(mergedParams),
 	})
