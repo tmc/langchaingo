@@ -43,7 +43,6 @@ var knownDrift = map[string]string{
 	"amazon-bedrock/openai.gpt-oss-safeguard-120b":          "не измерено: кандидат в не-чатовые поверхности",
 	"amazon-bedrock/openai.gpt-oss-safeguard-20b":           "не измерено: кандидат в не-чатовые поверхности",
 	"google-vertex/qwen/qwen3-235b-a22b-instruct-2507-maas": "не измерено",
-	"mistral/zai-glm-5-2":                                   "не измерено: шлюз режет параметр, вывод невозможен в обе стороны",
 }
 
 type snapshotModel struct {
