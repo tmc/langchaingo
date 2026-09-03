@@ -358,19 +358,35 @@ func wireEffortOf(sent bool, effort llms.ReasoningEffort) string {
 
 // setReasoning writes the reasoning fields and reports the effort that reached the wire.
 func (o *LLM) setReasoning(req *openaiclient.ChatRequest, opts llms.CallOptions) (string, error) {
+	model := o.effectiveModel(opts)
+	toolsRule := reasoning.EffortToolsFree
+	if len(opts.Tools) > 0 {
+		toolsRule = reasoning.EffortWithTools(model)
+	}
+
 	switch opts.Reasoning.ResolveMode() { //nolint:exhaustive // ReasoningOn is handled by the code after the switch
 	case llms.ReasoningDefault:
+		if toolsRule == reasoning.EffortToolsDisable {
+			o.writeDisableEffort(req)
+			return reasoning.OpenAIDisableEffort, nil
+		}
 		return "", nil
 	case llms.ReasoningOff:
 		return "", o.setReasoningOff(req, opts)
 	}
 
-	model := o.effectiveModel(opts)
 	acceptsEffort := reasoning.AcceptsEffortWire(model)
 	effort := reasoning.OpenAIReasoningCapsFor(model).ClampEffort(string(opts.Reasoning.GetEffort(opts.GetMaxTokens())))
 	reasoningEffort := llms.ReasoningEffort(reasoning.ClaudeClampEffort(model, effort))
 	reasoningTokens := opts.Reasoning.GetTokens(opts.GetMaxTokens())
 	sendsEffort := acceptsEffort && reasoningEffort != llms.ReasoningNone
+	switch toolsRule { //nolint:exhaustive // EffortToolsFree leaves the request alone
+	case reasoning.EffortToolsDisable:
+		o.writeDisableEffort(req)
+		return reasoning.OpenAIDisableEffort, nil
+	case reasoning.EffortToolsOmit:
+		sendsEffort = false
+	}
 	budget := 0
 	if opts.Reasoning.HasExplicitTokens() && reasoningTokens > 0 {
 		budget = reasoning.ClaudeClampBudget(model, reasoningTokens)
@@ -380,26 +396,29 @@ func (o *LLM) setReasoning(req *openaiclient.ChatRequest, opts llms.CallOptions)
 		effortBudget = llms.ReasoningEffortBudget(reasoningEffort, opts.GetMaxTokens())
 	}
 
+	return o.writeEffort(req, sendsEffort, reasoningEffort, budget, effortBudget), nil
+}
+
+func (o *LLM) writeEffort(
+	req *openaiclient.ChatRequest, sends bool, effort llms.ReasoningEffort, budget, effortBudget int,
+) string {
 	if !o.client.ModernReasoningFormat {
-		if sendsEffort {
-			req.ReasoningEffort = &reasoningEffort
+		if sends {
+			req.ReasoningEffort = &effort
 			o.raiseAnswerLimitForBudget(req, effortBudget)
 		}
-		return wireEffortOf(sendsEffort, reasoningEffort), nil
+		return wireEffortOf(sends, effort)
 	}
 
-	// using modern reasoning format
 	switch {
 	case o.client.UseReasoningMaxTokens && budget > 0:
 		req.Reasoning = &openaiclient.ReasoningOptions{MaxTokens: budget}
 		o.raiseAnswerLimitForBudget(req, budget)
-	case sendsEffort:
-		req.Reasoning = &openaiclient.ReasoningOptions{
-			Effort: reasoningEffort,
-		}
+	case sends:
+		req.Reasoning = &openaiclient.ReasoningOptions{Effort: effort}
 		o.raiseAnswerLimitForBudget(req, effortBudget)
 	}
-	return wireEffortOf(sendsEffort, reasoningEffort), nil
+	return wireEffortOf(sends, effort)
 }
 
 func (o *LLM) raiseAnswerLimitForBudget(req *openaiclient.ChatRequest, budget int) {
