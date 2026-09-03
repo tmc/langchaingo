@@ -3241,6 +3241,24 @@
     "output": 65536
    }
   },
+  "gemini-3.8-flash": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1048576,
+    "output": 65536
+   }
+  },
   "gemini-embedding-001": {
    "reasoning": false,
    "temperature": false,
@@ -3898,6 +3916,24 @@
    }
   },
   "gemini-3.7-flash": {
+   "reasoning": true,
+   "reasoning_options": [
+    {
+     "type": "effort",
+     "values": [
+      "low",
+      "medium",
+      "high"
+     ]
+    }
+   ],
+   "temperature": true,
+   "limit": {
+    "context": 1048576,
+    "output": 65536
+   }
+  },
+  "gemini-3.8-flash": {
    "reasoning": true,
    "reasoning_options": [
     {

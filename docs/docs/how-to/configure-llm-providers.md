@@ -164,7 +164,7 @@ llm, err := huggingface.New(huggingface.WithToken("your-hf-token"))
 
 ```go
 llm, err := huggingface.New(
-    huggingface.WithModel("microsoft/DialoGPT-medium"),
+    huggingface.WithModel("meta-llama/Llama-3.1-8B-Instruct"),
     huggingface.WithToken("your-hf-token"),
 )
 ```

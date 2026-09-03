@@ -26,7 +26,7 @@ func main() {
 
 	// Or override default model to another one
 	generateOptions := []llms.CallOption{
-		llms.WithModel("gpt2"),
+		llms.WithModel("meta-llama/Llama-3.1-8B-Instruct"),
 		// llms.WithTopK(10),
 		// llms.WithTopP(0.95),
 		// llms.WithSeed(13),

@@ -6,6 +6,8 @@ import (
 	"github.com/vxcontrol/langchaingo/callbacks"
 )
 
+const defaultModel = "ministral-8b-latest"
+
 type clientOptions struct {
 	apiKey           string
 	endpoint         string
@@ -45,7 +47,7 @@ func WithTimeout(timeout time.Duration) Option {
 	}
 }
 
-// Sets the model name for the Model being instantiated. Defaults to "open-mistral-7b". See https://docs.mistral.ai/platform/endpoints/ for a full list of supported models.
+// Sets the model name for the Model being instantiated. See https://docs.mistral.ai/models/overview for the models the vendor currently serves.
 func WithModel(model string) Option {
 	return func(o *clientOptions) {
 		o.model = model

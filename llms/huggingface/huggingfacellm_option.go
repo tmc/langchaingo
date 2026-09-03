@@ -12,7 +12,7 @@ const (
 	hfHomeEnvVarName      = "HF_HOME"        // HF home directory
 	xdgCacheHomeEnvVar    = "XDG_CACHE_HOME" // XDG cache directory
 	defaultTokenPath      = "token"          // Default token filename
-	defaultModel          = "gpt2"
+	defaultModel          = "meta-llama/Llama-3.1-8B-Instruct"
 	defaultURL            = "https://api-inference.huggingface.co"
 	routerURL             = "https://router.huggingface.co"
 )

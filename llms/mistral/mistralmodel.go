@@ -34,7 +34,7 @@ func New(opts ...Option) (*Model, error) {
 		endpoint:   sdk.Endpoint,
 		maxRetries: sdk.DefaultMaxRetries,
 		timeout:    sdk.DefaultTimeout,
-		model:      sdk.ModelOpenMistral7b,
+		model:      defaultModel,
 	}
 
 	for _, opt := range opts {

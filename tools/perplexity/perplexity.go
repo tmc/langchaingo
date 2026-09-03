@@ -22,14 +22,10 @@ const (
 	ModelSonarDeepResearch Model = "sonar-deep-research"
 	// ModelSonarReasoningPro is the reasoning pro model with 128k context window for chat completion.
 	ModelSonarReasoningPro Model = "sonar-reasoning-pro"
-	// ModelSonarReasoning is the reasoning model with 128k context window for chat completion.
-	ModelSonarReasoning Model = "sonar-reasoning"
 	// ModelSonarPro is the pro model with 200k context window for chat completion.
 	ModelSonarPro Model = "sonar-pro"
 	// ModelSonar is the standard model with 128k context window for chat completion.
 	ModelSonar Model = "sonar"
-	// ModelR11776 is the r1-1776 model.
-	ModelR11776 Model = "r1-1776"
 )
 
 // Option is a function that modifies the options for the Perplexity AI tool.

@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	llm, err := mistral.New(mistral.WithModel("open-mistral-7b"))
+	llm, err := mistral.New(mistral.WithModel("ministral-8b-latest"))
 	if err != nil {
 		log.Fatal(err)
 	}
