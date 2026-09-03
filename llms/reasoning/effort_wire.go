@@ -37,6 +37,9 @@ func UsesLegacyMaxTokens(model string) bool {
 // a model also has no way to spell "off": the disable token rides on this field.
 func AcceptsEffortWire(model string) bool {
 	for _, form := range modelSpellings(model) {
+		if hasGeneration(form, "qwen3.8") {
+			return true
+		}
 		if strings.HasPrefix(form, "qwen") || strings.HasPrefix(form, "qwq") {
 			return false
 		}

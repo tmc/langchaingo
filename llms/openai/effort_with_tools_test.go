@@ -93,3 +93,42 @@ func TestEffortAndToolsOnTheWire(t *testing.T) {
 		})
 	}
 }
+
+func TestQwenThinkingBudgetOnTheWire(t *testing.T) {
+	t.Parallel()
+
+	for _, tc := range []struct {
+		name   string
+		model  string
+		opt    llms.CallOption
+		want   string
+		absent bool
+	}{
+		{"бюджет уходит вместо эффорта", "dashscope/qwen3.8-max",
+			llms.WithReasoning(llms.ReasoningLow, 4096), `"thinking_budget":4096`, false},
+		{"эффорт при бюджете не уходит", "dashscope/qwen3.8-max",
+			llms.WithReasoning(llms.ReasoningLow, 4096), `"reasoning_effort"`, true},
+		{"без бюджета уходит эффорт", "dashscope/qwen3.8-max",
+			llms.WithReasoning(llms.ReasoningLow, 0), `"reasoning_effort":"low"`, false},
+		{"без бюджета поля бюджета нет", "dashscope/qwen3.8-max",
+			llms.WithReasoning(llms.ReasoningLow, 0), `"thinking_budget"`, true},
+		{"3.7 тоже берёт бюджет", "dashscope/qwen3.7-plus",
+			llms.WithReasoning(llms.ReasoningLow, 2048), `"thinking_budget":2048`, false},
+		{"чужой хост бюджета не получает", "openrouter/qwen/qwen3.7-plus",
+			llms.WithReasoning(llms.ReasoningLow, 2048), `"thinking_budget"`, true},
+		{"не qwen бюджета не получает", "gpt-5.2",
+			llms.WithReasoning(llms.ReasoningLow, 2048), `"thinking_budget"`, true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			body := bodyForCall(t, tc.model, llms.WithMaxTokens(8000), tc.opt)
+			if got := strings.Contains(body, tc.want); got == tc.absent {
+				verb := "не содержит"
+				if tc.absent {
+					verb = "содержит"
+				}
+				t.Errorf("тело запроса %s %s\nтело: %s", verb, tc.want, body)
+			}
+		})
+	}
+}

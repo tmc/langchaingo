@@ -8,6 +8,14 @@ import (
 
 var qwenParameterCountName = regexp.MustCompile(`^qwen3-\d+(\.\d+)?b(-a\d+(\.\d+)?b)?$`)
 
+var qwenDefaultThinkingName = regexp.MustCompile(`^qwen3\.[567]-`)
+
+// QwenThinkingOffByFlag reports whether the model thinks until enable_thinking
+// false asks it to stop.
+func QwenThinkingOffByFlag(model string) bool {
+	return qwenDefaultThinkingName.MatchString(qwenVendorSpelling(model))
+}
+
 // QwenThinkingRequiresStream reports whether DashScope serves the model's
 // thinking only on a streaming call.
 func QwenThinkingRequiresStream(model string) bool {
@@ -39,4 +47,16 @@ var qwenFlagThinkers = map[string]bool{
 // thinking off until enable_thinking:true asks for it.
 func QwenThinkingEnabledByFlag(model string) bool {
 	return qwenFlagThinkers[qwenVendorSpelling(model)]
+}
+
+// QwenTakesThinkingBudget reports whether DashScope caps the model's thinking by
+// a token budget.
+func QwenTakesThinkingBudget(model string) bool {
+	m := qwenVendorSpelling(model)
+	if m == "" {
+		return false
+	}
+	return qwenDefaultThinkingName.MatchString(m) ||
+		qwenParameterCountName.MatchString(m) ||
+		hasGeneration(m, "qwen3.8")
 }
