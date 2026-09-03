@@ -9,7 +9,7 @@ Hello there! 👋 This example demonstrates how to use the Perplexity API with L
 
 2. **Perplexity LLM Configuration**:
    - It sets up a Large Language Model (LLM) client using Perplexity's API, which is compatible with the OpenAI interface.
-   - The model used is "llama-3.1-sonar-large-128k-online", a powerful language model hosted by Perplexity.
+   - The model used is "sonar-pro", a search-grounded model hosted by Perplexity.
 
 3. **Text Generation**:
    - The example prompts the model to "What is a prime number?"

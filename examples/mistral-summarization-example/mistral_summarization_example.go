@@ -14,7 +14,7 @@ import (
 
 func main() {
 	ctx := context.Background()
-	llm, err := mistral.New(mistral.WithAPIKey("API_KEY_GOES_HERE"), mistral.WithModel("open-mistral-7b"))
+	llm, err := mistral.New(mistral.WithAPIKey("API_KEY_GOES_HERE"), mistral.WithModel("ministral-8b-latest"))
 	if err != nil {
 		log.Fatal(err)
 	}

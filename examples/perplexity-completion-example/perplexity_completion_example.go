@@ -23,7 +23,7 @@ func main() {
 
 	llm, err := openai.New(
 		// Supported models: https://docs.perplexity.ai/docs/model-cards
-		openai.WithModel("llama-3.1-sonar-large-128k-online"),
+		openai.WithModel("sonar-pro"),
 		openai.WithBaseURL("https://api.perplexity.ai"),
 		openai.WithToken(apiKey),
 	)

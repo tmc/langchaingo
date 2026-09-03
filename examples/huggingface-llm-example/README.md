@@ -10,7 +10,7 @@ This example demonstrates how to use the LangChain Go library to interact with H
 
 2. **Generates Text**:
    - The script sends a prompt to the language model asking for a company name that makes colorful socks.
-   - It demonstrates how to use different generation options like specifying a model (in this case, "gpt2").
+   - It demonstrates how to use different generation options like specifying a model (in this case, "meta-llama/Llama-3.1-8B-Instruct").
 
 3. **Handles Responses**:
    - The generated text is printed to the console.

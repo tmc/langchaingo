@@ -6,7 +6,7 @@ This example demonstrates how to generate text completions using the Mistral AI 
 
 ## What This Example Does
 
-1. **Setup**: The code initializes a Mistral language model using the `mistral.New()` function, specifying the "open-mistral-7b" model.
+1. **Setup**: The code initializes a Mistral language model using the `mistral.New()` function, specifying the "ministral-8b-latest" model.
 
 2. **Streaming Completion**:
    - It generates a completion for the question "Who was the first man to walk on the moon?"
