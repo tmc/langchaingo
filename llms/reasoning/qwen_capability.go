@@ -10,6 +10,8 @@ var qwenParameterCountName = regexp.MustCompile(`^qwen3-\d+(\.\d+)?b(-a\d+(\.\d+
 
 var qwenDefaultThinkingName = regexp.MustCompile(`^qwen3\.[567]-`)
 
+var qwenNextName = regexp.MustCompile(`^qwen3-next-`)
+
 // QwenThinkingOffByFlag reports whether the model thinks until enable_thinking
 // false asks it to stop.
 func QwenThinkingOffByFlag(model string) bool {
@@ -58,6 +60,7 @@ func QwenTakesThinkingBudget(model string) bool {
 	}
 	return qwenDefaultThinkingName.MatchString(m) ||
 		qwenParameterCountName.MatchString(m) ||
+		qwenNextName.MatchString(m) ||
 		qwenFlagThinkers[m] ||
 		hasGeneration(m, "qwen3.8")
 }

@@ -124,6 +124,8 @@ func TestQwenThinkingBudgetOnTheWire(t *testing.T) {
 			llms.WithReasoning(llms.ReasoningLow, 2048), `"thinking_budget":2048`, false},
 		{"qwen3-vl-flash берёт бюджет", "dashscope/qwen3-vl-flash",
 			llms.WithReasoning(llms.ReasoningLow, 2048), `"thinking_budget":2048`, false},
+		{"qwen3-next берёт бюджет", "dashscope/qwen3-next-80b-a3b-thinking",
+			llms.WithReasoning(llms.ReasoningLow, 2048), `"thinking_budget":2048`, false},
 		{"флаг остаётся вместе с бюджетом", "dashscope/qwen-plus",
 			llms.WithReasoning(llms.ReasoningLow, 2048), `"enable_thinking":true`, false},
 		{"чужой хост бюджета не получает", "openrouter/qwen/qwen3.7-plus",
