@@ -384,34 +384,37 @@ func handleHumanMessage(msg llms.MessageContent) (anthropicclient.ChatMessage, e
 }
 
 func handleAIMessage(msg llms.MessageContent) (anthropicclient.ChatMessage, error) {
-	if toolCall, ok := msg.Parts[0].(llms.ToolCall); ok {
-		var inputStruct map[string]interface{}
-		err := json.Unmarshal([]byte(toolCall.FunctionCall.Arguments), &inputStruct)
-		if err != nil {
-			return anthropicclient.ChatMessage{}, fmt.Errorf("anthropic: failed to unmarshal tool call arguments: %w", err)
-		}
-		toolUse := anthropicclient.ToolUseContent{
-			Type:  "tool_use",
-			ID:    toolCall.ID,
-			Name:  toolCall.FunctionCall.Name,
-			Input: inputStruct,
-		}
-
-		return anthropicclient.ChatMessage{
-			Role:    RoleAssistant,
-			Content: []anthropicclient.Content{toolUse},
-		}, nil
-	}
-	if textContent, ok := msg.Parts[0].(llms.TextContent); ok {
-		return anthropicclient.ChatMessage{
-			Role: RoleAssistant,
-			Content: []anthropicclient.Content{&anthropicclient.TextContent{
+	var contents []anthropicclient.Content
+	for _, part := range msg.Parts {
+		switch p := part.(type) {
+		case llms.ToolCall:
+			var inputStruct map[string]interface{}
+			err := json.Unmarshal([]byte(p.FunctionCall.Arguments), &inputStruct)
+			if err != nil {
+				return anthropicclient.ChatMessage{}, fmt.Errorf("anthropic: failed to unmarshal tool call arguments: %w", err)
+			}
+			contents = append(contents, anthropicclient.ToolUseContent{
+				Type:  "tool_use",
+				ID:    p.ID,
+				Name:  p.FunctionCall.Name,
+				Input: inputStruct,
+			})
+		case llms.TextContent:
+			contents = append(contents, &anthropicclient.TextContent{
 				Type: "text",
-				Text: textContent.Text,
-			}},
-		}, nil
+				Text: p.Text,
+			})
+		default:
+			return anthropicclient.ChatMessage{}, fmt.Errorf("anthropic: %w for AI message", ErrInvalidContentType)
+		}
 	}
-	return anthropicclient.ChatMessage{}, fmt.Errorf("anthropic: %w for AI message", ErrInvalidContentType)
+	if len(contents) == 0 {
+		return anthropicclient.ChatMessage{}, fmt.Errorf("anthropic: %w for AI message", ErrInvalidContentType)
+	}
+	return anthropicclient.ChatMessage{
+		Role:    RoleAssistant,
+		Content: contents,
+	}, nil
 }
 
 type ToolResult struct {
@@ -421,19 +424,25 @@ type ToolResult struct {
 }
 
 func handleToolMessage(msg llms.MessageContent) (anthropicclient.ChatMessage, error) {
-	if toolCallResponse, ok := msg.Parts[0].(llms.ToolCallResponse); ok {
-		toolContent := anthropicclient.ToolResultContent{
+	var contents []anthropicclient.Content
+	for _, part := range msg.Parts {
+		toolCallResponse, ok := part.(llms.ToolCallResponse)
+		if !ok {
+			return anthropicclient.ChatMessage{}, fmt.Errorf("anthropic: %w for tool message", ErrInvalidContentType)
+		}
+		contents = append(contents, anthropicclient.ToolResultContent{
 			Type:      "tool_result",
 			ToolUseID: toolCallResponse.ToolCallID,
 			Content:   toolCallResponse.Content,
-		}
-
-		return anthropicclient.ChatMessage{
-			Role:    RoleUser,
-			Content: []anthropicclient.Content{toolContent},
-		}, nil
+		})
 	}
-	return anthropicclient.ChatMessage{}, fmt.Errorf("anthropic: %w for tool message", ErrInvalidContentType)
+	if len(contents) == 0 {
+		return anthropicclient.ChatMessage{}, fmt.Errorf("anthropic: %w for tool message", ErrInvalidContentType)
+	}
+	return anthropicclient.ChatMessage{
+		Role:    RoleUser,
+		Content: contents,
+	}, nil
 }
 
 // SupportsReasoning implements the ReasoningModel interface.

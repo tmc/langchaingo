@@ -4,7 +4,9 @@ import (
 	"os"
 	"testing"
 
+	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/llms"
+	"github.com/tmc/langchaingo/llms/anthropic/internal/anthropicclient"
 )
 
 func TestNew(t *testing.T) {
@@ -141,6 +143,80 @@ func TestProcessMessages(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestHandleAIMessagePreservesAllParts(t *testing.T) {
+	t.Parallel()
+
+	message, err := handleAIMessage(llms.MessageContent{
+		Role: llms.ChatMessageTypeAI,
+		Parts: []llms.ContentPart{
+			llms.TextContent{Text: "I'll check both locations."},
+			llms.ToolCall{
+				ID: "tool-1",
+				FunctionCall: &llms.FunctionCall{
+					Name:      "get_weather",
+					Arguments: `{"location":"Paris"}`,
+				},
+			},
+			llms.ToolCall{
+				ID: "tool-2",
+				FunctionCall: &llms.FunctionCall{
+					Name:      "get_weather",
+					Arguments: `{"location":"London"}`,
+				},
+			},
+		},
+	})
+	require.NoError(t, err)
+	require.Equal(t, RoleAssistant, message.Role)
+
+	contents, ok := message.Content.([]anthropicclient.Content)
+	require.True(t, ok)
+	require.Len(t, contents, 3)
+
+	text, ok := contents[0].(*anthropicclient.TextContent)
+	require.True(t, ok)
+	require.Equal(t, "I'll check both locations.", text.Text)
+
+	firstTool, ok := contents[1].(anthropicclient.ToolUseContent)
+	require.True(t, ok)
+	require.Equal(t, "tool-1", firstTool.ID)
+	require.Equal(t, "get_weather", firstTool.Name)
+	require.Equal(t, map[string]interface{}{"location": "Paris"}, firstTool.Input)
+
+	secondTool, ok := contents[2].(anthropicclient.ToolUseContent)
+	require.True(t, ok)
+	require.Equal(t, "tool-2", secondTool.ID)
+	require.Equal(t, map[string]interface{}{"location": "London"}, secondTool.Input)
+}
+
+func TestHandleToolMessagePreservesAllResults(t *testing.T) {
+	t.Parallel()
+
+	message, err := handleToolMessage(llms.MessageContent{
+		Role: llms.ChatMessageTypeTool,
+		Parts: []llms.ContentPart{
+			llms.ToolCallResponse{ToolCallID: "tool-1", Content: "sunny"},
+			llms.ToolCallResponse{ToolCallID: "tool-2", Content: "rainy"},
+		},
+	})
+	require.NoError(t, err)
+	require.Equal(t, RoleUser, message.Role)
+
+	contents, ok := message.Content.([]anthropicclient.Content)
+	require.True(t, ok)
+	require.Len(t, contents, 2)
+
+	firstResult, ok := contents[0].(anthropicclient.ToolResultContent)
+	require.True(t, ok)
+	require.Equal(t, "tool-1", firstResult.ToolUseID)
+	require.Equal(t, "sunny", firstResult.Content)
+
+	secondResult, ok := contents[1].(anthropicclient.ToolResultContent)
+	require.True(t, ok)
+	require.Equal(t, "tool-2", secondResult.ToolUseID)
+	require.Equal(t, "rainy", secondResult.Content)
 }
 
 func TestToolsToTools(t *testing.T) {
