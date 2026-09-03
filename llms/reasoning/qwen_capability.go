@@ -55,6 +55,14 @@ func QwenThinkingEnabledByFlag(model string) bool {
 
 var dashScopeGuestBudget = []string{"glm-5.1", "glm-5.2", "kimi-k2.7-code", "deepseek-v4"}
 
+func dashScopeGuestSpelling(model string) string {
+	rest, ok := strings.CutPrefix(strings.ToLower(model), "dashscope/")
+	if !ok || strings.Contains(rest, "/") {
+		return ""
+	}
+	return rest
+}
+
 // DashScopeTakesThinkingBudget reports whether DashScope caps the model's
 // thinking by a token budget.
 func DashScopeTakesThinkingBudget(model string) bool {
@@ -62,9 +70,11 @@ func DashScopeTakesThinkingBudget(model string) bool {
 	if m == "" {
 		return false
 	}
-	for _, generation := range dashScopeGuestBudget {
-		if hasGeneration(m, generation) {
-			return true
+	if guest := dashScopeGuestSpelling(model); guest != "" {
+		for _, generation := range dashScopeGuestBudget {
+			if hasGeneration(guest, generation) {
+				return true
+			}
 		}
 	}
 	return qwenDefaultThinkingName.MatchString(m) ||
