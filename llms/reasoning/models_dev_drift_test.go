@@ -78,10 +78,6 @@ var knownEffortDrift = map[string]string{
 var knownBudgetDrift = map[string]string{
 	"qwen3-max": "снимок бюджета не объявляет, вендор его исполняет: голый вызов даёт 9166 " +
 		"символов размышления против 285 при thinking_budget 100, замер 03.09.2026",
-	"glm-5.2": "снимок знает у гостя DashScope только эффорт, но дверь исполняет и бюджет: " +
-		"голый вызов даёт 4390 символов против 441 при thinking_budget 100, замер 03.09.2026",
-	"deepseek-v4-flash-0731": "снимок знает у гостя DashScope только эффорт и переключатель, " +
-		"но дверь исполняет и бюджет: 8801 символ против 497 при thinking_budget 100, замер 03.09.2026",
 }
 
 func TestModelsDevBudgetDrift(t *testing.T) {
