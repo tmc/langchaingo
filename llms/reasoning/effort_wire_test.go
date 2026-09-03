@@ -20,6 +20,12 @@ func TestAcceptsEffortWire(t *testing.T) {
 		{"kimi-k3", true},
 		{"moonshot/kimi-k3", true},
 		{"gpt-5.5", true},
+		{"gpt-4o", false},
+		{"gpt-4o-mini", false},
+		{"gpt-4.1", false},
+		{"gpt-4-turbo", false},
+		{"gpt-3.5-turbo", false},
+		{"openai/gpt-4o", false},
 		{"o3-mini", true},
 		{"deepseek-v4-pro", true},
 		{"glm-5-turbo", true},
@@ -91,6 +97,31 @@ func TestTheGrokBuildAliasThatIsReallyGrok45(t *testing.T) {
 	for _, model := range []string{"grok-build-0.1", "grok-code-fast-1"} {
 		if AcceptsEffortWire(model) {
 			t.Errorf("%s carries the effort field, but the vendor refuses it by name", model)
+		}
+	}
+}
+
+func TestEffortWithTools(t *testing.T) {
+	t.Parallel()
+
+	for _, tc := range []struct {
+		model string
+		rule  EffortToolsRule
+	}{
+		{"gpt-5.6-sol", EffortToolsDisable},
+		{"gpt-5.6-terra", EffortToolsDisable},
+		{"openai/gpt-5.6", EffortToolsDisable},
+		{"gpt-5.5", EffortToolsOmit},
+		{"gpt-5.4-nano", EffortToolsOmit},
+		{"gpt-5.4-mini", EffortToolsOmit},
+		{"gpt-5.2", EffortToolsFree},
+		{"gpt-5.1", EffortToolsFree},
+		{"gpt-5-mini", EffortToolsFree},
+		{"gpt-4o", EffortToolsFree},
+		{"claude-opus-5", EffortToolsFree},
+	} {
+		if got := EffortWithTools(tc.model); got != tc.rule {
+			t.Errorf("EffortWithTools(%q) = %v, want %v", tc.model, got, tc.rule)
 		}
 	}
 }
