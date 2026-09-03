@@ -8,6 +8,14 @@ import (
 
 var qwenParameterCountName = regexp.MustCompile(`^qwen3-\d+(\.\d+)?b(-a\d+(\.\d+)?b)?$`)
 
+var qwenCommercialHybridName = regexp.MustCompile(`^qwen3\.[567]-(plus|flash|max)(-preview)?$`)
+
+// QwenThinkingOffByFlag reports whether the model thinks until enable_thinking
+// false asks it to stop.
+func QwenThinkingOffByFlag(model string) bool {
+	return qwenCommercialHybridName.MatchString(qwenVendorSpelling(model))
+}
+
 // QwenThinkingRequiresStream reports whether DashScope serves the model's
 // thinking only on a streaming call.
 func QwenThinkingRequiresStream(model string) bool {

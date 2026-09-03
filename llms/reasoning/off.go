@@ -92,7 +92,7 @@ func ResolveOff(model string, p Provider) OffWire {
 		if offByOmission(model) {
 			return OffOmit
 		}
-		if QwenThinkingRequiresStream(model) {
+		if QwenThinkingRequiresStream(model) || QwenThinkingOffByFlag(model) {
 			return OffDisableDashScope
 		}
 		if disablesByThinkingObject(model) {

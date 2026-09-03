@@ -47,6 +47,68 @@ var knownDrift = map[string]string{
 
 type snapshotModel struct {
 	Reasoning bool `json:"reasoning"`
+	Options   []struct {
+		Type string `json:"type"`
+	} `json:"reasoning_options"`
+}
+
+func (m snapshotModel) claimsEffort() bool {
+	for _, o := range m.Options {
+		if o.Type == "effort" {
+			return true
+		}
+	}
+	return false
+}
+
+// An entry records a divergence measured against the vendor, with the reason.
+var knownEffortDrift = map[string]string{
+	"xai/grok-4.20-multi-agent-0309": "вендор не обслуживает multi-agent на chat completions: " +
+		"«Multi Agent requests are not allowed on chat completions», замер 02.09.2026",
+}
+
+func TestModelsDevEffortDrift(t *testing.T) {
+	t.Parallel()
+
+	body, err := os.ReadFile("testdata/models_dev.json")
+	if err != nil {
+		t.Fatalf("read snapshot: %v", err)
+	}
+	var snapshot map[string]map[string]snapshotModel
+	if err := json.Unmarshal(body, &snapshot); err != nil {
+		t.Fatalf("parse snapshot: %v", err)
+	}
+
+	diverging := map[string]bool{}
+	claims := 0
+	for provider, entries := range snapshot {
+		for id, entry := range entries {
+			if !entry.claimsEffort() {
+				continue
+			}
+			claims++
+			if !AcceptsEffortWire(id) {
+				diverging[provider+"/"+id] = true
+			}
+		}
+	}
+	if claims == 0 {
+		t.Fatal("snapshot carries no effort options; regenerate it with go generate ./llms/reasoning")
+	}
+
+	for _, name := range sorted(diverging) {
+		if _, known := knownEffortDrift[name]; !known {
+			t.Errorf("new effort drift on %s: the catalogue gives it an effort control, our "+
+				"AcceptsEffortWire keeps the field off the wire. Measure it against the vendor, "+
+				"then either fix the predicate or add it to knownEffortDrift with the reason", name)
+		}
+	}
+	for _, name := range sortedKeys(knownEffortDrift) {
+		if !diverging[name] {
+			t.Errorf("stale knownEffortDrift entry %s: the catalogue and our predicate now agree, "+
+				"drop the line", name)
+		}
+	}
 }
 
 func TestModelsDevSnapshotDrift(t *testing.T) {
