@@ -183,8 +183,14 @@ func (c *ConverseClient) buildConverseInput(input *ConverseInput) (*bedrockrunti
 			}
 			// Budget thinking requires temperature=1.0 and rejects top_p.
 			if isAnthropicModelID(input.ModelID) {
+				keepTopP := input.Temperature == nil && inferenceConfig.TopP != nil &&
+					reasoning.ClaudeKeepsTopPWhileThinking(input.ModelID, float64(*inferenceConfig.TopP))
 				inferenceConfig.Temperature = aws.Float32(1.0)
-				inferenceConfig.TopP = nil
+				if keepTopP {
+					inferenceConfig.Temperature = nil
+				} else {
+					inferenceConfig.TopP = nil
+				}
 			}
 			return nil
 		}

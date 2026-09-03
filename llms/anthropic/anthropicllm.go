@@ -272,12 +272,17 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 		topP = nil
 		topK = nil
 	case thinking != nil && thinking.Type == "enabled" && thinking.Budget > 0:
-		if !reasoning.ClaudeRejectsSampling(model) {
-			temperature = getFloatPointer(1.0)
-		} else {
+		keepTopP := topP != nil && opts.Temperature == nil &&
+			reasoning.ClaudeKeepsTopPWhileThinking(model, *topP)
+		switch {
+		case reasoning.ClaudeRejectsSampling(model), keepTopP:
 			temperature = nil
+		default:
+			temperature = getFloatPointer(1.0)
 		}
-		topP = nil
+		if !keepTopP {
+			topP = nil
+		}
 		topK = nil
 		if !slices.Contains(betaHeaders, anthropicInterleavedThinkingBeta) {
 			maxTokens = reasoning.ClaudeMaxTokensForBudget(thinking.Budget, maxTokens)
