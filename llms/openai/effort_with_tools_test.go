@@ -94,7 +94,7 @@ func TestEffortAndToolsOnTheWire(t *testing.T) {
 	}
 }
 
-func TestQwenThinkingBudgetOnTheWire(t *testing.T) {
+func TestDashScopeThinkingBudgetOnTheWire(t *testing.T) {
 	t.Parallel()
 
 	for _, tc := range []struct {
@@ -136,6 +136,30 @@ func TestQwenThinkingBudgetOnTheWire(t *testing.T) {
 			llms.WithReasoning(llms.ReasoningLow, 2048), `"thinking_budget"`, true},
 		{"флаг остаётся вместе с бюджетом", "dashscope/qwen-plus",
 			llms.WithReasoning(llms.ReasoningLow, 2048), `"enable_thinking":true`, false},
+		{"гость glm-5.2 берёт бюджет", "dashscope/glm-5.2",
+			llms.WithReasoning(llms.ReasoningLow, 2048), `"thinking_budget":2048`, false},
+		{"снимок поколения glm-5.2 тоже", "dashscope/glm-5.2-fast-preview",
+			llms.WithReasoning(llms.ReasoningLow, 2048), `"thinking_budget":2048`, false},
+		{"гость glm-5.1 берёт бюджет", "dashscope/glm-5.1",
+			llms.WithReasoning(llms.ReasoningLow, 2048), `"thinking_budget":2048`, false},
+		{"гость kimi берёт бюджет", "dashscope/kimi-k2.7-code",
+			llms.WithReasoning(llms.ReasoningLow, 2048), `"thinking_budget":2048`, false},
+		{"гость deepseek-v4 берёт бюджет", "dashscope/deepseek-v4-pro",
+			llms.WithReasoning(llms.ReasoningLow, 2048), `"thinking_budget":2048`, false},
+		{"датированный снимок deepseek-v4 тоже", "dashscope/deepseek-v4-flash-0731",
+			llms.WithReasoning(llms.ReasoningLow, 2048), `"thinking_budget":2048`, false},
+		{"у гостя эффорт при бюджете не уходит", "dashscope/glm-5.2",
+			llms.WithReasoning(llms.ReasoningLow, 2048), `"reasoning_effort"`, true},
+		{"deepseek-v3.2 бюджета не получает", "dashscope/deepseek-v3.2",
+			llms.WithReasoning(llms.ReasoningLow, 2048), `"thinking_budget"`, true},
+		{"glm на своей двери бюджета не получает", "zai/glm-5.2",
+			llms.WithReasoning(llms.ReasoningLow, 2048), `"thinking_budget"`, true},
+		{"kimi на своей двери бюджета не получает", "moonshot/kimi-k2.7-code",
+			llms.WithReasoning(llms.ReasoningLow, 2048), `"thinking_budget"`, true},
+		{"glm через openrouter бюджета не получает", "openrouter/z-ai/glm-5.2",
+			llms.WithReasoning(llms.ReasoningLow, 2048), `"thinking_budget"`, true},
+		{"deepseek на своей двери бюджета не получает", "deepseek/deepseek-v4-pro",
+			llms.WithReasoning(llms.ReasoningLow, 2048), `"thinking_budget"`, true},
 		{"чужой хост бюджета не получает", "openrouter/qwen/qwen3.7-plus",
 			llms.WithReasoning(llms.ReasoningLow, 2048), `"thinking_budget"`, true},
 		{"не qwen бюджета не получает", "gpt-5.2",

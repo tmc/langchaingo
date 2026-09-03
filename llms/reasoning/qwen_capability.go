@@ -17,16 +17,16 @@ var qwenVLOpenWeightName = regexp.MustCompile(`^qwen3-vl-\d+(\.\d+)?b(-a\d+(\.\d
 // QwenThinkingOffByFlag reports whether the model thinks until enable_thinking
 // false asks it to stop.
 func QwenThinkingOffByFlag(model string) bool {
-	return qwenDefaultThinkingName.MatchString(qwenVendorSpelling(model))
+	return qwenDefaultThinkingName.MatchString(dashScopeSpelling(model))
 }
 
 // QwenThinkingRequiresStream reports whether DashScope serves the model's
 // thinking only on a streaming call.
 func QwenThinkingRequiresStream(model string) bool {
-	return qwenParameterCountName.MatchString(qwenVendorSpelling(model))
+	return qwenParameterCountName.MatchString(dashScopeSpelling(model))
 }
 
-func qwenVendorSpelling(model string) string {
+func dashScopeSpelling(model string) string {
 	m := strings.TrimPrefix(strings.ToLower(model), "dashscope/")
 	if strings.Contains(m, "/") {
 		return ""
@@ -50,15 +50,22 @@ var qwenFlagThinkers = map[string]bool{
 // QwenThinkingEnabledByFlag reports whether DashScope leaves the model's
 // thinking off until enable_thinking:true asks for it.
 func QwenThinkingEnabledByFlag(model string) bool {
-	return qwenFlagThinkers[qwenVendorSpelling(model)]
+	return qwenFlagThinkers[dashScopeSpelling(model)]
 }
 
-// QwenTakesThinkingBudget reports whether DashScope caps the model's thinking by
-// a token budget.
-func QwenTakesThinkingBudget(model string) bool {
-	m := qwenVendorSpelling(model)
+var dashScopeGuestBudget = []string{"glm-5.1", "glm-5.2", "kimi-k2.7-code", "deepseek-v4"}
+
+// DashScopeTakesThinkingBudget reports whether DashScope caps the model's
+// thinking by a token budget.
+func DashScopeTakesThinkingBudget(model string) bool {
+	m := dashScopeSpelling(model)
 	if m == "" {
 		return false
+	}
+	for _, generation := range dashScopeGuestBudget {
+		if hasGeneration(m, generation) {
+			return true
+		}
 	}
 	return qwenDefaultThinkingName.MatchString(m) ||
 		qwenParameterCountName.MatchString(m) ||
