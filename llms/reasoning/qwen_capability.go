@@ -58,5 +58,6 @@ func QwenTakesThinkingBudget(model string) bool {
 	}
 	return qwenDefaultThinkingName.MatchString(m) ||
 		qwenParameterCountName.MatchString(m) ||
+		qwenFlagThinkers[m] ||
 		hasGeneration(m, "qwen3.8")
 }
