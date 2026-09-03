@@ -10,7 +10,9 @@ var qwenParameterCountName = regexp.MustCompile(`^qwen3-\d+(\.\d+)?b(-a\d+(\.\d+
 
 var qwenDefaultThinkingName = regexp.MustCompile(`^qwen3\.[567]-`)
 
-var qwenNextName = regexp.MustCompile(`^qwen3-next-`)
+var qwenNextName = regexp.MustCompile(`^qwen3-next-.*-thinking$`)
+
+var qwenVLOpenWeightName = regexp.MustCompile(`^qwen3-vl-\d+(\.\d+)?b(-a\d+(\.\d+)?b)?$`)
 
 // QwenThinkingOffByFlag reports whether the model thinks until enable_thinking
 // false asks it to stop.
@@ -41,8 +43,8 @@ func (e *ErrThinkingRequiresStream) Error() string {
 }
 
 var qwenFlagThinkers = map[string]bool{
-	"qwen-plus": true, "qwen-flash": true, "qwen3-max": true,
-	"qwen3-vl-plus": true, "qwen3-vl-flash": true,
+	"qwen-plus": true, "qwen-flash": true, "qwen-turbo": true,
+	"qwen3-max": true, "qwen3-vl-plus": true, "qwen3-vl-flash": true,
 }
 
 // QwenThinkingEnabledByFlag reports whether DashScope leaves the model's
@@ -61,6 +63,7 @@ func QwenTakesThinkingBudget(model string) bool {
 	return qwenDefaultThinkingName.MatchString(m) ||
 		qwenParameterCountName.MatchString(m) ||
 		qwenNextName.MatchString(m) ||
+		qwenVLOpenWeightName.MatchString(m) ||
 		qwenFlagThinkers[m] ||
 		hasGeneration(m, "qwen3.8")
 }

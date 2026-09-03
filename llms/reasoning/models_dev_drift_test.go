@@ -30,7 +30,6 @@ var knownDrift = map[string]string{
 	"amazon-bedrock/deepseek.v3-v1:0": "имени нет на Bedrock: The provided model identifier is invalid; линейка V3 замерена как нерассуждающая",
 
 	"alibaba/qvq-max":                                       "не измерено",
-	"alibaba/qwen-turbo":                                    "не измерено",
 	"alibaba/qwen3-omni-flash":                              "не измерено",
 	"alibaba/qwen3-vl-235b-a22b":                            "не измерено",
 	"alibaba/qwen3-vl-30b-a3b":                              "не измерено",
@@ -61,10 +60,65 @@ func (m snapshotModel) claimsEffort() bool {
 	return false
 }
 
+func (m snapshotModel) claimsBudget() bool {
+	for _, o := range m.Options {
+		if o.Type == "budget_tokens" {
+			return true
+		}
+	}
+	return false
+}
+
 // An entry records a divergence measured against the vendor, with the reason.
 var knownEffortDrift = map[string]string{
 	"xai/grok-4.20-multi-agent-0309": "вендор не обслуживает multi-agent на chat completions: " +
 		"«Multi Agent requests are not allowed on chat completions», замер 02.09.2026",
+}
+
+var knownBudgetDrift = map[string]string{
+	"qwen3-max": "снимок бюджета не объявляет, вендор его исполняет: голый вызов даёт 9166 " +
+		"символов размышления против 285 при thinking_budget 100, замер 03.09.2026",
+}
+
+func TestModelsDevBudgetDrift(t *testing.T) {
+	t.Parallel()
+
+	body, err := os.ReadFile("testdata/models_dev.json")
+	if err != nil {
+		t.Fatalf("read snapshot: %v", err)
+	}
+	var snapshot map[string]map[string]snapshotModel
+	if err := json.Unmarshal(body, &snapshot); err != nil {
+		t.Fatalf("parse snapshot: %v", err)
+	}
+
+	diverging := map[string]bool{}
+	claims := 0
+	for id, entry := range snapshot["alibaba"] {
+		if entry.claimsBudget() {
+			claims++
+		}
+		if entry.claimsBudget() != QwenTakesThinkingBudget(id) {
+			diverging[id] = true
+		}
+	}
+	if claims == 0 {
+		t.Fatal("snapshot carries no budget options for alibaba; regenerate it with go generate ./llms/reasoning")
+	}
+
+	for _, name := range sorted(diverging) {
+		if _, known := knownBudgetDrift[name]; !known {
+			t.Errorf("new budget drift on %s: the catalogue and QwenTakesThinkingBudget disagree on "+
+				"whether DashScope caps its thinking by a token budget. Measure it against the vendor, "+
+				"then either fix the predicate or add it to knownBudgetDrift with the reason", name)
+		}
+	}
+	for _, name := range sortedKeys(knownBudgetDrift) {
+		if !diverging[name] {
+			t.Errorf("stale knownBudgetDrift entry %s: the catalogue and our predicate now agree, "+
+				"drop the line", name)
+		}
+	}
 }
 
 func TestModelsDevEffortDrift(t *testing.T) {
