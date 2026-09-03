@@ -387,6 +387,11 @@ func (o *LLM) setReasoning(req *openaiclient.ChatRequest, opts llms.CallOptions)
 	case reasoning.EffortToolsOmit:
 		sendsEffort = false
 	}
+	if opts.Reasoning.HasExplicitTokens() && reasoningTokens > 0 &&
+		reasoning.QwenTakesThinkingBudget(model) {
+		req.ThinkingBudget = &reasoningTokens
+		return wireEffortOf(true, reasoningEffort), nil
+	}
 	budget := 0
 	if opts.Reasoning.HasExplicitTokens() && reasoningTokens > 0 {
 		budget = reasoning.ClaudeClampBudget(model, reasoningTokens)

@@ -54,6 +54,7 @@ type ChatRequest struct {
 	TopP                *float64         `json:"top_p,omitempty"`
 	MinP                *float64         `json:"min_p,omitempty"`
 	EnableThinking      *bool            `json:"enable_thinking,omitempty"`
+	ThinkingBudget      *int             `json:"thinking_budget,omitempty"`
 	Thinking            *ThinkingOptions `json:"thinking,omitempty"`
 	MaxTokens           *int             `json:"max_tokens,omitempty"`
 	MaxCompletionTokens *int             `json:"max_completion_tokens,omitempty"`

@@ -48,3 +48,15 @@ var qwenFlagThinkers = map[string]bool{
 func QwenThinkingEnabledByFlag(model string) bool {
 	return qwenFlagThinkers[qwenVendorSpelling(model)]
 }
+
+// QwenTakesThinkingBudget reports whether DashScope caps the model's thinking by
+// a token budget.
+func QwenTakesThinkingBudget(model string) bool {
+	m := qwenVendorSpelling(model)
+	if m == "" {
+		return false
+	}
+	return qwenDefaultThinkingName.MatchString(m) ||
+		qwenParameterCountName.MatchString(m) ||
+		hasGeneration(m, "qwen3.8")
+}
