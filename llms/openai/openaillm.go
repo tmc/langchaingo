@@ -388,7 +388,7 @@ func (o *LLM) setReasoning(req *openaiclient.ChatRequest, opts llms.CallOptions)
 		sendsEffort = false
 	}
 	if opts.Reasoning.HasExplicitTokens() && reasoningTokens > 0 &&
-		reasoning.QwenTakesThinkingBudget(model) {
+		reasoning.DashScopeTakesThinkingBudget(model) {
 		req.ThinkingBudget = &reasoningTokens
 		return wireEffortOf(true, reasoningEffort), nil
 	}
