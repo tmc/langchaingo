@@ -318,6 +318,18 @@ var rejectsSamplingClaude = []string{
 	"claude-opus-latest", "claude-sonnet-latest", "claude-fable-latest",
 }
 
+// ClaudeThinkingTopPFloor is the lowest top_p Anthropic accepts while the model
+// is thinking.
+const ClaudeThinkingTopPFloor = 0.95
+
+// ClaudeKeepsTopPWhileThinking reports whether the caller's top_p survives on
+// the wire once the model is thinking.
+func ClaudeKeepsTopPWhileThinking(model string, topP float64) bool {
+	return ClaudeSupportsThinking(model) &&
+		!ClaudeRejectsSampling(model) &&
+		topP >= ClaudeThinkingTopPFloor
+}
+
 // ClaudeRejectsSampling reports whether the model rejects temperature/top_p
 // outright, so sampling params must be dropped even when no thinking is
 // requested.

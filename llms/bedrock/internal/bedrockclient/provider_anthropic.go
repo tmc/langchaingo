@@ -800,6 +800,7 @@ func getAnthropicInputContent(message Message) anthropicTextGenerationInputConte
 func applyAnthropicReasoning(
 	input *anthropicTextGenerationInput, cfg *llms.ReasoningConfig, modelID string, maxTokens int,
 ) error {
+	callerTemperature := input.Temperature
 	// Adaptive-only models reject sampling params even without thinking.
 	if reasoning.ClaudeRejectsSampling(modelID) {
 		input.Temperature = 0
@@ -840,11 +841,17 @@ func applyAnthropicReasoning(
 			input.OutputConfig = &anthropicOutputConfig{Effort: reasoning.ClaudeClampEffort(modelID, string(cfg.GetEffort(maxTokens)))}
 		}
 		// Budget thinking requires temperature=1.0 and rejects top_p/top_k.
-		input.Temperature = 1.0
-		if reasoning.ClaudeRejectsSampling(modelID) {
+		keepTopP := callerTemperature == 0 &&
+			reasoning.ClaudeKeepsTopPWhileThinking(modelID, input.TopP)
+		switch {
+		case reasoning.ClaudeRejectsSampling(modelID), keepTopP:
 			input.Temperature = 0
+		default:
+			input.Temperature = 1.0
 		}
-		input.TopP = 0
+		if !keepTopP {
+			input.TopP = 0
+		}
 		input.TopK = 0
 		return nil
 	}

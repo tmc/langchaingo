@@ -480,7 +480,10 @@ func (o *LLM) applySamplingPolicy(req *openaiclient.ChatRequest, opts llms.CallO
 			temperature := 1.0
 			req.Temperature = &temperature
 		}
-		req.TopP = nil
+		if req.Temperature != nil || req.TopP == nil ||
+			!reasoning.ClaudeKeepsTopPWhileThinking(model, *req.TopP) {
+			req.TopP = nil
+		}
 		req.TopK = nil
 		req.FrequencyPenalty = nil
 		req.PresencePenalty = nil
