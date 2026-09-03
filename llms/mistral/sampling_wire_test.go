@@ -63,14 +63,42 @@ func TestJSONModeReachesTheMistralWire(t *testing.T) {
 func TestToolChoiceReachesTheMistralWire(t *testing.T) {
 	t.Parallel()
 
-	for _, choice := range []string{"any", "auto", "none"} {
-		if got := captureMistralRequest(t, llms.WithToolChoice(choice))["tool_choice"]; got != choice {
-			t.Errorf("tool_choice %q must reach the wire, got %v", choice, got)
-		}
+	for _, tc := range []struct {
+		name   string
+		choice any
+		want   any
+	}{
+		{"any", "any", "any"},
+		{"auto", "auto", "auto"},
+		{"none", "none", "none"},
+		{"required", "required", "any"},
+		{"function without a name", "function", "any"},
+		{"struct asking for any", llms.ToolChoice{Type: "any"}, "any"},
+		{"struct asking for auto", llms.ToolChoice{Type: "auto"}, "auto"},
+		{"map asking for required", map[string]any{"type": "required"}, "any"},
+		{"named tool", llms.ToolChoice{
+			Type: "function", Function: &llms.FunctionReference{Name: "get_weather"},
+		}, nil},
+		{"a spelling nobody uses", "something-else", nil},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			got, sent := captureMistralRequest(t, llms.WithToolChoice(tc.choice))["tool_choice"]
+			if tc.want == nil {
+				if sent {
+					t.Errorf("must stay off the wire, got %v", got)
+				}
+				return
+			}
+			if got != tc.want {
+				t.Errorf("want %v on the wire, got %v", tc.want, got)
+			}
+		})
 	}
 
-	if _, ok := captureMistralRequest(t, llms.WithToolChoice("something-else"))["tool_choice"]; ok {
-		t.Error("a choice the vendor has no name for must not be guessed at")
+	if _, ok := captureMistralRequest(t)["tool_choice"]; ok {
+		t.Error("an unset choice must leave the field off the wire")
 	}
 }
 

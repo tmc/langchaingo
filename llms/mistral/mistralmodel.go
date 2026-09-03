@@ -334,14 +334,16 @@ func setMistralChatMessageRole(msg *llms.MessageContent, chatMsg *sdk.ChatMessag
 }
 
 func mistralToolChoice(choice any) string {
-	name, ok := choice.(string)
-	if !ok {
+	kind, _ := llms.ClassifyToolChoice(choice)
+	switch kind {
+	case llms.ToolChoiceAuto:
+		return sdk.ToolChoiceAuto
+	case llms.ToolChoiceNone:
+		return sdk.ToolChoiceNone
+	case llms.ToolChoiceAny:
+		return sdk.ToolChoiceAny
+	case llms.ToolChoiceNamed, llms.ToolChoiceUnset:
 		return ""
 	}
-	switch name {
-	case sdk.ToolChoiceAny, sdk.ToolChoiceAuto, sdk.ToolChoiceNone:
-		return name
-	default:
-		return ""
-	}
+	return ""
 }
