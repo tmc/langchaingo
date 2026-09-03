@@ -12,8 +12,27 @@ const (
 // when using the Anthropic Sonnet 3.5 model.
 const MaxTokensAnthropicSonnet35 = "max-tokens-3-5-sonnet-2024-07-15" //nolint:gosec // This is not a sensitive value.
 
+// FederationConfig names the federation rule a workload exchanges its identity
+// token under, and where that token comes from.
+type FederationConfig = anthropicclient.FederationConfig
+
+// AssertionSource yields the identity token to exchange. It is called for every
+// exchange, not once per client.
+type AssertionSource = anthropicclient.AssertionSource
+
+// AssertionFromFile reads the identity token from path on every exchange.
+func AssertionFromFile(path string) AssertionSource {
+	return anthropicclient.AssertionFromFile(path)
+}
+
+// AssertionFromString yields a fixed identity token.
+func AssertionFromString(assertion string) AssertionSource {
+	return anthropicclient.AssertionFromString(assertion)
+}
+
 type options struct {
 	token      string
+	federation *FederationConfig
 	model      string
 	baseURL    string
 	httpClient anthropicclient.Doer
@@ -34,6 +53,15 @@ type Option func(*options)
 func WithToken(token string) Option {
 	return func(opts *options) {
 		opts.token = token
+	}
+}
+
+// WithFederation authenticates with short-lived tokens exchanged from the
+// workload's identity provider, instead of a static API key. It replaces
+// WithToken and the ANTHROPIC_API_KEY environment variable.
+func WithFederation(cfg FederationConfig) Option {
+	return func(opts *options) {
+		opts.federation = &cfg
 	}
 }
 

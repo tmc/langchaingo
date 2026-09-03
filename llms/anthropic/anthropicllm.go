@@ -72,15 +72,20 @@ func New(opts ...Option) (*LLM, error) {
 }
 
 func newClientFromOptions(options *options) (*anthropicclient.Client, error) {
-	if len(options.token) == 0 {
+	if options.federation == nil && len(options.token) == 0 {
 		return nil, ErrMissingToken
 	}
 
-	return anthropicclient.New(options.token, options.model, options.baseURL,
+	clientOptions := []anthropicclient.Option{
 		anthropicclient.WithHTTPClient(options.httpClient),
 		anthropicclient.WithLegacyTextCompletionsAPI(options.useLegacyTextCompletionsAPI),
 		anthropicclient.WithAnthropicBetaHeader(options.anthropicBetaHeader),
-	)
+	}
+	if options.federation != nil {
+		clientOptions = append(clientOptions, anthropicclient.WithFederation(*options.federation))
+	}
+
+	return anthropicclient.New(options.token, options.model, options.baseURL, clientOptions...)
 }
 
 // Call requests a completion for the given prompt.
