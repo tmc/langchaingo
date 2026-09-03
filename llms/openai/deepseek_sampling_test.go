@@ -92,7 +92,8 @@ func TestPenaltiesStayOffTheDoorsThatRefuseThem(t *testing.T) {
 	t.Parallel()
 
 	for _, model := range []string{
-		"grok-4.6", "grok-4-1-fast", "grok-4-1-fast-non-reasoning", "grok-3-mini-beta", "xai/grok-4.6",
+		"grok-4.6", "grok-4-1-fast", "grok-4-1-fast-non-reasoning", "grok-3", "grok-3-mini",
+		"grok-3-mini-beta", "grok-4.20-0309-non-reasoning", "xai/grok-4.6",
 	} {
 		body := captureDeepSeekRequest(t, model,
 			llms.WithFrequencyPenalty(0.5), llms.WithPresencePenalty(0.5))
