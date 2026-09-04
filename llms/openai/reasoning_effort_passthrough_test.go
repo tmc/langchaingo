@@ -455,3 +455,57 @@ func TestClaudeSamplingBehindTheOpenAITransport(t *testing.T) {
 		})
 	}
 }
+
+func TestALevelOutsideTheVendorEnumDoesNotReachTheWire(t *testing.T) {
+	t.Parallel()
+
+	const completion = `{"id":"x","object":"chat.completion","created":1,"model":"m",` +
+		`"choices":[{"index":0,"message":{"role":"assistant","content":"ok"},"finish_reason":"stop"}],` +
+		`"usage":{"prompt_tokens":1,"completion_tokens":1,"total_tokens":2}}`
+
+	for _, tc := range []struct {
+		model  string
+		asked  llms.ReasoningEffort
+		want   string
+		reject string
+	}{
+		{"kimi-k3", llms.ReasoningMedium, `"reasoning_effort":"low"`, `"medium"`},
+		{"glm-5.3", llms.ReasoningMedium, `"reasoning_effort":"low"`, `"medium"`},
+		{"glm-5.3-flash", llms.ReasoningXHigh, `"reasoning_effort":"high"`, `"xhigh"`},
+		{"deepseek-v4-pro", llms.ReasoningMedium, `"reasoning_effort":"medium"`, ""},
+		{"glm-5.2", llms.ReasoningMedium, `"reasoning_effort":"medium"`, ""},
+	} {
+		t.Run(tc.model+"/"+string(tc.asked), func(t *testing.T) {
+			t.Parallel()
+
+			var body string
+			srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				b, _ := io.ReadAll(r.Body)
+				body = string(b)
+				w.Header().Set("Content-Type", "application/json")
+				_, _ = io.WriteString(w, completion)
+			}))
+			defer srv.Close()
+
+			llm, err := New(WithBaseURL(srv.URL), WithToken("test"), WithModel(tc.model))
+			if err != nil {
+				t.Fatalf("New() error: %v", err)
+			}
+			if _, err := llm.GenerateContent(
+				context.Background(),
+				[]llms.MessageContent{llms.TextParts(llms.ChatMessageTypeHuman, "hi")},
+				llms.WithReasoning(tc.asked, 0),
+			); err != nil {
+				t.Fatalf("GenerateContent() error: %v", err)
+			}
+
+			if !strings.Contains(body, tc.want) {
+				t.Fatalf("%s: wire body missing %s\nbody: %s", tc.model, tc.want, body)
+			}
+			if tc.reject != "" && strings.Contains(body, tc.reject) {
+				t.Fatalf("%s: %s reached the wire although the vendor documents an enum without it\nbody: %s",
+					tc.model, tc.reject, body)
+			}
+		})
+	}
+}

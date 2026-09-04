@@ -18,8 +18,8 @@ var openAIEffortRank = map[string]int{
 }
 
 // OpenAIReasoningCaps is a best-effort static projection of which reasoning
-// efforts an OpenAI model accepts, so callers avoid sending a value the API would
-// reject with a 400. It asserts only documented, non-default constraints; every
+// efforts a model reachable on an OpenAI-compatible door accepts, so callers avoid
+// sending a value the API would reject with a 400. It asserts only documented, non-default constraints; every
 // other model returns Known=false and is treated optimistically (send as
 // requested, let the API be the arbiter), preserving prior pass-through behavior.
 type OpenAIReasoningCaps struct {
@@ -54,8 +54,8 @@ func (c OpenAIReasoningCaps) ClampEffort(effort string) string {
 	return accepted
 }
 
-// OpenAIReasoningCapsFor classifies an OpenAI reasoning model by the effort set
-// its generation accepts on /chat/completions. A model outside the listed
+// OpenAIReasoningCapsFor classifies a reasoning model by the effort set its
+// generation accepts on /chat/completions. A model outside the listed
 // generations (including newer ones) returns Known=false so the caller stays
 // optimistic and the API arbitrates.
 func OpenAIReasoningCapsFor(model string) OpenAIReasoningCaps {
@@ -89,6 +89,8 @@ func openAICapsForForm(m string) OpenAIReasoningCaps {
 		return OpenAIReasoningCaps{Known: true, CanDisable: true, Efforts: []string{"low", "medium", "high"}}
 	case openAIXHighCeiling(m):
 		return OpenAIReasoningCaps{Known: true, CanDisable: true, Efforts: []string{"low", "medium", "high", "xhigh"}}
+	case nonOpenAILowHighMax(m):
+		return OpenAIReasoningCaps{Known: true, CanDisable: false, Efforts: []string{"low", "high", "max"}}
 	default:
 		return OpenAIReasoningCaps{Known: false}
 	}
@@ -101,6 +103,10 @@ func openAIProVariant(m string) bool {
 func openAIGPT5Base(m string) bool {
 	return m == "gpt-5" || strings.HasPrefix(m, "gpt-5-20") ||
 		hasGeneration(m, "gpt-5-mini") || hasGeneration(m, "gpt-5-nano")
+}
+
+func nonOpenAILowHighMax(m string) bool {
+	return hasGeneration(m, "kimi-k3") || hasGeneration(m, "glm-5.3")
 }
 
 func openAIXHighCeiling(m string) bool {
