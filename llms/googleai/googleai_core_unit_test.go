@@ -1044,7 +1044,8 @@ const (
 
 var productionGeminiModels = []struct {
 	name              string
-	usesThinkingLevel bool // Gemini 3.x uses thinking_level; 2.5 / Gemma use thinking_budget
+	usesThinkingLevel bool // Gemini 3.x uses thinking_level; 2.5 uses thinking_budget
+	noControl         bool // takes neither: the request carries no budget and no level
 	disable           disableWire
 }{
 	{name: "gemini-3.5-flash", usesThinkingLevel: true, disable: disableZeroBudget},
@@ -1054,8 +1055,8 @@ var productionGeminiModels = []struct {
 	{name: "gemini-2.5-pro", usesThinkingLevel: false, disable: disableUnsupported},
 	{name: "gemini-2.5-flash", usesThinkingLevel: false, disable: disableZeroBudget},
 	{name: "gemini-2.5-flash-lite", usesThinkingLevel: false, disable: disableOmit},
-	{name: "gemma-4-31b-it", usesThinkingLevel: false, disable: disableZeroBudget},
-	{name: "gemma-4-26b-a4b-it", usesThinkingLevel: false, disable: disableZeroBudget},
+	{name: "gemma-4-31b-it", usesThinkingLevel: false, noControl: true, disable: disableUnsupported},
+	{name: "gemma-4-26b-a4b-it", usesThinkingLevel: false, noControl: true, disable: disableUnsupported},
 }
 
 func TestResolveTemperature(t *testing.T) {
@@ -1248,11 +1249,16 @@ func TestProductionGeminiModels_ThinkingConfig(t *testing.T) {
 			require.NoError(t, err, "enable reasoning must succeed for %s", m.name)
 			require.NotNil(t, tc, "enable reasoning must emit a ThinkingConfig for %s", m.name)
 			assert.True(t, tc.IncludeThoughts)
-			if m.usesThinkingLevel {
+			switch {
+			case m.noControl:
+				assert.Nil(t, tc.ThinkingBudget, "%s takes no thinking_budget", m.name)
+				assert.Equal(t, genai.ThinkingLevel(""), tc.ThinkingLevel,
+					"%s takes no thinking_level", m.name)
+			case m.usesThinkingLevel:
 				assert.Equal(t, genai.ThinkingLevelMedium, tc.ThinkingLevel,
 					"%s should map effort→thinking_level", m.name)
 				assert.Nil(t, tc.ThinkingBudget, "%s level path must not also send a budget", m.name)
-			} else {
+			default:
 				require.NotNil(t, tc.ThinkingBudget, "%s should use thinking_budget", m.name)
 				assert.Greater(t, *tc.ThinkingBudget, int32(0))
 				assert.Equal(t, genai.ThinkingLevel(""), tc.ThinkingLevel)

@@ -232,8 +232,8 @@ func TestReasoningSupportFor(t *testing.T) { //nolint:funlen // table-driven tes
 			{"gemini-2.5-pro", true},
 			{"gemini-2.5-flash", false},
 			{"gemini-2.5-flash-lite", false},
-			{"gemma-4-31b-it", false},
-			{"gemma-4-26b-a4b-it", false},
+			{"gemma-4-31b-it", true},
+			{"gemma-4-26b-a4b-it", true},
 		}
 		for _, tc := range cases {
 			s := ReasoningSupportFor(tc.model, reasoning.ProviderGoogleAI)
