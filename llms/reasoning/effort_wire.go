@@ -25,7 +25,8 @@ func UsesLegacyMaxTokens(model string) bool {
 		if strings.HasPrefix(form, "grok") ||
 			strings.HasPrefix(form, "qwen") ||
 			strings.HasPrefix(form, "qwq") ||
-			strings.HasPrefix(form, "qvq") {
+			strings.HasPrefix(form, "qvq") ||
+			strings.HasPrefix(form, "deepseek") {
 			return true
 		}
 	}
