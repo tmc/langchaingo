@@ -172,3 +172,68 @@ func TestTheDocumentedMaxEffortIsNotOnTheWireForGPT56(t *testing.T) {
 		}
 	}
 }
+
+func TestAClosedVendorEnumClampsAndAMappedOneDoesNot(t *testing.T) {
+	t.Parallel()
+
+	for _, tc := range []struct {
+		model   string
+		efforts []string
+		clamped map[string]string
+	}{
+		{
+			model:   "kimi-k3",
+			efforts: []string{"low", "high", "max"},
+			clamped: map[string]string{"minimal": "low", "medium": "low", "xhigh": "high", "low": "low", "high": "high", "max": "max"},
+		},
+		{
+			model:   "glm-5.3",
+			efforts: []string{"low", "high", "max"},
+			clamped: map[string]string{"minimal": "low", "medium": "low", "xhigh": "high", "low": "low", "high": "high", "max": "max"},
+		},
+		{
+			model:   "glm-5.3-flash",
+			efforts: []string{"low", "high", "max"},
+			clamped: map[string]string{"medium": "low", "xhigh": "high"},
+		},
+	} {
+		t.Run(tc.model, func(t *testing.T) {
+			t.Parallel()
+			caps := OpenAIReasoningCapsFor(tc.model)
+			if !caps.Known {
+				t.Fatalf("%s: vendor documents an enum of exactly %v, so the model must be classified", tc.model, tc.efforts)
+			}
+			if !slices.Equal(caps.Efforts, tc.efforts) {
+				t.Errorf("%s efforts = %v, want %v", tc.model, caps.Efforts, tc.efforts)
+			}
+			for asked, want := range tc.clamped {
+				if got := caps.ClampEffort(asked); got != want {
+					t.Errorf("%s ClampEffort(%q) = %q, want %q", tc.model, asked, got, want)
+				}
+			}
+		})
+	}
+
+	for _, model := range []string{"deepseek-v4-pro", "deepseek-v4-flash", "glm-5.2"} {
+		t.Run("mapped/"+model, func(t *testing.T) {
+			t.Parallel()
+			for _, asked := range []string{"minimal", "medium", "xhigh"} {
+				if got := OpenAIReasoningCapsFor(model).ClampEffort(asked); got != asked {
+					t.Errorf("%s ClampEffort(%q) = %q: the vendor documents its own mapping for this level, "+
+						"so clamping it here would substitute a different depth than the vendor would pick",
+						model, asked, got)
+				}
+			}
+		})
+	}
+}
+
+func TestTheClosedEnumStopsAtItsOwnGeneration(t *testing.T) {
+	t.Parallel()
+
+	for _, model := range []string{"glm-5.31", "glm-5.4", "kimi-k30", "kimi-k4", "kimi-k2.6"} {
+		if OpenAIReasoningCapsFor(model).Known {
+			t.Errorf("%s is classified, but no vendor documentation covers it", model)
+		}
+	}
+}

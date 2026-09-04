@@ -75,13 +75,14 @@ func TestReasoningEffortOmittedOnDoorsThatRejectIt(t *testing.T) {
 		})
 	}
 
-	t.Run("kimi-k3 still receives the effort", func(t *testing.T) {
+	t.Run("kimi-k3 receives the effort inside the vendor enum", func(t *testing.T) {
 		body, err := capture(t, "kimi-k3", llms.WithReasoning(llms.ReasoningMedium, 0))
 		if err != nil {
 			t.Fatalf("GenerateContent() error: %v", err)
 		}
-		if !strings.Contains(body, `"reasoning_effort":"medium"`) {
-			t.Fatalf("kimi-k3 accepts reasoning_effort and must receive it, got body: %s", body)
+		if !strings.Contains(body, `"reasoning_effort":"low"`) {
+			t.Fatalf("kimi-k3 accepts reasoning_effort, and the vendor enum is low, high and max, "+
+				"so a requested medium must arrive as low, got body: %s", body)
 		}
 	})
 
