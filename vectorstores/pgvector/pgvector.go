@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"sort"
 	"strings"
 
 	"github.com/vxcontrol/langchaingo/embeddings"
@@ -294,18 +295,18 @@ func (s Store) SimilaritySearch(
 	if err != nil {
 		return nil, err
 	}
+	args := []any{len(embedderData), pgvector.NewVector(embedderData), numDocuments, collectionName}
 	whereQuerys := make([]string, 0)
 	if scoreThreshold != 0 {
 		whereQuerys = append(whereQuerys, fmt.Sprintf("data.distance < %f", 1-scoreThreshold))
 	}
-	for k, v := range filter {
-		whereQuerys = append(whereQuerys, fmt.Sprintf("(data.cmetadata ->> '%s') = '%s'", k, v))
-	}
+	filterQuerys, filterArgs := filterPredicates("data.", filter, len(args))
+	whereQuerys = append(whereQuerys, filterQuerys...)
+	args = append(args, filterArgs...)
 	whereQuery := strings.Join(whereQuerys, " AND ")
 	if len(whereQuery) == 0 {
 		whereQuery = "TRUE"
 	}
-	dims := len(embedderData)
 	sql := fmt.Sprintf(`WITH filtered_embedding_dims AS MATERIALIZED (
     SELECT
         *
@@ -326,14 +327,14 @@ FROM (
 		embedding <=> $2 AS distance
 	FROM
 		filtered_embedding_dims
-		JOIN %s ON filtered_embedding_dims.collection_id=%s.uuid WHERE %s.name='%s') AS data
+		JOIN %s ON filtered_embedding_dims.collection_id=%s.uuid WHERE %s.name=$4) AS data
 WHERE %s
 ORDER BY
 	data.distance
 LIMIT $3`, s.embeddingTableName,
-		s.collectionTableName, s.collectionTableName, s.collectionTableName, collectionName,
+		s.collectionTableName, s.collectionTableName, s.collectionTableName,
 		whereQuery)
-	rows, err := s.conn.Query(ctx, sql, dims, pgvector.NewVector(embedderData), numDocuments)
+	rows, err := s.conn.Query(ctx, sql, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -362,10 +363,9 @@ func (s Store) Search(
 	if err != nil {
 		return nil, err
 	}
-	whereQuerys := make([]string, 0)
-	for k, v := range filter {
-		whereQuerys = append(whereQuerys, fmt.Sprintf("(%s.cmetadata ->> '%s') = '%s'", s.embeddingTableName, k, v))
-	}
+	args := []any{numDocuments, collectionName}
+	whereQuerys, filterArgs := filterPredicates(s.embeddingTableName+".", filter, len(args))
+	args = append(args, filterArgs...)
 	whereQuery := strings.Join(whereQuerys, " AND ")
 	if len(whereQuery) == 0 {
 		whereQuery = "TRUE"
@@ -375,11 +375,11 @@ func (s Store) Search(
 	%s.cmetadata
 FROM %s
 JOIN %s ON %s.collection_id=%s.uuid
-WHERE %s.name='%s' AND %s
+WHERE %s.name=$2 AND %s
 LIMIT $1`, s.embeddingTableName, s.embeddingTableName, s.embeddingTableName,
-		s.collectionTableName, s.embeddingTableName, s.collectionTableName, s.collectionTableName, collectionName,
+		s.collectionTableName, s.embeddingTableName, s.collectionTableName, s.collectionTableName,
 		whereQuery)
-	rows, err := s.conn.Query(ctx, sql, numDocuments)
+	rows, err := s.conn.Query(ctx, sql, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -444,6 +444,25 @@ func (s Store) getScoreThreshold(opts vectorstores.Options) (float32, error) {
 		return 0, ErrInvalidScoreThreshold
 	}
 	return opts.ScoreThreshold, nil
+}
+
+// filterPredicates renders the metadata filter as predicates numbered from
+// argOffset; the returned args must be appended to the query in the same order.
+func filterPredicates(prefix string, filter map[string]any, argOffset int) ([]string, []any) {
+	keys := make([]string, 0, len(filter))
+	for k := range filter {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	predicates := make([]string, 0, len(keys))
+	args := make([]any, 0, len(keys)*2)
+	for _, k := range keys {
+		predicates = append(predicates, fmt.Sprintf("(%scmetadata ->> $%d) = $%d",
+			prefix, argOffset+len(args)+1, argOffset+len(args)+2))
+		args = append(args, k, fmt.Sprintf("%v", filter[k]))
+	}
+	return predicates, args
 }
 
 // getFilters return metadata filters, now only support map[key]value pattern
