@@ -1077,12 +1077,15 @@ func resolveTemperature(model string, clientOpts Options) float64 {
 }
 
 // resolveThinkingConfig builds the Gemini thinking config for the reasoning mode.
-// Off forces budget 0 on models that disable that way (Gemini 2.5 Flash), since
-// omitting would not disable a default-on model; a model whose thinking cannot be
-// disabled (Gemini 2.5 Pro, Gemini 3.x) returns a typed error before the request.
+// Off forces budget 0 on models that disable that way, since omitting would not
+// disable a default-on model; a model whose thinking cannot be disabled returns a
+// typed error before the request.
 func resolveThinkingConfig(model string, cfg *llms.ReasoningConfig, maxTokens int) (*genai.ThinkingConfig, error) {
 	switch cfg.ResolveMode() {
 	case llms.ReasoningOn:
+		if reasoning.GeminiRejectsThinkingControl(model) {
+			return &genai.ThinkingConfig{IncludeThoughts: true}, nil
+		}
 		// An effort with no explicit token budget maps to the qualitative
 		// thinking_level on Gemini 3.x (its native control, where thinking_budget is
 		// deprecated); an explicit budget or a 2.5 model still uses thinking_budget.
