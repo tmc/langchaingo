@@ -136,7 +136,11 @@ func ReasoningSupportFor(model string, p reasoning.Provider) ReasoningSupport {
 		}
 	}
 
-	return ReasoningSupport{Supported: reasoning.LikelyReasoningModel(model), Known: false}
+	return ReasoningSupport{
+		Supported:     reasoning.LikelyReasoningModel(model),
+		Known:         false,
+		CannotDisable: reasoning.ResolveOff(model, p) == reasoning.OffUnsupported,
+	}
 }
 
 // toReasoningEfforts converts the resolver's raw effort strings to the public

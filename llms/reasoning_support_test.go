@@ -418,3 +418,34 @@ func TestTheHintDoesNotOfferOffOnAModelThatAlwaysReasons(t *testing.T) {
 		}
 	}
 }
+
+func TestTheBedrockHintReportsTheRefusalTheDoorWillGive(t *testing.T) {
+	t.Parallel()
+
+	for _, tc := range []struct {
+		model             string
+		wantCannotDisable bool
+	}{
+		{"moonshot.kimi-k2-thinking", true},
+		{"us.deepseek.r1-v1:0", true},
+		{"openai.gpt-oss-120b-1:0", true},
+		{"us.xai.grok-4.6", true},
+		{"us.amazon.nova-2-lite-v1:0", false},
+		{"us.amazon.nova-pro-v1:0", false},
+	} {
+		t.Run(tc.model, func(t *testing.T) {
+			t.Parallel()
+
+			wire := reasoning.ResolveOff(tc.model, reasoning.ProviderBedrock)
+			if got := wire == reasoning.OffUnsupported; got != tc.wantCannotDisable {
+				t.Fatalf("%s: wire refuses = %v, want %v — the case no longer covers what it claims",
+					tc.model, got, tc.wantCannotDisable)
+			}
+			if got := ReasoningSupportFor(tc.model, reasoning.ProviderBedrock).CannotDisable; got != tc.wantCannotDisable {
+				t.Errorf("%s: hint CannotDisable = %v, want %v — a consumer building its interface from the hint "+
+					"would offer a control that the door answers with a typed error",
+					tc.model, got, tc.wantCannotDisable)
+			}
+		})
+	}
+}
