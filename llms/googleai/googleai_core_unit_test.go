@@ -1109,7 +1109,7 @@ func TestResolveThinkingConfigClampsMinimalWhereTheModelRefusesIt(t *testing.T) 
 	assert.True(t, tc.IncludeThoughts)
 }
 
-func TestResolveThinkingConfig(t *testing.T) {
+func TestResolveThinkingConfig(t *testing.T) { //nolint:funlen
 	t.Parallel()
 
 	t.Run("on with budget sends positive budget", func(t *testing.T) {
