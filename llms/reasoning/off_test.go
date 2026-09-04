@@ -76,3 +76,25 @@ func TestVendorsThatDisableWithAThinkingObject(t *testing.T) {
 		}
 	}
 }
+
+func TestAlwaysThinkingFamiliesAreRefusedOnBedrockToo(t *testing.T) {
+	t.Parallel()
+
+	for _, tc := range []struct {
+		model string
+		want  OffWire
+	}{
+		{"kimi-k3", OffUnsupported},
+		{"moonshot.kimi-k2-thinking", OffUnsupported},
+		{"us.deepseek.r1-v1:0", OffUnsupported},
+		{"openai.gpt-oss-120b-1:0", OffUnsupported},
+		{"us.xai.grok-4.6", OffUnsupported},
+		{"glm-5.3", OffUnsupported},
+		{"us.amazon.nova-2-lite-v1:0", OffOmit},
+		{"xai.grok-4.3", OffOmit},
+	} {
+		if got := ResolveOff(tc.model, ProviderBedrock); got != tc.want {
+			t.Errorf("ResolveOff(%q, ProviderBedrock) = %v, want %v", tc.model, got, tc.want)
+		}
+	}
+}
