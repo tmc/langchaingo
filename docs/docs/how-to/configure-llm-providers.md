@@ -146,6 +146,28 @@ llm, err := ollama.New(
 )
 ```
 
+### llmman
+
+[llmman](https://github.com/llmmanorg/llmman) is a local model runner that serves the Ollama API (alongside OpenAI- and Anthropic-compatible ones) on port 17434. Use the `ollama` package and point it at the llmman server:
+
+```go
+import (
+    "github.com/tmc/langchaingo/embeddings"
+    "github.com/tmc/langchaingo/llms/ollama"
+)
+
+// llmman listens on localhost:17434 by default (override with LLMMAN_HOST)
+llm, err := ollama.New(
+    ollama.WithServerURL("http://localhost:17434"),
+    ollama.WithModel("gemma4"),
+)
+
+// Embeddings use the same client
+embedder, err := embeddings.NewEmbedder(llm)
+```
+
+Pull a model with `llmman pull gemma4` and start the server with `llmman serve`. See the [llmman-completion-example](https://github.com/tmc/langchaingo/blob/main/examples/llmman-completion-example/llmman_completion_example.go) for a complete program.
+
 ## Hugging Face
 
 ### Basic configuration
