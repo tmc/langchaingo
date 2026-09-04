@@ -108,6 +108,9 @@ func ResolveOff(model string, p Provider) OffWire {
 		}
 		return OffEffortNone
 	default:
+		if mandatoryThinking(model) {
+			return OffUnsupported
+		}
 		// Bedrock non-Claude and everything else: no clean disable signal — omit.
 		return OffOmit
 	}

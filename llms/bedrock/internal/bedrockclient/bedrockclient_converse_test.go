@@ -1178,7 +1178,6 @@ func TestConverseClient_ReasoningReachesNonClaudeThinkers(t *testing.T) {
 	for _, modelID := range []string{
 		"us.deepseek.r1-v1:0",
 		"zai.glm-4.7",
-		"us.amazon.nova-2-lite-v1:0",
 	} {
 		t.Run(modelID, func(t *testing.T) {
 			mockClient := &MockBedrockRuntimeClient{}
@@ -1219,4 +1218,89 @@ func TestConverseClient_ReasoningReachesNonClaudeThinkers(t *testing.T) {
 			assert.EqualValues(t, 2666, thinking["budget_tokens"])
 		})
 	}
+}
+
+// novaConverseFields runs one reasoning request through the client and returns the
+// additionalModelRequestFields it built, plus the inference config it settled on.
+func novaConverseFields(t *testing.T, modelID string, cfg *llms.ReasoningConfig,
+	temperature, topP *float64,
+) (map[string]any, *types.InferenceConfiguration) {
+	t.Helper()
+
+	mockClient := &MockBedrockRuntimeClient{}
+	client := NewConverseClient(mockClient)
+
+	var capturedInput *bedrockruntime.ConverseInput
+	mockClient.On("Converse", mock.Anything, mock.MatchedBy(func(input *bedrockruntime.ConverseInput) bool {
+		capturedInput = input
+		return true
+	}), mock.Anything).Return(&bedrockruntime.ConverseOutput{
+		Output: &types.ConverseOutputMemberMessage{
+			Value: types.Message{
+				Role:    types.ConversationRoleAssistant,
+				Content: []types.ContentBlock{&types.ContentBlockMemberText{Value: "ok"}},
+			},
+		},
+	}, nil)
+
+	input := &ConverseInput{
+		ModelID:         modelID,
+		Messages:        []Message{{Role: llms.ChatMessageTypeHuman, Content: "Hello", Type: "text"}},
+		MaxTokens:       ptr(8000),
+		Temperature:     temperature,
+		TopP:            topP,
+		ReasoningConfig: cfg,
+	}
+
+	_, err := client.CreateCompletionConverse(t.Context(), input)
+	require.NoError(t, err)
+	require.NotNil(t, capturedInput.AdditionalModelRequestFields)
+
+	raw, err := capturedInput.AdditionalModelRequestFields.MarshalSmithyDocument()
+	require.NoError(t, err)
+	var fields map[string]any
+	require.NoError(t, json.Unmarshal(raw, &fields))
+
+	return fields, capturedInput.InferenceConfig
+}
+
+func TestConverseNovaSendsReasoningConfigNotThinking(t *testing.T) {
+	fields, cfg := novaConverseFields(t, "us.amazon.nova-2-lite-v1:0",
+		&llms.ReasoningConfig{Effort: llms.ReasoningMedium}, nil, nil)
+
+	assert.Nil(t, fields["thinking"],
+		"Bedrock answers a thinking key on Nova with extraneous key [thinking] is not permitted")
+
+	rc, _ := fields["reasoningConfig"].(map[string]any)
+	require.NotNil(t, rc, "Nova carries its reasoning in reasoningConfig")
+	assert.Equal(t, "enabled", rc["type"])
+	assert.Equal(t, "medium", rc["maxReasoningEffort"])
+
+	require.NotNil(t, cfg)
+	assert.Nil(t, cfg.MaxTokens, "Nova refuses maxTokens while reasoning is enabled")
+}
+
+func TestConverseNovaClampsEffortAndDropsSamplingAtHigh(t *testing.T) {
+	temperature, topP := 0.4, 0.9
+	fields, cfg := novaConverseFields(t, "us.amazon.nova-2-lite-v1:0",
+		&llms.ReasoningConfig{Effort: llms.ReasoningMax}, &temperature, &topP)
+
+	rc, _ := fields["reasoningConfig"].(map[string]any)
+	require.NotNil(t, rc)
+	assert.Equal(t, "high", rc["maxReasoningEffort"], "Nova takes only low, medium and high")
+
+	require.NotNil(t, cfg)
+	assert.Nil(t, cfg.Temperature, "Nova rejects sampling params at the top effort")
+	assert.Nil(t, cfg.TopP)
+}
+
+func TestConverseGrokSendsReasoningEffort(t *testing.T) {
+	fields, _ := novaConverseFields(t, "us.xai.grok-4.6",
+		&llms.ReasoningConfig{Effort: llms.ReasoningMax}, nil, nil)
+
+	assert.Nil(t, fields["thinking"], "Grok carries no thinking object")
+
+	r, _ := fields["reasoning"].(map[string]any)
+	require.NotNil(t, r, "Grok carries its effort in a reasoning object")
+	assert.Equal(t, "xhigh", r["effort"], "4.6 gained xhigh")
 }
