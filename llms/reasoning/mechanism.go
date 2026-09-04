@@ -7,6 +7,8 @@ const (
 	MechanismNone Mechanism = iota
 	MechanismAdaptive
 	MechanismBudget
+	MechanismNovaReasoningConfig
+	MechanismGrokEffort
 )
 
 // ResolveMechanism picks the thinking mechanism for a model the caller asked to
@@ -22,6 +24,10 @@ func ResolveMechanism(model string, adaptive, claudeFamily, reasons bool) Mechan
 		return MechanismBudget
 	case adaptive && claudeFamily && !ClaudePredatesAdaptive(model):
 		return MechanismAdaptive
+	case IsNovaReasoningModel(model):
+		return MechanismNovaReasoningConfig
+	case IsGrokModel(model):
+		return MechanismGrokEffort
 	case reasons:
 		return MechanismBudget
 	default:

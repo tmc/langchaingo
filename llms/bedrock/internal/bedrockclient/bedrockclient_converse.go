@@ -95,6 +95,23 @@ type converseAdditionalModelRequestFields struct {
 	OutputConfig *converseOutputConfig    `json:"output_config,omitempty" document:"output_config,omitempty"`
 }
 
+type converseNovaReasoningConfig struct {
+	Type               string `json:"type" document:"type"`
+	MaxReasoningEffort string `json:"maxReasoningEffort,omitempty" document:"maxReasoningEffort,omitempty"`
+}
+
+type converseNovaFields struct {
+	ReasoningConfig *converseNovaReasoningConfig `json:"reasoningConfig,omitempty" document:"reasoningConfig,omitempty"`
+}
+
+type converseGrokReasoning struct {
+	Effort string `json:"effort,omitempty" document:"effort,omitempty"`
+}
+
+type converseGrokFields struct {
+	Reasoning *converseGrokReasoning `json:"reasoning,omitempty" document:"reasoning,omitempty"`
+}
+
 // buildConverseInput converts our input to AWS Converse format
 func (c *ConverseClient) buildConverseInput(input *ConverseInput) (*bedrockruntime.ConverseInput, error) {
 	// Convert messages
@@ -156,6 +173,7 @@ func (c *ConverseClient) buildConverseInput(input *ConverseInput) (*bedrockrunti
 	switch input.ReasoningConfig.ResolveMode() {
 	case llms.ReasoningOn:
 		additionalModelFields := converseAdditionalModelRequestFields{}
+		var familyFields any
 		maxTokens := 0 // Use 0 to let it use default maxTokens
 		if input.MaxTokens != nil {
 			maxTokens = *input.MaxTokens
@@ -194,6 +212,21 @@ func (c *ConverseClient) buildConverseInput(input *ConverseInput) (*bedrockrunti
 			}
 			return nil
 		}
+		setNova := func() {
+			effort := reasoning.NovaEffort(string(input.ReasoningConfig.GetEffort(maxTokens)))
+			familyFields = converseNovaFields{
+				ReasoningConfig: &converseNovaReasoningConfig{Type: "enabled", MaxReasoningEffort: effort},
+			}
+			inferenceConfig.MaxTokens = nil
+			if reasoning.NovaRejectsSamplingAt(effort) {
+				inferenceConfig.Temperature = nil
+				inferenceConfig.TopP = nil
+			}
+		}
+		setGrok := func() {
+			effort := reasoning.GrokEffort(input.ModelID, string(input.ReasoningConfig.GetEffort(maxTokens)))
+			familyFields = converseGrokFields{Reasoning: &converseGrokReasoning{Effort: effort}}
+		}
 		switch reasoning.ResolveMechanism(input.ModelID, input.ReasoningConfig.Adaptive,
 			isAnthropicModelID(input.ModelID), c.supportsReasoning(input.ModelID)) {
 		case reasoning.MechanismAdaptive:
@@ -202,6 +235,13 @@ func (c *ConverseClient) buildConverseInput(input *ConverseInput) (*bedrockrunti
 			if err := setBudget(); err != nil {
 				return nil, err
 			}
+		case reasoning.MechanismNovaReasoningConfig:
+			setNova()
+		case reasoning.MechanismGrokEffort:
+			setGrok()
+		}
+		if familyFields != nil {
+			converseInput.AdditionalModelRequestFields = document.NewLazyDocument(familyFields)
 		}
 		if additionalModelFields.Thinking != nil {
 			converseInput.AdditionalModelRequestFields = document.NewLazyDocument(additionalModelFields)
