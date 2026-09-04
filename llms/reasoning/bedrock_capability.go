@@ -33,32 +33,25 @@ func IsGrokModel(model string) bool {
 	return strings.Contains(baseModelName(model), "xai.grok")
 }
 
-// grokDropsNone are the Grok generations that always reason.
-var grokDropsNone = []string{"grok-4.6"}
-
-// GrokCanDisable reports whether the model accepts effort none.
-func GrokCanDisable(model string) bool {
-	return !containsAny(baseModelName(model), grokDropsNone)
-}
-
-// GrokEffort maps a requested effort onto what the model accepts.
+// GrokEffort maps a requested effort onto what the model accepts. Only the
+// generations that kept none can carry it; a request to disable a model that
+// always reasons leaves the field off the wire rather than inventing a level.
 func GrokEffort(model, effort string) string {
 	switch strings.ToLower(effort) {
-	case "none", "":
-		if GrokCanDisable(model) {
-			return "none"
+	case "none":
+		if mandatoryThinking(model) {
+			return ""
 		}
-		return "low"
+		return "none"
 	case "minimal", "low":
 		return "low"
 	case "medium":
 		return "medium"
+	case "high":
+		return "high"
 	case "xhigh", "max":
-		if !GrokCanDisable(model) {
-			return "xhigh"
-		}
-		return "high"
+		return "xhigh"
 	default:
-		return "high"
+		return ""
 	}
 }

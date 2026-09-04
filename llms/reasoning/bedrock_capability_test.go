@@ -42,24 +42,23 @@ func TestNovaRejectsSamplingOnlyAtTopEffort(t *testing.T) {
 	}
 }
 
-func TestGrokDropsNoneFromTheNewerGeneration(t *testing.T) {
+func TestGrokIsRecognisedByItsBedrockName(t *testing.T) {
 	if !IsGrokModel("us.xai.grok-4.6") || !IsGrokModel("xai.grok-4.3") {
 		t.Fatal("both generations are Grok")
 	}
-	if !GrokCanDisable("xai.grok-4.3") {
-		t.Error("4.3 still accepts none")
-	}
-	if GrokCanDisable("us.xai.grok-4.6") {
-		t.Error("4.6 reasons always; none is not a valid effort there")
+	if IsGrokModel("us.amazon.nova-2-lite-v1:0") {
+		t.Error("Nova is not Grok")
 	}
 }
 
 func TestGrokEffortFollowsTheGeneration(t *testing.T) {
+	// xAI publishes the accepted set per model: 4.3 keeps none, 4.6 dropped it,
+	// and every generation takes xhigh.
 	cases := []struct{ model, in, want string }{
 		{"xai.grok-4.3", "none", "none"},
-		{"xai.grok-4.3", "max", "high"},
-		{"xai.grok-4.3", "xhigh", "high"},
-		{"us.xai.grok-4.6", "none", "low"},
+		{"xai.grok-4.3", "max", "xhigh"},
+		{"xai.grok-4.3", "xhigh", "xhigh"},
+		{"us.xai.grok-4.6", "none", ""},
 		{"us.xai.grok-4.6", "max", "xhigh"},
 		{"us.xai.grok-4.6", "xhigh", "xhigh"},
 		{"us.xai.grok-4.6", "medium", "medium"},
@@ -69,6 +68,21 @@ func TestGrokEffortFollowsTheGeneration(t *testing.T) {
 		if got := GrokEffort(c.model, c.in); got != c.want {
 			t.Errorf("GrokEffort(%s, %q) = %q, want %q", c.model, c.in, got, c.want)
 		}
+	}
+}
+
+func TestAlwaysReasoningModelCannotExpressOffOnAnyDoor(t *testing.T) {
+	for _, model := range []string{"us.xai.grok-4.6", "xai.grok-4.6"} {
+		for _, p := range []Provider{ProviderBedrock, ProviderOpenAI} {
+			if got := ResolveOff(model, p); got != OffUnsupported {
+				t.Errorf("ResolveOff(%s, %v) = %v, want OffUnsupported — omitting leaves thinking on",
+					model, p, got)
+			}
+		}
+	}
+	// Nova defaults to disabled, so omitting really is off there.
+	if got := ResolveOff("us.amazon.nova-2-lite-v1:0", ProviderBedrock); got != OffOmit {
+		t.Errorf("ResolveOff(nova, bedrock) = %v, want OffOmit", got)
 	}
 }
 
