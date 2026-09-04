@@ -82,7 +82,7 @@ func openAICapsForForm(m string) OpenAIReasoningCaps {
 		}
 		return OpenAIReasoningCaps{Known: true, CanDisable: false, Efforts: []string{"high"}}
 	case openAIMandatoryReasoning(m):
-		return OpenAIReasoningCaps{Known: true, CanDisable: false, Efforts: []string{"low", "medium", "high", "xhigh"}}
+		return OpenAIReasoningCaps{Known: true, CanDisable: false, Efforts: []string{"low", "medium", "high"}}
 	case openAIGPT5Base(m):
 		return OpenAIReasoningCaps{Known: true, CanDisable: false, Efforts: []string{"minimal", "low", "medium", "high"}}
 	case hasGeneration(m, "gpt-5.1"):
