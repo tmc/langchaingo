@@ -1,13 +1,13 @@
 httprr trace v1
-459 274673
+448 274673
 POST https://openrouter.ai/api/v1/chat/completions HTTP/1.1
 Host: openrouter.ai
 User-Agent: langchaingo-httprr
-Content-Length: 255
+Content-Length: 244
 Authorization: Bearer test-api-key
 Content-Type: application/json
 
-{"model":"deepseek/deepseek-r1","messages":[{"role":"user","content":"What is the factorial of 5? Show your work. Think before you answer."}],"max_completion_tokens":8192,"stream":true,"reasoning":{"effort":"high"},"stream_options":{"include_usage":true}}HTTP/2.0 200 OK
+{"model":"deepseek/deepseek-r1","messages":[{"role":"user","content":"What is the factorial of 5? Show your work. Think before you answer."}],"max_tokens":8192,"stream":true,"reasoning":{"effort":"high"},"stream_options":{"include_usage":true}}HTTP/2.0 200 OK
 Content-Length: 274189
 Access-Control-Allow-Origin: *
 Cache-Control: no-cache

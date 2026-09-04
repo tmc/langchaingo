@@ -1,13 +1,13 @@
 httprr trace v1
-425 83593
+414 83593
 POST https://api.deepseek.com/chat/completions HTTP/1.1
 Host: api.deepseek.com
 User-Agent: langchaingo-httprr
-Content-Length: 222
+Content-Length: 211
 Authorization: Bearer test-api-key
 Content-Type: application/json
 
-{"model":"deepseek-reasoner","messages":[{"role":"user","content":"What is the factorial of 5? Show your work. Think before you answer."}],"max_completion_tokens":8192,"stream":true,"stream_options":{"include_usage":true}}HTTP/2.0 200 OK
+{"model":"deepseek-reasoner","messages":[{"role":"user","content":"What is the factorial of 5? Show your work. Think before you answer."}],"max_tokens":8192,"stream":true,"stream_options":{"include_usage":true}}HTTP/2.0 200 OK
 Content-Length: 82959
 Access-Control-Allow-Credentials: true
 Cache-Control: no-cache

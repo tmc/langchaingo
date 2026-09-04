@@ -375,7 +375,10 @@ func TestTheOutputLimitPicksTheFieldTheRouteUnderstands(t *testing.T) {
 		return body
 	}
 
-	for _, model := range []string{"grok-4-1-fast", "qwen3.5-35b-a3b", "dashscope/qwen3.7-plus", "qwq-32b"} {
+	for _, model := range []string{
+		"grok-4-1-fast", "qwen3.5-35b-a3b", "dashscope/qwen3.7-plus", "qwq-32b",
+		"deepseek-v4-pro", "deepseek-v4-flash", "deepseek/deepseek-v4-pro", "deepseek-r1",
+	} {
 		body := capture(t, model)
 		if !strings.Contains(body, `"max_tokens":800`) {
 			t.Errorf("%s must receive max_tokens, got body: %s", model, body)
@@ -385,7 +388,7 @@ func TestTheOutputLimitPicksTheFieldTheRouteUnderstands(t *testing.T) {
 		}
 	}
 
-	for _, model := range []string{"gpt-5.4", "gpt-4.1", "o3", "claude-sonnet-4-5", "deepseek-v4-pro"} {
+	for _, model := range []string{"gpt-5.4", "gpt-4.1", "o3", "claude-sonnet-4-5", "glm-5.2", "kimi-k3"} {
 		body := capture(t, model)
 		if !strings.Contains(body, `"max_completion_tokens":800`) {
 			t.Errorf("%s must keep max_completion_tokens, got body: %s", model, body)
