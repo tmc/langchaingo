@@ -124,7 +124,10 @@ func ReasoningSupportFor(model string, p reasoning.Provider) ReasoningSupport {
 	if p == reasoning.ProviderGoogleAI && reasoning.GeminiSupportsThinking(model) {
 		// Efforts stays unset: this package does not classify the Google level names.
 		mechanism := ReasoningMechanismBudget
-		if reasoning.GeminiUsesThinkingLevel(model) {
+		switch {
+		case reasoning.GeminiRejectsThinkingControl(model):
+			mechanism = ReasoningMechanismUnknown
+		case reasoning.GeminiUsesThinkingLevel(model):
 			mechanism = ReasoningMechanismAdaptive
 		}
 		return ReasoningSupport{
