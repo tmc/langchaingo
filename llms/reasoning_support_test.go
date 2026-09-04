@@ -342,7 +342,7 @@ func TestGoogleHintNamesItsMechanism(t *testing.T) {
 	}{
 		{"gemini-3-pro-preview", ReasoningMechanismAdaptive},
 		{"gemini-2.5-flash", ReasoningMechanismBudget},
-		{"gemma-4-27b", ReasoningMechanismBudget},
+		{"gemini-2.5-pro", ReasoningMechanismBudget},
 	} {
 		got := ReasoningSupportFor(tc.model, reasoning.ProviderGoogleAI)
 		if !got.Known {
@@ -445,6 +445,28 @@ func TestTheBedrockHintReportsTheRefusalTheDoorWillGive(t *testing.T) {
 				t.Errorf("%s: hint CannotDisable = %v, want %v — a consumer building its interface from the hint "+
 					"would offer a control that the door answers with a typed error",
 					tc.model, got, tc.wantCannotDisable)
+			}
+		})
+	}
+}
+
+func TestTheHintNamesNoMechanismWhenTheDoorTakesNoControl(t *testing.T) {
+	t.Parallel()
+
+	for _, tc := range []struct {
+		model string
+		want  ReasoningMechanism
+	}{
+		{"gemma-4-31b-it", ReasoningMechanismUnknown},
+		{"gemma-4-26b-a4b-it", ReasoningMechanismUnknown},
+		{"gemini-2.5-flash", ReasoningMechanismBudget},
+		{"gemini-3-pro", ReasoningMechanismAdaptive},
+	} {
+		t.Run(tc.model, func(t *testing.T) {
+			t.Parallel()
+			if got := ReasoningSupportFor(tc.model, reasoning.ProviderGoogleAI).Mechanism; got != tc.want {
+				t.Errorf("%s: hint Mechanism = %v, want %v — a consumer builds its control from this field, "+
+					"and the door drops a budget it advertises", tc.model, got, tc.want)
 			}
 		})
 	}
