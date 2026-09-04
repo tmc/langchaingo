@@ -295,7 +295,8 @@ func (s Store) SimilaritySearch(
 	if err != nil {
 		return nil, err
 	}
-	args := []any{len(embedderData), pgvector.NewVector(embedderData), numDocuments, collectionName}
+	args := make([]any, 0, 4+2*len(filter))
+	args = append(args, len(embedderData), pgvector.NewVector(embedderData), numDocuments, collectionName)
 	whereQuerys := make([]string, 0)
 	if scoreThreshold != 0 {
 		whereQuerys = append(whereQuerys, fmt.Sprintf("data.distance < %f", 1-scoreThreshold))
@@ -363,7 +364,8 @@ func (s Store) Search(
 	if err != nil {
 		return nil, err
 	}
-	args := []any{numDocuments, collectionName}
+	args := make([]any, 0, 2+2*len(filter))
+	args = append(args, numDocuments, collectionName)
 	whereQuerys, filterArgs := filterPredicates(s.embeddingTableName+".", filter, len(args))
 	args = append(args, filterArgs...)
 	whereQuery := strings.Join(whereQuerys, " AND ")
