@@ -396,3 +396,25 @@ func TestAdvertisedEffortsFollowTheWireOfEachProvider(t *testing.T) {
 		}
 	}
 }
+
+func TestTheHintDoesNotOfferOffOnAModelThatAlwaysReasons(t *testing.T) {
+	t.Parallel()
+
+	for _, tc := range []struct {
+		model             string
+		wantCannotDisable bool
+	}{
+		{"kimi-k3", true},
+		{"kimi-k2.7-code", true},
+		{"kimi-k2-thinking", true},
+		{"kimi-k2.6", false},
+	} {
+		s := ReasoningSupportFor(tc.model, reasoning.ProviderOpenAI)
+		if !s.Supported {
+			t.Errorf("%s reasons, so the hint must say so", tc.model)
+		}
+		if s.CannotDisable != tc.wantCannotDisable {
+			t.Errorf("%s CannotDisable = %v, want %v", tc.model, s.CannotDisable, tc.wantCannotDisable)
+		}
+	}
+}

@@ -68,7 +68,7 @@ func TestVendorsThatDisableWithAThinkingObject(t *testing.T) {
 		"glm-5.2":     OffEffortNone,
 		"glm-5.3":     OffUnsupported,
 		"minimax-m2":  OffUnsupported,
-		"kimi-k3":     OffEffortNone,
+		"kimi-k3":     OffUnsupported,
 		"deepseek-v4": OffEffortNone,
 	} {
 		if got := ResolveOff(model, ProviderOpenAI); got != want {
