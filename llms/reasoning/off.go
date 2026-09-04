@@ -171,6 +171,7 @@ func mandatoryThinking(model string) bool {
 			form == "glm-flash-latest" ||
 			strings.HasPrefix(form, "kimi-k2-thinking") ||
 			strings.HasPrefix(form, "kimi-k2.7-code") ||
+			hasGeneration(form, "kimi-k3") ||
 			strings.HasPrefix(form, "gpt-oss") ||
 			strings.HasPrefix(form, "aion-") ||
 			strings.HasPrefix(form, "step-3") ||

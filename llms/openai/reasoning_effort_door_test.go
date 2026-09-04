@@ -2,6 +2,7 @@ package openai
 
 import (
 	"context"
+	"errors"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -9,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/vxcontrol/langchaingo/llms"
+	"github.com/vxcontrol/langchaingo/llms/reasoning"
 )
 
 func TestReasoningEffortOmittedOnDoorsThatRejectIt(t *testing.T) {
@@ -83,13 +85,15 @@ func TestReasoningEffortOmittedOnDoorsThatRejectIt(t *testing.T) {
 		}
 	})
 
-	t.Run("kimi-k3 still disables via none", func(t *testing.T) {
+	t.Run("kimi-k3 refuses to be disabled", func(t *testing.T) {
 		body, err := capture(t, "kimi-k3", llms.WithReasoningDisabled())
-		if err != nil {
-			t.Fatalf("GenerateContent() error: %v", err)
+		var unsupported *reasoning.ErrReasoningOffUnsupported
+		if !errors.As(err, &unsupported) {
+			t.Fatalf("the vendor enum is low, high and max and the model always reasons, "+
+				"so off cannot be honored: want ErrReasoningOffUnsupported, got err %v, body %s", err, body)
 		}
-		if !strings.Contains(body, `"reasoning_effort":"none"`) {
-			t.Fatalf("kimi-k3 disables via the none token, got body: %s", body)
+		if strings.Contains(body, "reasoning_effort") {
+			t.Fatalf("no request may leave when off cannot be honored, got body: %s", body)
 		}
 	})
 }
