@@ -95,20 +95,18 @@ func geminiKnownNonThinking(model string) bool {
 		hasFamily(m, "gemma-3")
 }
 
-// GeminiRejectsThinkingControl reports whether the model takes no thinking
-// control at all, so a request carries neither a budget nor a level.
-func GeminiRejectsThinkingControl(model string) bool {
+// GeminiTogglesThinkingByLevel reports whether the model expresses thinking as
+// on or off through thinking_level alone, with no budget and no level between.
+// Kept apart from GeminiUsesThinkingLevel, which also pins temperature to 1.0.
+func GeminiTogglesThinkingByLevel(model string) bool {
 	return hasFamily(baseModelName(model), "gemma-4")
 }
 
-// GeminiCanDisable reports whether thinking can be turned off via
-// thinkingBudget:0. Unclassified Google models are treated as disablable, so a
+// GeminiCanDisable reports whether thinking can be turned off at all; ResolveOff
+// decides the wire. Unclassified Google models are treated as disablable, so a
 // model this package has not seen is attempted rather than refused.
 func GeminiCanDisable(model string) bool {
 	m := baseModelName(model)
-	if GeminiRejectsThinkingControl(m) {
-		return false
-	}
 	if GeminiThinkingOffByDefault(m) {
 		return true
 	}

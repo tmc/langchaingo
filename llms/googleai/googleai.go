@@ -1083,8 +1083,8 @@ func resolveTemperature(model string, clientOpts Options) float64 {
 func resolveThinkingConfig(model string, cfg *llms.ReasoningConfig, maxTokens int) (*genai.ThinkingConfig, error) {
 	switch cfg.ResolveMode() {
 	case llms.ReasoningOn:
-		if reasoning.GeminiRejectsThinkingControl(model) {
-			return &genai.ThinkingConfig{IncludeThoughts: true}, nil
+		if reasoning.GeminiTogglesThinkingByLevel(model) {
+			return &genai.ThinkingConfig{ThinkingLevel: genai.ThinkingLevelHigh, IncludeThoughts: true}, nil
 		}
 		// An effort with no explicit token budget maps to the qualitative
 		// thinking_level on Gemini 3.x (its native control, where thinking_budget is
@@ -1103,6 +1103,8 @@ func resolveThinkingConfig(model string, cfg *llms.ReasoningConfig, maxTokens in
 		case reasoning.OffZeroBudget:
 			zero := int32(0)
 			return &genai.ThinkingConfig{ThinkingBudget: &zero}, nil
+		case reasoning.OffMinimalLevel:
+			return &genai.ThinkingConfig{ThinkingLevel: genai.ThinkingLevelMinimal}, nil
 		case reasoning.OffUnsupported:
 			return nil, &reasoning.ErrReasoningOffUnsupported{Model: model}
 		}

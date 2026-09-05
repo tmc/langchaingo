@@ -30,6 +30,8 @@ const (
 	OffDisableClaude
 	// OffZeroBudget → Google thinkingBudget:0.
 	OffZeroBudget
+	// OffMinimalLevel → Google thinking_level:"minimal".
+	OffMinimalLevel
 	// OffEffortNone → OpenAI reasoning_effort:"none".
 	OffEffortNone
 	// OffDisableDashScope → DashScope enable_thinking:false.
@@ -80,6 +82,9 @@ func ResolveOff(model string, p Provider) OffWire {
 		// send it; unknown Gemini/Gemma names stay optimistic (attempt budget:0).
 		if geminiKnownNonThinking(model) || GeminiThinkingOffByDefault(model) {
 			return OffOmit
+		}
+		if GeminiTogglesThinkingByLevel(model) {
+			return OffMinimalLevel
 		}
 		return OffZeroBudget
 	case ProviderOpenAI:
