@@ -156,10 +156,10 @@ func disablesByThinkingObject(model string) bool {
 		if hasGeneration(form, "minimax-m3") {
 			return true
 		}
-		if hasGeneration(form, "glm-5.2") {
-			continue
-		}
-		for _, generation := range []string{"glm-4.5", "glm-4.6", "glm-4.7", "glm-5", "glm-5.1"} {
+		for _, generation := range []string{
+			"glm-4.5", "glm-4.6", "glm-4.7", "glm-5", "glm-5.1",
+			"kimi-k2.6", "deepseek-v4",
+		} {
 			if hasGeneration(form, generation) {
 				return true
 			}
@@ -180,6 +180,7 @@ func mandatoryThinking(model string) bool {
 			strings.HasPrefix(form, "kimi-k2-thinking") ||
 			strings.HasPrefix(form, "kimi-k2.7-code") ||
 			hasGeneration(form, "kimi-k3") ||
+			hasGeneration(form, "qwen3.8-2.4t-a95b") ||
 			strings.HasPrefix(form, "gpt-oss") ||
 			strings.HasPrefix(form, "aion-") ||
 			strings.HasPrefix(form, "step-3") ||

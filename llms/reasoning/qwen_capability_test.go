@@ -80,6 +80,8 @@ func TestQwenDisableWire(t *testing.T) {
 	}{
 		{"qwen3.8-max", OffEffortNone},
 		{"qwen3.8-flash", OffEffortNone},
+		{"qwen3.8-2.4t-a95b", OffUnsupported},
+		{"dashscope/qwen3.8-2.4t-a95b", OffUnsupported},
 		{"qwen3.7-plus", OffDisableDashScope},
 		{"qwen3.6-flash", OffDisableDashScope},
 		{"qwen3.5-plus", OffDisableDashScope},
