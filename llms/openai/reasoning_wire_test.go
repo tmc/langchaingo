@@ -400,3 +400,50 @@ func TestTheOutputLimitPicksTheFieldTheRouteUnderstands(t *testing.T) {
 		t.Errorf("the explicit option must still win, got body: %s", body)
 	}
 }
+
+func sendDoorDefaultReasoning(t *testing.T, model string, effort llms.ReasoningEffort) string {
+	t.Helper()
+
+	const completion = `{"id":"x","object":"chat.completion","created":1,"model":"m",` +
+		`"choices":[{"index":0,"message":{"role":"assistant","content":"ok"},"finish_reason":"stop"}],` +
+		`"usage":{"prompt_tokens":1,"completion_tokens":1,"total_tokens":2}}`
+
+	var body string
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		b, _ := io.ReadAll(r.Body)
+		body = string(b)
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = io.WriteString(w, completion)
+	}))
+	t.Cleanup(srv.Close)
+
+	llm, err := New(WithBaseURL(srv.URL), WithToken("test"), WithModel(model))
+	if err != nil {
+		t.Fatalf("New() error: %v", err)
+	}
+	if _, err := llm.GenerateContent(context.Background(),
+		[]llms.MessageContent{llms.TextParts(llms.ChatMessageTypeHuman, "hi")},
+		llms.WithReasoning(effort, 0)); err != nil {
+		t.Fatalf("GenerateContent() error: %v", err)
+	}
+	return body
+}
+
+func TestTheChatCompletionsDoorSendsTheFlatEffortField(t *testing.T) {
+	t.Parallel()
+
+	for _, model := range []string{"gpt-5", "anthropic/claude-sonnet-5", "deepseek-v4-pro"} {
+		t.Run(model, func(t *testing.T) {
+			t.Parallel()
+
+			body := sendDoorDefaultReasoning(t, model, llms.ReasoningHigh)
+
+			if !strings.Contains(body, `"reasoning_effort":"high"`) {
+				t.Fatalf("effort must travel as the flat field, got body: %s", body)
+			}
+			if strings.Contains(body, `"reasoning":{`) {
+				t.Fatalf("the nested reasoning object belongs to another door, got body: %s", body)
+			}
+		})
+	}
+}
