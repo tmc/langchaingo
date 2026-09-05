@@ -28,6 +28,8 @@ func ResolveMechanism(model string, adaptive, claudeFamily, reasons bool) Mechan
 		return MechanismNovaReasoningConfig
 	case IsGrokModel(model):
 		return MechanismGrokEffort
+	case IsBedrockAlwaysReasoningModel(model):
+		return MechanismNone
 	case reasons:
 		return MechanismBudget
 	default:

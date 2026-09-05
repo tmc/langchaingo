@@ -1176,7 +1176,6 @@ func TestConverseBudgetPinsTemperatureOnlyForClaude(t *testing.T) {
 
 func TestConverseClient_ReasoningReachesNonClaudeThinkers(t *testing.T) {
 	for _, modelID := range []string{
-		"us.deepseek.r1-v1:0",
 		"zai.glm-4.7",
 	} {
 		t.Run(modelID, func(t *testing.T) {
@@ -1218,6 +1217,40 @@ func TestConverseClient_ReasoningReachesNonClaudeThinkers(t *testing.T) {
 			assert.EqualValues(t, 2666, thinking["budget_tokens"])
 		})
 	}
+}
+
+func TestConverseClient_DeepSeekTakesNoThinkingConfiguration(t *testing.T) {
+	mockClient := &MockBedrockRuntimeClient{}
+	client := NewConverseClient(mockClient)
+
+	var capturedInput *bedrockruntime.ConverseInput
+	mockClient.On("Converse", mock.Anything, mock.MatchedBy(func(input *bedrockruntime.ConverseInput) bool {
+		capturedInput = input
+		return true
+	}), mock.Anything).Return(&bedrockruntime.ConverseOutput{
+		Output: &types.ConverseOutputMemberMessage{
+			Value: types.Message{
+				Role:    types.ConversationRoleAssistant,
+				Content: []types.ContentBlock{&types.ContentBlockMemberText{Value: "ok"}},
+			},
+		},
+	}, nil)
+
+	input := &ConverseInput{
+		ModelID:         "us.deepseek.r1-v1:0",
+		Messages:        []Message{{Role: llms.ChatMessageTypeHuman, Content: "Hello", Type: "text"}},
+		MaxTokens:       ptr(4096),
+		ReasoningConfig: &llms.ReasoningConfig{Effort: llms.ReasoningHigh},
+	}
+
+	_, err := client.CreateCompletionConverse(t.Context(), input)
+	require.NoError(t, err)
+
+	assert.Nil(t, capturedInput.AdditionalModelRequestFields,
+		"the model reasons on its own and answers 400 to a thinking configuration")
+	require.NotNil(t, capturedInput.InferenceConfig.MaxTokens)
+	assert.EqualValues(t, 4096, *capturedInput.InferenceConfig.MaxTokens,
+		"no foreign budget rule raises the caller ceiling")
 }
 
 // novaConverseFields runs one reasoning request through the client and returns the

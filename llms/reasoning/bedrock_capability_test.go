@@ -95,6 +95,7 @@ func TestMechanismSeparatesTheBedrockFamilies(t *testing.T) {
 		{"us.amazon.nova-2-lite-v1:0", false, MechanismNovaReasoningConfig},
 		{"us.xai.grok-4.6", false, MechanismGrokEffort},
 		{"us.anthropic.claude-opus-4-5-20251101-v1:0", true, MechanismBudget},
+		{"us.deepseek.r1-v1:0", false, MechanismNone},
 	}
 	for _, c := range cases {
 		if got := ResolveMechanism(c.model, false, c.claudeFamily, true); got != c.want {
