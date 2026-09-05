@@ -14,7 +14,7 @@ type clientOptions struct {
 	maxRetries       int
 	timeout          time.Duration
 	model            string
-	modelFromCaller  bool
+	embeddingModel   string
 	callbacksHandler callbacks.Handler
 }
 
@@ -52,7 +52,14 @@ func WithTimeout(timeout time.Duration) Option {
 func WithModel(model string) Option {
 	return func(o *clientOptions) {
 		o.model = model
-		o.modelFromCaller = true
+	}
+}
+
+// Sets the model name the Model being instantiated embeds with. A gateway routes
+// by its own name, so a prefixed spelling goes here rather than in the endpoint.
+func WithEmbeddingModel(embeddingModel string) Option {
+	return func(o *clientOptions) {
+		o.embeddingModel = embeddingModel
 	}
 }
 

@@ -23,9 +23,9 @@ func convertFloat64ToFloat32(input []float64) []float32 {
 
 // CreateEmbedding implements the embeddings.EmbedderClient interface and creates embeddings for the given input texts.
 func (m *Model) CreateEmbedding(_ context.Context, inputTexts []string) ([][]float32, error) {
-	model := defaultEmbeddingModel
-	if m.clientOptions.modelFromCaller {
-		model = m.clientOptions.model
+	model := m.clientOptions.embeddingModel
+	if model == "" {
+		model = defaultEmbeddingModel
 	}
 	embsRes, err := m.client.Embeddings(model, inputTexts)
 	if err != nil {
