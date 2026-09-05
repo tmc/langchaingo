@@ -75,7 +75,7 @@ func TestResolveOffOnDoorsThatRejectEffort(t *testing.T) {
 	}{
 		{"qwen3-next-80b-a3b-thinking", OffUnsupported},
 		{"kimi-k2.7-code-highspeed", OffUnsupported},
-		{"kimi-k2.6", OffEffortNone},
+		{"kimi-k2.6", OffDisableThinkingObject},
 		{"kimi-k2-thinking", OffUnsupported},
 		{"kimi-k3", OffUnsupported},
 		{"deepseek-v4-pro", OffEffortNone},
