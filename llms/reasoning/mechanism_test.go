@@ -34,8 +34,8 @@ func TestResolveMechanism(t *testing.T) {
 			"anthropic.claude-3-5-haiku-20241022-v1:0", true, true, true, reasoning.MechanismBudget,
 		},
 		{
-			"a non-Claude reasoning model gets a budget",
-			"openai.gpt-oss-120b-1:0", true, false, true, reasoning.MechanismBudget,
+			"a non-Claude family with no mechanism of its own gets nothing",
+			"openai.gpt-oss-120b-1:0", true, false, true, reasoning.MechanismNone,
 		},
 		{
 			"a model the door does not consider reasoning gets nothing",

@@ -596,8 +596,6 @@ func TestConverseClient_AdaptiveReasoningNonAnthropicModel(t *testing.T) {
 		},
 	}, nil)
 
-	// Adaptive is an Anthropic request shape; other reasoning-capable models
-	// fall back to budget thinking.
 	input := &ConverseInput{
 		ModelID:         "openai.gpt-oss-120b-1:0",
 		Messages:        []Message{{Role: llms.ChatMessageTypeHuman, Content: "Hello", Type: "text"}},
@@ -610,23 +608,8 @@ func TestConverseClient_AdaptiveReasoningNonAnthropicModel(t *testing.T) {
 	assert.NoError(t, err)
 
 	assert.NotNil(t, capturedInput.InferenceConfig.Temperature, "sampling params stay when adaptive is not applied")
-
-	if !assert.NotNil(t, capturedInput.AdditionalModelRequestFields) {
-		return
-	}
-	raw, err := capturedInput.AdditionalModelRequestFields.MarshalSmithyDocument()
-	assert.NoError(t, err)
-	var fields map[string]any
-	assert.NoError(t, json.Unmarshal(raw, &fields))
-
-	thinking, _ := fields["thinking"].(map[string]any)
-	assert.Equal(t, "enabled", thinking["type"])
-	budget, ok := thinking["budget_tokens"].(float64)
-	assert.True(t, ok && budget > 0, "fallback must carry a positive token budget")
-	_, hasOutputConfig := fields["output_config"]
-	assert.False(t, hasOutputConfig, "budget fallback has no output_config")
-
-	mockClient.AssertExpectations(t)
+	assert.Nil(t, capturedInput.AdditionalModelRequestFields,
+		"an Anthropic request shape does not travel to another vendor")
 }
 
 func TestConverseClient_AdaptiveReasoningPreAdaptiveModelGated(t *testing.T) {
@@ -1174,9 +1157,12 @@ func TestConverseBudgetPinsTemperatureOnlyForClaude(t *testing.T) {
 	})
 }
 
-func TestConverseClient_ReasoningReachesNonClaudeThinkers(t *testing.T) {
+func TestConverseClient_NonClaudeThinkersTakeNoThinkingConfiguration(t *testing.T) {
 	for _, modelID := range []string{
 		"zai.glm-4.7",
+		"minimax.minimax-m2.5",
+		"openai.gpt-oss-120b-1:0",
+		"moonshot.kimi-k2-thinking",
 	} {
 		t.Run(modelID, func(t *testing.T) {
 			mockClient := &MockBedrockRuntimeClient{}
@@ -1205,16 +1191,11 @@ func TestConverseClient_ReasoningReachesNonClaudeThinkers(t *testing.T) {
 			_, err := client.CreateCompletionConverse(t.Context(), input)
 			require.NoError(t, err)
 
-			require.NotNil(t, capturedInput.AdditionalModelRequestFields,
-				"a thinking model gets a thinking request")
-			raw, err := capturedInput.AdditionalModelRequestFields.MarshalSmithyDocument()
-			require.NoError(t, err)
-			var fields map[string]any
-			require.NoError(t, json.Unmarshal(raw, &fields))
-			thinking, _ := fields["thinking"].(map[string]any)
-			require.NotNil(t, thinking)
-			assert.Equal(t, "enabled", thinking["type"])
-			assert.EqualValues(t, 2666, thinking["budget_tokens"])
+			assert.Nil(t, capturedInput.AdditionalModelRequestFields,
+				"only a family with a documented mechanism carries one")
+			require.NotNil(t, capturedInput.InferenceConfig.MaxTokens)
+			assert.EqualValues(t, 8000, *capturedInput.InferenceConfig.MaxTokens,
+				"no foreign budget rule raises the caller ceiling")
 		})
 	}
 }
