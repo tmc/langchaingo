@@ -95,6 +95,20 @@ func TestMechanismSeparatesTheBedrockFamilies(t *testing.T) {
 		{"us.amazon.nova-2-lite-v1:0", false, MechanismNovaReasoningConfig},
 		{"us.xai.grok-4.6", false, MechanismGrokEffort},
 		{"us.anthropic.claude-opus-4-5-20251101-v1:0", true, MechanismBudget},
+		{"us.deepseek.r1-v1:0", false, MechanismNone},
+		{"openai.gpt-oss-120b-1:0", false, MechanismNone},
+		{"openai.gpt-oss-20b-1:0", false, MechanismNone},
+		{"mistral.magistral-small-2509", false, MechanismNone},
+		{"moonshot.kimi-k2-thinking", false, MechanismNone},
+		{"moonshotai.kimi-k2.5", false, MechanismNone},
+		{"zai.glm-4.7", false, MechanismNone},
+		{"zai.glm-4.7-flash", false, MechanismNone},
+		{"zai.glm-5", false, MechanismNone},
+		{"minimax.minimax-m2", false, MechanismNone},
+		{"minimax.minimax-m2.1", false, MechanismNone},
+		{"minimax.minimax-m2.5", false, MechanismNone},
+		{"nvidia.nemotron-super-3-120b", false, MechanismNone},
+		{"qwen.qwen3-32b-v1:0", false, MechanismNone},
 	}
 	for _, c := range cases {
 		if got := ResolveMechanism(c.model, false, c.claudeFamily, true); got != c.want {

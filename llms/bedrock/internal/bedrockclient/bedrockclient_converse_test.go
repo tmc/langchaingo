@@ -596,8 +596,6 @@ func TestConverseClient_AdaptiveReasoningNonAnthropicModel(t *testing.T) {
 		},
 	}, nil)
 
-	// Adaptive is an Anthropic request shape; other reasoning-capable models
-	// fall back to budget thinking.
 	input := &ConverseInput{
 		ModelID:         "openai.gpt-oss-120b-1:0",
 		Messages:        []Message{{Role: llms.ChatMessageTypeHuman, Content: "Hello", Type: "text"}},
@@ -610,23 +608,8 @@ func TestConverseClient_AdaptiveReasoningNonAnthropicModel(t *testing.T) {
 	assert.NoError(t, err)
 
 	assert.NotNil(t, capturedInput.InferenceConfig.Temperature, "sampling params stay when adaptive is not applied")
-
-	if !assert.NotNil(t, capturedInput.AdditionalModelRequestFields) {
-		return
-	}
-	raw, err := capturedInput.AdditionalModelRequestFields.MarshalSmithyDocument()
-	assert.NoError(t, err)
-	var fields map[string]any
-	assert.NoError(t, json.Unmarshal(raw, &fields))
-
-	thinking, _ := fields["thinking"].(map[string]any)
-	assert.Equal(t, "enabled", thinking["type"])
-	budget, ok := thinking["budget_tokens"].(float64)
-	assert.True(t, ok && budget > 0, "fallback must carry a positive token budget")
-	_, hasOutputConfig := fields["output_config"]
-	assert.False(t, hasOutputConfig, "budget fallback has no output_config")
-
-	mockClient.AssertExpectations(t)
+	assert.Nil(t, capturedInput.AdditionalModelRequestFields,
+		"an Anthropic request shape does not travel to another vendor")
 }
 
 func TestConverseClient_AdaptiveReasoningPreAdaptiveModelGated(t *testing.T) {
@@ -1174,10 +1157,12 @@ func TestConverseBudgetPinsTemperatureOnlyForClaude(t *testing.T) {
 	})
 }
 
-func TestConverseClient_ReasoningReachesNonClaudeThinkers(t *testing.T) {
+func TestConverseClient_NonClaudeThinkersTakeNoThinkingConfiguration(t *testing.T) {
 	for _, modelID := range []string{
-		"us.deepseek.r1-v1:0",
 		"zai.glm-4.7",
+		"minimax.minimax-m2.5",
+		"openai.gpt-oss-120b-1:0",
+		"moonshot.kimi-k2-thinking",
 	} {
 		t.Run(modelID, func(t *testing.T) {
 			mockClient := &MockBedrockRuntimeClient{}
@@ -1206,18 +1191,47 @@ func TestConverseClient_ReasoningReachesNonClaudeThinkers(t *testing.T) {
 			_, err := client.CreateCompletionConverse(t.Context(), input)
 			require.NoError(t, err)
 
-			require.NotNil(t, capturedInput.AdditionalModelRequestFields,
-				"a thinking model gets a thinking request")
-			raw, err := capturedInput.AdditionalModelRequestFields.MarshalSmithyDocument()
-			require.NoError(t, err)
-			var fields map[string]any
-			require.NoError(t, json.Unmarshal(raw, &fields))
-			thinking, _ := fields["thinking"].(map[string]any)
-			require.NotNil(t, thinking)
-			assert.Equal(t, "enabled", thinking["type"])
-			assert.EqualValues(t, 2666, thinking["budget_tokens"])
+			assert.Nil(t, capturedInput.AdditionalModelRequestFields,
+				"only a family with a documented mechanism carries one")
+			require.NotNil(t, capturedInput.InferenceConfig.MaxTokens)
+			assert.EqualValues(t, 8000, *capturedInput.InferenceConfig.MaxTokens,
+				"no foreign budget rule raises the caller ceiling")
 		})
 	}
+}
+
+func TestConverseClient_DeepSeekTakesNoThinkingConfiguration(t *testing.T) {
+	mockClient := &MockBedrockRuntimeClient{}
+	client := NewConverseClient(mockClient)
+
+	var capturedInput *bedrockruntime.ConverseInput
+	mockClient.On("Converse", mock.Anything, mock.MatchedBy(func(input *bedrockruntime.ConverseInput) bool {
+		capturedInput = input
+		return true
+	}), mock.Anything).Return(&bedrockruntime.ConverseOutput{
+		Output: &types.ConverseOutputMemberMessage{
+			Value: types.Message{
+				Role:    types.ConversationRoleAssistant,
+				Content: []types.ContentBlock{&types.ContentBlockMemberText{Value: "ok"}},
+			},
+		},
+	}, nil)
+
+	input := &ConverseInput{
+		ModelID:         "us.deepseek.r1-v1:0",
+		Messages:        []Message{{Role: llms.ChatMessageTypeHuman, Content: "Hello", Type: "text"}},
+		MaxTokens:       ptr(4096),
+		ReasoningConfig: &llms.ReasoningConfig{Effort: llms.ReasoningHigh},
+	}
+
+	_, err := client.CreateCompletionConverse(t.Context(), input)
+	require.NoError(t, err)
+
+	assert.Nil(t, capturedInput.AdditionalModelRequestFields,
+		"the model reasons on its own and answers 400 to a thinking configuration")
+	require.NotNil(t, capturedInput.InferenceConfig.MaxTokens)
+	assert.EqualValues(t, 4096, *capturedInput.InferenceConfig.MaxTokens,
+		"no foreign budget rule raises the caller ceiling")
 }
 
 // novaConverseFields runs one reasoning request through the client and returns the
@@ -1321,4 +1335,97 @@ func TestConverseGrokSendsReasoningEffort(t *testing.T) {
 	r, _ := fields["reasoning"].(map[string]any)
 	require.NotNil(t, r, "Grok carries its effort in a reasoning object")
 	assert.Equal(t, "xhigh", r["effort"], "4.6 gained xhigh")
+}
+
+func TestConverseClient_RedactedReasoningReachesTheCaller(t *testing.T) {
+	mockClient := &MockBedrockRuntimeClient{}
+	client := NewConverseClient(mockClient)
+	encrypted := []byte{0xDE, 0xAD, 0xBE, 0xEF}
+
+	mockClient.On("Converse", mock.Anything, mock.Anything, mock.Anything).Return(&bedrockruntime.ConverseOutput{
+		Output: &types.ConverseOutputMemberMessage{
+			Value: types.Message{
+				Role: types.ConversationRoleAssistant,
+				Content: []types.ContentBlock{
+					&types.ContentBlockMemberReasoningContent{
+						Value: &types.ReasoningContentBlockMemberRedactedContent{Value: encrypted},
+					},
+					&types.ContentBlockMemberText{Value: "answer"},
+				},
+			},
+		},
+	}, nil)
+
+	resp, err := client.CreateCompletionConverse(t.Context(), &ConverseInput{
+		ModelID:  "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+		Messages: []Message{{Role: llms.ChatMessageTypeHuman, Content: "Hello", Type: "text"}},
+	})
+	require.NoError(t, err)
+	require.Len(t, resp.Choices, 1)
+	require.NotNil(t, resp.Choices[0].Reasoning, "the vendor returned a thought, encrypted or not")
+	assert.Equal(t, encrypted, resp.Choices[0].Reasoning.Redacted)
+	assert.False(t, resp.Choices[0].Reasoning.HasContent(), "encrypted bytes are not readable thinking")
+}
+
+func TestConverseClient_RedactedReasoningTravelsBack(t *testing.T) {
+	mockClient := &MockBedrockRuntimeClient{}
+	client := NewConverseClient(mockClient)
+	encrypted := []byte{0x01, 0x02, 0x03}
+
+	var capturedInput *bedrockruntime.ConverseInput
+	mockClient.On("Converse", mock.Anything, mock.MatchedBy(func(input *bedrockruntime.ConverseInput) bool {
+		capturedInput = input
+		return true
+	}), mock.Anything).Return(&bedrockruntime.ConverseOutput{
+		Output: &types.ConverseOutputMemberMessage{
+			Value: types.Message{
+				Role:    types.ConversationRoleAssistant,
+				Content: []types.ContentBlock{&types.ContentBlockMemberText{Value: "ok"}},
+			},
+		},
+	}, nil)
+
+	_, err := client.CreateCompletionConverse(t.Context(), &ConverseInput{
+		ModelID: "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+		Messages: []Message{
+			{Role: llms.ChatMessageTypeHuman, Content: "Hello", Type: "text"},
+			{
+				Role:      llms.ChatMessageTypeAI,
+				Content:   "answer",
+				Type:      "text",
+				Reasoning: &reasoning.ContentReasoning{Redacted: encrypted},
+			},
+			{Role: llms.ChatMessageTypeHuman, Content: "And now?", Type: "text"},
+		},
+	})
+	require.NoError(t, err)
+
+	var got []byte
+	for _, msg := range capturedInput.Messages {
+		for _, block := range msg.Content {
+			reasoningBlock, ok := block.(*types.ContentBlockMemberReasoningContent)
+			if !ok {
+				continue
+			}
+			if redacted, ok := reasoningBlock.Value.(*types.ReasoningContentBlockMemberRedactedContent); ok {
+				got = redacted.Value
+			}
+		}
+	}
+	assert.Equal(t, encrypted, got, "the replayed turn carries the encrypted block unchanged")
+}
+
+func TestConverseReasoningStreamKeepsEveryDelta(t *testing.T) {
+	t.Parallel()
+
+	var acc converseReasoningStream
+	assert.Equal(t, "thinking", acc.add(&types.ReasoningContentBlockDeltaMemberText{Value: "thinking"}))
+	assert.Empty(t, acc.add(&types.ReasoningContentBlockDeltaMemberSignature{Value: "sig"}))
+	assert.Empty(t, acc.add(&types.ReasoningContentBlockDeltaMemberRedactedContent{Value: []byte{0x07, 0x08}}))
+
+	got := acc.result(NewConverseClient(nil))
+	require.NotNil(t, got)
+	assert.Equal(t, "thinking", got.Content)
+	assert.Equal(t, []byte("sig"), got.Signature)
+	assert.Equal(t, []byte{0x07, 0x08}, got.Redacted)
 }

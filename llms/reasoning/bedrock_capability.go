@@ -27,6 +27,12 @@ func NovaClearsInferenceConfigAt(effort string) bool {
 	return NovaEffort(effort) == "high"
 }
 
+// IsBedrockAlwaysReasoningModel reports whether the Bedrock family reasons on
+// every request and takes no thinking configuration alongside it.
+func IsBedrockAlwaysReasoningModel(model string) bool {
+	return strings.Contains(baseModelName(model), "deepseek.r1")
+}
+
 // IsGrokModel reports whether the Bedrock model belongs to the xAI Grok family,
 // which carries its effort in a reasoning object rather than a thinking one.
 func IsGrokModel(model string) bool {
