@@ -2,6 +2,7 @@ package voyageai
 
 import (
 	"net/http"
+	"net/http/httptest"
 	"os"
 	"testing"
 
@@ -279,4 +280,22 @@ func TestApplyOptions(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotNil(t, v.client)
 	})
+}
+
+func TestTheCallersBaseURLReachesTheRequest(t *testing.T) {
+	var gotPath string
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		gotPath = r.URL.Path
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"data":[{"embedding":[0.1,0.2]}]}`))
+	}))
+	defer server.Close()
+
+	v, err := NewVoyageAI(WithBaseURL(server.URL+"/voyageai/"), WithToken("test-token"))
+	require.NoError(t, err)
+
+	emb, err := v.EmbedQuery(t.Context(), "hello")
+	require.NoError(t, err, "the request must reach the caller's base URL, not api.voyageai.com")
+	assert.Equal(t, []float32{0.1, 0.2}, emb)
+	assert.Equal(t, "/voyageai/embeddings", gotPath, "the path prefix survives and the trailing slash is not doubled")
 }

@@ -4,7 +4,9 @@ package googleai
 
 import (
 	"context"
+	"fmt"
 	"os"
+	"strings"
 
 	"github.com/vxcontrol/langchaingo/callbacks"
 	"github.com/vxcontrol/langchaingo/llms"
@@ -59,6 +61,13 @@ func New(ctx context.Context, opts ...Option) (*GoogleAI, error) {
 		}
 	}
 
+	if len(clientOptions.unhonoredOnREST) > 0 {
+		return gi, &ErrOptionNotHonored{Options: clientOptions.unhonoredOnREST}
+	}
+	if clientOptions.BaseURL != "" {
+		config.HTTPOptions.BaseURL = clientOptions.BaseURL
+	}
+
 	client, err := genai.NewClient(ctx, config)
 	if err != nil {
 		return gi, err
@@ -66,4 +75,15 @@ func New(ctx context.Context, opts ...Option) (*GoogleAI, error) {
 
 	gi.client = client
 	return gi, nil
+}
+
+// ErrOptionNotHonored reports options this door cannot carry. Pass credentials
+// and gRPC connections to vertex.New, which builds a client that takes them, or
+// shape the transport with WithHTTPClient.
+type ErrOptionNotHonored struct {
+	Options []string
+}
+
+func (e *ErrOptionNotHonored) Error() string {
+	return fmt.Sprintf("googleai: the Gemini API client cannot honor %s", strings.Join(e.Options, ", "))
 }

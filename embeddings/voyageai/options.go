@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/vxcontrol/langchaingo/httputil"
 )
@@ -44,6 +45,14 @@ func WithToken(token string) Option {
 func WithStripNewLines(stripNewLines bool) Option {
 	return func(v *VoyageAI) {
 		v.StripNewLines = stripNewLines
+	}
+}
+
+// WithBaseURL is an option for pointing the embedder at another deployment,
+// such as a gateway that serves the VoyageAI API under a path prefix.
+func WithBaseURL(baseURL string) Option {
+	return func(v *VoyageAI) {
+		v.baseURL = strings.TrimSuffix(baseURL, "/")
 	}
 }
 

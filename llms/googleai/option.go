@@ -30,6 +30,10 @@ type Options struct {
 
 	ClientOptions []option.ClientOption
 
+	BaseURL string
+
+	unhonoredOnREST []string
+
 	// Set by WithDefaultTemperature; writing DefaultTemperature directly leaves
 	// it false and lets the Gemini 3 recommendation win.
 	temperatureFromCaller bool
@@ -78,6 +82,7 @@ func WithCredentialsJSON(credentialsJSON []byte) Option {
 		if len(credentialsJSON) == 0 {
 			return
 		}
+		opts.unhonoredOnREST = append(opts.unhonoredOnREST, "WithCredentialsJSON")
 		opts.ClientOptions = append(opts.ClientOptions, option.WithCredentialsJSON(credentialsJSON))
 	}
 }
@@ -90,6 +95,7 @@ func WithCredentialsFile(credentialsFile string) Option {
 		if credentialsFile == "" {
 			return
 		}
+		opts.unhonoredOnREST = append(opts.unhonoredOnREST, "WithCredentialsFile")
 		opts.ClientOptions = append(opts.ClientOptions, option.WithCredentialsFile(credentialsFile))
 	}
 }
@@ -106,6 +112,7 @@ func WithRest() Option {
 // This is useful for gemini clients.
 func WithGRPCClient(grpcClient *grpc.ClientConn) Option {
 	return func(opts *Options) {
+		opts.unhonoredOnREST = append(opts.unhonoredOnREST, "WithGRPCClient")
 		opts.ClientOptions = append(opts.ClientOptions, option.WithGRPCConn(grpcClient))
 	}
 }
@@ -115,6 +122,7 @@ func WithGRPCClient(grpcClient *grpc.ClientConn) Option {
 // This is useful for gemini clients.
 func WithEndpoint(endpoint string) Option {
 	return func(opts *Options) {
+		opts.BaseURL = endpoint
 		opts.ClientOptions = append(opts.ClientOptions, option.WithEndpoint(endpoint))
 	}
 }
@@ -134,6 +142,7 @@ func WithHTTPClient(httpClient *http.Client) Option {
 // This is useful for testing embeddings in vertex clients.
 func WithGRPCConn(conn *grpc.ClientConn) Option {
 	return func(opts *Options) {
+		opts.unhonoredOnREST = append(opts.unhonoredOnREST, "WithGRPCConn")
 		opts.ClientOptions = append(opts.ClientOptions, option.WithGRPCConn(conn))
 	}
 }
