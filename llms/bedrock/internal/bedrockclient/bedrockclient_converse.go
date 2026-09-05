@@ -217,8 +217,8 @@ func (c *ConverseClient) buildConverseInput(input *ConverseInput) (*bedrockrunti
 			familyFields = converseNovaFields{
 				ReasoningConfig: &converseNovaReasoningConfig{Type: "enabled", MaxReasoningEffort: effort},
 			}
-			inferenceConfig.MaxTokens = nil
-			if reasoning.NovaRejectsSamplingAt(effort) {
+			if reasoning.NovaClearsInferenceConfigAt(effort) {
+				inferenceConfig.MaxTokens = nil
 				inferenceConfig.Temperature = nil
 				inferenceConfig.TopP = nil
 			}

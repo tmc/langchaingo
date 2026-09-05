@@ -21,9 +21,9 @@ func NovaEffort(effort string) string {
 	}
 }
 
-// NovaRejectsSamplingAt reports whether Nova refuses temperature, topP and topK
-// alongside the given effort.
-func NovaRejectsSamplingAt(effort string) bool {
+// NovaClearsInferenceConfigAt reports whether Nova refuses temperature, topP and
+// maxTokens alongside the given effort.
+func NovaClearsInferenceConfigAt(effort string) bool {
 	return NovaEffort(effort) == "high"
 }
 

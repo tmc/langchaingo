@@ -34,10 +34,10 @@ func TestNovaEffortCollapsesOntoThreeLevels(t *testing.T) {
 }
 
 func TestNovaRejectsSamplingOnlyAtTopEffort(t *testing.T) {
-	if !NovaRejectsSamplingAt("max") || !NovaRejectsSamplingAt("high") {
+	if !NovaClearsInferenceConfigAt("max") || !NovaClearsInferenceConfigAt("high") {
 		t.Error("temperature, topP and topK are an error at the top effort")
 	}
-	if NovaRejectsSamplingAt("low") || NovaRejectsSamplingAt("medium") {
+	if NovaClearsInferenceConfigAt("low") || NovaClearsInferenceConfigAt("medium") {
 		t.Error("sampling params are allowed below the top effort")
 	}
 }
