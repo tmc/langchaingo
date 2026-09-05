@@ -35,8 +35,8 @@ func TestGeminiCanDisable(t *testing.T) {
 	}{
 		{"gemini-2.5-flash", true},
 		{"gemini-2.5-flash-lite", true},
-		{"gemma-4-31b-it", false},
-		{"gemma-4-26b-a4b-it", false},
+		{"gemma-4-31b-it", true},
+		{"gemma-4-26b-a4b-it", true},
 		{"gemini-2.5-pro", false},
 		{"gemini-3-flash-preview", true},
 		{"gemini-3.1-pro-preview", false},
@@ -162,7 +162,7 @@ func TestGeminiAcceptsMinimalLevel(t *testing.T) {
 	}
 }
 
-func TestGemmaTakesNoThinkingControl(t *testing.T) {
+func TestGemmaTogglesThinkingByLevel(t *testing.T) {
 	t.Parallel()
 	cases := []struct {
 		model string
@@ -178,17 +178,20 @@ func TestGemmaTakesNoThinkingControl(t *testing.T) {
 		{"", false},
 	}
 	for _, tc := range cases {
-		if got := GeminiRejectsThinkingControl(tc.model); got != tc.want {
-			t.Errorf("GeminiRejectsThinkingControl(%q) = %v, want %v", tc.model, got, tc.want)
+		if got := GeminiTogglesThinkingByLevel(tc.model); got != tc.want {
+			t.Errorf("GeminiTogglesThinkingByLevel(%q) = %v, want %v", tc.model, got, tc.want)
 		}
 	}
 }
 
-func TestGemmaOffIsRefusedRatherThanSentAsZeroBudget(t *testing.T) {
+func TestGemmaOffGoesOutAsTheMinimalLevelRatherThanAZeroBudget(t *testing.T) {
 	t.Parallel()
-	for _, model := range []string{"gemma-4-31b-it", "gemma-4-26b-a4b-it"} {
-		if got := ResolveOff(model, ProviderGoogleAI); got != OffUnsupported {
-			t.Errorf("ResolveOff(%q) = %v, want OffUnsupported", model, got)
+	for _, model := range []string{"gemma-4-31b-it", "gemma-4-26b-a4b-it", "google/gemma-4-E2B-it"} {
+		if got := ResolveOff(model, ProviderGoogleAI); got != OffMinimalLevel {
+			t.Errorf("ResolveOff(%q) = %v, want OffMinimalLevel", model, got)
+		}
+		if !GeminiCanDisable(model) {
+			t.Errorf("GeminiCanDisable(%q) = false, want true", model)
 		}
 	}
 }

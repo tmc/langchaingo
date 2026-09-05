@@ -232,8 +232,8 @@ func TestReasoningSupportFor(t *testing.T) { //nolint:funlen // table-driven tes
 			{"gemini-2.5-pro", true},
 			{"gemini-2.5-flash", false},
 			{"gemini-2.5-flash-lite", false},
-			{"gemma-4-31b-it", true},
-			{"gemma-4-26b-a4b-it", true},
+			{"gemma-4-31b-it", false},
+			{"gemma-4-26b-a4b-it", false},
 		}
 		for _, tc := range cases {
 			s := ReasoningSupportFor(tc.model, reasoning.ProviderGoogleAI)
@@ -450,15 +450,15 @@ func TestTheBedrockHintReportsTheRefusalTheDoorWillGive(t *testing.T) {
 	}
 }
 
-func TestTheHintNamesNoMechanismWhenTheDoorTakesNoControl(t *testing.T) {
+func TestTheHintNamesTheMechanismTheDoorActuallyUses(t *testing.T) {
 	t.Parallel()
 
 	for _, tc := range []struct {
 		model string
 		want  ReasoningMechanism
 	}{
-		{"gemma-4-31b-it", ReasoningMechanismUnknown},
-		{"gemma-4-26b-a4b-it", ReasoningMechanismUnknown},
+		{"gemma-4-31b-it", ReasoningMechanismAdaptive},
+		{"gemma-4-26b-a4b-it", ReasoningMechanismAdaptive},
 		{"gemini-2.5-flash", ReasoningMechanismBudget},
 		{"gemini-3-pro", ReasoningMechanismAdaptive},
 	} {

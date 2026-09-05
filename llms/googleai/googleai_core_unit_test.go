@@ -1037,15 +1037,16 @@ func TestThinkingConfig(t *testing.T) {
 type disableWire int
 
 const (
-	disableUnsupported disableWire = iota // WithReasoningDisabled must error before the request
-	disableZeroBudget                     // thinking_budget: 0
-	disableOmit                           // no thinking config at all
+	disableUnsupported  disableWire = iota // WithReasoningDisabled must error before the request
+	disableZeroBudget                      // thinking_budget: 0
+	disableOmit                            // no thinking config at all
+	disableMinimalLevel                    // thinking_level: "minimal"
 )
 
 var productionGeminiModels = []struct {
 	name              string
 	usesThinkingLevel bool // Gemini 3.x uses thinking_level; 2.5 uses thinking_budget
-	noControl         bool // takes neither: the request carries no budget and no level
+	togglesByLevel    bool // on/off only, through thinking_level: high or minimal
 	disable           disableWire
 }{
 	{name: "gemini-3.5-flash", usesThinkingLevel: true, disable: disableZeroBudget},
@@ -1055,8 +1056,8 @@ var productionGeminiModels = []struct {
 	{name: "gemini-2.5-pro", usesThinkingLevel: false, disable: disableUnsupported},
 	{name: "gemini-2.5-flash", usesThinkingLevel: false, disable: disableZeroBudget},
 	{name: "gemini-2.5-flash-lite", usesThinkingLevel: false, disable: disableOmit},
-	{name: "gemma-4-31b-it", usesThinkingLevel: false, noControl: true, disable: disableUnsupported},
-	{name: "gemma-4-26b-a4b-it", usesThinkingLevel: false, noControl: true, disable: disableUnsupported},
+	{name: "gemma-4-31b-it", usesThinkingLevel: false, togglesByLevel: true, disable: disableMinimalLevel},
+	{name: "gemma-4-26b-a4b-it", usesThinkingLevel: false, togglesByLevel: true, disable: disableMinimalLevel},
 }
 
 func TestResolveTemperature(t *testing.T) {
@@ -1250,10 +1251,10 @@ func TestProductionGeminiModels_ThinkingConfig(t *testing.T) {
 			require.NotNil(t, tc, "enable reasoning must emit a ThinkingConfig for %s", m.name)
 			assert.True(t, tc.IncludeThoughts)
 			switch {
-			case m.noControl:
+			case m.togglesByLevel:
+				assert.Equal(t, genai.ThinkingLevelHigh, tc.ThinkingLevel,
+					"%s enables through thinking_level high", m.name)
 				assert.Nil(t, tc.ThinkingBudget, "%s takes no thinking_budget", m.name)
-				assert.Equal(t, genai.ThinkingLevel(""), tc.ThinkingLevel,
-					"%s takes no thinking_level", m.name)
 			case m.usesThinkingLevel:
 				assert.Equal(t, genai.ThinkingLevelMedium, tc.ThinkingLevel,
 					"%s should map effort→thinking_level", m.name)
@@ -1273,6 +1274,12 @@ func TestProductionGeminiModels_ThinkingConfig(t *testing.T) {
 				require.NotNil(t, tcOff)
 				require.NotNil(t, tcOff.ThinkingBudget)
 				assert.Equal(t, int32(0), *tcOff.ThinkingBudget)
+				assert.False(t, tcOff.IncludeThoughts)
+			case disableMinimalLevel:
+				require.NoError(t, err, "disable must succeed for %s", m.name)
+				require.NotNil(t, tcOff)
+				assert.Equal(t, genai.ThinkingLevelMinimal, tcOff.ThinkingLevel)
+				assert.Nil(t, tcOff.ThinkingBudget, "%s takes no thinking_budget", m.name)
 				assert.False(t, tcOff.IncludeThoughts)
 			case disableOmit:
 				require.NoError(t, err, "disable must succeed for %s", m.name)
