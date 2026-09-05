@@ -20,6 +20,8 @@ type Jina struct {
 	APIBaseURL    string
 	APIKey        string
 	client        *http.Client
+
+	batchSizeFromCaller bool
 }
 
 type EmbeddingRequest struct {

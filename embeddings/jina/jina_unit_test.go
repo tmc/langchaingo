@@ -1,9 +1,12 @@
 package jina
 
 import (
+	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -115,7 +118,7 @@ func TestNewJina(t *testing.T) { //nolint:funlen // comprehensive test
 				WithBatchSize(256),
 			},
 			check: func(t *testing.T, j *Jina) {
-				assert.Equal(t, 512, j.BatchSize) // Batch size is overridden by model
+				assert.Equal(t, 256, j.BatchSize)
 			},
 		},
 		{
@@ -316,4 +319,38 @@ func TestApplyOptions(t *testing.T) {
 			})
 		}
 	})
+}
+
+func TestTheCallersBatchSizeReachesTheWire(t *testing.T) {
+	var batches [][]string
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var req EmbeddingRequest
+		require.NoError(t, json.NewDecoder(r.Body).Decode(&req))
+		batches = append(batches, req.Input)
+
+		items := make([]string, 0, len(req.Input))
+		for i := range req.Input {
+			items = append(items, fmt.Sprintf(`{"object":"embedding","index":%d,"embedding":[0.1,0.2]}`, i))
+		}
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprintf(w, `{"model":%q,"object":"list","data":[%s]}`, req.Model, strings.Join(items, ","))
+	}))
+	defer server.Close()
+
+	j, err := NewJina(
+		WithAPIBaseURL(server.URL),
+		WithAPIKey("test-key"),
+		WithModel(BaseModel),
+		WithBatchSize(2),
+	)
+	require.NoError(t, err)
+
+	emb, err := j.EmbedDocuments(t.Context(), []string{"a", "b", "c", "d", "e"})
+	require.NoError(t, err)
+	assert.Len(t, emb, 5)
+
+	require.Len(t, batches, 3, "batch size 2 over five texts is three requests; the model dimension would make it one")
+	assert.Equal(t, []string{"a", "b"}, batches[0])
+	assert.Equal(t, []string{"c", "d"}, batches[1])
+	assert.Equal(t, []string{"e"}, batches[2])
 }

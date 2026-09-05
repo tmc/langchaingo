@@ -38,6 +38,7 @@ func WithStripNewLines(stripNewLines bool) Option {
 func WithBatchSize(batchSize int) Option {
 	return func(p *Jina) {
 		p.BatchSize = batchSize
+		p.batchSizeFromCaller = true
 	}
 }
 
@@ -82,9 +83,9 @@ func applyOptions(opts ...Option) *Jina {
 		opt(o)
 	}
 
-	// verify if model exists in the map
-	if _, ok := _models[o.Model]; ok {
-		o.BatchSize = _models[o.Model]
+	// _models holds vector dimensions, not batch sizes.
+	if size, ok := _models[o.Model]; ok && !o.batchSizeFromCaller {
+		o.BatchSize = size
 	}
 
 	return o
