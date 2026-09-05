@@ -14,6 +14,7 @@ type clientOptions struct {
 	maxRetries       int
 	timeout          time.Duration
 	model            string
+	modelFromCaller  bool
 	callbacksHandler callbacks.Handler
 }
 
@@ -51,6 +52,7 @@ func WithTimeout(timeout time.Duration) Option {
 func WithModel(model string) Option {
 	return func(o *clientOptions) {
 		o.model = model
+		o.modelFromCaller = true
 	}
 }
 
