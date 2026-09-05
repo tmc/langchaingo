@@ -1,6 +1,9 @@
 package reasoning
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 func TestHasContentSeparatesReasoningFromSignature(t *testing.T) {
 	t.Parallel()
@@ -23,5 +26,23 @@ func TestHasContentSeparatesReasoningFromSignature(t *testing.T) {
 		if got := tc.reasoning.IsEmpty(); got != tc.isEmpty {
 			t.Errorf("%s: IsEmpty() = %v, want %v", tc.name, got, tc.isEmpty)
 		}
+	}
+}
+
+func TestRedactedReasoningIsCarriedButIsNotText(t *testing.T) {
+	t.Parallel()
+
+	redacted := &ContentReasoning{Redacted: []byte{0x01, 0x02, 0x03}}
+	if redacted.IsEmpty() {
+		t.Error("an encrypted block is something to carry back, so it is not empty")
+	}
+	if redacted.HasContent() {
+		t.Error("an encrypted block is not readable thinking")
+	}
+	if got := redacted.String(); !strings.Contains(got, "3 bytes") {
+		t.Errorf("String() = %q, want the encrypted size named", got)
+	}
+	if !(&ContentReasoning{}).IsEmpty() {
+		t.Error("a value with nothing in it stays empty")
 	}
 }

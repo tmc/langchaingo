@@ -3,6 +3,7 @@ package reasoning
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"regexp"
 	"strings"
 	"sync"
@@ -22,11 +23,15 @@ type ContentReasoning struct {
 
 	// Signature is the signature of the reasoning contents.
 	Signature []byte `json:"signature,omitempty"`
+
+	// Redacted is reasoning the provider encrypted. It carries no readable text
+	// and travels back to the vendor unchanged.
+	Redacted []byte `json:"redacted,omitempty"`
 }
 
 // IsEmpty reports whether there is nothing to carry back into the next turn.
 func (r *ContentReasoning) IsEmpty() bool {
-	return r == nil || (r.Content == "" && len(r.Signature) == 0)
+	return r == nil || (r.Content == "" && len(r.Signature) == 0 && len(r.Redacted) == 0)
 }
 
 // HasContent reports whether the model actually reasoned.
@@ -45,6 +50,9 @@ func (r *ContentReasoning) String() string {
 	if len(r.Signature) > 0 {
 		buf.WriteString("\nSignature: ")
 		buf.Write(r.Signature)
+	}
+	if len(r.Redacted) > 0 {
+		fmt.Fprintf(&buf, "\nRedacted: %d bytes", len(r.Redacted))
 	}
 
 	return buf.String()

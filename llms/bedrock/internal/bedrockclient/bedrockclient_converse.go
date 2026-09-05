@@ -342,6 +342,11 @@ func (a *aiMessageAccumulator) build() types.Message {
 			Value: &reasoningBlock,
 		})
 	}
+	if a.reasoning != nil && len(a.reasoning.Redacted) > 0 {
+		content = append(content, &types.ContentBlockMemberReasoningContent{
+			Value: &types.ReasoningContentBlockMemberRedactedContent{Value: a.reasoning.Redacted},
+		})
+	}
 
 	// Add text content if present
 	if a.textContent != "" {
@@ -590,22 +595,6 @@ func (c *ConverseClient) convertUserOrAssistantMessage(msg Message) (types.Messa
 
 	var contentBlocks []types.ContentBlock
 
-	// For AI messages with reasoning, add reasoning blocks first
-	if msg.Role == llms.ChatMessageTypeAI && msg.Reasoning != nil {
-		// Add thinking block if present
-		if msg.Reasoning.Content != "" || len(msg.Reasoning.Signature) > 0 {
-			reasoningBlock := types.ReasoningContentBlockMemberReasoningText{
-				Value: types.ReasoningTextBlock{
-					Text:      aws.String(msg.Reasoning.Content),
-					Signature: ptrStringOrNil(string(msg.Reasoning.Signature)),
-				},
-			}
-			contentBlocks = append(contentBlocks, &types.ContentBlockMemberReasoningContent{
-				Value: &reasoningBlock,
-			})
-		}
-	}
-
 	// Handle text content
 	if msg.Content != "" {
 		contentBlocks = append(contentBlocks, &types.ContentBlockMemberText{
@@ -770,8 +759,7 @@ func (c *ConverseClient) handleStreamingResponse(ctx context.Context, input *bed
 // processStreamingResponse processes streaming events
 func (c *ConverseClient) processStreamingResponse(ctx context.Context, response *bedrockruntime.ConverseStreamOutput, callback streaming.Callback) (*llms.ContentResponse, error) {
 	var fullContent strings.Builder
-	var reasoningContent strings.Builder
-	var signature bytes.Buffer
+	var reasoningDeltas converseReasoningStream
 	var toolCalls []llms.ToolCall
 	var stopReason string
 	var streamErr error
@@ -802,22 +790,15 @@ DoStream:
 						}
 					}
 				case *types.ContentBlockDeltaMemberReasoningContent:
-					if callback != nil {
-						switch block := delta.Value.(type) {
-						case *types.ReasoningContentBlockDeltaMemberText:
-							reasoningContent.WriteString(block.Value)
-							chunk := streaming.Chunk{
-								Type:      streaming.ChunkTypeReasoning,
-								Reasoning: &reasoning.ContentReasoning{Content: block.Value},
-							}
-							if err := callback(ctx, chunk); err != nil {
-								streamErr = err
-								break DoStream
-							}
-						case *types.ReasoningContentBlockDeltaMemberSignature:
-							if len(block.Value) > 0 {
-								signature.WriteString(block.Value)
-							}
+					text := reasoningDeltas.add(delta.Value)
+					if text != "" && callback != nil {
+						chunk := streaming.Chunk{
+							Type:      streaming.ChunkTypeReasoning,
+							Reasoning: &reasoning.ContentReasoning{Content: text},
+						}
+						if err := callback(ctx, chunk); err != nil {
+							streamErr = err
+							break DoStream
 						}
 					}
 				case *types.ContentBlockDeltaMemberToolUse:
@@ -871,16 +852,11 @@ DoStream:
 		streamErr = fmt.Errorf("stream error: %w", err)
 	}
 
-	var sig []byte
-	if signature.Len() > 0 {
-		sig = signature.Bytes()
-	}
-
 	choice := &llms.ContentChoice{
 		Content:        fullContent.String(),
 		ToolCalls:      toolCalls,
 		GenerationInfo: make(map[string]any),
-		Reasoning:      c.processReasoning(reasoningContent.String(), sig),
+		Reasoning:      reasoningDeltas.result(c),
 		StopReason:     stopReason,
 		Truncated:      llms.IsTruncated(stopReason),
 	}
@@ -925,15 +901,52 @@ func applyConverseUsage(info map[string]any, usage *types.TokenUsage) {
 	info["PromptTokens"] = promptTokens
 }
 
-func (c *ConverseClient) processReasoning(reasoningContent string, signature []byte) *reasoning.ContentReasoning {
-	if reasoningContent == "" && len(signature) == 0 {
+func (c *ConverseClient) processReasoning(reasoningContent string, signature, redacted []byte) *reasoning.ContentReasoning {
+	if reasoningContent == "" && len(signature) == 0 && len(redacted) == 0 {
 		return nil
 	}
 
 	return &reasoning.ContentReasoning{
 		Content:   reasoningContent,
 		Signature: signature,
+		Redacted:  redacted,
 	}
+}
+
+type converseReasoningStream struct {
+	text      strings.Builder
+	signature bytes.Buffer
+	redacted  []byte
+}
+
+func (a *converseReasoningStream) add(delta types.ReasoningContentBlockDelta) (readableText string) {
+	switch block := delta.(type) {
+	case *types.ReasoningContentBlockDeltaMemberText:
+		a.text.WriteString(block.Value)
+		return block.Value
+	case *types.ReasoningContentBlockDeltaMemberSignature:
+		if len(block.Value) > 0 {
+			a.signature.WriteString(block.Value)
+		}
+	case *types.ReasoningContentBlockDeltaMemberRedactedContent:
+		a.redacted = append(a.redacted, block.Value...)
+	}
+	return ""
+}
+
+func (a *converseReasoningStream) result(c *ConverseClient) *reasoning.ContentReasoning {
+	var sig []byte
+	if a.signature.Len() > 0 {
+		sig = a.signature.Bytes()
+	}
+	return c.processReasoning(a.text.String(), sig, a.redacted)
+}
+
+func ensureReasoning(r *reasoning.ContentReasoning) *reasoning.ContentReasoning {
+	if r == nil {
+		return &reasoning.ContentReasoning{}
+	}
+	return r
 }
 
 // convertConverseResponse converts Converse response to ContentResponse
@@ -980,7 +993,6 @@ func (c *ConverseClient) convertConverseResponse(response *bedrockruntime.Conver
 				}
 				choice.ToolCalls = append(choice.ToolCalls, toolCall)
 			case *types.ContentBlockMemberReasoningContent:
-				// The block.Value is of type ReasoningContentBlock
 				switch content := block.Value.(type) {
 				case *types.ReasoningContentBlockMemberReasoningText:
 					reasoningText := ""
@@ -991,7 +1003,16 @@ func (c *ConverseClient) convertConverseResponse(response *bedrockruntime.Conver
 					if content.Value.Signature != nil {
 						sig = []byte(*content.Value.Signature)
 					}
-					choice.Reasoning = c.processReasoning(reasoningText, sig)
+					if reasoningText != "" || len(sig) > 0 {
+						choice.Reasoning = ensureReasoning(choice.Reasoning)
+						choice.Reasoning.Content = reasoningText
+						choice.Reasoning.Signature = sig
+					}
+				case *types.ReasoningContentBlockMemberRedactedContent:
+					if len(content.Value) > 0 {
+						choice.Reasoning = ensureReasoning(choice.Reasoning)
+						choice.Reasoning.Redacted = append(choice.Reasoning.Redacted, content.Value...)
+					}
 				}
 			}
 		}
