@@ -7,6 +7,7 @@ import (
 	"io"
 	"math"
 	"net/http"
+	"net/http/httptest"
 	"strings"
 	"testing"
 
@@ -1068,5 +1069,60 @@ func TestMaxTokensAboveInt32DoesNotGoNegative(t *testing.T) {
 		if got := convertToInt32Pointer(&n); got == nil || *got != tc.want {
 			t.Errorf("convertToInt32Pointer(%d) = %v, want %d", tc.in, got, tc.want)
 		}
+	}
+}
+
+func TestWithEndpointFeedsBothDoors(t *testing.T) {
+	t.Parallel()
+
+	opts := DefaultOptions()
+	WithEndpoint("https://llm.example.net/gemini")(&opts)
+
+	assert.Equal(t, "https://llm.example.net/gemini", opts.BaseURL,
+		"the Gemini API client reads BaseURL")
+	assert.Len(t, opts.ClientOptions, 1,
+		"the vertex door reads the same endpoint out of ClientOptions")
+}
+
+func TestTheCallersEndpointReachesTheRequest(t *testing.T) {
+	t.Parallel()
+
+	var gotPath string
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		gotPath = r.URL.Path
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"candidates":[{"content":{"role":"model","parts":[{"text":"hi"}]},` +
+			`"finishReason":"STOP"}],"usageMetadata":{}}`))
+	}))
+	defer server.Close()
+
+	llm, err := New(t.Context(), WithAPIKey("test-key"), WithEndpoint(server.URL), WithDefaultModel("gemini-2.5-flash"))
+	require.NoError(t, err)
+
+	_, err = llm.GenerateContent(t.Context(), []llms.MessageContent{
+		llms.TextParts(llms.ChatMessageTypeHuman, "hello"),
+	})
+	require.NoError(t, err)
+	assert.Contains(t, gotPath, "gemini-2.5-flash",
+		"the request must reach the caller's endpoint, not generativelanguage.googleapis.com")
+}
+
+func TestNewRefusesTheOptionsThisDoorCannotCarry(t *testing.T) {
+	t.Parallel()
+
+	for name, opt := range map[string]Option{
+		"WithCredentialsFile": WithCredentialsFile("path/to/creds.json"),
+		"WithCredentialsJSON": WithCredentialsJSON([]byte(`{"type":"service_account"}`)),
+		"WithGRPCConn":        WithGRPCConn(nil),
+	} {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			_, err := New(t.Context(), WithAPIKey("test-key"), opt)
+
+			var notHonored *ErrOptionNotHonored
+			require.ErrorAs(t, err, &notHonored,
+				"an option the door drops must be refused, not ignored")
+			assert.Contains(t, notHonored.Options, name)
+		})
 	}
 }
