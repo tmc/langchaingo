@@ -40,6 +40,8 @@ func TestTheCallersEmbeddingModelReachesTheWire(t *testing.T) {
 
 	assert.Equal(t, "mistral-embed", embeddingModelOnTheWire(t),
 		"a caller that named no model still embeds, and not with the chat default")
-	assert.Equal(t, "mistral/mistral-embed", embeddingModelOnTheWire(t, WithModel("mistral/mistral-embed")),
+	assert.Equal(t, "mistral/mistral-embed", embeddingModelOnTheWire(t, WithEmbeddingModel("mistral/mistral-embed")),
 		"the named model must reach the wire: a gateway routes by the prefixed name")
+	assert.Equal(t, "mistral-embed", embeddingModelOnTheWire(t, WithModel("ministral-8b-latest")),
+		"WithModel names the chat model and must not follow the caller into embeddings")
 }
