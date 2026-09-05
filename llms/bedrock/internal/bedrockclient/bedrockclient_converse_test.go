@@ -1277,7 +1277,8 @@ func TestConverseNovaSendsReasoningConfigNotThinking(t *testing.T) {
 	assert.Equal(t, "medium", rc["maxReasoningEffort"])
 
 	require.NotNil(t, cfg)
-	assert.Nil(t, cfg.MaxTokens, "Nova refuses maxTokens while reasoning is enabled")
+	assert.EqualValues(t, 8000, *cfg.MaxTokens,
+		"AWS unsets maxTokens only at the top effort; below it the caller's ceiling stands")
 }
 
 func TestConverseNovaClampsEffortAndDropsSamplingAtHigh(t *testing.T) {
@@ -1292,6 +1293,23 @@ func TestConverseNovaClampsEffortAndDropsSamplingAtHigh(t *testing.T) {
 	require.NotNil(t, cfg)
 	assert.Nil(t, cfg.Temperature, "Nova rejects sampling params at the top effort")
 	assert.Nil(t, cfg.TopP)
+	assert.Nil(t, cfg.MaxTokens, "the same rule unsets maxTokens at the top effort")
+}
+
+func TestConverseNovaKeepsMaxTokensBelowTopEffort(t *testing.T) {
+	for _, effort := range []llms.ReasoningEffort{llms.ReasoningLow, llms.ReasoningMedium} {
+		t.Run(string(effort), func(t *testing.T) {
+			temperature, topP := 0.4, 0.9
+			_, cfg := novaConverseFields(t, "us.amazon.nova-2-lite-v1:0",
+				&llms.ReasoningConfig{Effort: effort}, &temperature, &topP)
+
+			require.NotNil(t, cfg)
+			require.NotNil(t, cfg.MaxTokens, "dropping the ceiling here silently voids WithMaxTokens")
+			assert.EqualValues(t, 8000, *cfg.MaxTokens)
+			assert.NotNil(t, cfg.Temperature, "sampling is refused only at the top effort")
+			assert.NotNil(t, cfg.TopP)
+		})
+	}
 }
 
 func TestConverseGrokSendsReasoningEffort(t *testing.T) {
