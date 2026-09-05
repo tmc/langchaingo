@@ -156,9 +156,6 @@ func disablesByThinkingObject(model string) bool {
 		if hasGeneration(form, "minimax-m3") {
 			return true
 		}
-		if hasGeneration(form, "glm-5.2") {
-			continue
-		}
 		for _, generation := range []string{
 			"glm-4.5", "glm-4.6", "glm-4.7", "glm-5", "glm-5.1",
 			"kimi-k2.6",
