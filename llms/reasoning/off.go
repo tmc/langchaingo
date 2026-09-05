@@ -158,7 +158,7 @@ func disablesByThinkingObject(model string) bool {
 		}
 		for _, generation := range []string{
 			"glm-4.5", "glm-4.6", "glm-4.7", "glm-5", "glm-5.1",
-			"kimi-k2.6",
+			"kimi-k2.6", "deepseek-v4",
 		} {
 			if hasGeneration(form, generation) {
 				return true
