@@ -111,9 +111,6 @@ func (s *Store) init(ctx context.Context) error {
 		return err
 	}
 
-	if err := s.createVectorExtensionIfNotExists(ctx, tx); err != nil {
-		return err
-	}
 	if err := s.createCollectionTableIfNotExists(ctx, tx); err != nil {
 		return err
 	}
