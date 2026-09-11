@@ -301,6 +301,7 @@ func TestClient_GenerateChatWithThink(t *testing.T) {
 	client, err := NewClient(parsedURL, rr.Client())
 	require.NoError(t, err)
 
+	think := true
 	req := &ChatRequest{
 		Model: "gemma3:1b",
 		Messages: []*Message{
@@ -310,10 +311,10 @@ func TestClient_GenerateChatWithThink(t *testing.T) {
 			},
 		},
 		Stream: false,
+		Think:  &think, // Enable reasoning mode (top-level per Ollama API)
 		Options: Options{
 			Temperature: 0.0,
 			NumPredict:  100,
-			Think:       true, // Enable reasoning mode
 		},
 	}
 
@@ -328,32 +329,145 @@ func TestClient_GenerateChatWithThink(t *testing.T) {
 	assert.NotEmpty(t, response.Message.Content)
 	assert.True(t, response.Done)
 
-	// The think parameter should be included in the request
+	// The think parameter should be included at the top level of the request
 	// This test verifies that the parameter is properly serialized
 }
 
-func TestOptionsJSONMarshalWithThink(t *testing.T) {
-	// Test that the think parameter is properly marshaled to JSON
-	opts := Options{
-		Temperature: 0.5,
-		Think:       true,
-	}
+func TestChatRequestJSONMarshalWithThink(t *testing.T) {
+	// Test that the think parameter is properly marshaled as a top-level field
+	// (not nested inside "options") per the Ollama API spec.
 
-	data, err := json.Marshal(opts)
-	require.NoError(t, err)
+	t.Run("think=true", func(t *testing.T) {
+		think := true
+		req := ChatRequest{
+			Model:  "test-model",
+			Think:  &think,
+			Stream: false,
+			Options: Options{
+				Temperature: 0.5,
+			},
+		}
 
-	// Check that the JSON contains the think field
-	var result map[string]interface{}
-	err = json.Unmarshal(data, &result)
-	require.NoError(t, err)
+		data, err := json.Marshal(req)
+		require.NoError(t, err)
 
-	// Verify think field exists and is true
-	think, exists := result["think"]
-	assert.True(t, exists, "think field should exist in JSON")
-	assert.Equal(t, true, think, "think field should be true")
+		var result map[string]interface{}
+		err = json.Unmarshal(data, &result)
+		require.NoError(t, err)
 
-	// Verify temperature field for completeness
-	temp, exists := result["temperature"]
-	assert.True(t, exists, "temperature field should exist in JSON")
-	assert.Equal(t, float64(0.5), temp, "temperature should be 0.5")
+		// think should be a top-level field
+		thinkVal, exists := result["think"]
+		assert.True(t, exists, "think should be a top-level field in JSON")
+		assert.Equal(t, true, thinkVal, "think should be true")
+
+		// think should NOT be inside options
+		options, hasOptions := result["options"].(map[string]interface{})
+		assert.True(t, hasOptions, "options field should exist")
+		_, thinkInOptions := options["think"]
+		assert.False(t, thinkInOptions, "think should NOT be nested inside options")
+	})
+
+	t.Run("think=false", func(t *testing.T) {
+		think := false
+		req := ChatRequest{
+			Model:  "test-model",
+			Think:  &think,
+			Stream: false,
+			Options: Options{
+				Temperature: 0.5,
+			},
+		}
+
+		data, err := json.Marshal(req)
+		require.NoError(t, err)
+
+		var result map[string]interface{}
+		err = json.Unmarshal(data, &result)
+		require.NoError(t, err)
+
+		// think=false should still be present (pointer to false, not zero-value bool)
+		thinkVal, exists := result["think"]
+		assert.True(t, exists, "think=false should be present in JSON (pointer distinguishes unset from false)")
+		assert.Equal(t, false, thinkVal, "think should be false")
+	})
+
+	t.Run("think=nil (unset)", func(t *testing.T) {
+		req := ChatRequest{
+			Model:  "test-model",
+			Think:  nil,
+			Stream: false,
+			Options: Options{
+				Temperature: 0.5,
+			},
+		}
+
+		data, err := json.Marshal(req)
+		require.NoError(t, err)
+
+		var result map[string]interface{}
+		err = json.Unmarshal(data, &result)
+		require.NoError(t, err)
+
+		// think should be omitted entirely when nil
+		_, exists := result["think"]
+		assert.False(t, exists, "think should be omitted when nil (unset)")
+	})
+}
+
+func TestGenerateRequestJSONMarshalWithThink(t *testing.T) {
+	// Test that the think parameter is properly marshaled as a top-level field
+	// in GenerateRequest as well.
+
+	t.Run("think=true", func(t *testing.T) {
+		think := true
+		stream := false
+		req := GenerateRequest{
+			Model:  "test-model",
+			Prompt: "hello",
+			Think:  &think,
+			Stream: &stream,
+			Options: Options{
+				Temperature: 0.5,
+			},
+		}
+
+		data, err := json.Marshal(req)
+		require.NoError(t, err)
+
+		var result map[string]interface{}
+		err = json.Unmarshal(data, &result)
+		require.NoError(t, err)
+
+		thinkVal, exists := result["think"]
+		assert.True(t, exists, "think should be a top-level field")
+		assert.Equal(t, true, thinkVal)
+
+		// Should NOT be in options
+		options := result["options"].(map[string]interface{})
+		_, inOpts := options["think"]
+		assert.False(t, inOpts, "think should NOT be inside options")
+	})
+
+	t.Run("think=nil (unset)", func(t *testing.T) {
+		stream := false
+		req := GenerateRequest{
+			Model:  "test-model",
+			Prompt: "hello",
+			Think:  nil,
+			Stream: &stream,
+			Options: Options{
+				Temperature: 0.5,
+			},
+		}
+
+		data, err := json.Marshal(req)
+		require.NoError(t, err)
+
+		var result map[string]interface{}
+		err = json.Unmarshal(data, &result)
+		require.NoError(t, err)
+
+		_, exists := result["think"]
+		assert.False(t, exists, "think should be omitted when nil")
+	})
 }
