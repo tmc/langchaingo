@@ -370,7 +370,7 @@ func processStreamEvent(ctx context.Context, event map[string]interface{}, paylo
 	case "ping":
 		// Nothing to do here
 	case "error":
-		eventChan <- MessageEvent{Response: nil, Err: fmt.Errorf("received error event: %v", event)}
+		return response, fmt.Errorf("received error event: %v", event)
 	default:
 		log.Printf("unknown event type: %s - %v", eventType, event)
 	}
