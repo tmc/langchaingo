@@ -287,7 +287,7 @@ func (c *Client) createMessage(ctx context.Context, payload *messagePayload, bet
 		return nil, c.decodeError(resp)
 	}
 
-	if payload.StreamingFunc != nil {
+	if payload.StreamingFunc != nil || payload.StreamingReasoningFunc != nil {
 		return parseStreamingMessageResponse(ctx, resp, payload)
 	}
 

@@ -3,6 +3,7 @@ package anthropicclient
 import (
 	"context"
 	"encoding/json"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -38,6 +39,46 @@ func Test_parseStreamingMessageResponse_withEmptyInput(t *testing.T) {
 	require.True(t, ok, "Second content block should be of type ToolUseContent")
 	require.Equal(t, "get_current_ip_address", secondContent.Name, "Tool use name should match expected value")
 	require.Empty(t, secondContent.Input, "Tool use input should be empty")
+}
+
+func TestCreateMessageReasoningOnlyUsesStreamDecoder(t *testing.T) {
+	events := []string{
+		`{"type":"message_start","message":{"id":"m","type":"message","role":"assistant","content":[],"model":"claude-test","stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":1,"output_tokens":0}}}`,
+		`{"type":"content_block_start","index":0,"content_block":{"type":"thinking","thinking":""}}`,
+		`{"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":"consider"}}`,
+		`{"type":"content_block_stop","index":0}`,
+		`{"type":"content_block_start","index":1,"content_block":{"type":"text","text":""}}`,
+		`{"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"answer"}}`,
+		`{"type":"content_block_stop","index":1}`,
+		`{"type":"message_stop"}`,
+	}
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "text/event-stream")
+		for _, e := range events {
+			_, _ = io.WriteString(w, "data: "+e+"\n\n")
+		}
+	}))
+	defer server.Close()
+	client, err := New("test-key", "claude-test", server.URL)
+	require.NoError(t, err)
+
+	var reasoning []string
+	resp, err := client.createMessage(context.Background(), &messagePayload{
+		Model: "claude-test",
+		StreamingReasoningFunc: func(_ context.Context, reasoningChunk, _ []byte) error {
+			reasoning = append(reasoning, string(reasoningChunk))
+			return nil
+		},
+	}, nil)
+	require.NoError(t, err)
+	assert.Equal(t, []string{"consider"}, reasoning)
+	require.Len(t, resp.Content, 2)
+	thinking, ok := resp.Content[0].(*ThinkingContent)
+	require.True(t, ok, "content[0] is %T", resp.Content[0])
+	assert.Equal(t, "consider", thinking.Thinking)
+	text, ok := resp.Content[1].(*TextContent)
+	require.True(t, ok, "content[1] is %T", resp.Content[1])
+	assert.Equal(t, "answer", text.Text)
 }
 
 func Test_parseStreamingMessageResponse_withInputJSONDeltas(t *testing.T) {
