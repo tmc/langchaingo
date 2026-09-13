@@ -391,8 +391,8 @@ DoStream:
 
 		for _, part := range respCandidate.Content.Parts {
 			if text, ok := part.(genai.Text); ok {
-				if opts.StreamingFunc(ctx, []byte(text)) != nil {
-					break DoStream
+				if err := opts.StreamingFunc(ctx, []byte(text)); err != nil {
+					return nil, fmt.Errorf("streaming func returned an error: %w", err)
 				}
 			}
 		}
