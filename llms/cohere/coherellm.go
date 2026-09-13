@@ -40,11 +40,20 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		opt(opts)
 	}
 
-	// Assume we get a single text message
+	if len(messages) == 0 {
+		return nil, errors.New("messages must not be empty")
+	}
 	msg0 := messages[0]
+	if len(msg0.Parts) == 0 {
+		return nil, errors.New("message parts must not be empty")
+	}
 	part := msg0.Parts[0]
+	text, ok := part.(llms.TextContent)
+	if !ok {
+		return nil, errors.New("first message part must be text")
+	}
 	result, err := o.client.CreateGeneration(ctx, &cohereclient.GenerationRequest{
-		Prompt: part.(llms.TextContent).Text,
+		Prompt: text.Text,
 	})
 	if err != nil {
 		if o.CallbacksHandler != nil {

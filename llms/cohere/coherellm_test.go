@@ -181,6 +181,33 @@ func TestGenerateContent(t *testing.T) {
 	}
 }
 
+func TestGenerateContentRejectsInvalidInput(t *testing.T) {
+	tests := []struct {
+		name     string
+		messages []llms.MessageContent
+		want     string
+	}{
+		{name: "empty messages", want: "messages must not be empty"},
+		{name: "empty parts", messages: []llms.MessageContent{{}}, want: "message parts must not be empty"},
+		{
+			name: "non-text part",
+			messages: []llms.MessageContent{{Parts: []llms.ContentPart{
+				llms.BinaryContent{MIMEType: "application/octet-stream", Data: []byte("data")},
+			}}},
+			want: "first message part must be text",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := (&LLM{}).GenerateContent(context.Background(), tt.messages)
+			if err == nil || err.Error() != tt.want {
+				t.Fatalf("GenerateContent() error = %v, want %q", err, tt.want)
+			}
+		})
+	}
+}
+
 type testCallbackHandler struct {
 	generateStartCalled bool
 	generateEndCalled   bool
