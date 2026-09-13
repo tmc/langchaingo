@@ -89,6 +89,23 @@ func TestSetCallOptions(t *testing.T) {
 	}
 }
 
+func TestContentResponsePreservesToolCallChoice(t *testing.T) {
+	res := contentResponse(&sdk.ChatCompletionResponse{Choices: []sdk.ChatCompletionResponseChoice{
+		{Message: sdk.ChatMessage{Content: "first"}},
+		{Message: sdk.ChatMessage{Content: "second", ToolCalls: []sdk.ToolCall{{
+			Id: "call-2", Type: sdk.ToolTypeFunction,
+			Function: sdk.FunctionCall{Name: "second_tool", Arguments: `{}`},
+		}}}},
+	}})
+
+	if len(res.Choices[0].ToolCalls) != 0 {
+		t.Fatalf("choice 0 has %d tool calls, want 0", len(res.Choices[0].ToolCalls))
+	}
+	if got := res.Choices[1].ToolCalls; len(got) != 1 || got[0].ID != "call-2" {
+		t.Fatalf("choice 1 tool calls = %#v, want call-2", got)
+	}
+}
+
 func TestResolveDefaultOptions(t *testing.T) {
 	sdkDefaults := sdk.ChatRequestParams{
 		Temperature: 0.5,
