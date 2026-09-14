@@ -107,6 +107,29 @@ func TestEnvironmentAPIKeyPrecedence(t *testing.T) {
 	}
 }
 
+func TestEmbeddingModelDefaults(t *testing.T) {
+	tests := []struct {
+		name string
+		opts []Option
+		want string
+	}{
+		{"implicit", nil, "gemini-embedding-001"},
+		{"explicit", []Option{WithDefaultEmbeddingModel("custom")}, "custom"},
+		{"explicit empty", []Option{WithDefaultEmbeddingModel("")}, ""},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			o := DefaultOptions()
+			for _, opt := range tt.opts {
+				opt(&o)
+			}
+			if got := o.DefaultEmbeddingModel; got != tt.want {
+				t.Fatalf("DefaultEmbeddingModel = %q, want %q", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestGoogleAIEmbeddingRequestModelAndAuthentication(t *testing.T) {
 	var requestURL *url.URL
 	transport := hardeningRoundTripFunc(func(req *http.Request) (*http.Response, error) {
@@ -127,7 +150,7 @@ func TestGoogleAIEmbeddingRequestModelAndAuthentication(t *testing.T) {
 	if len(got) != 1 || len(got[0]) != 1 || got[0][0] != 1 {
 		t.Fatalf("embedding=%v", got)
 	}
-	if !strings.Contains(requestURL.Path, "/models/embedding-001:batchEmbedContents") {
+	if !strings.Contains(requestURL.Path, "/models/gemini-embedding-001:batchEmbedContents") {
 		t.Fatalf("path=%q", requestURL.Path)
 	}
 	if keys := requestURL.Query()["key"]; len(keys) != 1 || keys[0] != "wire-key" {
