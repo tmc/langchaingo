@@ -2,6 +2,7 @@ package cohere
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"os"
 	"testing"
@@ -185,24 +186,28 @@ func TestGenerateContentRejectsInvalidInput(t *testing.T) {
 	tests := []struct {
 		name     string
 		messages []llms.MessageContent
-		want     string
+		want     error
 	}{
-		{name: "empty messages", want: "messages must not be empty"},
-		{name: "empty parts", messages: []llms.MessageContent{{}}, want: "message parts must not be empty"},
+		{name: "empty messages", want: errEmptyMessages},
+		{name: "empty parts", messages: []llms.MessageContent{{}}, want: errEmptyMessageParts},
 		{
 			name: "non-text part",
 			messages: []llms.MessageContent{{Parts: []llms.ContentPart{
 				llms.BinaryContent{MIMEType: "application/octet-stream", Data: []byte("data")},
 			}}},
-			want: "first message part must be text",
+			want: errNonTextMessagePart,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := (&LLM{}).GenerateContent(context.Background(), tt.messages)
-			if err == nil || err.Error() != tt.want {
-				t.Fatalf("GenerateContent() error = %v, want %q", err, tt.want)
+			h := &testCallbackHandler{}
+			_, err := (&LLM{CallbacksHandler: h}).GenerateContent(context.Background(), tt.messages)
+			if !errors.Is(err, tt.want) {
+				t.Fatalf("GenerateContent() error = %v, want %v", err, tt.want)
+			}
+			if h.generateStartCalled || h.generateEndCalled || h.errorCalled {
+				t.Fatalf("callbacks fired for invalid input: start=%v end=%v error=%v", h.generateStartCalled, h.generateEndCalled, h.errorCalled)
 			}
 		})
 	}
