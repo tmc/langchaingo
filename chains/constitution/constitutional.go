@@ -110,7 +110,7 @@ func (c *Constitutional) Call(ctx context.Context, inputs map[string]any,
 	if err != nil {
 		return nil, err
 	}
-	critiquesAndRevisions, err := c.processCritiquesAndRevisions(ctx, response, inputPrompt, options)
+	response, critiquesAndRevisions, err := c.processCritiquesAndRevisions(ctx, response, inputPrompt, options)
 	if err != nil {
 		return nil, err
 	}
@@ -124,10 +124,10 @@ func (c *Constitutional) Call(ctx context.Context, inputs map[string]any,
 
 // processCritiquesAndRevisions processes critiques and revisions based on the input response and prompt.
 // It iterates through constitutional principles, retrieves critiques, and performs revisions where necessary.
-// The resulting pairs of critiques and revisions are returned.
+// The (possibly revised) response is returned along with pairs of critiques and revisions.
 func (c *Constitutional) processCritiquesAndRevisions(ctx context.Context, response any, inputPrompt llms.PromptValue,
 	options []chains.ChainCallOption,
-) ([]pair, error) {
+) (any, []pair, error) {
 	critiquesAndRevisions := make([]pair, 0, len(c.constitutionalPrinciples))
 	for _, constitutionalPrincipal := range c.constitutionalPrinciples {
 		rawCritique, err := c.critiqueChain.Call(ctx, map[string]any{
@@ -136,15 +136,15 @@ func (c *Constitutional) processCritiquesAndRevisions(ctx context.Context, respo
 			"critiqueRequest": constitutionalPrincipal.critiqueRequest,
 		}, options...)
 		if err != nil {
-			return nil, err
+			return response, nil, err
 		}
 		output, ok := rawCritique["text"]
 		if !ok {
-			return nil, ErrResponseTextNotFound
+			return response, nil, ErrResponseTextNotFound
 		}
 		stringOutput, ok := output.(string)
 		if !ok {
-			return nil, ErrStringConvert
+			return response, nil, ErrStringConvert
 		}
 		critique := parseCritique(stringOutput)
 
@@ -169,11 +169,11 @@ func (c *Constitutional) processCritiquesAndRevisions(ctx context.Context, respo
 			"revisionRequest": constitutionalPrincipal.revisionRequest,
 		})
 		if err != nil {
-			return nil, err
+			return response, nil, err
 		}
 		revision, ok := result["text"].(string)
 		if !ok {
-			return nil, ErrResponseTextNotFound
+			return response, nil, ErrResponseTextNotFound
 		}
 		revision = strings.Trim(revision, " ")
 		response = revision
@@ -182,7 +182,7 @@ func (c *Constitutional) processCritiquesAndRevisions(ctx context.Context, respo
 			second: revision,
 		})
 	}
-	return critiquesAndRevisions, nil
+	return response, critiquesAndRevisions, nil
 }
 
 func parseCritique(rawCritique string) string {
