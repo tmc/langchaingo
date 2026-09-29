@@ -14,7 +14,7 @@ llmman is a local model runner that serves the Ollama API (alongside OpenAI- and
 
 1. Install llmman:
    ```shell
-   curl -fsSL https://raw.githubusercontent.com/llmmanorg/llmman/main/install.sh | sh
+   curl -fsSL https://llmmanorg.github.io/install.sh | sh
    ```
 2. Pull a model and start the server:
    ```shell
