@@ -233,8 +233,8 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 
 	// An explicit thinking effort maps to the reasoning_effort
 	// parameter on models that accept it; other models reject the
-	// parameter, so it is omitted. Effort levels beyond OpenAI's
-	// vocabulary (low, medium, high) clamp to "high".
+	// parameter, so it is omitted. Levels beyond OpenAI's vocabulary
+	// clamp to the highest it accepts (see clampReasoningEffort).
 	var reasoningEffort string
 	if config, ok := opts.Metadata["thinking_config"].(*llms.ThinkingConfig); ok && modelCaps.SupportsThinking {
 		reasoningEffort = clampReasoningEffort(config.Effort)
