@@ -2,12 +2,14 @@ package googleai
 
 import (
 	"context"
+	"errors"
 	"io"
 	"net/http"
 	"net/url"
 	"strings"
 	"testing"
 
+	"github.com/tmc/langchaingo/llms"
 	"google.golang.org/api/option"
 )
 
@@ -193,4 +195,45 @@ func TestCustomEndpointKeepsClientAndAPIKey(t *testing.T) {
 
 func emptyResponse() *http.Response {
 	return &http.Response{StatusCode: http.StatusOK, Header: make(http.Header), Body: io.NopCloser(strings.NewReader(""))}
+}
+
+func TestGenerateContentEmptyStream(t *testing.T) {
+	t.Parallel()
+	// Gemini can end a stream without sending any response, for example
+	// when thinking uses the whole output token budget.
+	single := []llms.MessageContent{
+		llms.TextParts(llms.ChatMessageTypeHuman, "Say OK"),
+	}
+	chat := []llms.MessageContent{
+		llms.TextParts(llms.ChatMessageTypeSystem, "Be brief."),
+		llms.TextParts(llms.ChatMessageTypeHuman, "Say OK"),
+	}
+	stream := llms.WithStreamingFunc(func(context.Context, []byte) error { return nil })
+	tests := []struct {
+		name     string
+		messages []llms.MessageContent
+		opts     []llms.CallOption
+	}{
+		{"chat", chat, nil},
+		{"single streaming", single, []llms.CallOption{stream}},
+		{"chat streaming", chat, []llms.CallOption{stream}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			transport := hardeningRoundTripFunc(func(req *http.Request) (*http.Response, error) {
+				return &http.Response{StatusCode: http.StatusOK, Header: make(http.Header), Body: io.NopCloser(strings.NewReader("[]")), Request: req}, nil
+			})
+			client, err := New(context.Background(), WithRest(), WithAPIKey("wire-key"), WithHTTPClient(&http.Client{Transport: transport}))
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer client.Close()
+			opts := append([]llms.CallOption{llms.WithMaxTokens(10)}, tt.opts...)
+			_, err = client.GenerateContent(context.Background(), tt.messages, opts...)
+			if !errors.Is(err, ErrNoContentInResponse) {
+				t.Fatalf("err=%v, want %v", err, ErrNoContentInResponse)
+			}
+		})
+	}
 }
