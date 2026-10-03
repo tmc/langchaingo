@@ -94,8 +94,8 @@ func (g *GoogleAI) SupportsReasoning() bool {
 		model = g.opts.DefaultModel
 	}
 
-	// Gemini 2.0 models support reasoning/thinking capabilities
-	if strings.Contains(model, "gemini-2.0") {
+	// Gemini 2.0 and 2.5 models support reasoning/thinking capabilities
+	if strings.Contains(model, "gemini-2.0") || strings.Contains(model, "gemini-2.5") {
 		return true
 	}
 
