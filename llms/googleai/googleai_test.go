@@ -59,8 +59,12 @@ func newHTTPRRClient(t *testing.T, opts ...Option) *GoogleAI {
 		return nil
 	})
 
-	// Configure client with httprr
+	// Configure client with httprr. Replay needs no credentials, but
+	// without any the client looks for application default credentials.
 	opts = append(opts, WithRest(), WithHTTPClient(rr.Client()))
+	if apiKey == "" {
+		opts = append(opts, WithAPIKey("test-api-key"))
+	}
 
 	llm, err := New(context.Background(), opts...)
 	if err != nil {
