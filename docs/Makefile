@@ -1,5 +1,5 @@
 # The site is built with md2html (https://github.com/tmc/md2html).
-# Keep MD2HTML_VERSION in sync with .github/workflows/publish-docs.yaml.
+# The publish-docs workflow installs this version with "make install".
 MD2HTML_VERSION ?= v0.0.0-20260923024514-2cf8d540c613
 MD2HTML ?= md2html
 MDVET ?= mdvet
