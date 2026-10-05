@@ -1,0 +1,19 @@
+# Weekly dependency updates, grouped into one pull request per ecosystem.
+# Example modules are not listed: each is its own module, updated by hand
+# after a release (make update-examples, then go get and go mod tidy).
+version: 2
+updates:
+  - package-ecosystem: gomod
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      go:
+        patterns: ["*"]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ["*"]
