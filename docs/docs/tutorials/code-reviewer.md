@@ -40,7 +40,6 @@ import (
     "context"
     "flag"
     "fmt"
-    "go/ast"
     "go/parser"
     "go/token"
     "log"
@@ -205,7 +204,10 @@ Create `sample.go` to test the reviewer:
 ```go
 package main
 
-import "fmt"
+import (
+    "fmt"
+    "os"
+)
 
 func badCode() {
     // This has several issues
@@ -241,11 +243,15 @@ Create `reviewer.go` for more sophisticated analysis:
 package main
 
 import (
+    "context"
     "encoding/json"
     "fmt"
-    "go/ast"
     "go/parser"
     "go/token"
+    "os"
+
+    "github.com/tmc/langchaingo/llms"
+    "github.com/tmc/langchaingo/prompts"
 )
 
 type Issue struct {
@@ -268,10 +274,9 @@ func (cr *CodeReviewer) ReviewFileStructured(filename string) (*ReviewResult, er
         return nil, fmt.Errorf("reading file: %w", err)
     }
 
-    // Parse for line numbers
+    // Reject files that are not valid Go before calling the model.
     fset := token.NewFileSet()
-    node, err := parser.ParseFile(fset, filename, content, parser.ParseComments)
-    if err != nil {
+    if _, err := parser.ParseFile(fset, filename, content, parser.ParseComments); err != nil {
         return nil, fmt.Errorf("parsing Go file: %w", err)
     }
 

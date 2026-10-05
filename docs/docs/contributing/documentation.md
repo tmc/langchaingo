@@ -151,7 +151,8 @@ import (
     "context"
     "fmt"
     "log"
-    
+
+    "github.com/tmc/langchaingo/llms"
     "github.com/tmc/langchaingo/llms/openai"
 )
 
@@ -160,7 +161,11 @@ func main() {
     if err != nil {
         log.Fatal(err)
     }
-    // ... rest of example
+    completion, err := llms.GenerateFromSinglePrompt(context.Background(), llm, "Say hello")
+    if err != nil {
+        log.Fatal(err)
+    }
+    fmt.Println(completion)
 }
 ```
 

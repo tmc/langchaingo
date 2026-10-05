@@ -45,9 +45,7 @@ import (
     "go/doc"
     "go/parser"
     "go/token"
-    "path/filepath"
     "strings"
-    "unicode"
 )
 
 type CodeAnalyzer struct {
@@ -556,9 +554,7 @@ package main
 
 import (
     "context"
-    "encoding/json"
     "fmt"
-    "path/filepath"
     "strings"
     "text/template"
 
@@ -978,6 +974,8 @@ import (
     "log"
     "os"
     "path/filepath"
+    "strings"
+    "time"
 )
 
 func main() {

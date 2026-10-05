@@ -541,11 +541,12 @@ import (
     "context"
     "fmt"
     "log"
+    "strings"
     "time"
 
     "github.com/fsnotify/fsnotify"
-    "github.com/tmc/langchaingo/llms"
     "github.com/tmc/langchaingo/chains"
+    "github.com/tmc/langchaingo/prompts"
 )
 
 type LogMonitor struct {
