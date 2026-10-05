@@ -18,7 +18,7 @@ Build the static site into `_site` (pages under `_site/docs`, the files in
 
 	make build
 
-Check links, anchors, file name casing and MDX components:
+Check links, anchors, file name casing, MDX components and included files:
 
 	make vet
 
@@ -39,5 +39,11 @@ Check prose style with Vale:
   a line of its own. `make vet` reports components md2html does not know.
 - Name pages `.md`: md2html does not build `.mdx` files. MDX imports,
   exports and JavaScript expressions are not supported, nor is raw HTML.
-  To show a program from [examples/](../examples), copy it into a fenced
-  code block and link to its source.
+- To show a program from [examples/](../examples), include it rather than
+  copying it, so the page cannot drift from the code:
+
+	<Code src="/examples/llm-chain-example/llm_chain.go" title="examples/llm-chain-example/llm_chain.go" link />
+
+  `src` is relative to the repository root. `link` links the caption to
+  the file on GitHub, at the ref named in [docs/docs.json](docs/docs.json).
+  `make vet` and `make build` fail if the file does not exist.

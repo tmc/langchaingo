@@ -29,47 +29,4 @@ As mentioned above, there are many models available on the Mistral platform. We 
   * `mistral-medium-latest` (aka mistral-medium-2312)
   * `mistral-large-latest` (aka mistral-large-2402)
 
-[`examples/mistral-completion-example/mistral_completion_example.go`](https://github.com/tmc/langchaingo/blob/main/examples/mistral-completion-example/mistral_completion_example.go):
-
-```go
-package main
-
-import (
-	"context"
-	"fmt"
-	"log"
-
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/mistral"
-)
-
-func main() {
-	llm, err := mistral.New(mistral.WithModel("open-mistral-7b"))
-	if err != nil {
-		log.Fatal(err)
-	}
-	ctx := context.Background()
-	completionWithStreaming, err := llms.GenerateFromSinglePrompt(ctx, llm, "Who was the first man to walk on the moon?",
-		llms.WithTemperature(0.8),
-		llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {
-			fmt.Print(string(chunk))
-			return nil
-		}),
-	)
-	if err != nil {
-		log.Fatal(err)
-	}
-	// The full string response will be available in completionWithStreaming after the streaming is complete.
-	// (The Go compiler mandates declared variables be used at least once, hence the `_` assignment. https://go.dev/ref/spec#Blank_identifier)
-	_ = completionWithStreaming
-
-	completionWithoutStreaming, err := llms.GenerateFromSinglePrompt(ctx, llm, "Who was the first man to go to space?",
-		llms.WithTemperature(0.2),
-		llms.WithModel("mistral-small-latest"),
-	)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println("\n" + completionWithoutStreaming)
-}
-```
+<Code src="/examples/mistral-completion-example/mistral_completion_example.go" title="examples/mistral-completion-example/mistral_completion_example.go" link />

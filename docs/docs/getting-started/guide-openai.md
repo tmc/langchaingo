@@ -52,35 +52,4 @@ The example sends a prompt to OpenAI and prints the response.
 
 Here is the entire program (from [openai-completion-example](https://github.com/tmc/langchaingo/blob/main/examples/openai-completion-example/openai_completion_example.go)):
 
-```go
-package main
-
-import (
-	"context"
-	"fmt"
-	"log"
-
-	"github.com/tmc/langchaingo/llms"
-	"github.com/tmc/langchaingo/llms/openai"
-)
-
-func main() {
-	llm, err := openai.New()
-	if err != nil {
-		log.Fatal(err)
-	}
-	ctx := context.Background()
-	completion, err := llms.GenerateFromSinglePrompt(ctx,
-		llm,
-		"The first man to walk on the moon",
-		llms.WithTemperature(0.8),
-		llms.WithStopWords([]string{"Armstrong"}),
-	)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Println("The first man to walk on the moon:")
-	fmt.Println(completion)
-}
-```
+<Code src="/examples/openai-completion-example/openai_completion_example.go" title="examples/openai-completion-example/openai_completion_example.go" link />

@@ -7,7 +7,10 @@ SITE ?= _site
 ADDR ?= :8080
 SITE_URL ?= https://tmc.github.io/langchaingo/docs
 
-MD2HTML_FLAGS = -nav -search -title LangChainGo
+# Pages include example programs with <Code src="/examples/...">.
+INCLUDE_ROOT = $(abspath $(CURDIR)/..)
+
+MD2HTML_FLAGS = -nav -search -title LangChainGo -include-root $(INCLUDE_ROOT)
 
 .PHONY: serve
 serve:
@@ -25,7 +28,7 @@ build:
 
 .PHONY: vet
 vet:
-	$(MDVET) -c links,anchors,case,assets,frontmatter,components docs
+	$(MDVET) -include-root $(INCLUDE_ROOT) -c links,anchors,case,assets,frontmatter,components,includes docs
 
 .PHONY: install
 install:
