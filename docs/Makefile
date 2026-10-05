@@ -10,7 +10,8 @@ SITE_URL ?= https://tmc.github.io/langchaingo/docs
 # Pages include example programs with <Code src="/examples/...">.
 INCLUDE_ROOT = $(abspath $(CURDIR)/..)
 
-MD2HTML_FLAGS = -nav -search -title LangChainGo -include-root $(INCLUDE_ROOT)
+MD2HTML_FLAGS = -nav -search -title LangChainGo -include-root $(INCLUDE_ROOT) \
+	-favicon $(CURDIR)/static/img/favicon.ico
 
 .PHONY: serve
 serve:
