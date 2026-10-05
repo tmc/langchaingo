@@ -135,6 +135,9 @@ func generateCompletionsContent(ctx context.Context, o *LLM, messages []llms.Mes
 			},
 		},
 	}
+	if o.CallbacksHandler != nil {
+		o.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, resp)
+	}
 	return resp, nil
 }
 
@@ -181,7 +184,14 @@ func generateMessagesContent(ctx context.Context, o *LLM, messages []llms.Messag
 		}
 		return nil, fmt.Errorf("anthropic: failed to create message: %w", err)
 	}
-	return processAnthropicResponse(result)
+	resp, err := processAnthropicResponse(result)
+	if err != nil {
+		return nil, err
+	}
+	if o.CallbacksHandler != nil {
+		o.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, resp)
+	}
+	return resp, nil
 }
 
 // processAnthropicResponse converts Anthropic API response to standard ContentResponse
