@@ -1,13 +1,17 @@
+---
+title: How-to guides
+---
+
 # How-to guides
 
 These how-to guides answer "How do I...?" questions with practical solutions for specific problems.
 
-**Note**: Many guides are still being written. Want to help? See our [documentation contribution guide](/docs/contributing/documentation)!
+**Note**: Many guides are still being written. Want to help? See our [documentation contribution guide](../contributing/documentation.md)!
 
 ## LLMs and chat models
 
 ### Basic configuration
-- [How to configure different LLM providers](./configure-llm-providers)
+- [How to configure different LLM providers](configure-llm-providers.md)
 
 ### Advanced features
 - How to handle API rate limits and retries
@@ -74,4 +78,3 @@ These how-to guides answer "How do I...?" questions with practical solutions for
 ### Data integration
 - How to integrate with databases
 - How to implement caching strategies
-

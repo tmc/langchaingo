@@ -1,3 +1,7 @@
+---
+title: Contributing to LangChainGo
+---
+
 # Contributing to LangChainGo
 
 Thank you for your interest in contributing to LangChainGo! This guide helps you get started.
@@ -62,7 +66,7 @@ When contributing code that interacts with external APIs:
 1. Use the internal `httprr` tool for recording HTTP interactions
 2. Never commit real API keys or secrets
 3. Ensure tests can run without external dependencies
-4. See the [Architecture Guide](/docs/concepts/architecture#http-testing-with-httprr) for details
+4. See the [Architecture Guide](../concepts/architecture.md#http-testing-with-httprr) for details
 
 ## Contribution process
 
@@ -106,7 +110,7 @@ Include:
 
 ## Documentation contributions
 
-See our dedicated [Documentation Contribution Guide](./documentation) for details on:
+See our dedicated [Documentation Contribution Guide](documentation.md) for details on:
 - Writing tutorials
 - Creating how-to guides
 - Documentation style guide

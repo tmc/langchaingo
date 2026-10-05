@@ -1,3 +1,7 @@
+---
+title: Concepts
+---
+
 # Concepts
 
 Understanding the fundamental concepts behind LangChainGo helps you build better applications.

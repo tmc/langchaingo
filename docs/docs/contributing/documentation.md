@@ -1,3 +1,7 @@
+---
+title: Documentation contribution guide
+---
+
 # Documentation contribution guide
 
 This guide helps you contribute documentation to LangChainGo. We especially need help with tutorials and how-to guides!
@@ -36,7 +40,7 @@ Tutorials are complete learning experiences. Here's how to write a great tutoria
 
 ### Tutorial template
 
-```markdown
+````markdown
 # Building [What You're Building]
 
 [One sentence description of what the reader will build]
@@ -76,7 +80,7 @@ A [type of application] that:
 
 - [Potential improvements]
 - [Related tutorials]
-```
+````
 
 ### Tutorial guidelines
 
@@ -92,7 +96,7 @@ How-to guides solve specific problems. They differ from tutorials:
 
 ### How-to template
 
-```markdown
+````markdown
 # How to [Specific Task]
 
 ## Problem
@@ -118,7 +122,7 @@ How-to guides solve specific problems. They differ from tutorials:
 ## Related guides
 
 - [Link to related how-tos]
-```
+````
 
 ### How-to guidelines
 
@@ -188,7 +192,7 @@ We have several tutorials and guides marked as "Coming Soon". Here's how to cont
 
 ### 1. Choose a topic
 
-- Check our [Tutorials](/docs/tutorials) and [How-To Guides](/docs/how-to) for topics marked as coming soon. 
+- Check our [Tutorials](../tutorials/index.md) and [How-To Guides](../how-to/index.md) for topics marked as coming soon. 
 - Review open issues for topics that have already been claimed (avoid duplicate work).
 
 ### 2. Open an issue
@@ -282,13 +286,13 @@ Vale checks for:
 ## Examples of good documentation
 
 ### Good tutorial example
-- [Building an AI Code Reviewer](/docs/tutorials/code-reviewer)
+- [Building an AI Code Reviewer](../tutorials/code-reviewer.md)
 - Complete, practical application
 - Progressive complexity
 - Real-world use case
 
 ### Good how-to guide example
-- [How to configure different LLM providers](/docs/how-to/configure-llm-providers)
+- [How to configure different LLM providers](../how-to/configure-llm-providers.md)
 - Focused on specific task
 - Multiple provider examples
 - Clear configuration steps

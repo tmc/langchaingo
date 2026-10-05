@@ -1,0 +1,18 @@
+---
+title: Data Connection
+draft: true
+---
+
+# Data Connection 
+
+<Info>
+[Conceptual Guide](https://python.langchain.com/docs/modules/data_connection/indexing)
+</Info>
+
+Many LLM applications require user-specific data that is not part of the model's training set. LangChain gives you the 
+building blocks to load, transform, store and query your data via:
+
+- [Document loaders](document_loaders/index.md): Load documents from many different sources
+- [Text splitter](text_splitters/index.md): Split documents and texts
+- [Vector stores](vector_stores/index.md): Store and search over embedded data
+- [Retrievers](retrievers/index.md): Query your data

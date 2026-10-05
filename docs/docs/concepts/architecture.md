@@ -1,3 +1,7 @@
+---
+title: LangChainGo Architecture
+---
+
 # LangChainGo Architecture
 
 This document explains LangChainGo's architecture and how it follows Go conventions.

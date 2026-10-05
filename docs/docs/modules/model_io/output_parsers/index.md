@@ -1,0 +1,27 @@
+---
+title: Output Parsers
+---
+
+# Output Parsers
+
+<Info>
+[Conceptual Guide](https://python.langchain.com/docs/modules/model_io/output_parsers)
+</Info>
+
+Language models output text. But many times you may want to get more structured information than just text back. This is where output parsers come in.
+
+Output parsers are structs that help structure language model responses. There are three main methods an output parser must implement:
+
+```go
+// OutputParser is an interface for parsing the output of an LLM call.
+type OutputParser[T any] interface {
+	// Parse parses the output of an LLM call.
+	Parse(text string) (T, error)
+	// ParseWithPrompt parses the output of an LLM call with the prompt used.
+	ParseWithPrompt(text string, prompt PromptValue) (T, error)
+	// GetFormatInstructions returns a string describing the format of the output.
+	GetFormatInstructions() string
+	// Type returns the string type key uniquely identifying this class of parser
+	Type() string
+}
+```

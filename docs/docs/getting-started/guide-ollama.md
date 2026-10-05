@@ -1,0 +1,80 @@
+---
+title: "Quickstart: LangChainGo with Ollama"
+---
+
+# Quickstart: LangChainGo with Ollama
+
+Get started by running your first program with LangChainGo and [Ollama](https://ollama.ai/). Ollama provides the most straightforward method for local LLM inference across all computer platforms.
+
+## Prerequisites
+
+1. **Ollama**: [Download and install Ollama](https://ollama.ai/).
+2. **Go**: [Download and install Go](https://go.dev/doc/install).
+
+## Setup
+
+Ollama runs locally on your machine and doesn't require API keys. However, you need to have Ollama installed and a model downloaded.
+
+### Install Ollama
+Follow the installation instructions for your operating system at [ollama.ai](https://ollama.ai/).
+
+### Download a model
+Before running the example, you need to download a model. The example uses the `llama2` model:
+
+```bash
+ollama pull llama2
+```
+
+## Steps
+
+1. **Initialize Ollama**: In your terminal, execute the command `ollama run llama2`. The first run might take some time as the model needs to be fetched to your computer.
+2. **Run the example**: Enter the command:
+   ```shell
+   go run github.com/tmc/langchaingo/examples/ollama-completion-example@main
+   ```
+
+You should see output similar to the following:
+
+```shell
+The first human to set foot on the moon was Neil Armstrong, an American astronaut, who stepped onto the lunar surface during the Apollo 11 mission on July 20, 1969.
+```
+
+Congratulations! You have successfully built and executed your first open-source LLM-based program using local inference.
+
+Here is the entire program (from [ollama-completion-example](https://github.com/tmc/langchaingo/blob/main/examples/ollama-completion-example/ollama_completion_example.go)):
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+
+	"github.com/tmc/langchaingo/llms"
+	"github.com/tmc/langchaingo/llms/ollama"
+)
+
+func main() {
+	llm, err := ollama.New(ollama.WithModel("llama2"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	ctx := context.Background()
+	completion, err := llms.GenerateFromSinglePrompt(
+		ctx,
+		llm,
+		"Human: Who was the first man to walk on the moon?\nAssistant:",
+		llms.WithTemperature(0.8),
+		llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {
+			fmt.Print(string(chunk))
+			return nil
+		}),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_ = completion
+}
+```

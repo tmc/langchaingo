@@ -1,5 +1,8 @@
-# Welcome to LangChainGo
+---
+title: Welcome to LangChainGo
+---
 
+# Welcome to LangChainGo
 
 LangChainGo is the [Go Programming Language](https://go.dev/) port/fork of
 [LangChain](https://www.langchain.com/).
@@ -17,15 +20,15 @@ _**Note**: These docs are for [LangChainGo](https://github.com/tmc/langchaingo).
 
 Our documentation follows a structured approach to help you learn and use LangChainGo effectively:
 
-### 📚 [Tutorials](./tutorials/)
+### 📚 [Tutorials](tutorials/index.md)
 Step-by-step guides to build complete applications. Perfect for learning LangChainGo from the ground up.
 
-- **Getting Started**: [Quick setup with Ollama](./getting-started/guide-ollama.mdx) • [Quick setup with OpenAI](./getting-started/guide-openai.mdx)
+- **Getting Started**: [Quick setup with Ollama](getting-started/guide-ollama.md) • [Quick setup with OpenAI](getting-started/guide-openai.md)
 - **Basic Applications**: Simple chat apps, Q&A systems, document summarization
 - **Advanced Applications**: RAG systems, agents with tools, multi-modal apps
 - **Production**: Deployment, optimization, monitoring
 
-### 🛠️ [How-to Guides](./how-to/)
+### 🛠️ [How-to Guides](how-to/index.md)
 Practical solutions for specific problems. Find answers to "How do I...?" questions.
 
 - **LLM Integration**: Configure providers, handle rate limits, implement streaming
@@ -33,7 +36,7 @@ Practical solutions for specific problems. Find answers to "How do I...?" questi
 - **Agent Development**: Create custom tools, multi-step reasoning, error handling
 - **Production**: Project structure, logging, deployment, scaling
 
-### 🧠 [Concepts](./concepts/)
+### 🧠 [Concepts](concepts/index.md)
 Deep explanations of LangChainGo's architecture and design principles.
 
 - **Core Architecture**: Framework design, interfaces, Go-specific patterns
@@ -46,9 +49,9 @@ Technical reference for all LangChainGo modules and their capabilities.
 
 - **Model I/O**: LLMs, Chat Models, Embeddings, and Prompts
 - **Data Connection**: Document loaders, vector stores, text splitters, retrievers
-- **[Chains](./modules/chains/)**: Sequences of calls and end-to-end applications
-- **[Memory](./modules/memory/)**: State persistence and conversation management
-- **[Agents](./modules/agents/)**: Decision-making and autonomous behavior
+- **[Chains](modules/chains/index.md)**: Sequences of calls and end-to-end applications
+- **[Memory](modules/memory/index.md)**: State persistence and conversation management
+- **[Agents](modules/agents/index.md)**: Decision-making and autonomous behavior
 
 ## API Reference
 
@@ -56,6 +59,6 @@ Technical reference for all LangChainGo modules and their capabilities.
 
 ## Get Involved
 
-- **[Contributing Guide](/docs/contributing)**: Learn how to contribute code and documentation
+- **[Contributing Guide](contributing/index.md)**: Learn how to contribute code and documentation
 - **[GitHub Discussions](https://github.com/tmc/langchaingo/discussions)**: Join the conversation about LangChainGo
 - **[GitHub Issues](https://github.com/tmc/langchaingo/issues)**: Report bugs or request features

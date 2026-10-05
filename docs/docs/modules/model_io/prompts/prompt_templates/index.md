@@ -1,0 +1,266 @@
+---
+title: Prompt templates
+---
+
+# Prompt templates
+
+<Info>
+[Conceptual Guide](https://python.langchain.com/docs/modules/model_io/prompts/quick_start#prompttemplate)
+</Info>
+
+Prompt templates are the foundation of effective prompt engineering. They allow you to create reusable, parameterized prompts that can be dynamically filled with data. LangChain Go provides powerful templating capabilities with built-in security and support for multiple template formats.
+
+## Core concepts
+
+### PromptTemplate
+A `PromptTemplate` wraps a template string with metadata about required variables and output formatting:
+
+```go
+template := prompts.PromptTemplate{
+    Template: "Analyze this {{ content }} and provide {{ analysis_type }} insights",
+    InputVariables: []string{"content", "analysis_type"},
+    TemplateFormat: prompts.TemplateFormatJinja2,
+}
+```
+
+### Template rendering
+LangChain Go supports three template formats, each optimized for different use cases:
+
+#### Go templates (recommended)
+Native Go templating with sprig functions - the preferred choice for Go applications:
+
+```go
+template := `
+Analyze the following {{ .content_type }}:
+
+{{ .content }}
+
+{{ if .include_sentiment }}
+Include sentiment analysis in your response.
+{{ end }}
+
+{{ if .examples }}
+Consider these examples:
+{{ range .examples }}
+- {{ . }}
+{{ end }}
+{{ end }}
+`
+```
+
+#### Jinja2 templates
+Full-featured templating with filters, conditionals, and loops:
+
+```go
+template := `
+Analyze the following {{ content_type }}:
+
+{{ content }}
+
+{% if include_sentiment %}
+Include sentiment analysis in your response.
+{% endif %}
+
+{% if examples %}
+Consider these examples:
+{% for example in examples %}
+- {{ example }}
+{% endfor %}
+{% endif %}
+`
+```
+
+#### F-string templates
+Simple variable substitution for basic use cases:
+
+```go
+template := "Create a {type} summary of {content} in {language}"
+```
+
+## Basic usage
+
+Here's an example of creating and using a prompt template:
+
+```go
+import "github.com/tmc/langchaingo/prompts"
+
+func main() {
+    // Create a prompt template
+    prompt := prompts.NewPromptTemplate(
+        "What is a good name for a company that makes {{.product}}?",
+        []string{"product"},
+    )
+
+    // Render the template with data
+    result, err := prompt.Format(map[string]any{
+        "product": "colorful socks",
+    })
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    fmt.Println(result)
+    // Output: What is a good name for a company that makes colorful socks?
+}
+```
+
+Templates can accept multiple variables and use advanced templating features:
+
+```go
+// Multi-variable template with Go template format
+prompt := prompts.PromptTemplate{
+    Template: `
+Create a {{ .style | title }} {{ .content_type }} about {{ .topic }}.
+
+{{ if .requirements }}
+Requirements:
+{{ range .requirements }}
+- {{ . }}
+{{ end }}
+{{ end }}
+
+Target audience: {{ .audience | default "general" }}
+`,
+    InputVariables: []string{"style", "content_type", "topic", "requirements", "audience"},
+    TemplateFormat: prompts.TemplateFormatGoTemplate,
+}
+
+result, err := prompt.Format(map[string]any{
+    "style": "technical",
+    "content_type": "tutorial",
+    "topic": "machine learning",
+    "requirements": []string{"include examples", "explain key concepts"},
+    "audience": "developers",
+})
+```
+
+## Advanced features
+
+### Template composition
+For complex templates that include other templates, use `RenderTemplateFS`:
+
+```go
+//go:embed templates/*
+var templateFS embed.FS
+
+// templates/analysis.gohtml can include other templates
+result, err := prompts.RenderTemplateFS(
+    templateFS,
+    "analysis.gohtml",
+    prompts.TemplateFormatGoTemplate,
+    data,
+)
+```
+
+### Partial variables
+Pre-populate common values across templates:
+
+```go
+template := prompts.PromptTemplate{
+    Template: "Report for {{ user }} on {{ date }}: {{ summary }}",
+    InputVariables: []string{"user", "summary"},
+    PartialVariables: map[string]any{
+        "date": func() string {
+            return time.Now().Format("2006-01-02")
+        },
+    },
+}
+```
+
+### LLM integration
+Convert templates to LLM-compatible prompt values:
+
+```go
+promptValue, err := template.FormatPrompt(data)
+if err != nil {
+    log.Fatal(err)
+}
+
+// Use with any LLM
+response, err := llm.GenerateFromSingle(ctx, promptValue.String())
+```
+
+### Template validation
+Validate templates before use:
+
+```go
+err := prompts.CheckValidTemplate(
+    template.Template,
+    template.TemplateFormat,
+    template.InputVariables,
+)
+if err != nil {
+    log.Fatal("Invalid template:", err)
+}
+```
+
+## Security considerations
+
+LangChain Go templates are secure by default:
+
+- **Filesystem access blocked**: Templates cannot access files unless explicitly allowed
+- **Injection prevention**: Built-in protection against template injection attacks
+- **Controlled includes**: Use `RenderTemplateFS` for safe template composition
+- **Automatic sanitization**: Built-in XSS protection for web contexts
+
+```go
+// This will be safely blocked
+maliciousTemplate := "{{ \"/etc/passwd\" | readFile }}"
+result, err := prompts.RenderTemplate(
+    maliciousTemplate,
+    prompts.TemplateFormatGoTemplate,
+    data,
+) // Error: filesystem access denied
+
+// Safe controlled access
+result, err := prompts.RenderTemplateFS(
+    trustedFS,
+    "safe-template.gohtml",
+    prompts.TemplateFormatGoTemplate,
+    data,
+) // OK: controlled filesystem boundary
+```
+
+## Creating prompt templates for chat messages
+Chat Models take a list of chat messages as input - this list is commonly referred to as a prompt.
+These chat messages differ from a raw string (which you would pass into a LLM model), in that every message is associated with a role.
+
+For example, in OpenAI Chat Completion API, a chat message can be associated with the AI, human or system role.
+The model is supposed to follow instruction from system chat message more closely.
+
+You are encouraged to use these chat related prompt templates instead of PromptTemplate when querying chat models to fully exploit the potential of underlying chat model.
+
+```go
+import "github.com/tmc/langchaingo/prompts"
+
+func main() {
+   prompt := prompts.NewChatPromptTemplate([]prompts.MessageFormatter{
+        prompts.NewSystemMessagePromptTemplate(
+            "You are a translation engine that can only translate text and cannot interpret it.",
+            nil,
+        ),
+        prompts.NewHumanMessagePromptTemplate(
+            `translate this text from {{.inputLang}} to {{.outputLang}}:\n{{.input}}`,
+            []string{"inputLang", "outputLang", "input"},
+        ),
+    })
+
+    result, err := prompt.Format(map[string]any{
+        "inputLang": "English",
+        "outputLang": "Chinese",
+        "input": "I love programming",
+    })
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    fmt.Println(result)
+}
+```
+```
+[{You are a translation engine that can only translate text and cannot interpret it.} {translate this text from English to Chinese:\nI love programming}]
+```
+
+## Dig deeper
+
+- [Partial values](partial_values.md)

@@ -1,0 +1,17 @@
+---
+title: "Getting Started: Text Splitters"
+---
+
+# Getting Started: Text Splitters
+
+<Info>
+[Conceptual Guide](https://python.langchain.com/docs/modules/data_connection/document_transformers)
+</Info>
+
+Language Models are often limited by the amount of text that you can pass to them. Therefore, it is neccessary to split them up into smaller chunks. LangChain provides several utilities for doing so.
+
+Using a Text Splitter can also help improve the results from vector store searches, as eg. smaller chunks may sometimes be more likely to match a query. Testing different chunk sizes (and chunk overlap) is a worthwhile exercise to tailor the results to your use case.
+
+## All Text Splitters
+
+- [Examples](examples/index.md)

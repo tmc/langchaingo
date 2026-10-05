@@ -1,0 +1,36 @@
+---
+title: "Integrations: Embeddings"
+---
+
+# Integrations: Embeddings
+
+LangChainGo offers a number of Embeddings implementations that integrate with various model providers. These include:
+
+## OpenAI Embeddings
+
+```go
+import "github.com/tmc/langchaingo/embeddings"
+
+embedder, err := embeddings.NewEmbedder(llm)
+```
+
+## Google AI Embeddings
+
+```go
+import "github.com/tmc/langchaingo/llms/googleai"
+
+// The GoogleAI client can be used for embeddings
+llm, err := googleai.New(ctx)
+embedder, err := llm.CreateEmbedding(ctx, texts)
+```
+
+## Vertex AI Embeddings
+
+```go
+import "github.com/tmc/langchaingo/llms/googleai/vertex"
+
+llm, err := vertex.New(ctx)
+embedder, err := llm.CreateEmbedding(ctx, texts)
+```
+
+For more details on using embeddings, see the [Embeddings documentation](index.md).

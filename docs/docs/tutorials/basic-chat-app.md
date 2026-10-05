@@ -1,3 +1,7 @@
+---
+title: Building a Basic Chat Application
+---
+
 # Building a Basic Chat Application
 
 This tutorial will guide you through building a simple chat application using LangChainGo.

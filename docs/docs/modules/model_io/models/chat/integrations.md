@@ -1,0 +1,41 @@
+---
+title: "Integrations: Chat Models"
+---
+
+# Integrations: Chat Models
+
+LangChainGo offers a number of Chat Models implementations that integrate with various model providers. These include:
+
+## OpenAI
+
+```go
+import "github.com/tmc/langchaingo/llms/openai"
+
+llm, err := openai.New()
+```
+
+## Anthropic
+
+```go
+import "github.com/tmc/langchaingo/llms/anthropic"
+
+llm, err := anthropic.New()
+```
+
+## Google AI (Gemini)
+
+```go
+import "github.com/tmc/langchaingo/llms/googleai"
+
+llm, err := googleai.New(ctx)
+```
+
+## Ollama (Local Models)
+
+```go
+import "github.com/tmc/langchaingo/llms/ollama"
+
+llm, err := ollama.New()
+```
+
+For detailed configuration options for each provider, see the [Configure LLM Providers](../../../../how-to/configure-llm-providers.md) guide.

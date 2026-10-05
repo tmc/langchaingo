@@ -1,0 +1,57 @@
+---
+title: Partial values
+---
+
+# Partial values
+
+It can often make sense to "partial" a prompt template - passing in a subset of the required values to create a new prompt template which expects only the remaining subset of values.
+
+LangChain supports this in two ways:
+1. Partial formatting with string values
+2. Partial formatting with functions that return string values
+
+## Partial with strings
+
+One common use case is when you get some variables before others. For example, if you have a prompt template requiring two variables, `foo` and `baz`, but you get `foo` early in the chain and `baz` later, you can partial the prompt template with the `foo` value:
+
+```go
+prompt := prompts.NewPromptTemplate(
+    "{{.foo}}{{.baz}}",
+    []string{"foo", "baz"},
+)
+prompt.PartialVariables = map[string]any{
+    "foo": "foo",
+}
+
+result, _ := prompt.Format(map[string]any{
+    "baz": "baz",
+})
+// Output: foobaz
+```
+
+## Partial with functions
+
+The other common use is to partial with a function. This is useful when you have a variable you always want to fetch in a common way, like the current date:
+
+```go
+templateWithPartials := prompts.PromptTemplate{
+    Template:       "Daily Report for {{.user}}\nGenerated on: {{.timestamp}}\n\nSummary: {{.summary}}",
+    InputVariables: []string{"user", "summary"},
+    TemplateFormat: prompts.TemplateFormatGoTemplate,
+    PartialVariables: map[string]any{
+        "timestamp": func() string {
+            return time.Now().Format("2006-01-02 15:04:05")
+        },
+    },
+}
+
+report, _ := templateWithPartials.Format(map[string]any{
+    "user":    "Alice",
+    "summary": "All systems operational",
+})
+// Output: Daily Report for Alice
+//         Generated on: 2023-06-28 14:30:45
+//         Summary: All systems operational
+```
+
+For more examples, see the [comprehensive prompt templates example](https://github.com/tmc/langchaingo/tree/main/examples/prompt-templates-example).
