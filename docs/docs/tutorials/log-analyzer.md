@@ -404,19 +404,19 @@ Respond in JSON format:
 }
 
 func (la *LogAnalysis) PrintReport() {
-    fmt.Printf("📊 Log Analysis Report\n")
+    fmt.Printf("Log Analysis Report\n")
     fmt.Printf("=====================\n\n")
     
-    fmt.Printf("📈 Summary:\n")
+    fmt.Printf("Summary:\n")
     fmt.Printf("  Total Entries: %d\n", la.TotalEntries)
     fmt.Printf("  Errors: %d\n", la.ErrorCount)
     fmt.Printf("  Warnings: %d\n", la.WarningCount)
-    fmt.Printf("  Time Range: %s to %s\n\n", 
+    fmt.Printf("  Time Range: %s to %s\n\n",
         la.TimeRange.Start.Format("2006-01-02 15:04:05"),
         la.TimeRange.End.Format("2006-01-02 15:04:05"))
     
     if len(la.TopErrors) > 0 {
-        fmt.Printf("🔴 Top Error Patterns:\n")
+        fmt.Printf("Top Error Patterns:\n")
         for i, pattern := range la.TopErrors {
             if i >= 5 { break }
             fmt.Printf("  %d. %s (%d occurrences)\n", i+1, pattern.Pattern, pattern.Count)
@@ -425,7 +425,7 @@ func (la *LogAnalysis) PrintReport() {
     }
     
     if len(la.Anomalies) > 0 {
-        fmt.Printf("⚠️  Detected Anomalies:\n")
+        fmt.Printf("Detected Anomalies:\n")
         for _, anomaly := range la.Anomalies {
             fmt.Printf("  %s - %s (%s)\n", anomaly.Type, anomaly.Description, anomaly.Severity)
         }
@@ -433,7 +433,7 @@ func (la *LogAnalysis) PrintReport() {
     }
     
     if len(la.Recommendations) > 0 {
-        fmt.Printf("💡 Recommendations:\n")
+        fmt.Printf("Recommendations:\n")
         for i, rec := range la.Recommendations {
             fmt.Printf("  %d. %s\n", i+1, rec)
         }
@@ -461,7 +461,7 @@ func main() {
 
     if *watch {
         // Watch mode - simplified version
-        fmt.Printf("👀 Watching %s for changes...\n", *file)
+        fmt.Printf("Watching %s for changes...\n", *file)
         for {
             if err := analyzeFile(analyzer, *file, *output); err != nil {
                 log.Printf("Analysis error: %v", err)
@@ -476,7 +476,7 @@ func main() {
 }
 
 func analyzeFile(analyzer *LogAnalyzer, filename, outputFile string) error {
-    fmt.Printf("🔍 Analyzing %s...\n", filename)
+    fmt.Printf("Analyzing %s...\n", filename)
     
     entries, err := analyzer.ParseLogFile(filename)
     if err != nil {
@@ -499,7 +499,7 @@ func analyzeFile(analyzer *LogAnalyzer, filename, outputFile string) error {
         if err := os.WriteFile(outputFile, data, 0644); err != nil {
             return fmt.Errorf("writing report: %w", err)
         }
-        fmt.Printf("📄 Report saved to %s\n", outputFile)
+        fmt.Printf("Report saved to %s\n", outputFile)
     }
 
     return nil
@@ -594,7 +594,7 @@ func (lm *LogMonitor) Start(filename string) error {
         return err
     }
 
-    fmt.Printf("🚨 Monitoring %s for critical issues...\n", filename)
+    fmt.Printf("Monitoring %s for critical issues...\n", filename)
 
     for {
         select {
@@ -638,7 +638,7 @@ func (lm *LogMonitor) checkForAlerts(filename string) {
             return
         }
 
-        fmt.Printf("🚨 ALERT: %s\n", alert)
+        fmt.Printf("ALERT: %s\n", alert)
         // Here you would send to Slack, email, etc.
     }
 }

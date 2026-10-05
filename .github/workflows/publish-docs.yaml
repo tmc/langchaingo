@@ -76,7 +76,7 @@ jobs:
         with:
           script: |
             const url = '${{ steps.deployment.outputs.page_url }}';
-            const message = `📚 Documentation preview available at: ${url}`;
+            const message = `Documentation preview available at: ${url}`;
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
