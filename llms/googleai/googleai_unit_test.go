@@ -4,8 +4,11 @@ import (
 	"context"
 	"testing"
 
+	"github.com/google/generative-ai-go/genai"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/llms"
+	"google.golang.org/api/option"
 )
 
 func TestNew(t *testing.T) {
@@ -273,6 +276,23 @@ func TestErrorConstants(t *testing.T) {
 	assert.Equal(t, "no content in generation response", ErrNoContentInResponse.Error())
 	assert.Equal(t, "unknown part type in generation response", ErrUnknownPartInResponse.Error())
 	assert.Equal(t, "invalid mime type on content", ErrInvalidMimeType.Error())
+}
+
+func TestGenerateFromMessagesOnlySystem(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+	client, err := genai.NewClient(ctx, option.WithAPIKey("test-key"))
+	require.NoError(t, err)
+	defer client.Close()
+
+	model := client.GenerativeModel("gemini-pro")
+	messages := []llms.MessageContent{
+		llms.TextParts(llms.ChatMessageTypeSystem, "you are a helpful assistant"),
+	}
+
+	_, err = generateFromMessages(ctx, model, messages, &llms.CallOptions{})
+	assert.ErrorIs(t, err, ErrNoMessageContent)
 }
 
 func TestGoogleAIImplementsModelInterface(t *testing.T) {
