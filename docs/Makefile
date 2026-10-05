@@ -18,7 +18,7 @@ build:
 	rm -rf $(SITE)
 	mkdir -p $(SITE)
 	cp -R static/. $(SITE)/
-	$(MD2HTML) $(MD2HTML_FLAGS) -html-ext html \
+	$(MD2HTML) $(MD2HTML_FLAGS) -html-layout dir \
 		-site-url $(SITE_URL) \
 		-edit-url 'https://github.com/tmc/langchaingo/edit/main/docs/docs/{path}' \
 		-html $(SITE)/docs docs
