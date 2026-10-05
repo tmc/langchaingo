@@ -159,6 +159,7 @@ Pre-populate common values across templates:
 template := prompts.PromptTemplate{
     Template: "Report for {{ user }} on {{ date }}: {{ summary }}",
     InputVariables: []string{"user", "summary"},
+    TemplateFormat: prompts.TemplateFormatJinja2,
     PartialVariables: map[string]any{
         "date": func() string {
             return time.Now().Format("2006-01-02")
@@ -177,7 +178,7 @@ if err != nil {
 }
 
 // Use with any LLM
-response, err := llm.GenerateFromSingle(ctx, promptValue.String())
+response, err := llms.GenerateFromSinglePrompt(ctx, llm, promptValue.String())
 ```
 
 ### Template validation
@@ -196,24 +197,31 @@ if err != nil {
 
 ## Security considerations
 
-LangChain Go templates are secure by default:
+LangChain Go templates limit what a template can reach:
 
-- **Filesystem access blocked**: Templates cannot access files unless explicitly allowed
-- **Injection prevention**: Built-in protection against template injection attacks
+- **Filesystem access blocked**: Templates cannot read files unless you pass a filesystem
 - **Controlled includes**: Use `RenderTemplateFS` for safe template composition
-- **Automatic sanitization**: Built-in XSS protection for web contexts
+- **Opt-in sanitization**: Values are inserted unchanged by default. Pass `prompts.WithSanitization()` to HTML-escape them before rendering a template with untrusted data into a web page
 
 ```go
-// This will be safely blocked
-maliciousTemplate := "{{ \"/etc/passwd\" | readFile }}"
+// Jinja2 includes cannot load from the filesystem
+maliciousTemplate := `{% include "/etc/passwd" %}`
 result, err := prompts.RenderTemplate(
     maliciousTemplate,
+    prompts.TemplateFormatJinja2,
+    data,
+) // Error: template loading from filesystem disabled
+
+// HTML-escape untrusted values
+result, err = prompts.RenderTemplate(
+    "Hello {{ .name }}",
     prompts.TemplateFormatGoTemplate,
     data,
-) // Error: filesystem access denied
+    prompts.WithSanitization(),
+)
 
 // Safe controlled access
-result, err := prompts.RenderTemplateFS(
+result, err = prompts.RenderTemplateFS(
     trustedFS,
     "safe-template.gohtml",
     prompts.TemplateFormatGoTemplate,
