@@ -49,7 +49,7 @@ The first man to walk on the moon was Neil Armstrong on July 20, 1969. He made t
 The first human to go to space was Yuri Gagarin, a Soviet cosmonaut. He completed an orbit around the Earth in the spacecraft Vostok 1 on April 12, 1961. This historic event marked the beginning of human space exploration.
 ```
 
-Congratulations! You have successfully built and executed your first LangChainGo LLM-backed program using Mistral's cloud-based inference.
+The example sends prompts to Mistral and prints the responses.
 
 Here is the entire program (from [mistral-completion-example](https://github.com/tmc/langchaingo/blob/main/examples/mistral-completion-example/mistral_completion_example.go)):
 

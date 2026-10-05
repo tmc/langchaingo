@@ -8,7 +8,7 @@ title: Agent Executors
 [Conceptual Guide](https://python.langchain.com/docs/modules/agents/concepts#agentexecutor)
 </Info>
 
-To make agents more powerful we need to make them iterative, ie. call the model multiple times until they arrive at the final answer. That's the job of the AgentExecutor.
+An executor runs the agent loop, invoking tools and returning their results to the agent until it produces an answer.
 
 ## Example
 An example that initialize a MRKL (Modular Reasoning, Knowledge and Language, pronounced "miracle") agent executor.

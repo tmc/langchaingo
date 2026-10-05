@@ -8,7 +8,7 @@ title: Memory
 [Conceptual Guide](../../concepts/index.md) • [How-to Guides](../../how-to/index.md)
 </Info>
 
-Memory enables LangChainGo applications to persist state between calls, maintaining conversation context and enabling sophisticated, stateful interactions.
+Memory keeps conversation state between calls.
 
 ## Key Concepts
 

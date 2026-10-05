@@ -6,7 +6,7 @@ title: Fake LLM
 
 ## Overview
 
-This documentation provides an overview of the `fake` package, which offers a simulated implementation of a Language Learning Model (LLM) for testing purposes in Go applications.
+The `fake` package returns configured responses for tests that use a language model.
 
 ## Installation
 
@@ -98,4 +98,4 @@ Adds a new response to the list of possible responses of the fake LLM.
 
 ## Purpose
 
-The fake package is designed to facilitate testing of applications that interact with language learning models, without relying on real model implementations. It helps validate application logic and behavior in a controlled environment.
+The fake package is designed to facilitate testing of applications that interact with language models, without relying on real model implementations. It helps validate application logic and behavior in a controlled environment.

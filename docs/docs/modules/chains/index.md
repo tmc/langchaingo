@@ -8,7 +8,7 @@ title: Chains
 [Conceptual Guide](../../concepts/index.md) • [How-to Guides](../../how-to/index.md)
 </Info>
 
-Chains enable you to combine language models with other sources of information, third-party APIs, or even other language models. This allows you to create powerful, multi-step applications that go beyond single LLM calls.
+Chains enable you to combine language models with other sources of information, third-party APIs, or even other language models. Use chains to coordinate multiple calls in an application.
 
 LangChainGo provides a standard interface for chains, along with several built-in implementations for common patterns. You can also create custom chains by implementing the `Chain` interface.
 

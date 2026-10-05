@@ -4,7 +4,7 @@ title: Tutorials
 
 # Tutorials
 
-Welcome to the LangChainGo tutorials! These step-by-step guides help you build complete applications using LangChainGo.
+These tutorials walk through building applications with LangChainGo.
 
 ## Learning path
 
@@ -48,4 +48,4 @@ These tutorials go beyond simple chatbots to show practical applications:
 - **Production skills**: Deploy, monitor, and scale AI-powered applications
 - **Integration techniques**: Connect with external tools and services
 
-Let's get started with your first LangChainGo application!
+Start with the [chat application tutorial](basic-chat-app.md).

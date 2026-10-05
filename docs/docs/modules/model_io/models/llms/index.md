@@ -8,8 +8,7 @@ title: LLMs
 [Conceptual Guide](https://python.langchain.com/docs/modules/model_io/llms)
 </Info>
 
-Large Language Models (LLMs) are a core component of LangChain. 
-LangChain does not serve its own LLMs, but rather provides a standard interface for interacting with many different LLMs.
+LangChainGo provides a shared interface for interacting with large language model providers.
 
 All LLMs implement the `llms.Model` interface:
 

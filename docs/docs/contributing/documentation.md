@@ -4,7 +4,7 @@ title: Documentation contribution guide
 
 # Documentation contribution guide
 
-This guide helps you contribute documentation to LangChainGo. We especially need help with tutorials and how-to guides!
+This guide covers writing, building, and checking LangChainGo documentation.
 
 ## Documentation structure
 
@@ -36,7 +36,7 @@ Our documentation is organized into four main categories:
 
 ## Writing tutorials
 
-Tutorials are complete learning experiences. Here's how to write a great tutorial:
+Tutorials guide readers through a complete task. Use the following template:
 
 ### Tutorial template
 
@@ -292,5 +292,3 @@ Documentation contributors are credited in:
 - The documentation itself (author attribution)
 - Release notes
 - Contributors list
-
-Thank you for helping improve LangChainGo documentation!

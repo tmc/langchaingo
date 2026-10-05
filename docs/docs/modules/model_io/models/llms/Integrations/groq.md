@@ -6,7 +6,7 @@ title: Groq
 
 ## Overview
 
-This documentation provides a detailed overview and technical guidance for integrating Groq's machine learning models with the Langchaingo library in the Go programming environment. This integration allows Go developers to leverage the power of pre-trained AI models for various applications, including natural language processing, text generation, and more.
+Use Groq models from a Go application with LangChainGo.
 
 ## Prerequisites
 
@@ -21,20 +21,14 @@ To install the Groq package in your Go project, run the following command:
 go get github.com/tmc/langchaingo
 ```
 
-Ensure that your Groq API key is set as an environment variable:
-    
-    ```bash
-    export GROQ_API_KEY=your-api-key
-    ```
+Set the API key in your shell before running the example:
 
-You can use .env file to store the API key and load it in your Go application.
+```bash
+export GROQ_API_KEY="your-api-key"
+```
 
-.env file:
-
-    ```bash
-    GROQ_API_KEY=your-api-key
-    ```
-but you not need use godotenv package to load the .env file.
+The example reads `GROQ_API_KEY` from the process environment. A `.env`
+file requires a separate loader or shell setup.
 
 ## Usage
 

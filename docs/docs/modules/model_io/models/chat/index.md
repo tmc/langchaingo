@@ -22,7 +22,7 @@ There are currently four different classes of `ChatMessage` supported by LangCha
 - `HumanChatMessage`: A chat message that is sent as if from a Human's point of view.
 - `AIChatMessage`: A chat message that is sent from the point of view of the AI system to which the Human is corresponding.
 - `SystemChatMessage`: A chat message that gives the AI system some information about the conversation. This is usually sent at the beginning of a conversation.
-- `ChatMessage`: A generic chat message, with not only a `"text"` field but also an arbitrary `"role"` field.
+- `ChatMessage`: A generic chat message with text and a role.
 
 ## Dig deeper
 

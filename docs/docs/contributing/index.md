@@ -4,13 +4,13 @@ title: Contributing to LangChainGo
 
 # Contributing to LangChainGo
 
-Thank you for your interest in contributing to LangChainGo! This guide helps you get started.
+This guide covers contributing code, tests, and documentation to LangChainGo.
 
 ## Ways to contribute
 
 ### 1. Code contributions
 
-- **Bug fixes**: Help us squash bugs and improve stability
+- **Bug fixes**: Fix bugs and improve stability
 - **New features**: Implement new LLM providers, tools, or chains
 - **Performance improvements**: Optimize existing code
 - **Tests**: Improve test coverage and add missing tests
@@ -132,5 +132,3 @@ Contributors are recognized in:
 - Open a [GitHub Discussion](https://github.com/tmc/langchaingo/discussions)
 - Check existing issues and PRs
 - Review the documentation
-
-Thank you for helping make LangChainGo better!

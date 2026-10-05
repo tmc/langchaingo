@@ -4,77 +4,26 @@ title: How-to guides
 
 # How-to guides
 
-These how-to guides answer "How do I...?" questions with practical solutions for specific problems.
+Use these guides and examples for specific tasks.
 
-**Note**: Many guides are still being written. Want to help? See our [documentation contribution guide](../contributing/documentation.md)!
+## Configure models
 
-## LLMs and chat models
+- [Configure LLM providers](configure-llm-providers.md): set credentials, endpoints, and model options.
+- [Chat model integrations](../modules/model_io/models/chat/integrations.md): create provider clients.
+- [Embedding integrations](../modules/model_io/models/embeddings/integrations.md): generate embeddings.
 
-### Basic configuration
-- [How to configure different LLM providers](configure-llm-providers.md)
+## Prepare inputs and manage conversations
 
-### Advanced features
-- How to handle API rate limits and retries
-- How to stream responses from LLMs  
-- How to use function calling with OpenAI
-- How to implement custom LLM providers
+- [Prompt templates](../modules/model_io/prompts/prompt_templates/index.md): build prompts from variable values.
+- [Partial values](../modules/model_io/prompts/prompt_templates/partial_values.md): pre-fill template variables.
+- [Memory examples](../modules/memory/examples/index.md): find conversation-history examples in the repository.
 
-## Prompts and templates
+## Run agents
 
-### Template creation
-- How to create dynamic prompt templates
-- How to implement few-shot prompting
+- [Agent executors](../modules/agents/executor/getting-started.md): initialize an agent with tools and run it.
 
-### Output processing
-- How to parse structured output from LLMs
-- How to validate and sanitize LLM outputs
+## Contribute a guide
 
-## Memory and conversation
-
-### Memory management
-- How to implement conversation memory
-- How to persist conversation history
-- How to implement context windowing
-- How to handle long conversations
-
-## Agents and tools
-
-### Tool development
-- How to create custom tools for agents
-- How to handle tool execution errors
-
-### Agent optimization
-- How to implement multi-step reasoning
-- How to optimize agent performance
-
-## Production and deployment
-
-### Project structure
-- How to structure LangChainGo projects
-- How to handle secrets and configuration
-
-### Monitoring and scaling
-- How to implement logging and monitoring
-- How to deploy with Docker
-- How to implement health checks
-- How to scale LangChainGo applications
-
-## Testing and debugging
-
-### Testing strategies
-- How to write tests for LangChainGo components
-- How to mock LLM responses for testing
-
-### Performance
-- How to debug chain execution
-- How to benchmark performance
-
-## Integration patterns
-
-### Web applications
-- How to integrate with web frameworks (Gin, Echo)
-- How to implement background processing
-
-### Data integration
-- How to integrate with databases
-- How to implement caching strategies
+Additional guides for retrieval, deployment, testing, and performance are
+planned. See the [documentation contribution guide](../contributing/documentation.md)
+to propose or write one.

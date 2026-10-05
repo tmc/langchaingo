@@ -6,7 +6,7 @@ title: "Getting Started: Agent Executors"
 
 Agents use an LLM to determine which actions to take and in what order. An action can either be using a tool and observing its output, or returning to the user.
 
-When used correctly agents can be extremely powerful. In this tutorial, we show you how to easily use agents through the simplest, highest level API.
+This tutorial shows how to initialize an agent and run it with an executor.
 
 In order to load agents, you should understand the following concepts:
 

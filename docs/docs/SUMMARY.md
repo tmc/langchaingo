@@ -1,6 +1,6 @@
 # Summary
 
-- [Welcome to LangChainGo](index.md)
+- [LangChainGo](index.md)
 
 ## Tutorials
 

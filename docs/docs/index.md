@@ -1,64 +1,42 @@
 ---
-title: Welcome to LangChainGo
+title: LangChainGo
 ---
 
-# Welcome to LangChainGo
+# LangChainGo
 
-LangChainGo is the [Go Programming Language](https://go.dev/) port/fork of
-[LangChain](https://www.langchain.com/).
+LangChainGo is a Go library for building applications with language models.
+It provides interfaces for model providers, prompts, chains, memory, and agents.
 
-LangChain is a framework for developing applications powered by language models. We believe that the most powerful and differentiated applications will not only call out to a language model via an API, but will also:
+## Start here
 
-- _Be data-aware_: connect a language model to other sources of data
-- _Be agentic_: allow a language model to interact with its environment
+| Task | Guide |
+| --- | --- |
+| Run a model locally | [Ollama quickstart](getting-started/guide-ollama.md) |
+| Connect to OpenAI | [OpenAI quickstart](getting-started/guide-openai.md) |
+| Use Mistral | [Mistral quickstart](getting-started/guide-mistral.md) |
+| Build a chat application | [Basic chat tutorial](tutorials/basic-chat-app.md) |
+| Configure a provider | [Provider configuration](how-to/configure-llm-providers.md) |
+| Understand the library's interfaces | [Architecture](concepts/architecture.md) |
 
-The LangChain framework is designed with the above principles in mind.
+## Guides
 
-## Documentation Structure
+[Tutorials](tutorials/index.md) walk through building applications.
+[How-to guides](how-to/index.md) cover specific tasks.
+[Concepts](concepts/index.md) explain the library's design.
 
-_**Note**: These docs are for [LangChainGo](https://github.com/tmc/langchaingo)._
+## Components
 
-Our documentation follows a structured approach to help you learn and use LangChainGo effectively:
+- [Models](modules/model_io/models/index.md), [prompts](modules/model_io/prompts/index.md), and [output parsers](modules/model_io/output_parsers/index.md)
+- [Text splitters](modules/data_connection/text_splitters/index.md) and [retrievers](modules/data_connection/retrievers/index.md)
+- [Chains](modules/chains/index.md), [memory](modules/memory/index.md), and [agents](modules/agents/index.md)
 
-### 📚 [Tutorials](tutorials/index.md)
-Step-by-step guides to build complete applications. Perfect for learning LangChainGo from the ground up.
+## API reference
 
-- **Getting Started**: [Quick setup with Ollama](getting-started/guide-ollama.md) • [Quick setup with OpenAI](getting-started/guide-openai.md)
-- **Basic Applications**: Simple chat apps, Q&A systems, document summarization
-- **Advanced Applications**: RAG systems, agents with tools, multi-modal apps
-- **Production**: Deployment, optimization, monitoring
+The [Go package reference](https://pkg.go.dev/github.com/tmc/langchaingo)
+documents exported types, functions, and methods.
 
-### 🛠️ [How-to Guides](how-to/index.md)
-Practical solutions for specific problems. Find answers to "How do I...?" questions.
+## Contributing
 
-- **LLM Integration**: Configure providers, handle rate limits, implement streaming
-- **Document Processing**: Load documents, implement search, optimize retrieval
-- **Agent Development**: Create custom tools, multi-step reasoning, error handling
-- **Production**: Project structure, logging, deployment, scaling
-
-### 🧠 [Concepts](concepts/index.md)
-Deep explanations of LangChainGo's architecture and design principles.
-
-- **Core Architecture**: Framework design, interfaces, Go-specific patterns
-- **Language Models**: Model abstraction, communication patterns, optimization
-- **Agents & Memory**: Agent patterns, memory management, state persistence
-- **Production**: Performance, reliability, security considerations
-
-### 🔧 Components
-Technical reference for all LangChainGo modules and their capabilities.
-
-- **Model I/O**: LLMs, Chat Models, Embeddings, and Prompts
-- **Data Connection**: Document loaders, vector stores, text splitters, retrievers
-- **[Chains](modules/chains/index.md)**: Sequences of calls and end-to-end applications
-- **[Memory](modules/memory/index.md)**: State persistence and conversation management
-- **[Agents](modules/agents/index.md)**: Decision-making and autonomous behavior
-
-## API Reference
-
-[Here](https://pkg.go.dev/github.com/tmc/langchaingo) you can find the API reference for all of the modules in LangChain, as well as full documentation for all exported classes and functions.
-
-## Get Involved
-
-- **[Contributing Guide](contributing/index.md)**: Learn how to contribute code and documentation
-- **[GitHub Discussions](https://github.com/tmc/langchaingo/discussions)**: Join the conversation about LangChainGo
-- **[GitHub Issues](https://github.com/tmc/langchaingo/issues)**: Report bugs or request features
+Read the [contributing guide](contributing/index.md) to contribute code or documentation.
+Use [GitHub Issues](https://github.com/tmc/langchaingo/issues) for bug reports
+and [GitHub Discussions](https://github.com/tmc/langchaingo/discussions) for questions.

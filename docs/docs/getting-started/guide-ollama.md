@@ -39,7 +39,7 @@ You should see output similar to the following:
 The first human to set foot on the moon was Neil Armstrong, an American astronaut, who stepped onto the lunar surface during the Apollo 11 mission on July 20, 1969.
 ```
 
-Congratulations! You have successfully built and executed your first open-source LLM-based program using local inference.
+The example sends a prompt to the local Ollama server and prints the response.
 
 Here is the entire program (from [ollama-completion-example](https://github.com/tmc/langchaingo/blob/main/examples/ollama-completion-example/ollama_completion_example.go)):
 

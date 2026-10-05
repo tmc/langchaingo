@@ -48,7 +48,7 @@ You should see output similar to the following:
 The first man to walk on the moon was Neil
 ```
 
-Congratulations! You have successfully built and executed your first LangChainGo LLM-backed program using OpenAI's cloud-based inference.
+The example sends a prompt to OpenAI and prints the response.
 
 Here is the entire program (from [openai-completion-example](https://github.com/tmc/langchaingo/blob/main/examples/openai-completion-example/openai_completion_example.go)):
 

@@ -6,7 +6,7 @@ title: Hugging Face
 
 ## Overview
 
-This documentation provides a detailed overview and technical guidance for integrating the Hugging Face machine learning models with the LangchainGo library in the Go programming environment. This integration allows Go developers to leverage the power of pre-trained AI models for various applications, including natural language processing, text generation, and more.
+Use Hugging Face models from a Go application with LangChainGo.
 
 ## Prerequisites
 Go programming language installed on your machine (version 1.15 or higher recommended).

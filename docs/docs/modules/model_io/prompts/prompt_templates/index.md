@@ -8,7 +8,7 @@ title: Prompt templates
 [Conceptual Guide](https://python.langchain.com/docs/modules/model_io/prompts/quick_start#prompttemplate)
 </Info>
 
-Prompt templates are the foundation of effective prompt engineering. They allow you to create reusable, parameterized prompts that can be dynamically filled with data. LangChain Go provides powerful templating capabilities with built-in security and support for multiple template formats.
+Prompt templates combine reusable text with variable values. LangChainGo supports Go templates, Jinja2, and F-strings.
 
 ## Core concepts
 
