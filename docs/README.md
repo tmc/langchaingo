@@ -1,50 +1,43 @@
 # Docs site
 
-The documentation for this project is built using [Docusaurus](https://docusaurus.io/), a modern static website generator.
+The documentation is plain Markdown in [docs/](docs), rendered with
+[md2html](https://github.com/tmc/md2html) and published to GitHub Pages at
+https://tmc.github.io/langchaingo/docs/ by
+[publish-docs.yaml](../.github/workflows/publish-docs.yaml).
 
-### Installation
+Install md2html and mdvet at the version the workflow uses:
 
-```
-$ pnpm install
-```
+	make install
 
-### Local Development
+Preview with live reload at http://localhost:8080:
 
-```
-$ pnpm run start
-```
+	make serve
 
-This command starts a local development server and opens up a browser window. Most changes are reflected live without having to restart the server.
+Build the static site into `_site` (pages under `_site/docs`, the files in
+[static/](static) at the root):
 
-### Build
+	make build
 
-```
-$ pnpm run build
-```
+Check links, anchors, file name casing and MDX components:
 
-This command generates static content into the `build` directory and can be served using any static contents hosting service.
+	make vet
 
-### Deployment
+Check prose style with Vale:
 
-Using SSH:
+	make lint-docs
 
-```
-$ USE_SSH=true pnpm run deploy
-```
+## Authoring
 
-Not using SSH:
-
-```
-$ GIT_USER=<Your GitHub username> pnpm run deploy
-```
-
-If you are using GitHub pages for hosting, this command is a convenient way to build the website and push to the `gh-pages` branch.
-
-### Continuous Integration
-
-Some common defaults for linting/formatting have been set for you. If you integrate your project with an open source Continuous Integration system (e.g. Travis CI, CircleCI), you may check for issues using the following command.
-
-```
-$ pnpm run ci
-```
-
+- Navigation order comes from [docs/SUMMARY.md](docs/SUMMARY.md). Add new
+  pages there.
+- Link to other pages by relative path to the `.md` file, such as
+  `[Agents](../modules/agents/index.md)`. md2html rewrites these to the
+  rendered pages.
+- Pages with `draft: true` in their front matter are not published.
+- md2html renders a subset of MDX. Use its components for callouts
+  (`<Info>`, `<Note>`, `<Tip>`, `<Warning>`, `<Danger>`), with each tag on
+  a line of its own. `make vet` reports components md2html does not know.
+- Name pages `.md`: md2html does not build `.mdx` files. MDX imports,
+  exports and JavaScript expressions are not supported, nor is raw HTML.
+  To show a program from [examples/](../examples), copy it into a fenced
+  code block and link to its source.

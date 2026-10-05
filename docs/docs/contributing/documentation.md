@@ -223,40 +223,23 @@ Create a pull request with:
 
 ### Building documentation
 
-#### Local development
+The site is built with [md2html](https://github.com/tmc/md2html). From the
+`docs` directory:
 
 ```bash
-cd docs
-npm install
-npm run start
+make install   # install md2html and mdvet
+make serve     # preview with live reload at http://localhost:8080
+make build     # write the static site to _site
 ```
 
-This starts a local server at `http://localhost:3000`
-
-#### Docker development
-
-For a containerized environment:
-
-```bash
-cd docs
-
-# Quick development server with live reload
-make docker-dev
-
-# Or build and run a persistent container
-make docker-run
-
-# Clean up when done
-make docker-clean
-```
-
-The Docker approach ensures consistent Node.js environment and dependencies.
+Navigation order comes from `docs/SUMMARY.md`; add new pages there. Link to
+other pages by relative path to their `.md` file.
 
 ### Testing documentation
 
 Before submitting:
 
-1. **Check Links**: Ensure all links work
+1. **Check Links**: Run `make vet` to check links and anchors
 2. **Run Code**: Test all code examples
 3. **Review Formatting**: Check rendering in browser
 4. **Lint Documentation**: Run Vale to check style consistency

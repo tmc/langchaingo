@@ -1,14 +1,39 @@
-.PHONY: start
-start:
-	pnpm run start
+# The site is built with md2html (https://github.com/tmc/md2html).
+# Keep MD2HTML_VERSION in sync with .github/workflows/publish-docs.yaml.
+MD2HTML_VERSION ?= v0.0.0-20260923024514-2cf8d540c613
+MD2HTML ?= md2html
+MDVET ?= mdvet
+SITE ?= _site
+ADDR ?= :8080
+SITE_URL ?= https://tmc.github.io/langchaingo/docs
+
+MD2HTML_FLAGS = -nav -title LangChainGo
+
+.PHONY: serve
+serve:
+	$(MD2HTML) $(MD2HTML_FLAGS) -C docs -http $(ADDR)
 
 .PHONY: build
 build:
-	pnpm run build
+	rm -rf $(SITE)
+	mkdir -p $(SITE)
+	cp -R static/. $(SITE)/
+	$(MD2HTML) $(MD2HTML_FLAGS) -html-ext html \
+		-site-url $(SITE_URL) \
+		-edit-url 'https://github.com/tmc/langchaingo/edit/main/docs/docs/{path}' \
+		-html $(SITE)/docs docs
 
-.PHONY: lint
-lint:
-	pnpm run lint
+.PHONY: vet
+vet:
+	$(MDVET) -c links,anchors,case,assets,frontmatter,components docs
+
+.PHONY: install
+install:
+	go install github.com/tmc/md2html/cmd/...@$(MD2HTML_VERSION)
+
+.PHONY: clean
+clean:
+	rm -rf $(SITE)
 
 .PHONY: lint-deps
 lint-deps:
@@ -27,26 +52,3 @@ lint-deps:
 .PHONY: lint-docs
 lint-docs: lint-deps
 	vale docs
-
-.PHONY: docker-build
-docker-build: docker-setup
-	docker build -t langchaingo-docs .
-
-.PHONY: docker-run
-docker-run: docker-build
-	@echo "Starting documentation server at http://localhost:3000"
-	docker run --rm -p 3000:3000 -v $(PWD):/app langchaingo-docs
-
-.PHONY: docker-dev
-docker-dev: docker-setup
-	@echo "Starting development environment with live reload..."
-	docker run --rm -it -p 3000:3000 -v $(PWD):/app -w /app node:18-alpine sh -c "\
-		npm install -g pnpm && \
-		pnpm install && \
-		pnpm run start --host 0.0.0.0"
-
-.PHONY: docker-clean
-docker-clean:
-	@echo "Cleaning up Docker resources..."
-	-docker rmi langchaingo-docs
-	-rm -f Dockerfile

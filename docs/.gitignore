@@ -22,3 +22,6 @@ yarn-error.log*
 
 # ESLint
 .eslintcache
+
+# md2html output
+/_site
