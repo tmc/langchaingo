@@ -42,6 +42,19 @@ jobs:
           check-latest: false
       - name: Build
         run: go build -v ./...
+
+  vulncheck:
+    name: govulncheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+          check-latest: false
+      - name: Check for reachable vulnerabilities
+        run: go run golang.org/x/vuln/cmd/govulncheck@v1.8.0 ./...
   
   test:
     name: test
