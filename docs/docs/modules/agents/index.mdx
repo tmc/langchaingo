@@ -106,6 +106,14 @@ func (c CustomTool) Call(ctx context.Context, input string) (string, error) {
 
 ## Agent Components
 
-- [Agent types](agents/index.mdx)
-- [Agent executors](executor/index.mdx)
-- [Tools](tools/index.mdx)
+<CardGroup cols={3}>
+<Card title="Agent types" href="agents/index.mdx">
+The agents LangChainGo provides and how they choose tools.
+</Card>
+<Card title="Agent executors" href="executor/index.mdx">
+Run the agent loop until the agent produces an answer.
+</Card>
+<Card title="Tools" href="tools/index.mdx">
+Functions and APIs an agent can call.
+</Card>
+</CardGroup>
