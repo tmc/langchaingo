@@ -510,7 +510,7 @@ func analyzeFile(analyzer *LogAnalyzer, filename, outputFile string) error {
 
 Create `sample.log` for testing:
 
-```
+```text
 2024-01-15 10:30:01 [INFO] Application started successfully
 2024-01-15 10:30:02 [INFO] Database connection established
 2024-01-15 10:30:15 [ERROR] Failed to process user request: invalid email format user@

@@ -57,7 +57,7 @@ if err != nil {
 fmt.Println(res)
 ```
 
-```
+```text
 map[text:
 
 Socktastic!]
@@ -78,7 +78,7 @@ if err != nil {
 fmt.Println(text)
 ```
 
-```
+```text
 Socktastic!
 ```
 

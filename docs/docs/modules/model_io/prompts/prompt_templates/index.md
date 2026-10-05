@@ -257,7 +257,7 @@ func main() {
     fmt.Println(result)
 }
 ```
-```
+```text
 [{You are a translation engine that can only translate text and cannot interpret it.} {translate this text from English to Chinese:\nI love programming}]
 ```
 

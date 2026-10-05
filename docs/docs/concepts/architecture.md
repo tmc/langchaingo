@@ -139,7 +139,7 @@ response, err := llm.GenerateContent(ctx, messages,
 
 The models layer provides abstractions for different types of language models:
 
-```
+```text
 ┌─────────────────────────────────────────────────────────┐
 │                    Models Layer                         │
 ├─────────────────┬─────────────────┬─────────────────────┤
@@ -177,7 +177,7 @@ prompt, err := template.Format(map[string]any{
 
 Memory provides stateful conversation management:
 
-```
+```text
 ┌─────────────────────────────────────────────────────────┐
 │                  Memory Subsystem                       │
 ├─────────────────┬─────────────────┬─────────────────────┤
@@ -213,7 +213,7 @@ sequential, err := chains.NewSequentialChain(
 
 Agents provide autonomous behavior:
 
-```
+```text
 ┌─────────────────────────────────────────────────────────┐
 │                  Agent Framework                        │
 ├─────────────────┬─────────────────┬─────────────────────┤
@@ -229,14 +229,14 @@ Agents provide autonomous behavior:
 ## Data flow
 
 ### Request flow
-```
+```text
 User Input → Prompt Template → LLM → Output Parser → Response
      ↓             ↓              ↓         ↓           ↓
    Memory ←── Chain Logic ←── API Call ←── Processing ←── Memory
 ```
 
 ### Agent flow
-```
+```text
 User Input → Agent Planning → Tool Selection → Tool Execution
      ↓              ↓              ↓              ↓
    Memory ←── Result Analysis ←── Tool Results ←── External APIs
