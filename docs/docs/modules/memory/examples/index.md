@@ -3,3 +3,19 @@ title: "Examples: Memory"
 ---
 
 # Examples: Memory
+
+These programs in the repository's
+[examples](https://github.com/tmc/langchaingo/tree/main/examples) directory
+use the memory package:
+
+- [chains-conversation-memory-sqlite](https://github.com/tmc/langchaingo/tree/main/examples/chains-conversation-memory-sqlite):
+  a conversation chain whose history is stored in SQLite.
+- [zep-memory-chain-example](https://github.com/tmc/langchaingo/tree/main/examples/zep-memory-chain-example):
+  a conversation chain backed by Zep memory.
+- [google-alloydb-chat-message-history-example](https://github.com/tmc/langchaingo/tree/main/examples/google-alloydb-chat-message-history-example):
+  chat message history stored in Google AlloyDB.
+- [google-cloudsql-chat-message-history-example](https://github.com/tmc/langchaingo/tree/main/examples/google-cloudsql-chat-message-history-example):
+  chat message history stored in Google Cloud SQL.
+
+The [basic chat application tutorial](../../../tutorials/basic-chat-app.md)
+also adds conversation memory step by step.
