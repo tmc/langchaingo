@@ -104,7 +104,10 @@ func main() {
 
     for {
         fmt.Print("You: ")
-        input, _ := reader.ReadString('\n')
+        input, err := reader.ReadString('\n')
+        if err != nil {
+            break // stdin closed
+        }
         input = strings.TrimSpace(input)
 
         if input == "quit" {
@@ -159,7 +162,10 @@ func main() {
 
     for {
         fmt.Print("You: ")
-        input, _ := reader.ReadString('\n')
+        input, err := reader.ReadString('\n')
+        if err != nil {
+            break // stdin closed
+        }
         input = strings.TrimSpace(input)
 
         if input == "quit" {
@@ -237,7 +243,10 @@ func main() {
 
     for {
         fmt.Print("You: ")
-        input, _ := reader.ReadString('\n')
+        input, err := reader.ReadString('\n')
+        if err != nil {
+            break // stdin closed
+        }
         input = strings.TrimSpace(input)
 
         if input == "quit" {
