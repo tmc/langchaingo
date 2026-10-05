@@ -1,10 +1,10 @@
 module github.com/tmc/langchaingo/examples/bedrock-provider-example
 
-go 1.23.8
+go 1.24.4
 
 toolchain go1.24.6
 
-require github.com/tmc/langchaingo v0.1.14-pre.4
+require github.com/tmc/langchaingo v0.1.15
 
 require (
 	github.com/aws/aws-sdk-go-v2 v1.36.3 // indirect
