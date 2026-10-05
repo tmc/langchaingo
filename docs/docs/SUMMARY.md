@@ -75,3 +75,7 @@
 
 - [Overview](contributing/index.md)
 - [Documentation guide](contributing/documentation.md)
+
+---
+
+- [API Reference](https://pkg.go.dev/github.com/tmc/langchaingo)
