@@ -18,7 +18,8 @@ Build the static site into `_site` (pages under `_site/docs`, the files in
 
 	make build
 
-Check links, anchors, file name casing, MDX components and included files:
+Run every mdvet check: navigation, links, anchors, file name casing, MDX
+components, included files and the rest (`mdvet -list`):
 
 	make vet
 

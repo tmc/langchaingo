@@ -30,7 +30,7 @@ build:
 
 .PHONY: vet
 vet:
-	$(MDVET) -include-root $(INCLUDE_ROOT) -c links,anchors,case,assets,frontmatter,components,includes docs
+	$(MDVET) -include-root $(INCLUDE_ROOT) docs
 
 .PHONY: install
 install:
