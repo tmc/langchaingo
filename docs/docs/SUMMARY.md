@@ -12,9 +12,9 @@
 
 ## Getting Started
 
-- [Quickstart: Ollama](getting-started/guide-ollama.md)
-- [Quickstart: OpenAI](getting-started/guide-openai.md)
-- [Quickstart: Mistral](getting-started/guide-mistral.md)
+- [Quickstart: Ollama](getting-started/guide-ollama.mdx)
+- [Quickstart: OpenAI](getting-started/guide-openai.mdx)
+- [Quickstart: Mistral](getting-started/guide-mistral.mdx)
 
 ## How-to Guides
 
@@ -28,48 +28,48 @@
 
 ## Model I/O
 
-- [Prompts](modules/model_io/prompts/index.md)
-  - [Prompt templates](modules/model_io/prompts/prompt_templates/index.md)
-    - [Partial values](modules/model_io/prompts/prompt_templates/partial_values.md)
-- [Models](modules/model_io/models/index.md)
-  - [LLMs](modules/model_io/models/llms/index.md)
-    - [Fake LLM](modules/model_io/models/llms/Integrations/fake.md)
-    - [Groq](modules/model_io/models/llms/Integrations/groq.md)
-    - [Hugging Face](modules/model_io/models/llms/Integrations/huggingface.md)
-    - [Llamafile](modules/model_io/models/llms/Integrations/llamafile.md)
-    - [Local](modules/model_io/models/llms/Integrations/local.md)
-    - [Mistral](modules/model_io/models/llms/Integrations/mistral.md)
-    - [OpenAI](modules/model_io/models/llms/Integrations/openai.md)
-    - [Vertex AI](modules/model_io/models/llms/Integrations/vertexai.md)
-    - [watsonx](modules/model_io/models/llms/Integrations/watsonx.md)
-  - [Chat Models](modules/model_io/models/chat/index.md)
-    - [Integrations](modules/model_io/models/chat/integrations.md)
-  - [Embeddings](modules/model_io/models/embeddings/index.md)
-    - [Integrations](modules/model_io/models/embeddings/integrations.md)
-- [Output Parsers](modules/model_io/output_parsers/index.md)
+- [Prompts](modules/model_io/prompts/index.mdx)
+  - [Prompt templates](modules/model_io/prompts/prompt_templates/index.mdx)
+    - [Partial values](modules/model_io/prompts/prompt_templates/partial_values.mdx)
+- [Models](modules/model_io/models/index.mdx)
+  - [LLMs](modules/model_io/models/llms/index.mdx)
+    - [Fake LLM](modules/model_io/models/llms/Integrations/fake.mdx)
+    - [Groq](modules/model_io/models/llms/Integrations/groq.mdx)
+    - [Hugging Face](modules/model_io/models/llms/Integrations/huggingface.mdx)
+    - [Llamafile](modules/model_io/models/llms/Integrations/llamafile.mdx)
+    - [Local](modules/model_io/models/llms/Integrations/local.mdx)
+    - [Mistral](modules/model_io/models/llms/Integrations/mistral.mdx)
+    - [OpenAI](modules/model_io/models/llms/Integrations/openai.mdx)
+    - [Vertex AI](modules/model_io/models/llms/Integrations/vertexai.mdx)
+    - [watsonx](modules/model_io/models/llms/Integrations/watsonx.mdx)
+  - [Chat Models](modules/model_io/models/chat/index.mdx)
+    - [Integrations](modules/model_io/models/chat/integrations.mdx)
+  - [Embeddings](modules/model_io/models/embeddings/index.mdx)
+    - [Integrations](modules/model_io/models/embeddings/integrations.mdx)
+- [Output Parsers](modules/model_io/output_parsers/index.mdx)
 
 ## Data Connection
 
-- [Text Splitters](modules/data_connection/text_splitters/index.md)
-  - [Examples](modules/data_connection/text_splitters/examples/index.md)
-- [Retrievers](modules/data_connection/retrievers/index.md)
+- [Text Splitters](modules/data_connection/text_splitters/index.mdx)
+  - [Examples](modules/data_connection/text_splitters/examples/index.mdx)
+- [Retrievers](modules/data_connection/retrievers/index.mdx)
 
 ## Chains
 
-- [Chains](modules/chains/index.md)
+- [Chains](modules/chains/index.mdx)
 
 ## Memory
 
-- [Memory](modules/memory/index.md)
-  - [Examples](modules/memory/examples/index.md)
+- [Memory](modules/memory/index.mdx)
+  - [Examples](modules/memory/examples/index.mdx)
 
 ## Agents
 
-- [Agents](modules/agents/index.md)
-  - [Agent types](modules/agents/agents/index.md)
-  - [Agent executors](modules/agents/executor/index.md)
-    - [Getting started](modules/agents/executor/getting-started.md)
-  - [Tools](modules/agents/tools/index.md)
+- [Agents](modules/agents/index.mdx)
+  - [Agent types](modules/agents/agents/index.mdx)
+  - [Agent executors](modules/agents/executor/index.mdx)
+    - [Getting started](modules/agents/executor/getting-started.mdx)
+  - [Tools](modules/agents/tools/index.mdx)
 
 ## Contributing
 

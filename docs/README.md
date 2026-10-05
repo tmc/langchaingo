@@ -30,14 +30,14 @@ Check prose style with Vale:
 
 - Navigation order comes from [docs/SUMMARY.md](docs/SUMMARY.md). Add new
   pages there.
-- Link to other pages by relative path to the `.md` file, such as
-  `[Agents](../modules/agents/index.md)`. md2html rewrites these to the
-  rendered pages.
+- Link to other pages by relative path to the `.md` or `.mdx` file, such
+  as `[Agents](../modules/agents/index.mdx)`. md2html rewrites these to
+  the rendered pages.
 - Pages with `draft: true` in their front matter are not published.
 - md2html renders a subset of MDX. Use its components for callouts
   (`<Info>`, `<Note>`, `<Tip>`, `<Warning>`, `<Danger>`), with each tag on
   a line of its own. `make vet` reports components md2html does not know.
-- Name pages `.md`: md2html does not build `.mdx` files. MDX imports,
+- Pages may be `.md` or `.mdx`; both are built the same way. MDX imports,
   exports and JavaScript expressions are not supported, nor is raw HTML.
 - To show a program from [examples/](../examples), include it rather than
   copying it, so the page cannot drift from the code:

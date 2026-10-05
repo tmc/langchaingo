@@ -11,9 +11,9 @@ It provides interfaces for model providers, prompts, chains, memory, and agents.
 
 | Task | Guide |
 | --- | --- |
-| Run a model locally | [Ollama quickstart](getting-started/guide-ollama.md) |
-| Connect to OpenAI | [OpenAI quickstart](getting-started/guide-openai.md) |
-| Use Mistral | [Mistral quickstart](getting-started/guide-mistral.md) |
+| Run a model locally | [Ollama quickstart](getting-started/guide-ollama.mdx) |
+| Connect to OpenAI | [OpenAI quickstart](getting-started/guide-openai.mdx) |
+| Use Mistral | [Mistral quickstart](getting-started/guide-mistral.mdx) |
 | Build a chat application | [Basic chat tutorial](tutorials/basic-chat-app.md) |
 | Configure a provider | [Provider configuration](how-to/configure-llm-providers.md) |
 | Understand the library's interfaces | [Architecture](concepts/architecture.md) |
@@ -26,9 +26,9 @@ It provides interfaces for model providers, prompts, chains, memory, and agents.
 
 ## Components
 
-- [Models](modules/model_io/models/index.md), [prompts](modules/model_io/prompts/index.md), and [output parsers](modules/model_io/output_parsers/index.md)
-- [Text splitters](modules/data_connection/text_splitters/index.md) and [retrievers](modules/data_connection/retrievers/index.md)
-- [Chains](modules/chains/index.md), [memory](modules/memory/index.md), and [agents](modules/agents/index.md)
+- [Models](modules/model_io/models/index.mdx), [prompts](modules/model_io/prompts/index.mdx), and [output parsers](modules/model_io/output_parsers/index.mdx)
+- [Text splitters](modules/data_connection/text_splitters/index.mdx) and [retrievers](modules/data_connection/retrievers/index.mdx)
+- [Chains](modules/chains/index.mdx), [memory](modules/memory/index.mdx), and [agents](modules/agents/index.mdx)
 
 ## API reference
 
