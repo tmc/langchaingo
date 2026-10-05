@@ -62,40 +62,40 @@ func main() {
 }
 ```
 
-# API Reference
+## API Reference
 
-## Constructor
+### Constructor
 ```go
 func NewFakeLLM(responses []string) *LLM
 ```
 Creates a new instance of the fake LLM with the provided responses.
 
-## Methods
+### Methods
 
-### Call
+#### Call
 ```go
 func (f *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error)
 ```
 Simulates calling the model with a specific prompt and returns a predefined response. Supports all standard LLM options like `WithTemperature`, `WithMaxTokens`, etc.
 
-### GenerateContent  
+#### GenerateContent  
 ```go
 func (f *LLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error)
 ```
 Simulates generating content from message sequences. This is the modern interface that supports multi-modal inputs.
 
-### Reset
+#### Reset
 ```go
 func (f *LLM) Reset()
 ```
 Resets the internal response index, allowing responses to cycle through from the beginning again.
 
-### AddResponse
+#### AddResponse
 ```go
 func (f *LLM) AddResponse(response string)
 ```
 Adds a new response to the list of possible responses of the fake LLM.
 
-# Purpose
+## Purpose
 
 The fake package is designed to facilitate testing of applications that interact with language learning models, without relying on real model implementations. It helps validate application logic and behavior in a controlled environment.

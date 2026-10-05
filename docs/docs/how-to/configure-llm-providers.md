@@ -47,7 +47,7 @@ llm, err := openai.New(
 
 ## Anthropic
 
-### Basic configuration
+### Basic Anthropic configuration
 
 ```go
 import "github.com/tmc/langchaingo/llms/anthropic"
@@ -59,7 +59,7 @@ llm, err := anthropic.New()
 llm, err := anthropic.New(anthropic.WithToken("your-api-key"))
 ```
 
-### Model selection
+### Anthropic model selection
 
 ```go
 llm, err := anthropic.New(
@@ -70,7 +70,7 @@ llm, err := anthropic.New(
 
 ## Google AI (Gemini)
 
-### Basic configuration
+### Basic Google AI configuration
 
 ```go
 import (
@@ -100,7 +100,7 @@ llm, err := googleai.New(
 
 ## Vertex AI
 
-### Basic configuration
+### Basic Vertex AI configuration
 
 ```go
 import (
@@ -135,7 +135,7 @@ llm, err := vertex.New(
 
 ## Local Models (Ollama)
 
-### Basic configuration
+### Basic Ollama configuration
 
 ```go
 import "github.com/tmc/langchaingo/llms/ollama"
@@ -152,7 +152,7 @@ llm, err := ollama.New(
 
 ## Hugging Face
 
-### Basic configuration
+### Basic Hugging Face configuration
 
 ```go
 import "github.com/tmc/langchaingo/llms/huggingface"
@@ -164,7 +164,7 @@ llm, err := huggingface.New()
 llm, err := huggingface.New(huggingface.WithToken("your-hf-token"))
 ```
 
-### Model selection
+### Hugging Face model selection
 
 ```go
 llm, err := huggingface.New(
