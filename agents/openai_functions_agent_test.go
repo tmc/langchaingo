@@ -209,3 +209,33 @@ func TestOpenAIFunctionsAgent_ParseOutput_MultipleToolCalls(t *testing.T) {
 		t.Errorf("expected 2 actions, got %d", len(actions))
 	}
 }
+
+// TestOpenAIFunctionsAgent_ParseOutput_MultiParamArguments verifies that
+// tool-declared multi-parameter arguments (no __arg1 key) are passed through
+// to the tool verbatim as the full arguments JSON object.
+func TestOpenAIFunctionsAgent_ParseOutput_MultiParamArguments(t *testing.T) {
+	t.Parallel()
+	agent := &agents.OpenAIFunctionsAgent{}
+
+	resp := &llms.ContentResponse{
+		Choices: []*llms.ContentChoice{
+			{
+				ToolCalls: []llms.ToolCall{
+					{
+						ID: "call1",
+						FunctionCall: &llms.FunctionCall{
+							Name:      "weather",
+							Arguments: `{"city":"Seattle","unit":"celsius"}`,
+						},
+					},
+				},
+			},
+		},
+	}
+
+	actions, finish, err := agent.ParseOutput(resp)
+	require.NoError(t, err)
+	require.Nil(t, finish)
+	require.Len(t, actions, 1)
+	require.Equal(t, `{"city":"Seattle","unit":"celsius"}`, actions[0].ToolInput)
+}
