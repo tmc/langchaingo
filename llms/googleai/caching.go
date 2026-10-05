@@ -35,7 +35,7 @@ func NewCachingHelper(ctx context.Context, opts ...Option) (*CachingHelper, erro
 // Example usage:
 //
 //	helper, _ := NewCachingHelper(ctx, WithAPIKey(apiKey))
-//	cached, _ := helper.CreateCachedContent(ctx, "gemini-2.0-flash", []llms.MessageContent{
+//	cached, _ := helper.CreateCachedContent(ctx, "gemini-2.5-flash", []llms.MessageContent{
 //	    {
 //	        Role: llms.ChatMessageTypeSystem,
 //	        Parts: []llms.ContentPart{

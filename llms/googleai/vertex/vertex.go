@@ -369,6 +369,10 @@ DoStream:
 		}
 	}
 	mresp := iter.MergedResponse()
+	if mresp == nil {
+		// The stream ended before any response arrived.
+		return nil, ErrNoContentInResponse
+	}
 	return convertCandidates([]*genai.Candidate{candidate}, mresp.UsageMetadata)
 }
 

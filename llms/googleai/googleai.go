@@ -308,6 +308,27 @@ func generateFromSingleMessage(
 	return convertAndStreamFromIterator(ctx, iter, opts)
 }
 
+// sendMessage is session.SendMessage without its nil dereference when the
+// response stream ends before any response arrives, which Gemini does when
+// thinking uses the whole output token budget. It sends the same request.
+func sendMessage(ctx context.Context, session *genai.ChatSession, parts ...genai.Part) (*genai.GenerateContentResponse, error) {
+	iter := session.SendMessageStream(ctx, parts...)
+	for {
+		_, err := iter.Next()
+		if errors.Is(err, iterator.Done) {
+			break
+		}
+		if err != nil {
+			return nil, err
+		}
+	}
+	resp := iter.MergedResponse()
+	if resp == nil {
+		return nil, ErrNoContentInResponse
+	}
+	return resp, nil
+}
+
 func generateFromMessages(
 	ctx context.Context,
 	model *genai.GenerativeModel,
@@ -337,7 +358,7 @@ func generateFromMessages(
 	session.History = history
 
 	if opts.StreamingFunc == nil {
-		resp, err := session.SendMessage(ctx, reqContent.Parts...)
+		resp, err := sendMessage(ctx, session, reqContent.Parts...)
 		if err != nil {
 			return nil, err
 		}
@@ -391,13 +412,17 @@ DoStream:
 
 		for _, part := range respCandidate.Content.Parts {
 			if text, ok := part.(genai.Text); ok {
-				if opts.StreamingFunc(ctx, []byte(text)) != nil {
-					break DoStream
+				if err := opts.StreamingFunc(ctx, []byte(text)); err != nil {
+					return nil, fmt.Errorf("streaming func returned an error: %w", err)
 				}
 			}
 		}
 	}
 	mresp := iter.MergedResponse()
+	if mresp == nil {
+		// The stream ended before any response arrived.
+		return nil, ErrNoContentInResponse
+	}
 	return convertCandidates([]*genai.Candidate{candidate}, mresp.UsageMetadata)
 }
 

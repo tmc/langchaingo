@@ -1,62 +1,33 @@
-// Package llmtest provides utilities for testing LLM implementations.
+// Package llmtest provides support for testing implementations of
+// llms.Model, in the spirit of testing/fstest.
 //
-// Inspired by Go's testing/fstest package, llmtest offers a simple,
-// backend-independent way to verify that LLM implementations conform
-// to the expected interfaces and behaviors.
+// # TestModel
 //
-// # Design Philosophy
+// TestModel checks that a model satisfies the llms.Model contract. It
+// is not coupled to *testing.T: it returns an error describing every
+// violation found, so it can run anywhere:
 //
-// Following the principles of testing/fstest:
-//   - Minimal API surface - one main function (TestLLM)
-//   - Automatic capability discovery - no configuration required
-//   - Comprehensive by default - tests all detected capabilities
-//   - Interface testing - works with any llms.Model implementation
-//   - Simple usage pattern - just pass the model to test
-//
-// # Usage
-//
-// Testing an LLM implementation is straightforward:
-//
-//	func TestMyLLM(t *testing.T) {
-//	    llm, err := mylllm.New()
+//	func TestConformance(t *testing.T) {
+//	    model, err := myprovider.New()
 //	    if err != nil {
 //	        t.Fatal(err)
 //	    }
-//	    llmtest.TestLLM(t, llm)
+//	    if err := llmtest.TestModel(context.Background(), model, "streaming", "tools"); err != nil {
+//	        t.Fatal(err)
+//	    }
 //	}
 //
-// # Automatic Capability Discovery
+// The variadic list names the capabilities the model must demonstrate,
+// as fstest.TestFS's expected files do; unnamed capabilities are not
+// exercised. Against a live provider TestModel performs network calls;
+// record them (for example with httprr) to run offline.
 //
-// The package automatically detects and tests supported capabilities:
-//   - Basic operations (Call, GenerateContent)
-//   - Streaming (if model implements streaming interface)
-//   - Tool/Function calling (probed with test tool)
-//   - Reasoning/Thinking mode (if supported)
-//   - Token counting (if usage information provided)
-//   - Context caching (if implemented)
+// The llms/fake package provides a canned-response model that conforms
+// to the baseline contract, playing the role fstest.MapFS plays for
+// io/fs.
 //
-// # Mock Implementation
+// # TestLLM
 //
-// A MockLLM is provided for testing without making actual API calls:
-//
-//	mock := &llmtest.MockLLM{
-//	    CallFunc: func(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
-//	        return "mocked response", nil
-//	    },
-//	}
-//	llmtest.TestLLM(t, mock)
-//
-// # Parallel Testing
-//
-// All tests run in parallel by default for better performance:
-//   - Core tests (Call, GenerateContent) run concurrently
-//   - Capability tests run in parallel when detected
-//   - Safe for concurrent execution with independent contexts
-//
-// # Provider Coverage
-//
-// The package is used to test all LangChain Go providers:
-// anthropic, bedrock, cloudflare, cohere, ernie, fake, googleai,
-// huggingface, llamafile, local, maritaca, mistral, ollama, openai,
-// watsonx, and more.
+// TestLLM is an older *testing.T-based harness that probes capabilities
+// by issuing live requests. New tests should prefer TestModel.
 package llmtest

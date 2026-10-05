@@ -25,14 +25,25 @@ type Options struct {
 	HarmThreshold         HarmBlockThreshold
 
 	ClientOptions []option.ClientOption
+	auth          authKind
+	apiKey        string
+	httpClient    *http.Client
 }
+
+type authKind uint8
+
+const (
+	authNone authKind = iota
+	authAPIKey
+	authCredentials
+)
 
 func DefaultOptions() Options {
 	return Options{
 		CloudProject:          "",
 		CloudLocation:         "",
-		DefaultModel:          "gemini-2.0-flash",
-		DefaultEmbeddingModel: "embedding-001",
+		DefaultModel:          "gemini-2.5-flash",
+		DefaultEmbeddingModel: "gemini-embedding-001",
 		DefaultCandidateCount: 1,
 		DefaultMaxTokens:      2048,
 		DefaultTemperature:    0.5,
@@ -44,7 +55,7 @@ func DefaultOptions() Options {
 
 // EnsureAuthPresent attempts to ensure that the client has authentication information. If it does not, it will attempt to use the GOOGLE_API_KEY environment variable.
 func (o *Options) EnsureAuthPresent() {
-	if !hasAuthOptions(o.ClientOptions) {
+	if o.auth == authNone && !hasAuthOptions(o.ClientOptions) {
 		if key := os.Getenv("GOOGLE_API_KEY"); key != "" {
 			WithAPIKey(key)(o)
 		}
@@ -58,6 +69,8 @@ type Option func(*Options)
 func WithAPIKey(apiKey string) Option {
 	return func(opts *Options) {
 		opts.ClientOptions = append(opts.ClientOptions, option.WithAPIKey(apiKey))
+		opts.auth = authAPIKey
+		opts.apiKey = apiKey
 	}
 }
 
@@ -70,6 +83,8 @@ func WithCredentialsJSON(credentialsJSON []byte) Option {
 			return
 		}
 		opts.ClientOptions = append(opts.ClientOptions, option.WithCredentialsJSON(credentialsJSON))
+		opts.auth = authCredentials
+		opts.apiKey = ""
 	}
 }
 
@@ -82,6 +97,8 @@ func WithCredentialsFile(credentialsFile string) Option {
 			return
 		}
 		opts.ClientOptions = append(opts.ClientOptions, option.WithCredentialsFile(credentialsFile))
+		opts.auth = authCredentials
+		opts.apiKey = ""
 	}
 }
 
@@ -97,6 +114,7 @@ func WithRest() Option {
 // This is useful for vertex clients.
 func WithHTTPClient(httpClient *http.Client) Option {
 	return func(opts *Options) {
+		opts.httpClient = httpClient
 		opts.ClientOptions = append(opts.ClientOptions, option.WithHTTPClient(httpClient))
 	}
 }

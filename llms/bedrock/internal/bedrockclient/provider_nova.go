@@ -176,7 +176,10 @@ func createNovaCompletion(ctx context.Context,
 	if err != nil {
 		return nil, err
 	}
+	return novaContentResponse(output)
+}
 
+func novaContentResponse(output *novaTextGenerationOutput) (*llms.ContentResponse, error) {
 	content := output.Output.Message.Content
 	if len(content) == 0 {
 		return nil, errors.New("no results")
@@ -186,19 +189,19 @@ func createNovaCompletion(ctx context.Context,
 		stopReason != NovaCompletionReasonContentFiltered {
 		return nil, errors.New("completed due to " + stopReason + ". Maybe try increasing max tokens")
 	}
-	Contentchoices := make([]*llms.ContentChoice, len(content))
-	for i, c := range content {
-		Contentchoices[i] = &llms.ContentChoice{
-			Content:    c.Text,
+	var text string
+	for _, c := range content {
+		text += c.Text
+	}
+	return &llms.ContentResponse{
+		Choices: []*llms.ContentChoice{{
+			Content:    text,
 			StopReason: output.StopReason,
 			GenerationInfo: map[string]interface{}{
 				"input_tokens":  output.Usage.InputTokens,
 				"output_tokens": output.Usage.OutputTokens,
 			},
-		}
-	}
-	return &llms.ContentResponse{
-		Choices: Contentchoices,
+		}},
 	}, nil
 }
 

@@ -18,8 +18,15 @@ jobs:
       - uses: actions/checkout@v4
       - id: set-matrix
         run: |
-          # Find all example directories and create a JSON array
-          examples=$(find ./examples -mindepth 1 -maxdepth 1 -type d -exec basename {} \; | sort | jq -R -s -c 'split("\n")[:-1]')
+          # A buildable example is a directory "go build ." can run in:
+          # one holding a go.mod (most examples are their own module) or
+          # Go files directly. Keying on that rather than on directory
+          # depth lets examples be grouped in a subdirectory without the
+          # matrix trying to build the grouping directory, which holds no
+          # Go files of its own.
+          examples=$({ find ./examples -mindepth 2 -name go.mod -exec dirname {} \;
+                       find ./examples -mindepth 2 -maxdepth 2 -name '*.go' -exec dirname {} \; ; } \
+                     | sed 's|^\./examples/||' | sort -u | jq -R -s -c 'split("\n")[:-1]')
           echo "matrix={\"example\":$examples}" >> $GITHUB_OUTPUT
           echo "Found examples: $examples"
 

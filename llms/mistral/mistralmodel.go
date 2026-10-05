@@ -155,7 +155,13 @@ func generateNonStreamingContent(ctx context.Context, m *Model, callOptions *llm
 		m.CallbacksHandler.HandleLLMError(ctx, err)
 		return nil, errors.New("unexpected response from Mistral SDK, length of the Choices slice must be greater than or equal 1")
 	}
+	langchainContentResponse := contentResponse(res)
+	m.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, langchainContentResponse)
 
+	return langchainContentResponse, nil
+}
+
+func contentResponse(res *sdk.ChatCompletionResponse) *llms.ContentResponse {
 	langchainContentResponse := &llms.ContentResponse{
 		Choices: make([]*llms.ContentChoice, 0),
 	}
@@ -173,7 +179,7 @@ func generateNonStreamingContent(ctx context.Context, m *Model, callOptions *llm
 		if len(toolCalls) > 0 {
 			langchainContentResponse.Choices[idx].FuncCall = (*llms.FunctionCall)(&toolCalls[0].Function)
 			for _, tool := range toolCalls {
-				langchainContentResponse.Choices[0].ToolCalls = append(langchainContentResponse.Choices[0].ToolCalls, llms.ToolCall{
+				langchainContentResponse.Choices[idx].ToolCalls = append(langchainContentResponse.Choices[idx].ToolCalls, llms.ToolCall{
 					ID:   tool.Id,
 					Type: string(tool.Type),
 					FunctionCall: &llms.FunctionCall{
@@ -184,9 +190,7 @@ func generateNonStreamingContent(ctx context.Context, m *Model, callOptions *llm
 			}
 		}
 	}
-	m.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, langchainContentResponse)
-
-	return langchainContentResponse, nil
+	return langchainContentResponse
 }
 
 func generateStreamingContent(ctx context.Context, m *Model, callOptions *llms.CallOptions, messages []sdk.ChatMessage, chatOpts sdk.ChatRequestParams) (*llms.ContentResponse, error) {

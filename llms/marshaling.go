@@ -223,35 +223,35 @@ func (tc ToolCall) MarshalJSON() ([]byte, error) {
 }
 
 func (tc *ToolCall) UnmarshalJSON(data []byte) error {
-	var m map[string]any
-	if err := json.Unmarshal(data, &m); err != nil {
-		return err
+	var m struct {
+		Type     *string `json:"type"`
+		ToolCall *struct {
+			ID           *string       `json:"id"`
+			Type         *string       `json:"type"`
+			FunctionCall *FunctionCall `json:"function"`
+		} `json:"tool_call"`
 	}
-	_, ok := m["type"].(string)
-	if !ok {
+	if err := json.Unmarshal(data, &m); err != nil {
+		return fmt.Errorf("error unmarshalling ToolCall: %w", err)
+	}
+	if m.Type == nil {
 		return fmt.Errorf(`missing "type" field in ToolCall`)
 	}
-	toolCall, ok := m["tool_call"].(map[string]any)
-	if !ok {
+	if m.ToolCall == nil {
 		return fmt.Errorf("invalid tool_call field in ToolCall")
 	}
-	id, ok := toolCall["id"].(string)
-	if !ok {
+	if m.ToolCall.ID == nil {
 		return fmt.Errorf("invalid id field in ToolCall")
 	}
-	typ, ok := toolCall["type"].(string)
-	if !ok {
+	if m.ToolCall.Type == nil {
 		return fmt.Errorf("invalid type field in ToolCall")
 	}
 	var fc FunctionCall
-	fcData, ok := toolCall["function"].(json.RawMessage)
-	if ok {
-		if err := json.Unmarshal(fcData, &fc); err != nil {
-			return fmt.Errorf("error unmarshalling function call: %w", err)
-		}
+	if m.ToolCall.FunctionCall != nil {
+		fc = *m.ToolCall.FunctionCall
 	}
-	tc.ID = id
-	tc.Type = typ
+	tc.ID = *m.ToolCall.ID
+	tc.Type = *m.ToolCall.Type
 	tc.FunctionCall = &fc
 	return nil
 }

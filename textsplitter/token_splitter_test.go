@@ -3,6 +3,7 @@ package textsplitter
 import (
 	"testing"
 
+	"github.com/pkoukk/tiktoken-go"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tmc/langchaingo/schema"
@@ -10,6 +11,9 @@ import (
 
 func TestTokenSplitter(t *testing.T) {
 	t.Parallel()
+	if _, err := tiktoken.GetEncoding(_defaultTokenEncoding); err != nil {
+		t.Skipf("tokenizer unavailable: %v", err)
+	}
 	type testCase struct {
 		text         string
 		chunkOverlap int

@@ -1,7 +1,9 @@
 package googleai
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -24,6 +26,21 @@ func hasExistingRecording(t *testing.T) bool {
 	return err == nil
 }
 
+// compactJSONBody removes the whitespace that protojson inserts, which varies
+// between builds, so request bodies match their recordings.
+func compactJSONBody(req *http.Request) error {
+	body, ok := req.Body.(*httprr.Body)
+	if !ok || !json.Valid(body.Data) {
+		return nil
+	}
+	var buf bytes.Buffer
+	if err := json.Compact(&buf, body.Data); err != nil {
+		return err
+	}
+	body.Data = buf.Bytes()
+	return nil
+}
+
 func newHTTPRRClient(t *testing.T, opts ...Option) *GoogleAI {
 	t.Helper()
 
@@ -38,13 +55,14 @@ func newHTTPRRClient(t *testing.T, opts ...Option) *GoogleAI {
 	// Create httprr with API key transport wrapper
 	// This is necessary because the Google API library doesn't add the API key
 	// when a custom HTTP client is provided via WithHTTPClient
+	// Replay sends the placeholder key that recording scrubs the real one to.
 	apiKey := os.Getenv("GOOGLE_API_KEY")
-	transport := httputil.DefaultTransport
-	if apiKey != "" {
-		transport = &httputil.ApiKeyTransport{
-			Transport: transport,
-			APIKey:    apiKey,
-		}
+	if apiKey == "" {
+		apiKey = "test-api-key"
+	}
+	transport := &httputil.ApiKeyTransport{
+		Transport: httputil.DefaultTransport,
+		APIKey:    apiKey,
 	}
 
 	rr := httprr.OpenForTest(t, transport)
@@ -59,8 +77,11 @@ func newHTTPRRClient(t *testing.T, opts ...Option) *GoogleAI {
 		return nil
 	})
 
-	// Configure client with httprr
-	opts = append(opts, WithRest(), WithHTTPClient(rr.Client()))
+	rr.ScrubReq(compactJSONBody)
+
+	// Configure client with httprr. Passing the key keeps the client from
+	// looking for application default credentials during replay.
+	opts = append(opts, WithRest(), WithHTTPClient(rr.Client()), WithAPIKey(apiKey))
 
 	llm, err := New(context.Background(), opts...)
 	if err != nil {
@@ -124,7 +145,7 @@ func TestGoogleAIGenerateContentWithMultipleMessages(t *testing.T) {
 		},
 	}
 
-	resp, err := llm.GenerateContent(context.Background(), content, llms.WithModel("gemini-1.5-flash"))
+	resp, err := llm.GenerateContent(context.Background(), content, llms.WithModel("gemini-2.5-flash"))
 	if err != nil {
 		// Check if this is a recording mismatch error
 		if strings.Contains(err.Error(), "cached HTTP response not found") {
@@ -156,7 +177,7 @@ func TestGoogleAIGenerateContentWithSystemMessage(t *testing.T) {
 		},
 	}
 
-	resp, err := llm.GenerateContent(context.Background(), content, llms.WithModel("gemini-1.5-flash"))
+	resp, err := llm.GenerateContent(context.Background(), content, llms.WithModel("gemini-2.5-flash"))
 	if err != nil {
 		// Check if this is a recording mismatch error
 		if strings.Contains(err.Error(), "cached HTTP response not found") {
@@ -209,7 +230,7 @@ func TestGoogleAICreateEmbedding(t *testing.T) {
 func TestGoogleAIWithOptions(t *testing.T) {
 
 	llm := newHTTPRRClient(t,
-		WithDefaultModel("gemini-1.5-flash"),
+		WithDefaultModel("gemini-2.5-flash"),
 		WithDefaultMaxTokens(100),
 		WithDefaultTemperature(0.1),
 	)
@@ -439,7 +460,7 @@ func TestGoogleAIMultiModalContent(t *testing.T) {
 	resp, err := llm.GenerateContent(
 		context.Background(),
 		content,
-		llms.WithModel("gemini-1.5-flash"),
+		llms.WithModel("gemini-2.5-flash"),
 	)
 
 	if err != nil {

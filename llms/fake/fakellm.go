@@ -1,3 +1,5 @@
+// Package fake provides a canned-response implementation of llms.Model
+// for tests, in the spirit of testing/fstest's MapFS.
 package fake
 
 import (
@@ -19,8 +21,14 @@ func NewFakeLLM(responses []string) *LLM {
 	}
 }
 
-// GenerateContent generate fake content.
-func (f *LLM) GenerateContent(_ context.Context, _ []llms.MessageContent, _ ...llms.CallOption) (*llms.ContentResponse, error) {
+// GenerateContent returns the next configured response. It honors
+// context cancellation and, when llms.WithStreamingFunc is set, streams
+// the response to the callback before returning it; a callback error
+// aborts the request.
+func (f *LLM) GenerateContent(ctx context.Context, _ []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
 	if len(f.responses) == 0 {
 		return nil, errors.New("no responses configured")
 	}
@@ -29,6 +37,16 @@ func (f *LLM) GenerateContent(_ context.Context, _ []llms.MessageContent, _ ...l
 	}
 	response := f.responses[f.index]
 	f.index++
+
+	opts := &llms.CallOptions{}
+	for _, opt := range options {
+		opt(opts)
+	}
+	if opts.StreamingFunc != nil {
+		if err := opts.StreamingFunc(ctx, []byte(response)); err != nil {
+			return nil, err
+		}
+	}
 	return &llms.ContentResponse{
 		Choices: []*llms.ContentChoice{{Content: response}},
 	}, nil
