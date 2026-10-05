@@ -16,7 +16,7 @@ A CLI tool that:
 
 ## Prerequisites
 
-- Go 1.21+
+- Go 1.26 or later
 - OpenAI or Anthropic API key
 - Git installed
 

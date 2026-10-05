@@ -17,7 +17,7 @@ go get "github.com/tmc/langchaingo"
 ```
 
 ## Prerequisites
-Ensure you have Go programming language installed on your machine (version 1.15 or higher recommended).
+Install Go 1.26 or later.
 
 ## Example Usage
 Here is an example demonstrating how to use the fake package:

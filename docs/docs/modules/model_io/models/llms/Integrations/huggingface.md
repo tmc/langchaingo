@@ -9,8 +9,9 @@ title: Hugging Face
 Use Hugging Face models from a Go application with LangChainGo.
 
 ## Prerequisites
-Go programming language installed on your machine (version 1.15 or higher recommended).
-A valid Hugging Face API token. Obtain it by creating an account on the Hugging Face platform and generating a new token
+
+- Go 1.26 or later
+- A Hugging Face API token
 
 ## Installation
 
