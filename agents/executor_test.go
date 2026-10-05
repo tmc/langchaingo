@@ -2,6 +2,7 @@ package agents_test
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"strings"
 	"testing"
@@ -10,6 +11,7 @@ import (
 	"github.com/tmc/langchaingo/agents"
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/internal/httprr"
+	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/prompts"
 	"github.com/tmc/langchaingo/schema"
@@ -40,7 +42,10 @@ func (a *testAgent) Plan(
 	a.recordedInputs = inputs
 	a.numPlanCalls++
 
-	return a.actions, a.finish, a.err
+	if a.numPlanCalls == 1 {
+		return a.actions, nil, a.err
+	}
+	return nil, a.finish, a.err
 }
 
 func (a testAgent) GetInputKeys() []string {
@@ -191,24 +196,6 @@ func TestExecutorWithOpenAIFunctionAgent(t *testing.T) {
 }
 
 // mockTool implements the tools.Tool interface for testing
-type mockTool struct {
-	name             string
-	description      string
-	receivedInputPtr *string
-}
-
-func (m *mockTool) Name() string {
-	return m.name
-}
-
-func (m *mockTool) Description() string {
-	return m.description
-}
-
-func (m *mockTool) Call(_ context.Context, input string) (string, error) {
-	*m.receivedInputPtr = input
-	return "mock result", nil
-}
 
 func TestExecutorTrimsObservationSuffix(t *testing.T) {
 	t.Parallel()
@@ -218,7 +205,6 @@ func TestExecutorTrimsObservationSuffix(t *testing.T) {
 	var receivedInput string
 	mockToolInst := &mockTool{
 		name:             "mock_tool",
-		description:      "A mock tool for testing",
 		receivedInputPtr: &receivedInput,
 	}
 
@@ -244,4 +230,143 @@ func TestExecutorTrimsObservationSuffix(t *testing.T) {
 
 	// Verify that the tool received the input with "\nObservation:" trimmed off
 	require.Equal(t, "test input", receivedInput, "Tool should receive input with \\nObservation: suffix trimmed")
+}
+
+type mockCallbackHandler struct {
+	toolStartCalled bool
+	toolEndCalled   bool
+	toolErrorCalled bool
+	toolStartInput  string
+	toolEndInput    string
+	toolErrorInput  error
+}
+
+func (m *mockCallbackHandler) HandleText(context.Context, string)                                   {}
+func (m *mockCallbackHandler) HandleLLMStart(context.Context, []string)                             {}
+func (m *mockCallbackHandler) HandleLLMGenerateContentStart(context.Context, []llms.MessageContent) {}
+func (m *mockCallbackHandler) HandleLLMGenerateContentEnd(context.Context, *llms.ContentResponse)   {}
+func (m *mockCallbackHandler) HandleLLMError(context.Context, error)                                {}
+func (m *mockCallbackHandler) HandleChainStart(context.Context, map[string]any)                     {}
+func (m *mockCallbackHandler) HandleChainEnd(context.Context, map[string]any)                       {}
+func (m *mockCallbackHandler) HandleChainError(context.Context, error)                              {}
+func (m *mockCallbackHandler) HandleToolStart(_ context.Context, input string) {
+	m.toolStartCalled = true
+	m.toolStartInput = input
+}
+func (m *mockCallbackHandler) HandleToolEnd(_ context.Context, output string) {
+	m.toolEndCalled = true
+	m.toolEndInput = output
+}
+func (m *mockCallbackHandler) HandleToolError(_ context.Context, err error) {
+	m.toolErrorCalled = true
+	m.toolErrorInput = err
+}
+func (m *mockCallbackHandler) HandleAgentAction(_ context.Context, _ schema.AgentAction)           {}
+func (m *mockCallbackHandler) HandleAgentFinish(_ context.Context, _ schema.AgentFinish)           {}
+func (m *mockCallbackHandler) HandleRetrieverStart(_ context.Context, _ string)                    {}
+func (m *mockCallbackHandler) HandleRetrieverEnd(_ context.Context, _ string, _ []schema.Document) {}
+func (m *mockCallbackHandler) HandleStreamingFunc(_ context.Context, _ []byte)                     {}
+
+type mockTool struct {
+	name             string
+	response         string
+	receivedInputPtr *string
+	err              error
+}
+
+func (m mockTool) Name() string        { return m.name }
+func (m mockTool) Description() string { return "A mock tool for testing" }
+func (m mockTool) Call(_ context.Context, input string) (string, error) {
+	if m.receivedInputPtr != nil {
+		*m.receivedInputPtr = input
+	}
+	return m.response, m.err
+}
+
+func TestExecutorToolCallbacks(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name          string
+		toolResponse  string
+		toolError     error
+		expectedStart string
+		expectedEnd   string
+		expectedError error
+		shouldHaveErr bool
+	}{
+		{
+			name:          "successful tool execution",
+			toolResponse:  "success",
+			expectedStart: "TEST_TOOL::(input)",
+			expectedEnd:   "success",
+			shouldHaveErr: false,
+		},
+		{
+			name:          "tool execution with error",
+			toolError:     fmt.Errorf("tool error"),
+			expectedStart: "TEST_TOOL::(input)",
+			expectedError: fmt.Errorf("tool error"),
+			shouldHaveErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			// Create mock tool and callback handler
+			tool := mockTool{
+				name:     "TEST_TOOL",
+				response: tt.toolResponse,
+				err:      tt.toolError,
+			}
+			callbackHandler := &mockCallbackHandler{}
+
+			// Create test agent that will use our tool
+			agent := &testAgent{
+				actions: []schema.AgentAction{
+					{
+						Tool:      "TEST_TOOL",
+						ToolInput: "input",
+					},
+				},
+				tools: []tools.Tool{tool},
+			}
+
+			// Only set finish for successful tool execution
+			if !tt.shouldHaveErr {
+				agent.finish = &schema.AgentFinish{
+					ReturnValues: map[string]any{
+						"output": "done",
+					},
+				}
+			}
+
+			// Create executor with our callback handler
+			executor := agents.NewExecutor(
+				agent,
+				agents.WithCallbacksHandler(callbackHandler),
+			)
+
+			// Execute the agent
+			_, err := chains.Call(context.Background(), executor, map[string]any{"input": "test"})
+
+			// Verify callback handling
+			require.True(t, callbackHandler.toolStartCalled)
+			require.Equal(t, tt.expectedStart, callbackHandler.toolStartInput)
+
+			if tt.shouldHaveErr {
+				require.True(t, callbackHandler.toolErrorCalled)
+				require.Equal(t, tt.expectedError.Error(), callbackHandler.toolErrorInput.Error())
+				require.False(t, callbackHandler.toolEndCalled)
+				require.Error(t, err)
+			} else {
+				require.True(t, callbackHandler.toolEndCalled)
+				require.Equal(t, tt.expectedEnd, callbackHandler.toolEndInput)
+				require.False(t, callbackHandler.toolErrorCalled)
+				require.NoError(t, err)
+			}
+		})
+	}
 }
