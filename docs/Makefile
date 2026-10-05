@@ -24,6 +24,7 @@ build:
 	cp -R static/. $(SITE)/
 	$(MD2HTML) $(MD2HTML_FLAGS) -html-layout dir \
 		-site-url $(SITE_URL) \
+		-og-image ../img/parrot-chainlink-icon.png \
 		-edit-url 'https://github.com/tmc/langchaingo/edit/main/docs/docs/{path}' \
 		-html $(SITE)/docs docs
 
