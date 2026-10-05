@@ -91,8 +91,8 @@ text, err := chains.Predict(
     chain,
     map[string]any{
       "product": "colorful socks",
-      "description": "The company is based in California"
-    }
+      "description": "The company is based in California",
+    },
 )
 if err != nil {
   log.Fatal(err)

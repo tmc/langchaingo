@@ -23,6 +23,7 @@ import (
 )
 ...
 llm, _ := watsonx.New(
+    "meta-llama/llama-3-70b-instruct",
     wx.WithWatsonxAPIKey("YOUR WATSONX API KEY"),
     wx.WithWatsonxProjectID("YOUR WATSONX PROJECT ID"),
 )

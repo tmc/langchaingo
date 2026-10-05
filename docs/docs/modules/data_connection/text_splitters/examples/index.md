@@ -9,25 +9,34 @@ Splitters are components or tools used to divide texts into smaller, more manage
 For create splitters can use PDF, Text or HTML
 
 ```go
-func main(){
-func textToSplit() []schema.Document {
+package main
 
+import (
+	"context"
+	"log"
+	"os"
+
+	"github.com/tmc/langchaingo/documentloaders"
+	"github.com/tmc/langchaingo/textsplitter"
+)
+
+func main() {
 	f, err := os.Open("./splitters/docs/transcript.txt")
 	if err != nil {
-		fmt.Println("Error opening file: ", err)
+		log.Fatal(err)
 	}
+	defer f.Close()
 
 	p := documentloaders.NewText(f)
 
 	split := textsplitter.NewRecursiveCharacter()
-	split.ChunkSize = 300 // size of the chunk is number of characters
+	split.ChunkSize = 300   // size of the chunk is number of characters
 	split.ChunkOverlap = 30 // overlap is the number of characters that the chunks overlap
 	docs, err := p.LoadAndSplit(context.Background(), split)
-
 	if err != nil {
-		fmt.Println("Error loading document: ", err)
+		log.Fatal(err)
 	}
 
-	log.Println("Document loaded: ", len(docs))
+	log.Println("Documents loaded:", len(docs))
 }
 ```

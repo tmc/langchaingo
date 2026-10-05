@@ -199,10 +199,10 @@ export GOOGLE_APPLICATION_CREDENTIALS="path/to/service-account.json"
 ### OpenAI functions
 
 ```go
-tools := []openai.Tool{
+tools := []llms.Tool{
     {
         Type: "function",
-        Function: openai.FunctionDefinition{
+        Function: &llms.FunctionDefinition{
             Name:        "get_weather",
             Description: "Get current weather",
             Parameters: map[string]any{
