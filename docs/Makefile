@@ -7,7 +7,7 @@ SITE ?= _site
 ADDR ?= :8080
 SITE_URL ?= https://tmc.github.io/langchaingo/docs
 
-MD2HTML_FLAGS = -nav -title LangChainGo
+MD2HTML_FLAGS = -nav -search -title LangChainGo
 
 .PHONY: serve
 serve:
