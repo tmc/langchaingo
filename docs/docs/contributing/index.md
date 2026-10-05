@@ -1,7 +1,3 @@
----
-title: Contributing to LangChainGo
----
-
 # Contributing to LangChainGo
 
 This guide covers contributing code, tests, and documentation to LangChainGo.

@@ -1,7 +1,3 @@
----
-title: Building an intelligent log analyzer
----
-
 # Building an intelligent log analyzer
 
 Create an AI-powered log analysis tool that identifies patterns, anomalies, and potential issues in application logs.

@@ -1,7 +1,3 @@
----
-title: How-to guides
----
-
 # How-to guides
 
 Use these guides and examples for specific tasks.

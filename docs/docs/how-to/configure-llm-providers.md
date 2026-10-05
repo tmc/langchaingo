@@ -1,7 +1,3 @@
----
-title: How to configure different LLM providers
----
-
 # How to configure different LLM providers
 
 This guide shows you how to configure and use different LLM providers with LangChainGo.

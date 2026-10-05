@@ -1,7 +1,3 @@
----
-title: Tutorials
----
-
 # Tutorials
 
 These tutorials walk through building applications with LangChainGo.

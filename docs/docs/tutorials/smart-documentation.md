@@ -1,7 +1,3 @@
----
-title: Building smart documentation generator
----
-
 # Building smart documentation generator
 
 Create an AI-powered tool that automatically generates and maintains technical documentation from your codebase.

@@ -1,7 +1,3 @@
----
-title: Building an AI code reviewer
----
-
 # Building an AI code reviewer
 
 Create an intelligent code review assistant that analyzes Go code for bugs, style issues, and performance improvements.

@@ -1,7 +1,3 @@
----
-title: Documentation contribution guide
----
-
 # Documentation contribution guide
 
 This guide covers writing, building, and checking LangChainGo documentation.

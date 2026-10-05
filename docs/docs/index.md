@@ -1,7 +1,3 @@
----
-title: LangChainGo
----
-
 # LangChainGo
 
 LangChainGo is a Go library for building applications with language models.
