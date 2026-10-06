@@ -58,8 +58,9 @@ func (m *Model) Call(ctx context.Context, prompt string, options ...llms.CallOpt
 		return "", err
 	}
 	if len(res.Choices) != 1 {
-		m.CallbacksHandler.HandleLLMError(ctx, err)
-		return "", errors.New("unexpected response from Mistral SDK, length of the Choices slice must be 1")
+		unexpectedErr := errors.New("unexpected response from Mistral SDK, length of the Choices slice must be 1")
+		m.CallbacksHandler.HandleLLMError(ctx, unexpectedErr)
+		return "", unexpectedErr
 	}
 
 	return res.Choices[0].Message.Content, nil
