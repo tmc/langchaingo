@@ -10,6 +10,14 @@ import (
 	"github.com/tmc/langchaingo/llms"
 )
 
+var (
+	// ErrEmptyResponse is returned when a response has no choices.
+	ErrEmptyResponse = errors.New("no response")
+	// ErrUnexpectedResponseLength is returned when Call receives more
+	// than one choice.
+	ErrUnexpectedResponseLength = errors.New("unexpected length of response")
+)
+
 // Model encapsulates an instantiated Mistral client, the client options used to instantiate the client, and a callback handler provided by Langchain Go.
 type Model struct {
 	client           *sdk.MistralClient
@@ -62,8 +70,12 @@ func (m *Model) Call(ctx context.Context, prompt string, options ...llms.CallOpt
 		return "", err
 	}
 	if len(res.Choices) != 1 {
+		err := ErrEmptyResponse
+		if len(res.Choices) > 1 {
+			err = ErrUnexpectedResponseLength
+		}
 		m.CallbacksHandler.HandleLLMError(ctx, err)
-		return "", errors.New("unexpected response from Mistral SDK, length of the Choices slice must be 1")
+		return "", err
 	}
 
 	return res.Choices[0].Message.Content, nil
@@ -154,9 +166,9 @@ func generateNonStreamingContent(ctx context.Context, m *Model, callOptions *llm
 		return nil, err
 	}
 
-	if len(res.Choices) < 1 {
-		m.CallbacksHandler.HandleLLMError(ctx, err)
-		return nil, errors.New("unexpected response from Mistral SDK, length of the Choices slice must be greater than or equal 1")
+	if len(res.Choices) == 0 {
+		m.CallbacksHandler.HandleLLMError(ctx, ErrEmptyResponse)
+		return nil, ErrEmptyResponse
 	}
 	langchainContentResponse := contentResponse(res)
 	m.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, langchainContentResponse)

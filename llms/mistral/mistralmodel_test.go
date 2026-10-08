@@ -2,6 +2,7 @@ package mistral
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -518,36 +519,86 @@ func TestGenerateContent(t *testing.T) {
 	t.Skip("GenerateContent() requires integration testing with mock Mistral client")
 }
 
-// endCounter counts HandleLLMGenerateContentEnd calls.
-type endCounter struct {
+// recorder records generate-end and error callbacks.
+type recorder struct {
 	callbacks.SimpleHandler
-	n int
+	ends int
+	errs []error
 }
 
-func (h *endCounter) HandleLLMGenerateContentEnd(context.Context, *llms.ContentResponse) {
-	h.n++
+func (h *recorder) HandleLLMGenerateContentEnd(context.Context, *llms.ContentResponse) {
+	h.ends++
 }
 
-func TestGenerateContentEndOnce(t *testing.T) {
+func (h *recorder) HandleLLMError(_ context.Context, err error) {
+	h.errs = append(h.errs, err)
+}
+
+// newServerModel returns a Model whose requests are answered with body
+// by a local test server.
+func newServerModel(t *testing.T, body string, h callbacks.Handler) *Model {
+	t.Helper()
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		_, _ = w.Write([]byte(`{"id":"1","object":"chat.completion","created":1,"model":"m",` +
-			`"choices":[{"index":0,"message":{"role":"assistant","content":"hi"},"finish_reason":"stop"}],` +
-			`"usage":{"prompt_tokens":1,"completion_tokens":1,"total_tokens":2}}`))
+		_, _ = w.Write([]byte(body))
 	}))
-	defer srv.Close()
-
-	h := &endCounter{}
+	t.Cleanup(srv.Close)
 	m, err := New(WithAPIKey("test"), WithEndpoint(srv.URL), WithMaxRetries(0), WithCallbacksHandler(h))
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := m.GenerateContent(context.Background(), []llms.MessageContent{
-		llms.TextParts(llms.ChatMessageTypeHuman, "hello"),
-	}); err != nil {
+	return m
+}
+
+var hello = []llms.MessageContent{llms.TextParts(llms.ChatMessageTypeHuman, "hello")}
+
+func TestGenerateContentEndOnce(t *testing.T) {
+	h := &recorder{}
+	m := newServerModel(t, `{"id":"1","object":"chat.completion","created":1,"model":"m",`+
+		`"choices":[{"index":0,"message":{"role":"assistant","content":"hi"},"finish_reason":"stop"}],`+
+		`"usage":{"prompt_tokens":1,"completion_tokens":1,"total_tokens":2}}`, h)
+	if _, err := m.GenerateContent(context.Background(), hello); err != nil {
 		t.Fatal(err)
 	}
-	if h.n != 1 {
-		t.Errorf("HandleLLMGenerateContentEnd called %d times, want 1", h.n)
+	if h.ends != 1 {
+		t.Errorf("HandleLLMGenerateContentEnd called %d times, want 1", h.ends)
+	}
+}
+
+func TestChoiceCount(t *testing.T) {
+	const (
+		head   = `{"id":"1","object":"chat.completion","created":1,"model":"m","choices":[`
+		tail   = `],"usage":{"prompt_tokens":1,"completion_tokens":1,"total_tokens":2}}`
+		choice = `{"index":0,"message":{"role":"assistant","content":"hi"},"finish_reason":"stop"}`
+	)
+	call := func(m *Model) error {
+		_, err := m.Call(context.Background(), "hello")
+		return err
+	}
+	generate := func(m *Model) error {
+		_, err := m.GenerateContent(context.Background(), hello)
+		return err
+	}
+	tests := []struct {
+		name string
+		body string
+		run  func(*Model) error
+		want error
+	}{
+		{"Call no choices", head + tail, call, ErrEmptyResponse},
+		{"Call two choices", head + choice + "," + choice + tail, call, ErrUnexpectedResponseLength},
+		{"GenerateContent no choices", head + tail, generate, ErrEmptyResponse},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			h := &recorder{}
+			err := tt.run(newServerModel(t, tt.body, h))
+			if !errors.Is(err, tt.want) {
+				t.Errorf("err = %v, want %v", err, tt.want)
+			}
+			if len(h.errs) != 1 || h.errs[0] != err {
+				t.Errorf("HandleLLMError got %v, want [%v]", h.errs, err)
+			}
+		})
 	}
 }
