@@ -2,13 +2,14 @@ package chroma
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"maps"
+	"os"
 
-	chromago "github.com/amikos-tech/chroma-go"
-	"github.com/amikos-tech/chroma-go/openai"
-	chromatypes "github.com/amikos-tech/chroma-go/types"
+	chroma "github.com/amikos-tech/chroma-go/pkg/api/v2"
+	chromaembed "github.com/amikos-tech/chroma-go/pkg/embeddings"
 	"github.com/google/uuid"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/schema"
@@ -26,17 +27,17 @@ var (
 
 // Store is a wrapper around the chromaGo API and client.
 type Store struct {
-	client             *chromago.Client
-	collection         *chromago.Collection
-	distanceFunction   chromatypes.DistanceFunction
-	chromaURL          string
-	openaiAPIKey       string
-	openaiOrganization string
-
-	nameSpace    string
-	nameSpaceKey string
-	embedder     embeddings.Embedder
-	includes     []chromatypes.QueryEnum
+	client           chroma.Client
+	collection       chroma.Collection
+	distanceFunction chromaembed.DistanceMetric
+	chromaURL        string
+	cloudAPIKey      string
+	tenant           string
+	database         string
+	nameSpace        string
+	nameSpaceKey     string
+	embedder         embeddings.Embedder
+	includes         []chroma.Include
 }
 
 var _ vectorstores.VectorStore = Store{}
@@ -49,41 +50,66 @@ func New(opts ...Option) (Store, error) {
 		return s, coErr
 	}
 
-	// create the client connection and confirm that we can access the server with it
-	chromaClient, err := chromago.NewClient(s.chromaURL)
-	if err != nil {
-		return s, err
-	}
-
-	if _, errHb := chromaClient.Heartbeat(context.Background()); errHb != nil {
-		return s, errHb
-	}
-	s.client = chromaClient
-
-	var embeddingFunction chromatypes.EmbeddingFunction
-	if s.embedder != nil {
-		// inject user's embedding function, if provided
-		embeddingFunction = chromaGoEmbedder{Embedder: s.embedder}
-	} else {
-		// otherwise use standard langchaingo OpenAI embedding function
-		var options []openai.Option
-		if s.openaiOrganization != "" {
-			options = append(options, openai.WithOpenAIOrganizationID(s.openaiOrganization))
+	if s.client == nil {
+		var err error
+		if s.cloudAPIKey != "" || os.Getenv(ChromaAPIKeyEnvVarName) != "" {
+			s.client, err = createCloudClient(&s)
+		} else {
+			s.client, err = createHTTPClient(&s)
 		}
-		embeddingFunction, err = openai.NewOpenAIEmbeddingFunction(s.openaiAPIKey, options...)
 		if err != nil {
 			return s, err
 		}
 	}
 
-	col, errCc := s.client.CreateCollection(context.Background(), s.nameSpace, map[string]any{}, true,
-		embeddingFunction, s.distanceFunction)
+	if errHb := s.client.Heartbeat(context.Background()); errHb != nil {
+		return s, errHb
+	}
+
+	ef := chromaGoEmbedder{Embedder: s.embedder}
+
+	col, errCc := s.client.GetOrCreateCollection(context.Background(), s.nameSpace,
+		chroma.WithEmbeddingFunctionCreate(ef),
+		chroma.WithHNSWSpaceCreate(s.distanceFunction),
+	)
 	if errCc != nil {
 		return s, fmt.Errorf("%w: %w", ErrNewClient, errCc)
 	}
 
 	s.collection = col
 	return s, nil
+}
+
+func createHTTPClient(s *Store) (chroma.Client, error) {
+	return chroma.NewHTTPClient(chroma.WithBaseURL(s.chromaURL))
+}
+
+func createCloudClient(s *Store) (chroma.Client, error) {
+	var opts []chroma.ClientOption
+	apiKey := s.cloudAPIKey
+	if apiKey == "" {
+		apiKey = os.Getenv(ChromaAPIKeyEnvVarName)
+	}
+	if apiKey != "" {
+		opts = append(opts, chroma.WithCloudAPIKey(apiKey))
+	}
+	if s.tenant != "" && s.database != "" {
+		opts = append(opts, chroma.WithDatabaseAndTenant(s.database, s.tenant))
+	}
+	return chroma.NewCloudClient(opts...)
+}
+
+// Close releases client resources.
+func (s Store) Close() error {
+	if s.client != nil {
+		return s.client.Close()
+	}
+	return nil
+}
+
+// Collection returns the underlying Chroma collection for advanced operations.
+func (s Store) Collection() chroma.Collection {
+	return s.collection
 }
 
 // AddDocuments adds the text and metadata from the documents to the Chroma collection associated with 'Store'.
@@ -102,25 +128,37 @@ func (s Store) AddDocuments(ctx context.Context,
 		return nil, fmt.Errorf("%w: nameSpace without nameSpaceKey", ErrUnsupportedOptions)
 	}
 
-	ids := make([]string, len(docs))
+	ids := make([]chroma.DocumentID, len(docs))
+	strIDs := make([]string, len(docs))
 	texts := make([]string, len(docs))
-	metadatas := make([]map[string]any, len(docs))
-	for docIdx, doc := range docs {
-		ids[docIdx] = uuid.New().String() // TODO (noodnik2): find & use something more meaningful
-		texts[docIdx] = doc.PageContent
-		mc := make(map[string]any, 0)
+	metadatas := make([]chroma.DocumentMetadata, len(docs))
+
+	for i, doc := range docs {
+		id := uuid.New().String()
+		ids[i] = chroma.DocumentID(id)
+		strIDs[i] = id
+		texts[i] = doc.PageContent
+		mc := make(map[string]any)
 		maps.Copy(mc, doc.Metadata)
-		metadatas[docIdx] = mc
 		if nameSpace != "" {
-			metadatas[docIdx][s.nameSpaceKey] = nameSpace
+			mc[s.nameSpaceKey] = nameSpace
 		}
+		dm, err := chroma.NewDocumentMetadataFromMap(mc)
+		if err != nil {
+			return nil, fmt.Errorf("%w: %w", ErrAddDocument, err)
+		}
+		metadatas[i] = dm
 	}
 
 	col := s.collection
-	if _, addErr := col.Add(ctx, nil, metadatas, texts, ids); addErr != nil {
+	if addErr := col.Add(ctx,
+		chroma.WithIDs(ids...),
+		chroma.WithTexts(texts...),
+		chroma.WithMetadatas(metadatas...),
+	); addErr != nil {
 		return nil, fmt.Errorf("%w: %w", ErrAddDocument, addErr)
 	}
-	return ids, nil
+	return strIDs, nil
 }
 
 func (s Store) SimilaritySearch(ctx context.Context, query string, numDocuments int,
@@ -129,7 +167,6 @@ func (s Store) SimilaritySearch(ctx context.Context, query string, numDocuments 
 	opts := s.getOptions(options...)
 
 	if opts.Embedder != nil {
-		// embedder is not used by this method, so shouldn't ever be specified
 		return nil, fmt.Errorf("%w: Embedder", ErrUnsupportedOptions)
 	}
 
@@ -139,23 +176,43 @@ func (s Store) SimilaritySearch(ctx context.Context, query string, numDocuments 
 	}
 
 	filter := s.getNamespacedFilter(opts)
-	qr, queryErr := s.collection.Query(ctx, []string{query}, safeIntToInt32(numDocuments), filter, nil, s.includes)
+
+	queryOpts := []chroma.CollectionQueryOption{
+		chroma.WithQueryTexts(query),
+		chroma.WithNResults(numDocuments),
+	}
+
+	if filter != nil {
+		queryOpts = append(queryOpts, chroma.WithWhere(&rawWhereFilter{data: filter}))
+	}
+
+	if len(s.includes) > 0 {
+		queryOpts = append(queryOpts, chroma.WithInclude(s.includes...))
+	}
+
+	qr, queryErr := s.collection.Query(ctx, queryOpts...)
 	if queryErr != nil {
 		return nil, queryErr
 	}
 
-	if len(qr.Documents) != len(qr.Metadatas) || len(qr.Metadatas) != len(qr.Distances) {
-		return nil, fmt.Errorf("%w: qr.Documents[%d], qr.Metadatas[%d], qr.Distances[%d]",
-			ErrUnexpectedResponseLength, len(qr.Documents), len(qr.Metadatas), len(qr.Distances))
+	docGroups := qr.GetDocumentsGroups()
+	metaGroups := qr.GetMetadatasGroups()
+	distGroups := qr.GetDistancesGroups()
+
+	if len(docGroups) != len(metaGroups) || len(metaGroups) != len(distGroups) {
+		return nil, fmt.Errorf("%w: documents[%d], metadatas[%d], distances[%d]",
+			ErrUnexpectedResponseLength, len(docGroups), len(metaGroups), len(distGroups))
 	}
+
 	var sDocs []schema.Document
-	for docsI := range qr.Documents {
-		for docI := range qr.Documents[docsI] {
-			if score := 1.0 - qr.Distances[docsI][docI]; score >= scoreThreshold {
+	for g := range docGroups {
+		for i := range docGroups[g] {
+			dist := float64(distGroups[g][i])
+			if score := 1.0 - dist; score >= float64(scoreThreshold) {
 				sDocs = append(sDocs, schema.Document{
-					Metadata:    qr.Metadatas[docsI][docI],
-					PageContent: qr.Documents[docsI][docI],
-					Score:       score,
+					Metadata:    documentMetadataToMap(metaGroups[g][i]),
+					PageContent: docGroups[g][i].ContentString(),
+					Score:       float32(score),
 				})
 			}
 		}
@@ -168,9 +225,9 @@ func (s Store) RemoveCollection() error {
 	if s.client == nil || s.collection == nil {
 		return fmt.Errorf("%w: no collection", ErrRemoveCollection)
 	}
-	_, errDc := s.client.DeleteCollection(context.Background(), s.collection.Name)
-	if errDc != nil {
-		return fmt.Errorf("%w(%s): %w", ErrRemoveCollection, s.collection.Name, errDc)
+	name := s.collection.Name()
+	if errDc := s.client.DeleteCollection(context.Background(), name); errDc != nil {
+		return fmt.Errorf("%w(%s): %w", ErrRemoveCollection, name, errDc)
 	}
 	return nil
 }
@@ -213,6 +270,70 @@ func (s Store) getNamespacedFilter(opts vectorstores.Options) map[string]any {
 	return map[string]any{"$and": []map[string]any{nameSpaceFilter, filter}}
 }
 
-func safeIntToInt32(n int) int32 {
-	return int32(max(0, n))
+func (s Store) getNamespacedSearchFilter(filter map[string]any) map[string]any {
+	if s.nameSpace == "" || s.nameSpaceKey == "" {
+		return filter
+	}
+
+	nameSpaceFilter := map[string]any{s.nameSpaceKey: s.nameSpace}
+	if filter == nil {
+		return nameSpaceFilter
+	}
+
+	return map[string]any{"$and": []map[string]any{nameSpaceFilter, filter}}
+}
+
+// rawWhereFilter wraps a map[string]any to implement chroma.WhereFilter,
+// allowing users to pass arbitrary filter maps through the vectorstores API.
+type rawWhereFilter struct {
+	data map[string]any
+}
+
+func (r *rawWhereFilter) String() string {
+	b, _ := json.Marshal(r.data)
+	return string(b)
+}
+
+func (r *rawWhereFilter) Validate() error { return nil }
+
+func (r *rawWhereFilter) MarshalJSON() ([]byte, error) {
+	return json.Marshal(r.data)
+}
+
+func (r *rawWhereFilter) UnmarshalJSON(b []byte) error {
+	return json.Unmarshal(b, &r.data)
+}
+
+// rawWhereClause wraps a map[string]any to implement chroma.WhereClause
+// for use with the Search API filtering.
+type rawWhereClause struct {
+	data map[string]any
+}
+
+func (r *rawWhereClause) Operator() chroma.WhereFilterOperator { return "" }
+func (r *rawWhereClause) Key() string                          { return "" }
+func (r *rawWhereClause) Operand() any                         { return r.data }
+
+func (r *rawWhereClause) String() string {
+	b, _ := json.Marshal(r.data)
+	return string(b)
+}
+
+func (r *rawWhereClause) Validate() error              { return nil }
+func (r *rawWhereClause) MarshalJSON() ([]byte, error) { return json.Marshal(r.data) }
+func (r *rawWhereClause) UnmarshalJSON(b []byte) error { return json.Unmarshal(b, &r.data) }
+
+func documentMetadataToMap(dm chroma.DocumentMetadata) map[string]any {
+	if dm == nil {
+		return nil
+	}
+	b, err := json.Marshal(dm)
+	if err != nil {
+		return nil
+	}
+	var m map[string]any
+	if err := json.Unmarshal(b, &m); err != nil {
+		return nil
+	}
+	return m
 }

@@ -8,7 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	chromatypes "github.com/amikos-tech/chroma-go/types"
+	chromav2 "github.com/amikos-tech/chroma-go/pkg/api/v2"
+	chromaembed "github.com/amikos-tech/chroma-go/pkg/embeddings"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
@@ -23,15 +24,6 @@ import (
 	"github.com/tmc/langchaingo/vectorstores"
 	"github.com/tmc/langchaingo/vectorstores/chroma"
 )
-
-// TODO (noodnik2):
-//  add relevant tests from "weaviate_test.go" (the initial tests are based upon those found in "pinecone_test.go")
-//  consider refactoring out standard set of vectorstore unit tests to run across all implementations
-
-//
-// NOTE: View the 'getValues()' function to see which environment variables are required to run these tests.
-// WARNING: When these values are not provided, the tests will not fail, but will be (silently) skipped.
-//
 
 // createOpenAIEmbedder creates an OpenAI embedder with httprr support for testing.
 func createOpenAIEmbedder(t *testing.T) *embeddings.EmbedderImpl {
@@ -77,13 +69,12 @@ func TestChromaGoStoreRest(t *testing.T) {
 		t.Parallel()
 	}
 
-	testChromaURL, openaiAPIKey := getValues(t)
+	testChromaURL := getValues(t)
 	e := createOpenAIEmbedder(t)
 
 	s, err := chroma.New(
-		chroma.WithOpenAIAPIKey(openaiAPIKey),
 		chroma.WithChromaURL(testChromaURL),
-		chroma.WithDistanceFunction(chromatypes.COSINE),
+		chroma.WithDistanceFunction(chromaembed.COSINE),
 		chroma.WithNameSpace(getTestNameSpace()),
 		chroma.WithEmbedder(e),
 	)
@@ -116,13 +107,12 @@ func TestChromaStoreRestWithScoreThreshold(t *testing.T) {
 		t.Parallel()
 	}
 
-	testChromaURL, openaiAPIKey := getValues(t)
+	testChromaURL := getValues(t)
 	e := createOpenAIEmbedder(t)
 
 	s, err := chroma.New(
-		chroma.WithOpenAIAPIKey(openaiAPIKey),
 		chroma.WithChromaURL(testChromaURL),
-		chroma.WithDistanceFunction(chromatypes.COSINE),
+		chroma.WithDistanceFunction(chromaembed.COSINE),
 		chroma.WithNameSpace(getTestNameSpace()),
 		chroma.WithEmbedder(e),
 	)
@@ -167,11 +157,10 @@ func TestSimilaritySearchWithInvalidScoreThreshold(t *testing.T) {
 		t.Parallel()
 	}
 
-	testChromaURL, openaiAPIKey := getValues(t)
+	testChromaURL := getValues(t)
 	e := createOpenAIEmbedder(t)
 
 	s, err := chroma.New(
-		chroma.WithOpenAIAPIKey(openaiAPIKey),
 		chroma.WithChromaURL(testChromaURL),
 		chroma.WithNameSpace(getTestNameSpace()),
 		chroma.WithEmbedder(e),
@@ -213,12 +202,11 @@ func TestChromaAsRetriever(t *testing.T) {
 		t.Parallel()
 	}
 
-	testChromaURL, openaiAPIKey := getValues(t)
+	testChromaURL := getValues(t)
 
 	llm, e := createOpenAILLMAndEmbedder(t)
 
 	s, err := chroma.New(
-		chroma.WithOpenAIAPIKey(openaiAPIKey),
 		chroma.WithChromaURL(testChromaURL),
 		chroma.WithNameSpace(getTestNameSpace()),
 		chroma.WithEmbedder(e),
@@ -257,14 +245,13 @@ func TestChromaAsRetrieverWithScoreThreshold(t *testing.T) {
 		t.Parallel()
 	}
 
-	testChromaURL, openaiAPIKey := getValues(t)
+	testChromaURL := getValues(t)
 
 	llm, e := createOpenAILLMAndEmbedder(t)
 
 	s, err := chroma.New(
-		chroma.WithOpenAIAPIKey(openaiAPIKey),
 		chroma.WithChromaURL(testChromaURL),
-		chroma.WithDistanceFunction(chromatypes.COSINE),
+		chroma.WithDistanceFunction(chromaembed.COSINE),
 		chroma.WithNameSpace(getTestNameSpace()),
 		chroma.WithEmbedder(e),
 	)
@@ -294,9 +281,6 @@ func TestChromaAsRetrieverWithScoreThreshold(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	// TODO (noodnik2): clarify - WHY should we see "orange" in the result,
-	//  as required by (expected in) the original "Pinecone" test??
-	//   require.Contains(t, result, "orange", "expected orange in result")
 	require.Contains(t, result, "black", "expected black in result")
 	require.Contains(t, result, "beige", "expected beige in result")
 }
@@ -309,12 +293,11 @@ func TestChromaAsRetrieverWithMetadataFilterEqualsClause(t *testing.T) {
 		t.Parallel()
 	}
 
-	testChromaURL, openaiAPIKey := getValues(t)
+	testChromaURL := getValues(t)
 
 	llm, e := createOpenAILLMAndEmbedder(t)
 
 	s, err := chroma.New(
-		chroma.WithOpenAIAPIKey(openaiAPIKey),
 		chroma.WithChromaURL(testChromaURL),
 		chroma.WithNameSpace(getTestNameSpace()),
 		chroma.WithEmbedder(e),
@@ -386,12 +369,11 @@ func TestChromaAsRetrieverWithMetadataFilterInClause(t *testing.T) {
 		t.Parallel()
 	}
 
-	testChromaURL, openaiAPIKey := getValues(t)
+	testChromaURL := getValues(t)
 
 	llm, e := createOpenAILLMAndEmbedder(t)
 
 	s, newChromaErr := chroma.New(
-		chroma.WithOpenAIAPIKey(openaiAPIKey),
 		chroma.WithChromaURL(testChromaURL),
 		chroma.WithEmbedder(e),
 	)
@@ -467,12 +449,11 @@ func TestChromaAsRetrieverWithMetadataFilterNotSelected(t *testing.T) {
 		t.Parallel()
 	}
 
-	testChromaURL, openaiAPIKey := getValues(t)
+	testChromaURL := getValues(t)
 
 	llm, e := createOpenAILLMAndEmbedder(t)
 
 	s, err := chroma.New(
-		chroma.WithOpenAIAPIKey(openaiAPIKey),
 		chroma.WithChromaURL(testChromaURL),
 		chroma.WithNameSpace(getTestNameSpace()),
 		chroma.WithEmbedder(e),
@@ -544,12 +525,11 @@ func TestChromaAsRetrieverWithMetadataFilters(t *testing.T) {
 		t.Parallel()
 	}
 
-	testChromaURL, openaiAPIKey := getValues(t)
+	testChromaURL := getValues(t)
 
 	llm, e := createOpenAILLMAndEmbedder(t)
 
 	s, err := chroma.New(
-		chroma.WithOpenAIAPIKey(openaiAPIKey),
 		chroma.WithChromaURL(testChromaURL),
 		chroma.WithNameSpace(getTestNameSpace()),
 		chroma.WithEmbedder(e),
@@ -586,15 +566,15 @@ func TestChromaAsRetrieverWithMetadataFilters(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	filter := map[string]interface{}{
-		"$and": []map[string]interface{}{
+	filter := map[string]any{
+		"$and": []map[string]any{
 			{
-				"location": map[string]interface{}{
+				"location": map[string]any{
 					"$eq": "sitting room",
 				},
 			},
 			{
-				"square_feet": map[string]interface{}{
+				"square_feet": map[string]any{
 					"$gte": 300,
 				},
 			},
@@ -615,7 +595,7 @@ func TestChromaAsRetrieverWithMetadataFilters(t *testing.T) {
 	require.Contains(t, result, "purple", "expected purple in result")
 }
 
-func getValues(t *testing.T) (string, string) {
+func getValues(t *testing.T) string {
 	t.Helper()
 	testctr.SkipIfDockerNotAvailable(t)
 
@@ -623,14 +603,14 @@ func getValues(t *testing.T) (string, string) {
 		t.Skip("Skipping test in short mode")
 	}
 
-	openaiAPIKey := os.Getenv(chroma.OpenAIAPIKeyEnvVarName)
+	openaiAPIKey := os.Getenv("OPENAI_API_KEY")
 	if openaiAPIKey == "" {
-		t.Skipf("Must set %s to run test", chroma.OpenAIAPIKeyEnvVarName)
+		t.Skipf("Must set OPENAI_API_KEY to run test")
 	}
 
 	chromaURL := os.Getenv(chroma.ChromaURLKeyEnvVarName)
 	if chromaURL == "" {
-		chromaContainer, err := tcchroma.Run(context.Background(), "chromadb/chroma:0.4.24", testcontainers.WithLogger(log.TestLogger(t)))
+		chromaContainer, err := tcchroma.Run(context.Background(), "chromadb/chroma:0.6.3", testcontainers.WithLogger(log.TestLogger(t)))
 		if err != nil && strings.Contains(err.Error(), "Cannot connect to the Docker daemon") {
 			t.Skip("Docker not available")
 		}
@@ -647,14 +627,194 @@ func getValues(t *testing.T) (string, string) {
 		}
 	}
 
-	return chromaURL, openaiAPIKey
+	return chromaURL
 }
 
 func cleanupTestArtifacts(t *testing.T, s chroma.Store) {
 	t.Helper()
 	require.NoError(t, s.RemoveCollection())
+	_ = s.Close()
 }
 
 func getTestNameSpace() string {
 	return fmt.Sprintf("test-namespace-%s", uuid.New().String())
+}
+
+func TestCollectionGetter(t *testing.T) {
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "CHROMA_URL")
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	_ = rr
+	if !rr.Recording() {
+		t.Parallel()
+	}
+
+	testChromaURL := getValues(t)
+	e := createOpenAIEmbedder(t)
+
+	s, err := chroma.New(
+		chroma.WithChromaURL(testChromaURL),
+		chroma.WithNameSpace(getTestNameSpace()),
+		chroma.WithEmbedder(e),
+	)
+	require.NoError(t, err)
+	defer cleanupTestArtifacts(t, s)
+
+	col := s.Collection()
+	require.NotNil(t, col)
+	require.NotEmpty(t, col.Name())
+}
+
+func TestSearch(t *testing.T) {
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "CHROMA_URL")
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	_ = rr
+	if !rr.Recording() {
+		t.Parallel()
+	}
+
+	testChromaURL := getValues(t)
+	e := createOpenAIEmbedder(t)
+
+	s, err := chroma.New(
+		chroma.WithChromaURL(testChromaURL),
+		chroma.WithDistanceFunction(chromaembed.COSINE),
+		chroma.WithNameSpace(getTestNameSpace()),
+		chroma.WithEmbedder(e),
+	)
+	require.NoError(t, err)
+	defer cleanupTestArtifacts(t, s)
+
+	_, err = s.AddDocuments(context.Background(), []schema.Document{
+		{PageContent: "tokyo", Metadata: map[string]any{"country": "japan"}},
+		{PageContent: "paris", Metadata: map[string]any{"country": "france"}},
+		{PageContent: "london", Metadata: map[string]any{"country": "uk"}},
+	})
+	require.NoError(t, err)
+
+	docs, err := s.Search(context.Background(), "japan", 3)
+	require.NoError(t, err)
+	require.NotEmpty(t, docs)
+	require.Equal(t, "tokyo", docs[0].PageContent)
+	require.True(t, docs[0].Score > 0, "expected positive relevance score")
+}
+
+func TestSearchWithFilter(t *testing.T) {
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "CHROMA_URL")
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	_ = rr
+	if !rr.Recording() {
+		t.Parallel()
+	}
+
+	testChromaURL := getValues(t)
+	e := createOpenAIEmbedder(t)
+
+	s, err := chroma.New(
+		chroma.WithChromaURL(testChromaURL),
+		chroma.WithDistanceFunction(chromaembed.COSINE),
+		chroma.WithNameSpace(getTestNameSpace()),
+		chroma.WithEmbedder(e),
+	)
+	require.NoError(t, err)
+	defer cleanupTestArtifacts(t, s)
+
+	_, err = s.AddDocuments(context.Background(), []schema.Document{
+		{PageContent: "tokyo", Metadata: map[string]any{"country": "japan"}},
+		{PageContent: "osaka", Metadata: map[string]any{"country": "japan"}},
+		{PageContent: "paris", Metadata: map[string]any{"country": "france"}},
+	})
+	require.NoError(t, err)
+
+	filter := map[string]any{
+		"country": map[string]any{"$eq": "japan"},
+	}
+
+	docs, err := s.Search(context.Background(), "city", 3,
+		chroma.WithSearchFilter(filter),
+	)
+	require.NoError(t, err)
+	require.Len(t, docs, 2)
+	for _, doc := range docs {
+		require.Equal(t, "japan", doc.Metadata["country"])
+	}
+}
+
+func TestSearchWithScoreThreshold(t *testing.T) {
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "CHROMA_URL")
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	_ = rr
+	if !rr.Recording() {
+		t.Parallel()
+	}
+
+	testChromaURL := getValues(t)
+	e := createOpenAIEmbedder(t)
+
+	s, err := chroma.New(
+		chroma.WithChromaURL(testChromaURL),
+		chroma.WithDistanceFunction(chromaembed.COSINE),
+		chroma.WithNameSpace(getTestNameSpace()),
+		chroma.WithEmbedder(e),
+	)
+	require.NoError(t, err)
+	defer cleanupTestArtifacts(t, s)
+
+	_, err = s.AddDocuments(context.Background(), []schema.Document{
+		{PageContent: "tokyo"},
+		{PageContent: "potato"},
+	})
+	require.NoError(t, err)
+
+	// Invalid threshold
+	_, err = s.Search(context.Background(), "japan", 2,
+		chroma.WithSearchScoreThreshold(-0.5),
+	)
+	require.ErrorIs(t, err, chroma.ErrInvalidScoreThreshold)
+
+	_, err = s.Search(context.Background(), "japan", 2,
+		chroma.WithSearchScoreThreshold(1.5),
+	)
+	require.ErrorIs(t, err, chroma.ErrInvalidScoreThreshold)
+
+	// High threshold should filter results
+	docs, err := s.Search(context.Background(), "japan", 2,
+		chroma.WithSearchScoreThreshold(0.9),
+	)
+	require.NoError(t, err)
+	for _, doc := range docs {
+		require.GreaterOrEqual(t, doc.Score, float32(0.9))
+	}
+}
+
+func TestWithClientOption(t *testing.T) {
+	httprr.SkipIfNoCredentialsAndRecordingMissing(t, "CHROMA_URL")
+	rr := httprr.OpenForTest(t, http.DefaultTransport)
+	_ = rr
+	if !rr.Recording() {
+		t.Parallel()
+	}
+
+	testChromaURL := getValues(t)
+	e := createOpenAIEmbedder(t)
+
+	client, err := chromav2.NewHTTPClient(chromav2.WithBaseURL(testChromaURL))
+	require.NoError(t, err)
+
+	s, err := chroma.New(
+		chroma.WithClient(client),
+		chroma.WithNameSpace(getTestNameSpace()),
+		chroma.WithEmbedder(e),
+	)
+	require.NoError(t, err)
+	defer cleanupTestArtifacts(t, s)
+
+	_, err = s.AddDocuments(context.Background(), []schema.Document{
+		{PageContent: "test document"},
+	})
+	require.NoError(t, err)
+
+	docs, err := s.SimilaritySearch(context.Background(), "test", 1)
+	require.NoError(t, err)
+	require.Len(t, docs, 1)
+	require.Equal(t, "test document", docs[0].PageContent)
 }
