@@ -9,7 +9,7 @@ import (
 
 func main() {
 	fmt.Println("LangChain Go - Prompt Template Example")
-	fmt.Println("=====================================\n")
+	fmt.Print("=====================================\n\n")
 
 	// Example 1: Basic template
 	fmt.Println("1. Basic Template:")
@@ -99,7 +99,7 @@ func main() {
 	messages, err := chatTemplate.FormatMessages(map[string]any{
 		"input_language":  "English",
 		"output_language": "French",
-		"text":           "Hello, how are you?",
+		"text":            "Hello, how are you?",
 	})
 	if err != nil {
 		log.Fatal(err)
