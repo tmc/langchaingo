@@ -232,3 +232,39 @@ func (ignoresCancel) GenerateContent(context.Context, []llms.MessageContent, ...
 func (ignoresCancel) Call(context.Context, string, ...llms.CallOption) (string, error) {
 	return "OK", nil
 }
+
+// TestTestModelUsage checks that the usage capability accepts the key
+// spellings and integer types in-tree providers report.
+func TestTestModelUsage(t *testing.T) {
+	tests := []struct {
+		name string
+		info map[string]any
+		ok   bool
+	}{
+		{"openai int", map[string]any{"TotalTokens": 3}, true},
+		{"anthropic int", map[string]any{"InputTokens": 3, "OutputTokens": 1}, true},
+		{"googleai int32", map[string]any{"PromptTokens": int32(3), "input_tokens": int32(3)}, true},
+		{"vertex int32", map[string]any{"input_tokens": int32(3), "output_tokens": int32(1), "total_tokens": int32(4)}, true},
+		{"bedrock snake case", map[string]any{"input_tokens": 3, "output_tokens": 1}, true},
+		{"int64", map[string]any{"total_tokens": int64(4)}, true},
+		{"uint", map[string]any{"CompletionTokens": uint(1)}, true},
+		{"zero", map[string]any{"TotalTokens": 0}, false},
+		{"negative", map[string]any{"output_tokens": int32(-1)}, false},
+		{"string", map[string]any{"TotalTokens": "3"}, false},
+		{"unknown key", map[string]any{"tokens": 3}, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			model := &scriptModel{generate: func(context.Context, []llms.MessageContent, *llms.CallOptions) (*llms.ContentResponse, error) {
+				return &llms.ContentResponse{Choices: []*llms.ContentChoice{{
+					Content:        "OK",
+					GenerationInfo: tt.info,
+				}}}, nil
+			}}
+			err := llmtest.TestModel(context.Background(), model, "usage")
+			if got := err == nil; got != tt.ok {
+				t.Errorf("TestModel with GenerationInfo %v: err = %v, want ok = %v", tt.info, err, tt.ok)
+			}
+		})
+	}
+}

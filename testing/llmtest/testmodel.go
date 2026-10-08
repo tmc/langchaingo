@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"reflect"
 	"strings"
 
 	"github.com/tmc/langchaingo/llms"
@@ -281,22 +282,38 @@ func (t *modelTester) testUsage() {
 	if !t.checkResponse("usage", resp) {
 		return
 	}
-	// Providers report usage under provider-family-specific keys:
-	// Anthropic uses Input/OutputTokens, OpenAI-style providers use
-	// Prompt/Completion/TotalTokens.
+	// Providers report usage under provider-family-specific keys and
+	// integer types: Anthropic uses Input/OutputTokens, OpenAI-style
+	// providers use Prompt/Completion/TotalTokens, and Bedrock and
+	// Vertex use input/output/total_tokens. Google reports int32.
 	keys := []string{
 		"InputTokens",
 		"OutputTokens",
 		"PromptTokens",
 		"CompletionTokens",
 		"TotalTokens",
+		"input_tokens",
+		"output_tokens",
+		"total_tokens",
 	}
 	for _, choice := range resp.Choices {
 		for _, key := range keys {
-			if n, ok := choice.GenerationInfo[key].(int); ok && n > 0 {
+			if positive(choice.GenerationInfo[key]) {
 				return
 			}
 		}
 	}
 	t.errorf("usage: no positive token count in GenerationInfo")
+}
+
+// positive reports whether v is an integer greater than zero.
+func positive(v any) bool {
+	rv := reflect.ValueOf(v)
+	switch {
+	case rv.CanInt():
+		return rv.Int() > 0
+	case rv.CanUint():
+		return rv.Uint() > 0
+	}
+	return false
 }
