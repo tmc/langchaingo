@@ -24,11 +24,16 @@
 package testctr
 
 import (
+	"context"
 	"fmt"
+	"net"
+	"net/http"
 	"os"
 	"os/exec"
 	"strings"
+	"sync"
 	"testing"
+	"time"
 )
 
 // EnsureTestEnv sets up the necessary environment variables for testcontainers
@@ -71,8 +76,8 @@ func EnsureTestEnv() int {
 
 			// Set DOCKER_HOST if using non-standard Docker socket paths (Colima, Lima, etc.)
 			// This works around testcontainers bug where it doesn't properly detect non-standard sockets
-			if dockerHost != "" && (strings.Contains(dockerHost, "colima") || 
-				strings.Contains(dockerHost, ".lima") || 
+			if dockerHost != "" && (strings.Contains(dockerHost, "colima") ||
+				strings.Contains(dockerHost, ".lima") ||
 				!strings.Contains(dockerHost, "/var/run/docker.sock")) {
 				os.Setenv("DOCKER_HOST", dockerHost)
 				if verbose {
@@ -98,15 +103,15 @@ func EnsureTestEnv() int {
 	// Set the testcontainers Docker socket override if not already set
 	// This tells testcontainers where to find the actual Docker socket
 	if os.Getenv("TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE") == "" {
-		dockerSocket := "/var/run/docker.sock"  // default
-		
+		dockerSocket := "/var/run/docker.sock" // default
+
 		// For Colima and other non-standard setups, extract socket path from DOCKER_HOST
 		if dockerHost := os.Getenv("DOCKER_HOST"); dockerHost != "" {
 			if strings.HasPrefix(dockerHost, "unix://") {
 				dockerSocket = strings.TrimPrefix(dockerHost, "unix://")
 			}
 		}
-		
+
 		os.Setenv("TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE", dockerSocket)
 		if verbose {
 			fmt.Fprintf(os.Stderr, "testctr: Set TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=%s\n", dockerSocket)
@@ -132,4 +137,46 @@ func SkipIfDockerNotAvailable(t *testing.T) {
 		}
 		// Docker CLI not found but DOCKER_HOST is set, so continue
 	}
+
+	if err := pingDaemon(); err != nil {
+		t.Skipf("Docker daemon not reachable, skipping test: %v", err)
+	}
 }
+
+// pingDaemon reports whether the Docker daemon answers on its local socket.
+// Without this check, testcontainers panics in MustExtractDockerHost when the
+// configured context points at a stopped daemon (for example, a stopped Colima VM).
+// Non-unix hosts are not checked.
+var pingDaemon = sync.OnceValue(func() error {
+	host := os.Getenv("DOCKER_HOST")
+	if host == "" {
+		host = "unix:///var/run/docker.sock"
+		out, err := exec.Command("docker", "context", "inspect", "-f={{.Endpoints.docker.Host}}").Output()
+		if err == nil && strings.TrimSpace(string(out)) != "" {
+			host = strings.TrimSpace(string(out))
+		}
+	}
+	socket, ok := strings.CutPrefix(host, "unix://")
+	if !ok {
+		return nil
+	}
+
+	client := &http.Client{
+		Timeout: 2 * time.Second,
+		Transport: &http.Transport{
+			DialContext: func(ctx context.Context, _, _ string) (net.Conn, error) {
+				var d net.Dialer
+				return d.DialContext(ctx, "unix", socket)
+			},
+		},
+	}
+	resp, err := client.Get("http://docker/_ping")
+	if err != nil {
+		return fmt.Errorf("ping %s: %w", host, err)
+	}
+	resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("ping %s: %s", host, resp.Status)
+	}
+	return nil
+})

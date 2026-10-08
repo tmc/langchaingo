@@ -110,6 +110,7 @@ func setupTestEnv(t *testing.T, httpClient ...*http.Client) *testEnv {
 	if testing.Short() {
 		t.Skip("skipping MongoDB vector store tests in short mode")
 	}
+	testctr.SkipIfDockerNotAvailable(t)
 
 	setupOnce.Do(func() {
 		// Use fmt.Printf since we don't have a test context yet
