@@ -184,6 +184,18 @@ func misbehaviorCases() []misbehaviorCase {
 			want:     "not valid JSON",
 		},
 		{
+			name: "nil function call",
+			model: &scriptModel{generate: func(context.Context, []llms.MessageContent, *llms.CallOptions) (*llms.ContentResponse, error) {
+				call := llms.ToolCall{ID: "call_1", Type: "function"}
+				return &llms.ContentResponse{Choices: []*llms.ContentChoice{{
+					ToolCalls: []llms.ToolCall{call},
+					Parts:     []llms.ContentPart{call},
+				}}}, nil
+			}},
+			expected: []string{"tools"},
+			want:     "nil FunctionCall",
+		},
+		{
 			name: "no usage",
 			model: &scriptModel{generate: func(context.Context, []llms.MessageContent, *llms.CallOptions) (*llms.ContentResponse, error) {
 				return &llms.ContentResponse{Choices: []*llms.ContentChoice{{Content: "OK"}}}, nil

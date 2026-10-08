@@ -233,7 +233,7 @@ func (t *modelTester) testTools() {
 	for _, call := range calls {
 		if call.FunctionCall == nil {
 			t.errorf("tools: tool call %q has nil FunctionCall", call.ID)
-			continue
+			return
 		}
 		if call.FunctionCall.Name != "get_weather" {
 			t.errorf("tools: called %q, want %q", call.FunctionCall.Name, "get_weather")
