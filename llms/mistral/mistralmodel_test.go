@@ -66,6 +66,25 @@ func TestNew(t *testing.T) {
 	}
 }
 
+func TestNewCallbacksHandler(t *testing.T) {
+	h := &testCallbackHandler{}
+	m, err := New(WithAPIKey("test"), WithCallbacksHandler(h))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if m.CallbacksHandler != h {
+		t.Errorf("CallbacksHandler = %v, want the handler passed to WithCallbacksHandler", m.CallbacksHandler)
+	}
+
+	m, err = New(WithAPIKey("test"), WithCallbacksHandler(nil))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if m.CallbacksHandler == nil {
+		t.Error("CallbacksHandler is nil after WithCallbacksHandler(nil), want SimpleHandler")
+	}
+}
+
 func TestSetCallOptions(t *testing.T) {
 	callOpts := &llms.CallOptions{}
 
@@ -518,12 +537,11 @@ func TestGenerateContentEndOnce(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	m, err := New(WithAPIKey("test"), WithEndpoint(srv.URL), WithMaxRetries(0))
+	h := &endCounter{}
+	m, err := New(WithAPIKey("test"), WithEndpoint(srv.URL), WithMaxRetries(0), WithCallbacksHandler(h))
 	if err != nil {
 		t.Fatal(err)
 	}
-	h := &endCounter{}
-	m.CallbacksHandler = h
 	if _, err := m.GenerateContent(context.Background(), []llms.MessageContent{
 		llms.TextParts(llms.ChatMessageTypeHuman, "hello"),
 	}); err != nil {

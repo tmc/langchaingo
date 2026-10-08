@@ -23,21 +23,25 @@ var _ llms.Model = (*Model)(nil)
 // Instantiates a new Mistral Model.
 func New(opts ...Option) (*Model, error) {
 	options := &clientOptions{
-		apiKey:     os.Getenv("MISTRAL_API_KEY"),
-		endpoint:   sdk.Endpoint,
-		maxRetries: sdk.DefaultMaxRetries,
-		timeout:    sdk.DefaultTimeout,
-		model:      sdk.ModelOpenMistral7b,
+		apiKey:           os.Getenv("MISTRAL_API_KEY"),
+		endpoint:         sdk.Endpoint,
+		maxRetries:       sdk.DefaultMaxRetries,
+		timeout:          sdk.DefaultTimeout,
+		model:            sdk.ModelOpenMistral7b,
+		callbacksHandler: callbacks.SimpleHandler{},
 	}
 
 	for _, opt := range opts {
 		opt(options)
 	}
+	if options.callbacksHandler == nil {
+		options.callbacksHandler = callbacks.SimpleHandler{}
+	}
 
 	return &Model{
 		clientOptions:    options,
 		client:           sdk.NewMistralClient(options.apiKey, options.endpoint, options.maxRetries, options.timeout),
-		CallbacksHandler: callbacks.SimpleHandler{},
+		CallbacksHandler: options.callbacksHandler,
 	}, nil
 }
 
