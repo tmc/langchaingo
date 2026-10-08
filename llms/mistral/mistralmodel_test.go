@@ -602,3 +602,45 @@ func TestChoiceCount(t *testing.T) {
 		})
 	}
 }
+
+func TestUsage(t *testing.T) {
+	tests := []struct {
+		name string
+		body string
+		opts []llms.CallOption
+	}{
+		{
+			name: "non-streaming",
+			body: `{"id":"1","object":"chat.completion","created":1,"model":"m",` +
+				`"choices":[{"index":0,"message":{"role":"assistant","content":"hi"},"finish_reason":"stop"}],` +
+				`"usage":{"prompt_tokens":3,"completion_tokens":1,"total_tokens":4}}`,
+		},
+		{
+			name: "streaming",
+			body: `data: {"id":"1","model":"m","choices":[{"index":0,"delta":{"role":"assistant","content":"hi"}}]}` + "\n\n" +
+				`data: {"id":"1","model":"m","choices":[{"index":0,"delta":{"content":""},"finish_reason":"stop"}],` +
+				`"usage":{"prompt_tokens":3,"completion_tokens":1,"total_tokens":4}}` + "\n\n" +
+				"data: [DONE]\n\n",
+			opts: []llms.CallOption{llms.WithStreamingFunc(func(context.Context, []byte) error { return nil })},
+		},
+	}
+	want := map[string]int{"PromptTokens": 3, "CompletionTokens": 1, "TotalTokens": 4}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m := newServerModel(t, tt.body, callbacks.SimpleHandler{})
+			resp, err := m.GenerateContent(context.Background(), hello, tt.opts...)
+			if err != nil {
+				t.Fatal(err)
+			}
+			info := resp.Choices[0].GenerationInfo
+			for key, n := range want {
+				if got, ok := info[key].(int); !ok || got != n {
+					t.Errorf("GenerationInfo[%q] = %#v, want %d", key, info[key], n)
+				}
+			}
+			if _, ok := info["usage"].(sdk.UsageInfo); !ok {
+				t.Errorf("GenerationInfo[\"usage\"] = %#v, want sdk.UsageInfo", info["usage"])
+			}
+		})
+	}
+}

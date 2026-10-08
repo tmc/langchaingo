@@ -187,9 +187,9 @@ func contentResponse(res *sdk.ChatCompletionResponse) *llms.ContentResponse {
 			GenerationInfo: map[string]any{
 				"created": res.Created,
 				"model":   res.Model,
-				"usage":   res.Usage,
 			},
 		})
+		setUsage(langchainContentResponse.Choices[idx].GenerationInfo, res.Usage)
 		toolCalls := choice.Message.ToolCalls
 		if len(toolCalls) > 0 {
 			langchainContentResponse.Choices[idx].FuncCall = (*llms.FunctionCall)(&toolCalls[0].Function)
@@ -206,6 +206,15 @@ func contentResponse(res *sdk.ChatCompletionResponse) *llms.ContentResponse {
 		}
 	}
 	return langchainContentResponse
+}
+
+// setUsage records u in info under "usage" and under the token-count
+// keys other providers use.
+func setUsage(info map[string]any, u sdk.UsageInfo) {
+	info["usage"] = u
+	info["PromptTokens"] = u.PromptTokens
+	info["CompletionTokens"] = u.CompletionTokens
+	info["TotalTokens"] = u.TotalTokens
 }
 
 func generateStreamingContent(ctx context.Context, m *Model, callOptions *llms.CallOptions, messages []sdk.ChatMessage, chatOpts sdk.ChatRequestParams) (*llms.ContentResponse, error) {
@@ -226,7 +235,9 @@ func generateStreamingContent(ctx context.Context, m *Model, callOptions *llms.C
 		chunkStr := ""
 		langchainContentResponse.Choices[0].GenerationInfo["created"] = chatResChunk.Created
 		langchainContentResponse.Choices[0].GenerationInfo["model"] = chatResChunk.Model
-		langchainContentResponse.Choices[0].GenerationInfo["usage"] = chatResChunk.Usage
+		if chatResChunk.Usage != (sdk.UsageInfo{}) {
+			setUsage(langchainContentResponse.Choices[0].GenerationInfo, chatResChunk.Usage)
+		}
 		if chatResChunk.Error == nil {
 			for _, choice := range chatResChunk.Choices {
 				chunkStr += choice.Delta.Content
