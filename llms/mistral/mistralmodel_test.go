@@ -2,11 +2,14 @@ package mistral
 
 import (
 	"context"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"testing"
 	"time"
 
 	sdk "github.com/gage-technologies/mistral-go"
+	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/schema"
 )
@@ -494,4 +497,39 @@ func TestCall(t *testing.T) {
 func TestGenerateContent(t *testing.T) {
 	// This test requires mocking the Mistral SDK client
 	t.Skip("GenerateContent() requires integration testing with mock Mistral client")
+}
+
+// endCounter counts HandleLLMGenerateContentEnd calls.
+type endCounter struct {
+	callbacks.SimpleHandler
+	n int
+}
+
+func (h *endCounter) HandleLLMGenerateContentEnd(context.Context, *llms.ContentResponse) {
+	h.n++
+}
+
+func TestGenerateContentEndOnce(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"id":"1","object":"chat.completion","created":1,"model":"m",` +
+			`"choices":[{"index":0,"message":{"role":"assistant","content":"hi"},"finish_reason":"stop"}],` +
+			`"usage":{"prompt_tokens":1,"completion_tokens":1,"total_tokens":2}}`))
+	}))
+	defer srv.Close()
+
+	m, err := New(WithAPIKey("test"), WithEndpoint(srv.URL), WithMaxRetries(0))
+	if err != nil {
+		t.Fatal(err)
+	}
+	h := &endCounter{}
+	m.CallbacksHandler = h
+	if _, err := m.GenerateContent(context.Background(), []llms.MessageContent{
+		llms.TextParts(llms.ChatMessageTypeHuman, "hello"),
+	}); err != nil {
+		t.Fatal(err)
+	}
+	if h.n != 1 {
+		t.Errorf("HandleLLMGenerateContentEnd called %d times, want 1", h.n)
+	}
 }

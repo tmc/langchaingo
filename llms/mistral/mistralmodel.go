@@ -145,7 +145,6 @@ func mistralChatParamsFromCallOptions(callOpts *llms.CallOptions) sdk.ChatReques
 
 func generateNonStreamingContent(ctx context.Context, m *Model, callOptions *llms.CallOptions, messages []sdk.ChatMessage, chatOpts sdk.ChatRequestParams) (*llms.ContentResponse, error) {
 	res, err := m.client.Chat(callOptions.Model, messages, &chatOpts)
-	m.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, nil)
 	if err != nil {
 		m.CallbacksHandler.HandleLLMError(ctx, err)
 		return nil, err
