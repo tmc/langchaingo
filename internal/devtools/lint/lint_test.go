@@ -28,6 +28,16 @@ func TestRemoveBlankLineAfterBrace(t *testing.T) {
 			in:   "func f() {\n\n\n\tx := 1\n}\n",
 			want: "func f() {\n\n\tx := 1\n}\n",
 		},
+		{
+			name: "blank line in raw string preserved",
+			in:   "var s = `{\n\n}`\n",
+			want: "var s = `{\n\n}`\n",
+		},
+		{
+			name: "blank line in block comment preserved",
+			in:   "/* {\n\n*/\nvar x = 1\n",
+			want: "/* {\n\n*/\nvar x = 1\n",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
