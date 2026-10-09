@@ -211,8 +211,12 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		"PromptTokens":     resp.PromptEvalCount,
 		"TotalTokens":      resp.EvalCount + resp.PromptEvalCount,
 		// Add empty thinking fields for cross-provider compatibility
-		"ThinkingContent": "", // Ollama doesn't separate thinking content
-		"ThinkingTokens":  0,  // Ollama doesn't track thinking tokens separately
+		"ThinkingContent":    "", // Ollama doesn't separate thinking content
+		"ThinkingTokens":     0,  // Ollama doesn't track thinking tokens separately
+		"PromptEvalDuration": resp.PromptEvalDuration,
+		"EvalDuration":       resp.EvalDuration,
+		"LoadDuration":       resp.LoadDuration,
+		"TotalDuration":      resp.TotalDuration,
 	}
 
 	// If context caching is enabled, track cache usage
