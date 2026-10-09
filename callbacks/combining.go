@@ -14,6 +14,10 @@ type CombiningHandler struct {
 
 var _ Handler = CombiningHandler{}
 
+func NewCombiningHandler(callbacks ...Handler) *CombiningHandler {
+	return &CombiningHandler{Callbacks: callbacks}
+}
+
 func (l CombiningHandler) HandleText(ctx context.Context, text string) {
 	for _, handle := range l.Callbacks {
 		handle.HandleText(ctx, text)
