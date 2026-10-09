@@ -14,6 +14,13 @@ import (
 type MessageContent struct {
 	Role  ChatMessageType
 	Parts []ContentPart
+
+	// ReasoningContent is used with reasoning models (e.g. deepseek-reasoner)
+	// to preserve the reasoning content in assistant messages for round-trip
+	// conversations. When the API returns reasoning_content in an assistant
+	// message (e.g. alongside tool_calls), this field must be included when
+	// sending the message back as part of conversation history.
+	ReasoningContent string
 }
 
 // TextPart creates TextContent from a given string.
