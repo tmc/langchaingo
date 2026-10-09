@@ -13,7 +13,7 @@ const (
 	xdgCacheHomeEnvVar    = "XDG_CACHE_HOME" // XDG cache directory
 	defaultTokenPath      = "token"          // Default token filename
 	defaultModel          = "gpt2"
-	defaultURL            = "https://api-inference.huggingface.co"
+	defaultURL            = "https://router.huggingface.co/hf-inference"
 	routerURL             = "https://router.huggingface.co"
 )
 
