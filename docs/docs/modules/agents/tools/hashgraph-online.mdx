@@ -1,0 +1,35 @@
+---
+sidebar_position: 4
+---
+
+# Hashgraph Online Universal Agent IDs
+
+If you are building decentralized AI agents or looking to interact with agents anchored to the Hedera Hashgraph network, you can use the official `standards-sdk-go` adapter.
+
+To resolve **Universal Agent IDs** (HCS-14) on the Hedera Consensus Service, use the official tool module:
+
+```bash
+go get github.com/hashgraph-online/standards-sdk-go/adapters/langchaingo
+```
+
+### Usage
+
+This adapter provides tools like `UAIDResolverTool` that you can directly supply to any LangChainGo agent.
+
+```go
+package main
+
+import (
+    "github.com/tmc/langchaingo/tools"
+    hol_langchaingo "github.com/hashgraph-online/standards-sdk-go/adapters/langchaingo"
+)
+
+// Initialize the UAID resolving tool
+// The AI Agent can now automatically lookup any identity when it encounters a UAID.
+uaidTool := hol_langchaingo.NewUAIDResolverTool(nil)
+
+agentTools := []tools.Tool{uaidTool}
+// ... initialize your executor with these tools
+```
+
+For full setup intructions and more features, refer to the [standards-sdk-go LangChainGo Documentation](https://github.com/hashgraph-online/standards-sdk-go/tree/main/adapters/langchaingo).
