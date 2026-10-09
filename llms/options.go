@@ -55,11 +55,10 @@ type CallOptions struct {
 	// Deprecated: Use Tools instead.
 	Functions []FunctionDefinition `json:"functions,omitempty"`
 	// FunctionCallBehavior is the behavior to use when calling functions.
-	//
-	// If a specific function should be invoked, use the format:
-	// `{"name": "my_function"}`
+	// It can be a FunctionCallBehavior string ("none", "auto") or a
+	// FunctionCallBehaviorFunctionObject to force calling a specific function.
 	// Deprecated: Use ToolChoice instead.
-	FunctionCallBehavior FunctionCallBehavior `json:"function_call,omitempty"`
+	FunctionCallBehavior any `json:"function_call,omitempty"`
 
 	// Metadata is a map of metadata to include in the request.
 	// The meaning of this field is specific to the backend in use.
@@ -152,6 +151,13 @@ const (
 	// FunctionCallBehaviorAuto will call functions automatically.
 	FunctionCallBehaviorAuto FunctionCallBehavior = "auto"
 )
+
+// FunctionCallBehaviorFunctionObject forces the model to call the named function.
+// Use with WithFunctionCallBehaviorFunction.
+// Deprecated: Use ToolChoice with a ToolChoice object instead.
+type FunctionCallBehaviorFunctionObject struct {
+	Name string `json:"name"`
+}
 
 // WithModel specifies which model name to use.
 func WithModel(model string) CallOption {
@@ -274,10 +280,21 @@ func WithPresencePenalty(presencePenalty float64) CallOption {
 }
 
 // WithFunctionCallBehavior will add an option to set the behavior to use when calling functions.
+// Accepts FunctionCallBehaviorNone or FunctionCallBehaviorAuto.
+// To force a specific function, use WithFunctionCallBehaviorFunction instead.
 // Deprecated: Use WithToolChoice instead.
 func WithFunctionCallBehavior(behavior FunctionCallBehavior) CallOption {
 	return func(o *CallOptions) {
 		o.FunctionCallBehavior = behavior
+	}
+}
+
+// WithFunctionCallBehaviorFunction forces the model to call the named function.
+// This sets function_call to {"name": "<name>"} in the OpenAI API request.
+// Deprecated: Use WithToolChoice with a ToolChoice object instead.
+func WithFunctionCallBehaviorFunction(name string) CallOption {
+	return func(o *CallOptions) {
+		o.FunctionCallBehavior = FunctionCallBehaviorFunctionObject{Name: name}
 	}
 }
 
