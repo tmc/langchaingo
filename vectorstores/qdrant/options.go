@@ -56,6 +56,14 @@ func WithContentKey(contentKey string) Option {
 	}
 }
 
+// WithVectorName returns an Option for setting the vector name for multi-vector collections.
+// This is required when using Qdrant collections with multiple named vectors. Optional.
+func WithVectorName(vectorName string) Option {
+	return func(p *Store) {
+		p.vectorName = vectorName
+	}
+}
+
 func applyClientOptions(opts ...Option) (Store, error) {
 	o := &Store{
 		contentKey: defaultContentKey,
