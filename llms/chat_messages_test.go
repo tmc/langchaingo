@@ -68,3 +68,40 @@ type unsupportedChatMessage struct{}
 
 func (m unsupportedChatMessage) GetType() llms.ChatMessageType { return "unsupported" }
 func (m unsupportedChatMessage) GetContent() string            { return "Unsupported message" }
+
+func TestChatMessageModelRoundTrip(t *testing.T) {
+	t.Parallel()
+	testCases := []struct {
+		name    string
+		message llms.ChatMessage
+	}{
+		{
+			name:    "AI message",
+			message: llms.AIChatMessage{Content: "I'm doing great!"},
+		},
+		{
+			name:    "Human message",
+			message: llms.HumanChatMessage{Content: "Hello, how are you?"},
+		},
+		{
+			name:    "System message",
+			message: llms.SystemChatMessage{Content: "Please be polite."},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			got := llms.ConvertChatMessageToModel(tc.message).ToChatMessage()
+			if got == nil {
+				t.Fatalf("ToChatMessage returned nil for %T", tc.message)
+			}
+			if got.GetType() != tc.message.GetType() {
+				t.Errorf("type mismatch: got %q, want %q", got.GetType(), tc.message.GetType())
+			}
+			if got.GetContent() != tc.message.GetContent() {
+				t.Errorf("content mismatch: got %q, want %q", got.GetContent(), tc.message.GetContent())
+			}
+		})
+	}
+}
