@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/google/uuid"
 	opensearchgo "github.com/opensearch-project/opensearch-go"
 	"github.com/opensearch-project/opensearch-go/opensearchapi"
 	"github.com/tmc/langchaingo/embeddings"
@@ -75,7 +74,7 @@ func (s Store) AddDocuments(
 	}
 
 	for i, doc := range docs {
-		id := uuid.NewString()
+		id := opts.GenerateDocumentID(ctx, doc, ids)
 		_, err := s.documentIndexing(ctx, id, opts.NameSpace, doc.PageContent, vectors[i], doc.Metadata)
 		if err != nil {
 			return ids, err
