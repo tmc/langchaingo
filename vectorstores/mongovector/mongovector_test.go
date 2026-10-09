@@ -22,7 +22,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/testcontainers/testcontainers-go/modules/mongodb"
+	"github.com/testcontainers/testcontainers-go/modules/mongodb/atlaslocal"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/internal/httprr"
 	"github.com/tmc/langchaingo/internal/testutil/testctr"
@@ -57,7 +57,7 @@ var (
 type testEnv struct {
 	uri       string
 	client    *mongo.Client
-	container *mongodb.MongoDBContainer
+	container *atlaslocal.Container
 }
 
 // TestMain handles cleanup of the shared container.
@@ -118,10 +118,7 @@ func setupTestEnv(t *testing.T, httpClient ...*http.Client) *testEnv {
 		}
 		ctx := context.Background()
 
-		container, err := mongodb.Run(ctx, "mongodb/mongodb-atlas-local:latest",
-			mongodb.WithUsername("admin"),
-			mongodb.WithPassword("password"),
-		)
+		container, err := atlaslocal.Run(ctx, "mongodb/mongodb-atlas-local:latest")
 		if err != nil {
 			setupErr = fmt.Errorf("failed to start MongoDB container: %w", err)
 			return
@@ -663,13 +660,16 @@ func TestStore_SimilaritySearch_NonExactQuery(t *testing.T) {
 		wantErr      string
 		setupFunc    func() // Optional setup function for special cases
 	}{
-		{name: "numDocuments=1 of 3",
+		{
+			name:         "numDocuments=1 of 3",
 			numDocuments: 1, seed: seed, want: seed[:1],
 		},
-		{name: "numDocuments=3 of 4",
+		{
+			name:         "numDocuments=3 of 4",
 			numDocuments: 3, seed: seed, want: seed,
 		},
-		{name: "with score threshold",
+		{
+			name:         "with score threshold",
 			numDocuments: 3, seed: seed, want: seed[:2],
 			options: []vectorstores.Option{vectorstores.WithScoreThreshold(0.50)},
 		},
@@ -679,14 +679,17 @@ func TestStore_SimilaritySearch_NonExactQuery(t *testing.T) {
 			options: []vectorstores.Option{vectorstores.WithScoreThreshold(-0.50)},
 			wantErr: ErrInvalidScoreThreshold.Error(),
 		},
-		{name: "with metadata",
+		{
+			name:         "with metadata",
 			numDocuments: 3, seed: metadataSeed, want: metadataSeed,
 		},
-		{name: "with metadata and score threshold",
+		{
+			name:         "with metadata and score threshold",
 			numDocuments: 3, seed: metadataSeed, want: metadataSeed[:2],
 			options: []vectorstores.Option{vectorstores.WithScoreThreshold(0.50)},
 		},
-		{name: "with namespace",
+		{
+			name:         "with namespace",
 			numDocuments: 1,
 			setupFunc: func() {
 				emb := newMockEmbedder(testIndexSize3)
@@ -700,14 +703,16 @@ func TestStore_SimilaritySearch_NonExactQuery(t *testing.T) {
 				vectorstores.WithEmbedder(newMockEmbedder(testIndexSize3)),
 			},
 		},
-		{name: "with non-existent namespace",
+		{
+			name:         "with non-existent namespace",
 			numDocuments: 1,
 			seed:         metadataSeed,
 			options: []vectorstores.Option{
 				vectorstores.WithNameSpace("some-non-existent-index-name"),
 			},
 		},
-		{name: "with filter",
+		{
+			name:         "with filter",
 			numDocuments: 1,
 			seed:         metadataSeed,
 			want:         metadataSeed[len(metadataSeed)-1:],
@@ -716,7 +721,8 @@ func TestStore_SimilaritySearch_NonExactQuery(t *testing.T) {
 				vectorstores.WithNameSpace(testIndexDP1536WithFilter),
 			},
 		},
-		{name: "with non-tokenized filter",
+		{
+			name:         "with non-tokenized filter",
 			numDocuments: 1,
 			seed:         metadataSeed,
 			options: []vectorstores.Option{
@@ -725,7 +731,8 @@ func TestStore_SimilaritySearch_NonExactQuery(t *testing.T) {
 			},
 			wantErr: "'pageContent' needs to be indexed as filter",
 		},
-		{name: "with deduplicator",
+		{
+			name:         "with deduplicator",
 			numDocuments: 1,
 			seed:         metadataSeed,
 			options: []vectorstores.Option{
