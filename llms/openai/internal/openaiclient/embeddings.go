@@ -13,6 +13,10 @@ const (
 	defaultEmbeddingModel = "text-embedding-ada-002"
 )
 
+// ErrMissingAzureEmbeddingModel is returned when embeddings are created on
+// Azure without an embedding deployment, which the request path is built from
+var ErrMissingAzureEmbeddingModel = errors.New("embeddings model needs to be provided when using Azure API")
+
 type embeddingPayload struct {
 	Model      string   `json:"model"`
 	Input      []string `json:"input"`
