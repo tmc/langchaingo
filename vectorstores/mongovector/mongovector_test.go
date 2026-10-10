@@ -22,7 +22,9 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/mongodb"
+	"github.com/testcontainers/testcontainers-go/wait"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/internal/httprr"
 	"github.com/tmc/langchaingo/internal/testutil/testctr"
@@ -118,9 +120,12 @@ func setupTestEnv(t *testing.T, httpClient ...*http.Client) *testEnv {
 		}
 		ctx := context.Background()
 
+		// Atlas Local can take search index requests once its health check
+		// passes; the testcontainers atlaslocal module waits the same way.
 		container, err := mongodb.Run(ctx, "mongodb/mongodb-atlas-local:latest",
 			mongodb.WithUsername("admin"),
 			mongodb.WithPassword("password"),
+			testcontainers.WithAdditionalWaitStrategyAndDeadline(2*time.Minute, wait.ForHealthCheck()),
 		)
 		if err != nil {
 			setupErr = fmt.Errorf("failed to start MongoDB container: %w", err)
