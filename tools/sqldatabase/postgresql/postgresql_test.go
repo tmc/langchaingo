@@ -36,7 +36,7 @@ func Test(t *testing.T) {
 			"postgres:17", // TODO: lets add a text matrix for this (or do so in this test)
 			postgres.WithDatabase("test"),
 			postgres.WithUsername("db_user"),
-			postgres.WithPassword("p@mysecretpassword"),
+			postgres.WithPassword("mysecretpassword"),
 			postgres.WithInitScripts(filepath.Join("..", "testdata", "db.sql")),
 			postgres.BasicWaitStrategies(),
 			testcontainers.WithLogger(log.TestLogger(t)),
