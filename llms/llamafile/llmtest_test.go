@@ -7,6 +7,10 @@ import (
 )
 
 func TestLLM(t *testing.T) {
+	if !isLlamafileAvailable() {
+		t.Skip("llamafile is not available")
+	}
+
 	// Llamafile uses LLAMAFILE_HOST environment variable for server URL
 	// If not set, it defaults to http://127.0.0.1:8080
 
