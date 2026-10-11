@@ -2,11 +2,15 @@ package mistral
 
 import (
 	"context"
+	"errors"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"testing"
 	"time"
 
 	sdk "github.com/gage-technologies/mistral-go"
+	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/schema"
 )
@@ -60,6 +64,25 @@ func TestNew(t *testing.T) {
 				t.Error("New() returned nil model without error")
 			}
 		})
+	}
+}
+
+func TestNewCallbacksHandler(t *testing.T) {
+	h := &testCallbackHandler{}
+	m, err := New(WithAPIKey("test"), WithCallbacksHandler(h))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if m.CallbacksHandler != h {
+		t.Errorf("CallbacksHandler = %v, want the handler passed to WithCallbacksHandler", m.CallbacksHandler)
+	}
+
+	m, err = New(WithAPIKey("test"), WithCallbacksHandler(nil))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if m.CallbacksHandler == nil {
+		t.Error("CallbacksHandler is nil after WithCallbacksHandler(nil), want SimpleHandler")
 	}
 }
 
@@ -494,4 +517,130 @@ func TestCall(t *testing.T) {
 func TestGenerateContent(t *testing.T) {
 	// This test requires mocking the Mistral SDK client
 	t.Skip("GenerateContent() requires integration testing with mock Mistral client")
+}
+
+// recorder records generate-end and error callbacks.
+type recorder struct {
+	callbacks.SimpleHandler
+	ends int
+	errs []error
+}
+
+func (h *recorder) HandleLLMGenerateContentEnd(context.Context, *llms.ContentResponse) {
+	h.ends++
+}
+
+func (h *recorder) HandleLLMError(_ context.Context, err error) {
+	h.errs = append(h.errs, err)
+}
+
+// newServerModel returns a Model whose requests are answered with body
+// by a local test server.
+func newServerModel(t *testing.T, body string, h callbacks.Handler) *Model {
+	t.Helper()
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(body))
+	}))
+	t.Cleanup(srv.Close)
+	m, err := New(WithAPIKey("test"), WithEndpoint(srv.URL), WithMaxRetries(0), WithCallbacksHandler(h))
+	if err != nil {
+		t.Fatal(err)
+	}
+	return m
+}
+
+var hello = []llms.MessageContent{llms.TextParts(llms.ChatMessageTypeHuman, "hello")}
+
+func TestGenerateContentEndOnce(t *testing.T) {
+	h := &recorder{}
+	m := newServerModel(t, `{"id":"1","object":"chat.completion","created":1,"model":"m",`+
+		`"choices":[{"index":0,"message":{"role":"assistant","content":"hi"},"finish_reason":"stop"}],`+
+		`"usage":{"prompt_tokens":1,"completion_tokens":1,"total_tokens":2}}`, h)
+	if _, err := m.GenerateContent(context.Background(), hello); err != nil {
+		t.Fatal(err)
+	}
+	if h.ends != 1 {
+		t.Errorf("HandleLLMGenerateContentEnd called %d times, want 1", h.ends)
+	}
+}
+
+func TestChoiceCount(t *testing.T) {
+	const (
+		head   = `{"id":"1","object":"chat.completion","created":1,"model":"m","choices":[`
+		tail   = `],"usage":{"prompt_tokens":1,"completion_tokens":1,"total_tokens":2}}`
+		choice = `{"index":0,"message":{"role":"assistant","content":"hi"},"finish_reason":"stop"}`
+	)
+	call := func(m *Model) error {
+		_, err := m.Call(context.Background(), "hello")
+		return err
+	}
+	generate := func(m *Model) error {
+		_, err := m.GenerateContent(context.Background(), hello)
+		return err
+	}
+	tests := []struct {
+		name string
+		body string
+		run  func(*Model) error
+		want error
+	}{
+		{"Call no choices", head + tail, call, ErrEmptyResponse},
+		{"Call two choices", head + choice + "," + choice + tail, call, ErrUnexpectedResponseLength},
+		{"GenerateContent no choices", head + tail, generate, ErrEmptyResponse},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			h := &recorder{}
+			err := tt.run(newServerModel(t, tt.body, h))
+			if !errors.Is(err, tt.want) {
+				t.Errorf("err = %v, want %v", err, tt.want)
+			}
+			if len(h.errs) != 1 || h.errs[0] != err {
+				t.Errorf("HandleLLMError got %v, want [%v]", h.errs, err)
+			}
+		})
+	}
+}
+
+func TestUsage(t *testing.T) {
+	tests := []struct {
+		name string
+		body string
+		opts []llms.CallOption
+	}{
+		{
+			name: "non-streaming",
+			body: `{"id":"1","object":"chat.completion","created":1,"model":"m",` +
+				`"choices":[{"index":0,"message":{"role":"assistant","content":"hi"},"finish_reason":"stop"}],` +
+				`"usage":{"prompt_tokens":3,"completion_tokens":1,"total_tokens":4}}`,
+		},
+		{
+			name: "streaming",
+			body: `data: {"id":"1","model":"m","choices":[{"index":0,"delta":{"role":"assistant","content":"hi"}}]}` + "\n\n" +
+				`data: {"id":"1","model":"m","choices":[{"index":0,"delta":{"content":""},"finish_reason":"stop"}],` +
+				`"usage":{"prompt_tokens":3,"completion_tokens":1,"total_tokens":4}}` + "\n\n" +
+				"data: [DONE]\n\n",
+			opts: []llms.CallOption{llms.WithStreamingFunc(func(context.Context, []byte) error { return nil })},
+		},
+	}
+	want := map[string]int{"PromptTokens": 3, "CompletionTokens": 1, "TotalTokens": 4}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m := newServerModel(t, tt.body, callbacks.SimpleHandler{})
+			resp, err := m.GenerateContent(context.Background(), hello, tt.opts...)
+			if err != nil {
+				t.Fatal(err)
+			}
+			info := resp.Choices[0].GenerationInfo
+			for key, n := range want {
+				if got, ok := info[key].(int); !ok || got != n {
+					t.Errorf("GenerationInfo[%q] = %#v, want %d", key, info[key], n)
+				}
+			}
+			if _, ok := info["usage"].(sdk.UsageInfo); !ok {
+				t.Errorf("GenerationInfo[\"usage\"] = %#v, want sdk.UsageInfo", info["usage"])
+			}
+		})
+	}
 }

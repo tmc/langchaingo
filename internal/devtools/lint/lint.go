@@ -9,6 +9,7 @@ import (
 	"go/ast"
 	"go/format"
 	"go/parser"
+	"go/scanner"
 	"go/token"
 	"io/fs"
 	"log"
@@ -1326,11 +1327,32 @@ func fixHttprrPatternsInFileAST(filePath string, issues []HttprrIssue) error {
 // removeBlankLineAfterBrace drops a single blank line that immediately
 // follows a line ending in an opening brace. This cleans up the residue left
 // when a statement is removed from the start of a block during autofix.
+// Lines inside raw string literals and block comments are left untouched.
 func removeBlankLineAfterBrace(src []byte) []byte {
+	// Record the lines that lie inside a multi-line token.
+	inToken := make(map[int]bool)
+	fset := token.NewFileSet()
+	file := fset.AddFile("", fset.Base(), len(src))
+	var s scanner.Scanner
+	s.Init(file, src, nil, scanner.ScanComments)
+	for {
+		pos, tok, lit := s.Scan()
+		if tok == token.EOF {
+			break
+		}
+		if tok != token.STRING && tok != token.COMMENT {
+			continue
+		}
+		start := file.Line(pos)
+		for l := start + 1; l <= start+strings.Count(lit, "\n"); l++ {
+			inToken[l] = true
+		}
+	}
+
 	lines := strings.Split(string(src), "\n")
 	out := make([]string, 0, len(lines))
 	for i, line := range lines {
-		if strings.TrimSpace(line) == "" && i > 0 &&
+		if strings.TrimSpace(line) == "" && i > 0 && !inToken[i+1] &&
 			strings.HasSuffix(strings.TrimSpace(lines[i-1]), "{") {
 			continue
 		}
