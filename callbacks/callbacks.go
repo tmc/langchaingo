@@ -30,6 +30,13 @@ type Handler interface {
 	HandleStreamingFunc(ctx context.Context, chunk []byte)
 }
 
+// RetrieverErrorHandler is an optional interface a Handler may implement to be
+// notified when a retriever fails. It is kept separate from Handler so that
+// existing Handler implementations do not need to change.
+type RetrieverErrorHandler interface {
+	HandleRetrieverError(ctx context.Context, err error)
+}
+
 // HandlerHaver is an interface used to get callbacks handler.
 type HandlerHaver interface {
 	GetCallbackHandler() Handler
