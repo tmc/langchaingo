@@ -77,12 +77,15 @@ func WithAPIKey(apiKey string) Option {
 // WithCredentialsJSON append a ClientOption that authenticates
 // API calls with the given service account or refresh token JSON
 // credentials.
+//
+// The credentials must come from a trusted source; see
+// [option.WithCredentialsJSON].
 func WithCredentialsJSON(credentialsJSON []byte) Option {
 	return func(opts *Options) {
 		if len(credentialsJSON) == 0 {
 			return
 		}
-		opts.ClientOptions = append(opts.ClientOptions, option.WithCredentialsJSON(credentialsJSON))
+		opts.ClientOptions = append(opts.ClientOptions, option.WithCredentialsJSON(credentialsJSON)) //nolint:staticcheck // documented: trusted credentials only
 		opts.auth = authCredentials
 		opts.apiKey = ""
 	}
@@ -91,12 +94,15 @@ func WithCredentialsJSON(credentialsJSON []byte) Option {
 // WithCredentialsFile append a ClientOption that authenticates
 // API calls with the given service account or refresh token JSON
 // credentials file.
+//
+// The credentials must come from a trusted source; see
+// [option.WithCredentialsJSON].
 func WithCredentialsFile(credentialsFile string) Option {
 	return func(opts *Options) {
 		if credentialsFile == "" {
 			return
 		}
-		opts.ClientOptions = append(opts.ClientOptions, option.WithCredentialsFile(credentialsFile))
+		opts.ClientOptions = append(opts.ClientOptions, option.WithCredentialsFile(credentialsFile)) //nolint:staticcheck // documented: trusted credentials only
 		opts.auth = authCredentials
 		opts.apiKey = ""
 	}
