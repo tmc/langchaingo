@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"net/http/httptest"
 	"os"
 	"strings"
 	"testing"
@@ -189,7 +190,7 @@ func TestWithThink(t *testing.T) {
 		},
 	}
 
-	// The request should include think:true in options
+	// The request should include think:true at top-level
 	resp, err := llm.GenerateContent(ctx, content)
 	require.NoError(t, err)
 
@@ -197,6 +198,115 @@ func TestWithThink(t *testing.T) {
 	c1 := resp.Choices[0]
 	// The response should contain the answer
 	assert.Contains(t, strings.ToLower(c1.Content), "4")
+}
+
+func TestWithThink_Options(t *testing.T) {
+	t.Run("default unset", func(t *testing.T) {
+		llm, err := New()
+		require.NoError(t, err)
+		assert.Nil(t, llm.options.think)
+	})
+
+	t.Run("WithThink true", func(t *testing.T) {
+		llm, err := New(WithThink(true))
+		require.NoError(t, err)
+		require.NotNil(t, llm.options.think)
+		assert.True(t, *llm.options.think)
+	})
+
+	t.Run("WithThink false", func(t *testing.T) {
+		llm, err := New(WithThink(false))
+		require.NoError(t, err)
+		require.NotNil(t, llm.options.think)
+		assert.False(t, *llm.options.think)
+	})
+}
+
+func TestGenerateContent_ThinkFieldSerialization(t *testing.T) {
+	bTrue := true
+	bFalse := false
+
+	tests := []struct {
+		name          string
+		model         string
+		clientOpts    []Option
+		callOpts      []llms.CallOption
+		expectedThink *bool
+	}{
+		{
+			name:          "default unset",
+			model:         "gemma3:1b",
+			expectedThink: nil,
+		},
+		{
+			name:          "client WithThink true",
+			model:         "gemma3:1b",
+			clientOpts:    []Option{WithThink(true)},
+			expectedThink: &bTrue,
+		},
+		{
+			name:          "client WithThink false",
+			model:         "gemma3:1b",
+			clientOpts:    []Option{WithThink(false)},
+			expectedThink: &bFalse,
+		},
+		{
+			name:          "thinking mode none sets false",
+			model:         "deepseek-r1:latest",
+			callOpts:      []llms.CallOption{llms.WithThinkingMode(llms.ThinkingModeNone)},
+			expectedThink: &bFalse,
+		},
+		{
+			name:          "thinking mode medium on reasoning model sets true",
+			model:         "deepseek-r1:latest",
+			callOpts:      []llms.CallOption{llms.WithThinkingMode(llms.ThinkingModeMedium)},
+			expectedThink: &bTrue,
+		},
+		{
+			name:          "thinking mode medium on non-reasoning model remains unset",
+			model:         "llama3:latest",
+			callOpts:      []llms.CallOption{llms.WithThinkingMode(llms.ThinkingModeMedium)},
+			expectedThink: nil,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var recordedBody map[string]any
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				_ = json.NewDecoder(r.Body).Decode(&recordedBody)
+				w.Header().Set("Content-Type", "application/x-ndjson")
+				_, _ = w.Write([]byte(`{"message":{"role":"assistant","content":"hello"},"done":true}` + "\n"))
+			}))
+			defer server.Close()
+
+			opts := append([]Option{
+				WithServerURL(server.URL),
+				WithModel(tt.model),
+			}, tt.clientOpts...)
+
+			llm, err := New(opts...)
+			require.NoError(t, err)
+
+			_, err = llm.GenerateContent(context.Background(), []llms.MessageContent{
+				llms.TextParts(llms.ChatMessageTypeHuman, "hello"),
+			}, tt.callOpts...)
+			require.NoError(t, err)
+
+			optionsMap, ok := recordedBody["options"].(map[string]any)
+			require.True(t, ok)
+			_, existsInOptions := optionsMap["think"]
+			assert.False(t, existsInOptions, "think must not exist in options")
+
+			val, exists := recordedBody["think"]
+			if tt.expectedThink == nil {
+				assert.False(t, exists, "think must not exist at top level when unset")
+			} else {
+				assert.True(t, exists, "think must exist at top level")
+				assert.Equal(t, *tt.expectedThink, val)
+			}
+		})
+	}
 }
 
 func TestWithPullModel(t *testing.T) {
