@@ -131,3 +131,22 @@ func TestDefinedParse(t *testing.T) {
 		}
 	}
 }
+
+func TestDefinedParseInvalidFences(t *testing.T) {
+	t.Parallel()
+	parser, err := NewDefined(struct{ Name string }{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for _, input := range []string{"", "{}", "```", "```json", "{}\n```", "```json\n{}"} {
+		t.Run(fmt.Sprintf("%q", input), func(t *testing.T) {
+			if _, err := parser.Parse(input); err == nil {
+				t.Error("Parse: expected an error for missing JSON fences")
+			}
+			if _, err := parser.ParseWithPrompt(input, nil); err == nil {
+				t.Error("ParseWithPrompt: expected an error for missing JSON fences")
+			}
+		})
+	}
+}
