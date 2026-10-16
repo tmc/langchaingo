@@ -133,3 +133,14 @@ func TestMilvusConnection(t *testing.T) {
 	require.GreaterOrEqual(t, len(japanRes), 1)
 	require.LessOrEqual(t, len(japanRes), 2)
 }
+
+func TestEmptyDocuments(t *testing.T) {
+	t.Parallel()
+	storer, err := getNewStore(t, WithDropOld(), WithCollectionName("test"))
+	require.NoError(t, err)
+
+	data := []schema.Document{}
+
+	_, err = storer.AddDocuments(context.Background(), data)
+	require.NoError(t, err)
+}
