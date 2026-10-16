@@ -1,6 +1,6 @@
 # The site is built with md2html (https://github.com/tmc/md2html).
 # The publish-docs workflow installs this version with "make install".
-MD2HTML_VERSION ?= v0.0.0-20260923024514-2cf8d540c613
+MD2HTML_VERSION ?= v0.1.0
 MD2HTML ?= md2html
 MDVET ?= mdvet
 SITE ?= _site
