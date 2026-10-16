@@ -138,6 +138,12 @@ func TestOptions(t *testing.T) { //nolint:funlen // comprehensive test //nolint:
 		assert.Len(t, opts.ClientOptions, 1)
 	})
 
+	t.Run("WithBaseURL", func(t *testing.T) {
+		opts := &Options{}
+		WithBaseURL("https://custom.endpoint.com")(opts)
+		assert.Len(t, opts.ClientOptions, 1)
+	})
+
 	t.Run("WithHTTPClient", func(t *testing.T) {
 		opts := &Options{}
 		WithHTTPClient(nil)(opts)
