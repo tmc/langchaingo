@@ -16,6 +16,7 @@ type Store struct {
 	qdrantURL      url.URL
 	apiKey         string
 	contentKey     string
+	waitForInsert  bool
 }
 
 var _ vectorstores.VectorStore = Store{}
