@@ -332,7 +332,7 @@ Log Summary:
 
 Top Error Patterns:
 {{range .top_errors}}
-- {{.pattern}} ({{.count}} occurrences)
+- {{.Pattern}} ({{.Count}} occurrences)
 {{end}}
 
 Recent Log Sample:
