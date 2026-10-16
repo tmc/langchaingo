@@ -82,7 +82,12 @@ type ChatRequest struct {
 	FunctionCallBehavior FunctionCallBehavior `json:"function_call,omitempty"`
 
 	// Metadata allows you to specify additional information that will be passed to the model.
+	// Note: OpenAI requires store: true when using metadata.
 	Metadata map[string]any `json:"metadata,omitempty"`
+
+	// Store controls whether the request is stored for later retrieval.
+	// This is required when using metadata per OpenAI's API.
+	Store bool `json:"store,omitempty"`
 
 	// WebSearchOptions configures web search behavior for search-enabled models
 	// like gpt-4o-search-preview and gpt-4o-mini-search-preview.

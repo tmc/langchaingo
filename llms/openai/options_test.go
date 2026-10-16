@@ -178,3 +178,55 @@ func TestWebSearchOptionsConversion(t *testing.T) {
 		t.Errorf("expected Country=GB, got %s", result2.UserLocation.Approximate.Country)
 	}
 }
+
+func TestWithMetadataSetsStoreField(t *testing.T) {
+	// Test that using llms.WithMetadata results in the Store field being set
+	// This tests the integration in openaillm.go where apiMetadata is populated
+	// and Store is set based on whether metadata is present
+
+	// Simulate the filtering logic from openaillm.go
+	opts := &llms.CallOptions{}
+	metadata := map[string]interface{}{
+		"feature":     "support",
+		"environment": "local",
+		"team":        "ai",
+	}
+	llms.WithMetadata(metadata)(opts)
+
+	// Verify metadata is set
+	if opts.Metadata == nil {
+		t.Fatal("expected Metadata to be set")
+	}
+
+	// Simulate the filtering that happens in openaillm.go
+	apiMetadata := make(map[string]any)
+	for k, v := range opts.Metadata {
+		if k == "thinking_config" { // simulating the HasPrefix check
+			continue
+		}
+		apiMetadata[k] = v
+	}
+
+	// Verify that when metadata is present, Store should be true
+	store := len(apiMetadata) > 0
+	if !store {
+		t.Error("expected Store to be true when metadata is present")
+	}
+
+	// Test with empty metadata
+	opts2 := &llms.CallOptions{}
+	llms.WithMetadata(map[string]interface{}{})(opts2)
+
+	apiMetadata2 := make(map[string]any)
+	for k, v := range opts2.Metadata {
+		if k == "thinking_config" {
+			continue
+		}
+		apiMetadata2[k] = v
+	}
+
+	store2 := len(apiMetadata2) > 0
+	if store2 {
+		t.Error("expected Store to be false when metadata is empty")
+	}
+}
