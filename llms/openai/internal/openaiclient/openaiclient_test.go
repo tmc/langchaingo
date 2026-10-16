@@ -374,8 +374,7 @@ func TestSanitizeHTTPError(t *testing.T) {
 	t.Run("context cancelled", func(t *testing.T) {
 		err := context.Canceled
 		sanitized := sanitizeHTTPError(err)
-		assert.Error(t, sanitized)
-		assert.Equal(t, "request cancelled", sanitized.Error())
+		assert.ErrorIs(t, sanitized, context.Canceled)
 	})
 
 	t.Run("network timeout", func(t *testing.T) {
