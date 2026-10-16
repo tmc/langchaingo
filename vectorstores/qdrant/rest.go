@@ -68,13 +68,21 @@ func (s Store) searchPoints(
 	payload := searchBody{
 		WithPayload: true,
 		WithVector:  false,
-		Vector:      vector,
 		Limit:       numVectors,
 		Filter:      filter,
 	}
 
 	if scoreThreshold != 0 {
 		payload.ScoreThreshold = scoreThreshold
+	}
+
+	if s.vectorName != "" {
+		payload.Vector = namedVector{
+			Vector: vector,
+			Name:   s.vectorName,
+		}
+	} else {
+		payload.Vector = vector
 	}
 
 	url := baseURL.JoinPath("collections", s.collectionName, "points", "search")
