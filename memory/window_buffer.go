@@ -100,3 +100,8 @@ func (wb *ConversationWindowBuffer) cutMessages(message []llms.ChatMessage) ([]l
 func (wb *ConversationWindowBuffer) Clear(ctx context.Context) error {
 	return wb.ConversationBuffer.Clear(ctx)
 }
+
+// GetMemoryKey uses ConversationBuffer method for getting the memory key.
+func (wb *ConversationWindowBuffer) GetMemoryKey(ctx context.Context) string {
+	return wb.ConversationBuffer.GetMemoryKey(ctx)
+}
