@@ -123,6 +123,50 @@ func TestSequentialChain(t *testing.T) {
 	assert.Equal(t, "Vey legit", res[_llmChainDefaultOutputKey])
 }
 
+func TestSequentialChainIntermediateOutputs(t *testing.T) {
+	ctx := context.Background()
+	t.Parallel()
+
+	// Reproduce issue #1095: intermediate outputs (e.g. "synopsis") should be
+	// accessible when declared in outputKeys.
+	testLLM1 := &testLanguageModel{expResult: "A gripping tale of mystery"}
+	testLLM2 := &testLanguageModel{expResult: "Five stars, must watch"}
+
+	chain1 := NewLLMChain(
+		testLLM1,
+		prompts.NewPromptTemplate("Write a synopsis for {{.title}} set in {{.era}}", []string{"title", "era"}),
+	)
+	chain1.OutputKey = "synopsis"
+
+	chain2 := NewLLMChain(
+		testLLM2,
+		prompts.NewPromptTemplate("Review this synopsis: {{.synopsis}}", []string{"synopsis"}),
+	)
+	chain2.OutputKey = "review"
+
+	// Request BOTH intermediate and final outputs.
+	seqChain, err := NewSequentialChain(
+		[]Chain{chain1, chain2},
+		[]string{"title", "era"},
+		[]string{"synopsis", "review"},
+	)
+	require.NoError(t, err)
+
+	res, err := Call(ctx, seqChain, map[string]any{
+		"title": "Mystery in the haunted mansion",
+		"era":   "1930s in Haiti",
+	})
+	require.NoError(t, err)
+
+	// Both intermediate and final outputs must be present.
+	assert.Equal(t, "A gripping tale of mystery", res["synopsis"])
+	assert.Equal(t, "Five stars, must watch", res["review"])
+
+	// chain2 must have received chain1's output as its prompt input.
+	expPrompt := "Review this synopsis: A gripping tale of mystery"
+	assert.Equal(t, expPrompt, testLLM2.recordedPrompt[0].String())
+}
+
 func TestSequentialChainErrors(t *testing.T) {
 	ctx := context.Background()
 	t.Parallel()
