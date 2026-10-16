@@ -15,7 +15,7 @@ import (
 const (
 	defaultIndex               = "vector_index"
 	pageContentName            = "pageContent"
-	defaultPath                = "plot_embedding"
+	defaultPath                = "embeddings"
 	metadataName               = "metadata"
 	scoreName                  = "score"
 	defaultNumCandidatesScalar = 10
