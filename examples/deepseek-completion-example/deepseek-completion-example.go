@@ -11,8 +11,11 @@ import (
 
 func main() {
 	// Initialize the OpenAI client with Deepseek model
+	// Per the official DeepSeek API documentation (https://api-docs.deepseek.com/), 
+	// please note that all API calls must be configured to use the DeepSeek base URL instead of the OpenAI endpoint.
 	llm, err := openai.New(
 		openai.WithModel("deepseek-reasoner"),
+		openai.WithBaseURL("https://api.deepseek.com"),
 	)
 	if err != nil {
 		log.Fatal(err)
