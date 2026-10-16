@@ -14,25 +14,29 @@ func (mc MessageContent) MarshalJSON() ([]byte, error) {
 	if hasSingleTextPart {
 		tp, _ := mc.Parts[0].(TextContent)
 		return json.Marshal(struct {
-			Role ChatMessageType `json:"role"`
-			Text string          `json:"text"`
-		}{Role: mc.Role, Text: tp.Text})
+			Role             ChatMessageType `json:"role"`
+			Text             string          `json:"text"`
+			ReasoningContent string          `json:"reasoning_content,omitempty"`
+		}{Role: mc.Role, Text: tp.Text, ReasoningContent: mc.ReasoningContent})
 	}
 
 	return json.Marshal(struct {
-		Role  ChatMessageType `json:"role"`
-		Parts []ContentPart   `json:"parts"`
+		Role             ChatMessageType `json:"role"`
+		Parts            []ContentPart   `json:"parts"`
+		ReasoningContent string          `json:"reasoning_content,omitempty"`
 	}{
-		Role:  mc.Role,
-		Parts: mc.Parts,
+		Role:             mc.Role,
+		Parts:            mc.Parts,
+		ReasoningContent: mc.ReasoningContent,
 	})
 }
 
 func (mc *MessageContent) UnmarshalJSON(data []byte) error {
 	var m struct {
-		Role  ChatMessageType `json:"role"`
-		Text  string          `json:"text"`
-		Parts []struct {
+		Role             ChatMessageType `json:"role"`
+		Text             string          `json:"text"`
+		ReasoningContent string          `json:"reasoning_content"`
+		Parts            []struct {
 			Type     string `json:"type"`
 			Text     string `json:"text,omitempty"`
 			ImageURL struct {
@@ -60,6 +64,7 @@ func (mc *MessageContent) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	mc.Role = m.Role
+	mc.ReasoningContent = m.ReasoningContent
 
 	for _, part := range m.Parts {
 		switch part.Type {

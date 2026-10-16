@@ -122,3 +122,37 @@ func TestChatMessage_MarshalUnmarshal_WithReasoning(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, msg, msg2)
 }
+
+func TestChatMessage_MarshalUnmarshal_WithReasoningAndToolCalls(t *testing.T) {
+	t.Parallel()
+	msg := ChatMessage{
+		Role:             "assistant",
+		Content:          "",
+		ReasoningContent: "I need to use the calculator to add 15 and 28",
+		ToolCalls: []ToolCall{
+			{
+				ID:   "call_123",
+				Type: ToolTypeFunction,
+				Function: ToolFunction{
+					Name:      "calculator",
+					Arguments: `{"a":15,"b":28}`,
+				},
+			},
+		},
+	}
+	text, err := json.Marshal(msg)
+	require.NoError(t, err)
+
+	// Verify reasoning_content is present in serialized JSON
+	assert.Contains(t, string(text), `"reasoning_content"`)
+	assert.Contains(t, string(text), `"tool_calls"`)
+
+	// Round-trip: unmarshal back
+	var msg2 ChatMessage
+	err = json.Unmarshal(text, &msg2)
+	require.NoError(t, err)
+	require.Equal(t, msg.ReasoningContent, msg2.ReasoningContent)
+	require.Equal(t, len(msg.ToolCalls), len(msg2.ToolCalls))
+	require.Equal(t, msg.ToolCalls[0].ID, msg2.ToolCalls[0].ID)
+	require.Equal(t, msg.ToolCalls[0].Function.Name, msg2.ToolCalls[0].Function.Name)
+}
