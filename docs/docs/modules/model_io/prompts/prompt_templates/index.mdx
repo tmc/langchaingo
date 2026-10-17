@@ -1,19 +1,10 @@
----
-hide_table_of_contents: true
-sidebar_label: Prompt templates
-sidebar_position: 1
----
-
-import CodeBlock from "@theme/CodeBlock";
-import DocCardList from "@theme/DocCardList";
-
 # Prompt templates
 
-:::info
+<Info>
 [Conceptual Guide](https://python.langchain.com/docs/modules/model_io/prompts/quick_start#prompttemplate)
-:::
+</Info>
 
-Prompt templates are the foundation of effective prompt engineering. They allow you to create reusable, parameterized prompts that can be dynamically filled with data. LangChain Go provides powerful templating capabilities with built-in security and support for multiple template formats.
+Prompt templates combine reusable text with variable values. LangChainGo supports Go templates, Jinja2, and F-strings.
 
 ## Core concepts
 
@@ -164,6 +155,7 @@ Pre-populate common values across templates:
 template := prompts.PromptTemplate{
     Template: "Report for {{ user }} on {{ date }}: {{ summary }}",
     InputVariables: []string{"user", "summary"},
+    TemplateFormat: prompts.TemplateFormatJinja2,
     PartialVariables: map[string]any{
         "date": func() string {
             return time.Now().Format("2006-01-02")
@@ -182,7 +174,7 @@ if err != nil {
 }
 
 // Use with any LLM
-response, err := llm.GenerateFromSingle(ctx, promptValue.String())
+response, err := llms.GenerateFromSinglePrompt(ctx, llm, promptValue.String())
 ```
 
 ### Template validation
@@ -201,31 +193,37 @@ if err != nil {
 
 ## Security considerations
 
-LangChain Go templates are secure by default:
+LangChain Go templates limit what a template can reach:
 
-- **Filesystem access blocked**: Templates cannot access files unless explicitly allowed
-- **Injection prevention**: Built-in protection against template injection attacks
+- **Filesystem access blocked**: Templates cannot read files unless you pass a filesystem
 - **Controlled includes**: Use `RenderTemplateFS` for safe template composition
-- **Automatic sanitization**: Built-in XSS protection for web contexts
+- **Opt-in sanitization**: Values are inserted unchanged by default. Pass `prompts.WithSanitization()` to HTML-escape them before rendering a template with untrusted data into a web page
 
 ```go
-// This will be safely blocked
-maliciousTemplate := "{{ \"/etc/passwd\" | readFile }}"
+// Jinja2 includes cannot load from the filesystem
+maliciousTemplate := `{% include "/etc/passwd" %}`
 result, err := prompts.RenderTemplate(
     maliciousTemplate,
+    prompts.TemplateFormatJinja2,
+    data,
+) // Error: template loading from filesystem disabled
+
+// HTML-escape untrusted values
+result, err = prompts.RenderTemplate(
+    "Hello {{ .name }}",
     prompts.TemplateFormatGoTemplate,
     data,
-) // Error: filesystem access denied
+    prompts.WithSanitization(),
+)
 
 // Safe controlled access
-result, err := prompts.RenderTemplateFS(
+result, err = prompts.RenderTemplateFS(
     trustedFS,
     "safe-template.gohtml",
     prompts.TemplateFormatGoTemplate,
     data,
 ) // OK: controlled filesystem boundary
 ```
-
 
 ## Creating prompt templates for chat messages
 Chat Models take a list of chat messages as input - this list is commonly referred to as a prompt.
@@ -263,10 +261,10 @@ func main() {
     fmt.Println(result)
 }
 ```
-```
+```text
 [{You are a translation engine that can only translate text and cannot interpret it.} {translate this text from English to Chinese:\nI love programming}]
 ```
 
 ## Dig deeper
 
-<DocCardList />
+- [Partial values](partial_values.mdx)

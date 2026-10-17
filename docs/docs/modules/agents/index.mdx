@@ -1,15 +1,8 @@
----
-sidebar_position: 5
-hide_table_of_contents: true
----
-
-import DocCardList from "@theme/DocCardList";
-
 # Agents
 
-:::info
-[Conceptual Guide](../../concepts/) • [How-to Guides](../../how-to/)
-:::
+<Info>
+[Conceptual Guide](../../concepts/index.md) • [How-to Guides](../../how-to/index.md)
+</Info>
 
 Agents enable autonomous behavior by allowing language models to dynamically choose which tools to use based on user input. Unlike predetermined chains, agents make real-time decisions about their actions.
 
@@ -61,14 +54,18 @@ LangChainGo provides several built-in tools:
 ### Basic Agent Setup
 
 ```go
-// Create tools
-tools := []tools.Tool{
+// Create tools. serpapi.New reads the SERPAPI_API_KEY environment variable.
+search, err := serpapi.New()
+if err != nil {
+    log.Fatal(err)
+}
+agentTools := []tools.Tool{
     tools.Calculator{},
-    tools.WebSearch{APIKey: "your-api-key"},
+    search,
 }
 
 // Create agent
-agent := agents.NewOneShotAgent(llm, tools)
+agent := agents.NewOneShotAgent(llm, agentTools)
 
 // Create executor
 executor := agents.NewExecutor(agent)
@@ -109,4 +106,14 @@ func (c CustomTool) Call(ctx context.Context, input string) (string, error) {
 
 ## Agent Components
 
-<DocCardList />
+<CardGroup cols={3}>
+<Card title="Agent types" href="agents/index.mdx">
+The agents LangChainGo provides and how they choose tools.
+</Card>
+<Card title="Agent executors" href="executor/index.mdx">
+Run the agent loop until the agent produces an answer.
+</Card>
+<Card title="Tools" href="tools/index.mdx">
+Functions and APIs an agent can call.
+</Card>
+</CardGroup>

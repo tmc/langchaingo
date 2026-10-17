@@ -1,10 +1,3 @@
----
-sidebar_position: 1
----
-
-import CodeBlock from "@theme/CodeBlock";
-import ExampleOllama from "@examples/ollama-completion-example/ollama_completion_example.go";
-
 # Quickstart: LangChainGo with Ollama
 
 Get started by running your first program with LangChainGo and [Ollama](https://ollama.ai/). Ollama provides the most straightforward method for local LLM inference across all computer platforms.
@@ -42,8 +35,8 @@ You should see output similar to the following:
 The first human to set foot on the moon was Neil Armstrong, an American astronaut, who stepped onto the lunar surface during the Apollo 11 mission on July 20, 1969.
 ```
 
-Congratulations! You have successfully built and executed your first open-source LLM-based program using local inference.
+The example sends a prompt to the local Ollama server and prints the response.
 
 Here is the entire program (from [ollama-completion-example](https://github.com/tmc/langchaingo/blob/main/examples/ollama-completion-example/ollama_completion_example.go)):
 
-<CodeBlock language="go">{ExampleOllama}</CodeBlock>
+<Code src="/examples/ollama-completion-example/ollama_completion_example.go" title="examples/ollama-completion-example/ollama_completion_example.go" link />

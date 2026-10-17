@@ -1,6 +1,6 @@
 # Documentation contribution guide
 
-This guide helps you contribute documentation to LangChainGo. We especially need help with tutorials and how-to guides!
+This guide covers writing, building, and checking LangChainGo documentation.
 
 ## Documentation structure
 
@@ -32,11 +32,11 @@ Our documentation is organized into four main categories:
 
 ## Writing tutorials
 
-Tutorials are complete learning experiences. Here's how to write a great tutorial:
+Tutorials guide readers through a complete task. Use the following template:
 
 ### Tutorial template
 
-```markdown
+````markdown
 # Building [What You're Building]
 
 [One sentence description of what the reader will build]
@@ -50,7 +50,7 @@ A [type of application] that:
 
 ## Prerequisites
 
-- Go 1.21+
+- Go 1.26 or later
 - [Required API keys]
 - [Other requirements]
 
@@ -76,7 +76,7 @@ A [type of application] that:
 
 - [Potential improvements]
 - [Related tutorials]
-```
+````
 
 ### Tutorial guidelines
 
@@ -92,7 +92,7 @@ How-to guides solve specific problems. They differ from tutorials:
 
 ### How-to template
 
-```markdown
+````markdown
 # How to [Specific Task]
 
 ## Problem
@@ -118,7 +118,7 @@ How-to guides solve specific problems. They differ from tutorials:
 ## Related guides
 
 - [Link to related how-tos]
-```
+````
 
 ### How-to guidelines
 
@@ -147,7 +147,8 @@ import (
     "context"
     "fmt"
     "log"
-    
+
+    "github.com/tmc/langchaingo/llms"
     "github.com/tmc/langchaingo/llms/openai"
 )
 
@@ -156,7 +157,11 @@ func main() {
     if err != nil {
         log.Fatal(err)
     }
-    // ... rest of example
+    completion, err := llms.GenerateFromSinglePrompt(context.Background(), llm, "Say hello")
+    if err != nil {
+        log.Fatal(err)
+    }
+    fmt.Println(completion)
 }
 ```
 
@@ -188,7 +193,7 @@ We have several tutorials and guides marked as "Coming Soon". Here's how to cont
 
 ### 1. Choose a topic
 
-- Check our [Tutorials](/docs/tutorials) and [How-To Guides](/docs/how-to) for topics marked as coming soon. 
+- Check our [Tutorials](../tutorials/index.md) and [How-To Guides](../how-to/index.md) for topics marked as coming soon. 
 - Review open issues for topics that have already been claimed (avoid duplicate work).
 
 ### 2. Open an issue
@@ -219,40 +224,23 @@ Create a pull request with:
 
 ### Building documentation
 
-#### Local development
+The site is built with [md2html](https://github.com/tmc/md2html). From the
+`docs` directory:
 
 ```bash
-cd docs
-npm install
-npm run start
+make install   # install md2html and mdvet
+make serve     # preview with live reload at http://localhost:8080
+make build     # write the static site to _site
 ```
 
-This starts a local server at `http://localhost:3000`
-
-#### Docker development
-
-For a containerized environment:
-
-```bash
-cd docs
-
-# Quick development server with live reload
-make docker-dev
-
-# Or build and run a persistent container
-make docker-run
-
-# Clean up when done
-make docker-clean
-```
-
-The Docker approach ensures consistent Node.js environment and dependencies.
+Navigation order comes from `docs/SUMMARY.md`; add new pages there. Link to
+other pages by relative path to their `.md` file.
 
 ### Testing documentation
 
 Before submitting:
 
-1. **Check Links**: Ensure all links work
+1. **Check Links**: Run `make vet` to check links and anchors
 2. **Run Code**: Test all code examples
 3. **Review Formatting**: Check rendering in browser
 4. **Lint Documentation**: Run Vale to check style consistency
@@ -282,13 +270,13 @@ Vale checks for:
 ## Examples of good documentation
 
 ### Good tutorial example
-- [Building an AI Code Reviewer](/docs/tutorials/code-reviewer)
+- [Building an AI Code Reviewer](../tutorials/code-reviewer.md)
 - Complete, practical application
 - Progressive complexity
 - Real-world use case
 
 ### Good how-to guide example
-- [How to configure different LLM providers](/docs/how-to/configure-llm-providers)
+- [How to configure different LLM providers](../how-to/configure-llm-providers.md)
 - Focused on specific task
 - Multiple provider examples
 - Clear configuration steps
@@ -305,5 +293,3 @@ Documentation contributors are credited in:
 - The documentation itself (author attribution)
 - Release notes
 - Contributors list
-
-Thank you for helping improve LangChainGo documentation!

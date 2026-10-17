@@ -1,16 +1,8 @@
----
-sidebar_label: Getting Started
-hide_table_of_contents: true
----
-
-import CodeBlock from "@theme/CodeBlock";
-import ExampleMRKL from "@examples/mrkl-agent-example/mrkl_agent.go";
-
 # Getting Started: Agent Executors
 
 Agents use an LLM to determine which actions to take and in what order. An action can either be using a tool and observing its output, or returning to the user.
 
-When used correctly agents can be extremely powerful. In this tutorial, we show you how to easily use agents through the simplest, highest level API.
+This tutorial shows how to initialize an agent and run it with an executor.
 
 In order to load agents, you should understand the following concepts:
 
@@ -28,4 +20,4 @@ SERPAPI_API_KEY="..."
 
 Here's a complete working example showing how to create and run an agent executor:
 
-<CodeBlock language="go">{ExampleMRKL}</CodeBlock>
+<Code src="/examples/mrkl-agent-example/mrkl_agent.go" title="examples/mrkl-agent-example/mrkl_agent.go" link />
