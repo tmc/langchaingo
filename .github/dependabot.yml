@@ -10,6 +10,11 @@ updates:
     groups:
       go:
         patterns: ["*"]
+    ignore:
+      # chroma-go v0.3 (and the chroma modules that require it) drops
+      # the openai and types packages that vectorstores/chroma imports.
+      - dependency-name: github.com/testcontainers/testcontainers-go/modules/chroma
+      - dependency-name: github.com/amikos-tech/chroma-go
   - package-ecosystem: github-actions
     directory: /
     schedule:
