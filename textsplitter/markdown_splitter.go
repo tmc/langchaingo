@@ -200,6 +200,10 @@ func (mc *markdownContext) clone(startAt, endAt int) *markdownContext {
 		chunkOverlap:   mc.chunkOverlap,
 		secondSplitter: mc.secondSplitter,
 
+		renderCodeBlocks: mc.renderCodeBlocks,
+		useInlineContent: mc.useInlineContent,
+		joinTableRows:    mc.joinTableRows,
+
 		lenFunc: mc.lenFunc,
 	}
 }
