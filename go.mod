@@ -17,15 +17,15 @@ require github.com/google/uuid v1.6.0
 // Testing
 require (
 	github.com/stretchr/testify v1.12.1
-	github.com/testcontainers/testcontainers-go v0.41.0
+	github.com/testcontainers/testcontainers-go v0.44.0
 	github.com/testcontainers/testcontainers-go/modules/chroma v0.37.0
-	github.com/testcontainers/testcontainers-go/modules/milvus v0.37.0
-	github.com/testcontainers/testcontainers-go/modules/mongodb v0.37.0
-	github.com/testcontainers/testcontainers-go/modules/mysql v0.37.0
-	github.com/testcontainers/testcontainers-go/modules/opensearch v0.37.0
-	github.com/testcontainers/testcontainers-go/modules/postgres v0.37.0
-	github.com/testcontainers/testcontainers-go/modules/redis v0.37.0
-	github.com/testcontainers/testcontainers-go/modules/weaviate v0.40.0
+	github.com/testcontainers/testcontainers-go/modules/milvus v0.44.0
+	github.com/testcontainers/testcontainers-go/modules/mongodb v0.44.0
+	github.com/testcontainers/testcontainers-go/modules/mysql v0.44.0
+	github.com/testcontainers/testcontainers-go/modules/opensearch v0.44.0
+	github.com/testcontainers/testcontainers-go/modules/postgres v0.44.0
+	github.com/testcontainers/testcontainers-go/modules/redis v0.44.0
+	github.com/testcontainers/testcontainers-go/modules/weaviate v0.44.0
 )
 
 // LLM providers
@@ -211,8 +211,7 @@ require (
 	github.com/containerd/platforms v0.2.1 // indirect
 	github.com/cpuguy83/dockercfg v0.3.2 // indirect
 	github.com/distribution/reference v0.6.0 // indirect
-	github.com/docker/docker v28.5.2+incompatible // indirect
-	github.com/docker/go-connections v0.6.0 // indirect
+	github.com/docker/go-connections v0.7.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/getsentry/sentry-go v0.30.0 // indirect
 	github.com/mdelapenya/tlscert v0.2.0 // indirect
@@ -223,7 +222,6 @@ require (
 	github.com/moby/sys/user v0.4.1 // indirect
 	github.com/moby/sys/userns v0.1.0 // indirect
 	github.com/moby/term v0.5.2 // indirect
-	github.com/morikuni/aec v1.0.0 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.1 // indirect
 )
@@ -242,7 +240,7 @@ require (
 	github.com/deepmap/oapi-codegen/v2 v2.1.0 // indirect
 	github.com/dlclark/regexp2 v1.12.0 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
-	github.com/ebitengine/purego v0.10.0 // indirect
+	github.com/ebitengine/purego v0.10.1 // indirect
 	github.com/felixge/httpsnoop v1.1.0 // indirect
 	github.com/go-logr/logr v1.4.4 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
@@ -259,7 +257,7 @@ require (
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
-	github.com/golang/snappy v0.0.4 // indirect
+	github.com/golang/snappy v1.0.0 // indirect
 	github.com/google/flatbuffers v23.5.26+incompatible // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/goph/emperror v0.17.2 // indirect
@@ -271,7 +269,7 @@ require (
 	github.com/klauspost/cpuid/v2 v2.2.11 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
-	github.com/lufia/plan9stats v0.0.0-20250317134145-8bc96cf8fc35 // indirect
+	github.com/lufia/plan9stats v0.0.0-20260330125221-c963978e514e // indirect
 	github.com/magiconair/properties v1.8.10 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
@@ -286,15 +284,15 @@ require (
 	github.com/power-devops/perfstat v0.0.0-20240221224432-82ca36839d55 // indirect
 	github.com/rogpeppe/go-internal v1.14.1 // indirect
 	github.com/rs/zerolog v1.31.0 // indirect
-	github.com/shirou/gopsutil/v4 v4.26.2 // indirect
+	github.com/shirou/gopsutil/v4 v4.26.6 // indirect
 	github.com/shopspring/decimal v1.2.0 // indirect
 	github.com/sirupsen/logrus v1.9.4 // indirect
 	github.com/spf13/cast v1.7.1 // indirect
 	github.com/tidwall/gjson v1.17.1 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.0 // indirect
-	github.com/tklauser/go-sysconf v0.3.16 // indirect
-	github.com/tklauser/numcpus v0.11.0 // indirect
+	github.com/tklauser/go-sysconf v0.4.0 // indirect
+	github.com/tklauser/numcpus v0.12.0 // indirect
 	github.com/yargevad/filepathx v1.0.0 // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
 	golang.org/x/crypto v0.57.0 // indirect
@@ -309,7 +307,7 @@ require (
 
 require (
 	github.com/milvus-io/milvus/client/v2 v2.6.0
-	github.com/testcontainers/testcontainers-go/modules/mariadb v0.38.0
+	github.com/testcontainers/testcontainers-go/modules/mariadb v0.44.0
 )
 
 require (
@@ -344,6 +342,8 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.30.0 // indirect
 	github.com/jonboulle/clockwork v0.5.0 // indirect
 	github.com/milvus-io/milvus/pkg/v2 v2.0.0-20250319085209-5a6b4e56d59e // indirect
+	github.com/moby/moby/api v1.55.0 // indirect
+	github.com/moby/moby/client v0.5.0 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/oklog/ulid/v2 v2.1.1 // indirect
 	github.com/opencontainers/runtime-spec v1.0.2 // indirect
