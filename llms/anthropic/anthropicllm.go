@@ -768,20 +768,21 @@ func extractThinkingOptions(o *LLM, opts *llms.CallOptions) ([]string, *anthropi
 // extractThinkingFromText extracts thinking content from Anthropic responses
 // Anthropic models often embed thinking in <thinking> tags
 func extractThinkingFromText(fullText string) (thinkingContent, outputContent string) {
+	const (
+		openTag  = "<thinking>"
+		closeTag = "</thinking>"
+	)
 	// Look for <thinking> tags in the text
-	if strings.Contains(fullText, "<thinking>") {
-		start := strings.Index(fullText, "<thinking>")
-		end := strings.Index(fullText, "</thinking>")
+	if strings.Contains(fullText, openTag) {
+		start := strings.Index(fullText, openTag)
+		end := strings.Index(fullText, closeTag)
 		if start >= 0 && end > start {
 			// Extract thinking content between tags
-			thinkingContent = fullText[start+10 : end] // +10 for "<thinking>"
+			thinkingContent = fullText[start+len(openTag) : end]
 
 			// Extract output content (everything before and after thinking tags)
 			beforeThinking := strings.TrimSpace(fullText[:start])
-			afterThinking := ""
-			if end+12 < len(fullText) { // +12 for "</thinking>"
-				afterThinking = strings.TrimSpace(fullText[end+12:])
-			}
+			afterThinking := strings.TrimSpace(fullText[end+len(closeTag):])
 
 			// Combine non-thinking content
 			if beforeThinking != "" && afterThinking != "" {
