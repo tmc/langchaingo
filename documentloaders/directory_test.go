@@ -2,11 +2,30 @@ package documentloaders
 
 import (
 	"context"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+func TestRecursiveDirectoryLoader_ExtensionCase(t *testing.T) {
+	for _, ext := range []string{"txt", "TXT", "tXt", "md", "MD", "mD"} {
+		t.Run(ext, func(t *testing.T) {
+			root := t.TempDir()
+			path := filepath.Join(root, "document."+ext)
+			require.NoError(t, os.WriteFile(path, []byte("Knowledge base content"), 0o600))
+			loader := NewRecursiveDirLoader(WithRoot(root), WithAllowExts(".txt", ".md"))
+
+			docs, err := loader.Load(context.Background())
+			require.NoError(t, err)
+			require.Len(t, docs, 1)
+			assert.Equal(t, "Knowledge base content", docs[0].PageContent)
+			assert.Equal(t, path, docs[0].Metadata["source"])
+		})
+	}
+}
 
 func TestNewRecursiveDirLoader_Options(t *testing.T) {
 	t.Run("default option", func(t *testing.T) {

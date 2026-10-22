@@ -69,7 +69,7 @@ func NewRecursiveDirLoader(opts ...Option) *RecursiveDirectoryLoader {
 }
 
 func (l *RecursiveDirectoryLoader) newLoader(f *os.File) (Loader, error) {
-	ext := filepath.Ext(f.Name())
+	ext := strings.ToLower(filepath.Ext(f.Name()))
 	switch ext {
 	case ".txt", ".md":
 		return NewText(f), nil
