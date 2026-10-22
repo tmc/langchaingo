@@ -36,6 +36,10 @@ func (c CSV) Load(_ context.Context) ([]schema.Document, error) {
 	var rown int
 
 	rd := csv.NewReader(c.r)
+	// Rows may differ in length. By default every row must have as many
+	// fields as the first, so one short or long row failed the whole file
+	// with "wrong number of fields".
+	rd.FieldsPerRecord = -1
 	for {
 		row, err := rd.Read()
 		if errors.Is(err, io.EOF) {
@@ -46,11 +50,20 @@ func (c CSV) Load(_ context.Context) ([]schema.Document, error) {
 		}
 		if len(header) == 0 {
 			header = append(header, row...)
+			// Excel's "CSV UTF-8" export starts the file with a byte order mark.
+			header[0] = strings.TrimPrefix(header[0], "\ufeff")
 			continue
 		}
 
 		var content []string
 		for i, value := range row {
+			// A field past the last header has no column name.
+			if i >= len(header) {
+				if len(c.columns) == 0 {
+					content = append(content, value)
+				}
+				continue
+			}
 			if len(c.columns) > 0 &&
 				!slices.Contains(c.columns, header[i]) {
 				continue
