@@ -3,11 +3,15 @@ package llms
 import (
 	"testing"
 
+	"github.com/pkoukk/tiktoken-go"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestCountTokens(t *testing.T) {
 	t.Parallel()
+	if _, err := tiktoken.EncodingForModel("gpt-3.5-turbo"); err != nil {
+		t.Skipf("tokenizer unavailable: %v", err)
+	}
 	numTokens := CountTokens("gpt-3.5-turbo", "test for counting tokens")
 	expectedNumTokens := 4
 	assert.Equal(t, expectedNumTokens, numTokens)

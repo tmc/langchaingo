@@ -26,7 +26,7 @@ jobs:
       - name: Run golangci-lint
         uses: golangci/golangci-lint-action@v7
         with:
-          version: v2.1.6
+          version: v2.9.0
           args: --timeout=5m
           skip-cache: false
   
@@ -42,6 +42,19 @@ jobs:
           check-latest: false
       - name: Build
         run: go build -v ./...
+
+  vulncheck:
+    name: govulncheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+          check-latest: false
+      - name: Check for reachable vulnerabilities
+        run: go run golang.org/x/vuln/cmd/govulncheck@v1.8.0 ./...
   
   test:
     name: test
@@ -63,6 +76,8 @@ jobs:
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           GENAI_API_KEY: ${{ secrets.GENAI_API_KEY }}
+        # bash runs with pipefail, so a failing go test fails the step.
+        shell: bash
         run: |
           go test -v -json -coverprofile=coverage-${{ steps.go-version.outputs.version }}.out ./... | tee test-results-${{ steps.go-version.outputs.version }}.ndjson
       - name: Upload test results
@@ -88,6 +103,7 @@ jobs:
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           GENAI_API_KEY: ${{ secrets.GENAI_API_KEY }}
+        shell: bash
         run: go test -v -json ./... -race | tee test-results-race-${{ steps.go-version.outputs.version }}.ndjson
       - name: Upload race test results
         uses: actions/upload-artifact@v4

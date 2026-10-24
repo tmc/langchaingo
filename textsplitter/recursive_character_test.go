@@ -12,7 +12,10 @@ import (
 
 //nolint:dupword,funlen
 func TestRecursiveCharacterSplitter(t *testing.T) {
-	tokenEncoder, _ := tiktoken.GetEncoding("cl100k_base")
+	tokenEncoder, err := tiktoken.GetEncoding("cl100k_base")
+	if err != nil {
+		t.Skipf("tokenizer unavailable: %v", err)
+	}
 
 	t.Parallel()
 	type testCase struct {

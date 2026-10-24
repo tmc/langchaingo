@@ -22,6 +22,11 @@ func TestGoogleAI_SupportsReasoning(t *testing.T) {
 			expected: true,
 		},
 		{
+			name:     "Gemini 2.5 Flash supports reasoning",
+			model:    "gemini-2.5-flash",
+			expected: true,
+		},
+		{
 			name:     "Gemini 2.0 Pro supports reasoning",
 			model:    "gemini-2.0-pro",
 			expected: true,
@@ -89,7 +94,7 @@ func TestGoogleAI_ReasoningIntegration(t *testing.T) {
 	// Test with Gemini 2.0 Flash (reasoning model)
 	client, err := New(ctx,
 		WithAPIKey(apiKey),
-		WithDefaultModel("gemini-2.0-flash"),
+		WithDefaultModel("gemini-2.5-flash"),
 	)
 	if err != nil {
 		t.Fatalf("Failed to create client: %v", err)
@@ -103,7 +108,7 @@ func TestGoogleAI_ReasoningIntegration(t *testing.T) {
 
 	// Verify it reports reasoning support for Gemini 2.0
 	if !client.SupportsReasoning() {
-		t.Error("Gemini 2.0 Flash should support reasoning")
+		t.Error("gemini-2.5-flash should support reasoning")
 	}
 
 	// Test reasoning with a complex problem
@@ -117,7 +122,7 @@ func TestGoogleAI_ReasoningIntegration(t *testing.T) {
 	}
 
 	resp, err := client.GenerateContent(ctx, messages,
-		llms.WithMaxTokens(200),
+		llms.WithMaxTokens(2048),
 		llms.WithThinkingMode(llms.ThinkingModeMedium), // Note: Google AI may not use this yet
 	)
 	if err != nil {
@@ -153,7 +158,7 @@ func TestGoogleAI_CachingSupport(t *testing.T) {
 	Always consider performance, security, and maintainability in your reviews.
 	` + strings.Repeat("This is padding text to ensure we have enough tokens for caching. ", 100)
 
-	cached, err := helper.CreateCachedContent(ctx, "gemini-2.0-flash",
+	cached, err := helper.CreateCachedContent(ctx, "gemini-2.5-flash",
 		[]llms.MessageContent{
 			{
 				Role: llms.ChatMessageTypeSystem,

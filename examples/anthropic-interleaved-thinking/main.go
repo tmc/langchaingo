@@ -76,7 +76,7 @@ var (
 			},
 		},
 	}
-	
+
 	// New tool that depends on results from other tools
 	generateReportTool = llms.Tool{
 		Type: "function",
@@ -114,7 +114,7 @@ var (
 			},
 		},
 	}
-	
+
 	// Tool for making final predictions based on all data
 	makePredictionTool = llms.Tool{
 		Type: "function",
@@ -158,7 +158,7 @@ func (d *debugTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 		fmt.Println("\n" + strings.Repeat("=", 80))
 		fmt.Println("HTTP REQUEST")
 		fmt.Println(strings.Repeat("-", 80))
-		
+
 		// Dump request
 		reqDump, err := httputil.DumpRequestOut(req, true)
 		if err != nil {
@@ -167,15 +167,15 @@ func (d *debugTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 			fmt.Printf("%s\n", reqDump)
 		}
 	}
-	
+
 	// Make the actual request
 	resp, err := d.Transport.RoundTrip(req)
-	
+
 	if d.Debug && resp != nil {
 		fmt.Println("\n" + strings.Repeat("-", 80))
 		fmt.Println("HTTP RESPONSE")
 		fmt.Println(strings.Repeat("-", 80))
-		
+
 		// Dump response
 		respDump, err := httputil.DumpResponse(resp, true)
 		if err != nil {
@@ -185,7 +185,7 @@ func (d *debugTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 		}
 		fmt.Println(strings.Repeat("=", 80) + "\n")
 	}
-	
+
 	return resp, err
 }
 
@@ -201,7 +201,7 @@ func main() {
 	fmt.Println("║     Demonstrating thinking between tool calls             ║")
 	fmt.Println("╚════════════════════════════════════════════════════════════╝")
 	fmt.Println()
-	
+
 	if *debugHTTP {
 		fmt.Println("🔍 DEBUG MODE: HTTP requests/responses will be displayed")
 		fmt.Println()
@@ -221,12 +221,12 @@ func main() {
 	fmt.Println("  • Model: Claude Sonnet 4 (20250514)")
 	fmt.Println("  • Beta: interleaved-thinking-2025-05-14")
 	fmt.Println("  • Feature: Thinking between tool calls")
-	
+
 	// Configure options for Anthropic client
 	anthropicOpts := []anthropic.Option{
 		anthropic.WithModel("claude-sonnet-4-20250514"),
 	}
-	
+
 	// Add debug HTTP client if flag is set
 	if *debugHTTP {
 		httpClient := &http.Client{
@@ -237,7 +237,7 @@ func main() {
 		}
 		anthropicOpts = append(anthropicOpts, anthropic.WithHTTPClient(httpClient))
 	}
-	
+
 	// Using Claude Sonnet 4 for interleaved thinking
 	llm, err := anthropic.New(anthropicOpts...)
 	if err != nil {
@@ -318,7 +318,7 @@ This demonstrates interleaved thinking: parallel execution where possible, seque
 	// Configure with interleaved thinking for tool use
 	var streamedContent strings.Builder
 	var contentBlockCount int
-	
+
 	opts := []llms.CallOption{
 		// Enable thinking mode for reasoning between tools
 		llms.WithThinkingMode(llms.ThinkingModeMedium),
@@ -340,7 +340,7 @@ This demonstrates interleaved thinking: parallel execution where possible, seque
 		// not raw SSE events. The anthropic client handles SSE parsing internally.
 		llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {
 			chunkStr := string(chunk)
-			
+
 			// Show progress dots for content generation
 			if len(chunkStr) > 0 {
 				if contentBlockCount == 0 {
@@ -366,22 +366,22 @@ This demonstrates interleaved thinking: parallel execution where possible, seque
 		fmt.Printf("\n  ❌ Error: %v\n", err)
 		return
 	}
-	
+
 	fmt.Printf("\n  ℹ️  Initial response received (streaming may still be in progress)\n")
-	
+
 	// Handle tool calls in a conversation loop
 	maxIterations := 10 // Prevent infinite loops
 	iteration := 0
 	allResponses := []llms.ContentChoice{} // Store all responses for final display
-	
+
 	// Store initial response
 	if resp != nil && len(resp.Choices) > 0 {
 		allResponses = append(allResponses, *resp.Choices[0])
 	}
-	
+
 	for iteration < maxIterations && resp != nil && len(resp.Choices) > 0 {
 		choice := resp.Choices[0]
-		
+
 		// Check if there are tool calls to process
 		// Note: Tool calls appear in the response AFTER streaming completes
 		if len(choice.ToolCalls) > 0 {
@@ -389,23 +389,23 @@ This demonstrates interleaved thinking: parallel execution where possible, seque
 			for i, tc := range choice.ToolCalls {
 				fmt.Printf("      Tool %d: %s\n", i+1, tc.FunctionCall.Name)
 			}
-			
+
 			// Add assistant message with tool calls to conversation
 			assistantParts := []llms.ContentPart{}
 			if choice.Content != "" {
 				assistantParts = append(assistantParts, llms.TextPart(choice.Content))
 			}
 			assistantParts = append(assistantParts, convertToolCallsToParts(choice.ToolCalls)...)
-			
+
 			messages = append(messages, llms.MessageContent{
 				Role:  llms.ChatMessageTypeAI,
 				Parts: assistantParts,
 			})
-			
+
 			// Execute tools and add results to conversation
 			for _, tc := range choice.ToolCalls {
 				result := executeToolCall(tc.FunctionCall.Name, tc.FunctionCall.Arguments)
-				
+
 				// Add tool result to messages
 				messages = append(messages, llms.MessageContent{
 					Role: llms.ChatMessageTypeTool,
@@ -418,10 +418,10 @@ This demonstrates interleaved thinking: parallel execution where possible, seque
 					},
 				})
 			}
-			
+
 			// Continue conversation with tool results
 			fmt.Printf("\n  📤 Sending tool results back to model (iteration %d)...\n", iteration+1)
-			
+
 			// Remove streaming for subsequent calls to avoid duplicate output
 			continuationOpts := make([]llms.CallOption, 0, len(opts))
 			for _, opt := range opts {
@@ -429,54 +429,54 @@ This demonstrates interleaved thinking: parallel execution where possible, seque
 			}
 			// Override streaming for continuation
 			continuationOpts = append(continuationOpts, llms.WithStreamingFunc(nil))
-			
+
 			resp, err = llm.GenerateContent(ctx, messages, continuationOpts...)
 			if err != nil {
 				fmt.Printf("\n  ⚠️  Error in iteration %d: %v\n", iteration+1, err)
 				break
 			}
-			
+
 			// Store this response
 			if resp != nil && len(resp.Choices) > 0 {
 				allResponses = append(allResponses, *resp.Choices[0])
 				fmt.Printf("\n  ✅ Received response with %d tool calls\n", len(resp.Choices[0].ToolCalls))
 			}
-			
+
 			iteration++
 		} else {
 			// No more tool calls, conversation complete
 			break
 		}
 	}
-	
+
 	if iteration >= maxIterations {
 		fmt.Println("\n  ⚠️  Reached maximum iterations, stopping conversation loop")
 	}
 
 	// Ensure we have a clean line after streaming
-	fmt.Println("\n")
+	fmt.Print("\n\n")
 
 	// Stage 5: Results Analysis
 	fmt.Println("✅ STAGE 5: RESULTS ANALYSIS")
 	fmt.Println("─────────────────────────")
-	
+
 	// Show final iteration count and tool call summary
 	fmt.Printf("\n  📊 Completed after %d iteration(s)\n", iteration)
-	
+
 	// Count total tool calls processed
 	totalToolCalls := 0
 	if resp != nil && len(resp.Choices) > 0 {
 		totalToolCalls = len(resp.Choices[0].ToolCalls)
 		if totalToolCalls > 0 {
 			fmt.Printf("  ✅ Total tool calls executed: %d\n", totalToolCalls)
-			
+
 			// Show if they were parallel
 			if totalToolCalls > 1 {
 				fmt.Printf("  🚀 Tools were executed in PARALLEL!\n")
 			}
 		}
 	}
-	
+
 	// Check for tool calls in the final response
 	if resp != nil && len(resp.Choices) > 0 {
 		for i, choice := range resp.Choices {
@@ -498,7 +498,7 @@ This demonstrates interleaved thinking: parallel execution where possible, seque
 					fmt.Println("  └─────────────────────────────")
 				}
 			}
-			
+
 			// Display tool calls
 			if len(choice.ToolCalls) > 0 {
 				fmt.Printf("\n  🔧 Tool Execution Summary:\n")
@@ -515,7 +515,7 @@ This demonstrates interleaved thinking: parallel execution where possible, seque
 				}
 				fmt.Println("  └─────────────────────────────")
 			}
-			
+
 			// Display content if any
 			if choice.Content != "" {
 				fmt.Printf("\n  💬 Final Response %d:\n", i+1)
@@ -531,7 +531,7 @@ This demonstrates interleaved thinking: parallel execution where possible, seque
 			}
 		}
 	}
-	
+
 	// Stream statistics
 	if streamedContent.Len() > 0 {
 		fmt.Println("\n  📊 Stream Statistics:")
@@ -544,10 +544,10 @@ This demonstrates interleaved thinking: parallel execution where possible, seque
 	// Stage 6: Token Metrics
 	fmt.Println("\n📈 STAGE 6: TOKEN METRICS")
 	fmt.Println("─────────────────────────")
-	
+
 	// Try to get token info from GenerationInfo or from captured streaming data
 	var inputTokens, outputTokens, totalTokens int
-	
+
 	if genInfo := resp.Choices[0].GenerationInfo; genInfo != nil {
 		// Try different possible field names
 		if v, ok := genInfo["PromptTokens"].(int); ok {
@@ -557,7 +557,7 @@ This demonstrates interleaved thinking: parallel execution where possible, seque
 		} else if v, ok := genInfo["prompt_tokens"].(int); ok {
 			inputTokens = v
 		}
-		
+
 		if v, ok := genInfo["CompletionTokens"].(int); ok {
 			outputTokens = v
 		} else if v, ok := genInfo["OutputTokens"].(int); ok {
@@ -565,7 +565,7 @@ This demonstrates interleaved thinking: parallel execution where possible, seque
 		} else if v, ok := genInfo["completion_tokens"].(int); ok {
 			outputTokens = v
 		}
-		
+
 		if v, ok := genInfo["TotalTokens"].(int); ok {
 			totalTokens = v
 		} else if v, ok := genInfo["total_tokens"].(int); ok {
@@ -574,7 +574,6 @@ This demonstrates interleaved thinking: parallel execution where possible, seque
 			totalTokens = inputTokens + outputTokens
 		}
 	}
-	
 
 	fmt.Println("  Token Usage Summary:")
 	fmt.Println("  ├─────────────────────────────")
@@ -593,7 +592,7 @@ This demonstrates interleaved thinking: parallel execution where possible, seque
 			fmt.Printf("  │ Visible Output:    %d\n", outputTokens-usage.ThinkingTokens)
 			fmt.Printf("  │ Thinking Ratio:    %.1f%% of output\n",
 				float64(usage.ThinkingTokens)/float64(outputTokens)*100)
-			
+
 			if usage.ThinkingBudgetAllocated > 0 {
 				fmt.Printf("  │ Budget Allocated:  %d\n", usage.ThinkingBudgetAllocated)
 				fmt.Printf("  │ Budget Used:       %d\n", usage.ThinkingBudgetUsed)
@@ -614,14 +613,14 @@ This demonstrates interleaved thinking: parallel execution where possible, seque
 	fmt.Println("\n╔════════════════════════════════════════════════════════════╗")
 	fmt.Println("║                    DEMO COMPLETE                          ║")
 	fmt.Println("╚════════════════════════════════════════════════════════════╝")
-	
+
 	fmt.Println("\n🎯 Key Features Demonstrated:")
 	fmt.Println("  ✓ Interleaved thinking between tool calls")
 	fmt.Println("  ✓ Real-time progress tracking with stages")
 	fmt.Println("  ✓ Clear visualization of thinking blocks")
 	fmt.Println("  ✓ Tool orchestration with results")
 	fmt.Println("  ✓ Token usage analysis with thinking breakdown")
-	
+
 	fmt.Println("\n📚 Use Cases:")
 	fmt.Println("  • Complex multi-step analysis tasks")
 	fmt.Println("  • Data processing with reasoning")
@@ -666,7 +665,7 @@ func executeToolCall(name string, arguments string) string {
 			// Generic calculation result
 			return fmt.Sprintf("Result: %.2f", 15.5)
 		}
-		
+
 	case "search_knowledge":
 		query, _ := args["query"].(string)
 		// Return different results based on query
@@ -678,11 +677,11 @@ func executeToolCall(name string, arguments string) string {
 			return "Economic indicators: consumer confidence up 12%, GDP growth 2.8%, inflation moderating at 3.2%"
 		}
 		return fmt.Sprintf("Research data for '%s' retrieved", query)
-		
+
 	case "analyze_data":
 		analysisType, _ := args["analysis_type"].(string)
 		data, _ := args["data"].([]interface{})
-		
+
 		switch analysisType {
 		case "trend":
 			return "Trend: Consistent upward trajectory with 7.2% quarter-over-quarter average growth"
@@ -693,25 +692,25 @@ func executeToolCall(name string, arguments string) string {
 		default:
 			return fmt.Sprintf("Analysis complete for %s with %d data points", analysisType, len(data))
 		}
-		
+
 	case "make_prediction":
 		baseValue, _ := args["base_value"].(float64)
 		growthRate, _ := args["growth_rate"].(float64)
 		seasonality, _ := args["seasonality_factor"].(float64)
 		confidence, _ := args["confidence_level"].(string)
-		
+
 		// Calculate prediction
 		prediction := baseValue * (1 + growthRate) * seasonality
-		
+
 		return fmt.Sprintf("Prediction: %.2f million (confidence: %s, growth: %.1f%%, seasonality: %.2fx)",
 			prediction, confidence, growthRate*100, seasonality)
-		
+
 	case "generate_report":
 		growthRate, _ := args["growth_rate"].(float64)
 		trendDir, _ := args["trend_direction"].(string)
 		volatility, _ := args["volatility_level"].(string)
 		prediction, _ := args["prediction"].(float64)
-		
+
 		return fmt.Sprintf("Strategic Report Generated:\n"+
 			"- YoY Growth: %.1f%%\n"+
 			"- Trend: %s\n"+
@@ -719,7 +718,7 @@ func executeToolCall(name string, arguments string) string {
 			"- Q1-2025 Forecast: %.2f million\n"+
 			"- Recommendation: Continue growth strategy with focus on Q4 seasonality",
 			growthRate, trendDir, volatility, prediction)
-		
+
 	default:
 		return "Tool execution completed"
 	}

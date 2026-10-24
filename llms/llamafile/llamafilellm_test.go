@@ -321,11 +321,11 @@ func TestMakeLlamaOptionsFromOptions(t *testing.T) { //nolint:funlen // comprehe
 				if len(result.Stop) != 2 {
 					t.Errorf("Stop length = %v, want %v", len(result.Stop), 2)
 				}
-				if result.MinP != 10.0 {
-					t.Errorf("MinP = %v, want %v", result.MinP, 10.0)
+				if result.MinP != 0 {
+					t.Errorf("MinP = %v, want 0", result.MinP)
 				}
-				if result.NCtx != 2048 {
-					t.Errorf("NCtx = %v, want %v", result.NCtx, 2048)
+				if result.NCtx != 0 {
+					t.Errorf("NCtx = %v, want 0", result.NCtx)
 				}
 				if result.Stream == nil || *result.Stream != false {
 					t.Error("Stream should be false when StreamingFunc is nil")

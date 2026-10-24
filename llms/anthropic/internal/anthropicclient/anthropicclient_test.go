@@ -55,6 +55,7 @@ func TestClient_CreateMessage(t *testing.T) {
 	client, err := New(apiKey, "claude-3-opus-20240229", DefaultBaseURL, WithHTTPClient(rr.Client()))
 	require.NoError(t, err)
 
+	temperature := 0.0
 	req := &MessageRequest{
 		Model: "claude-3-opus-20240229",
 		Messages: []ChatMessage{
@@ -63,7 +64,8 @@ func TestClient_CreateMessage(t *testing.T) {
 				Content: "Hello, how are you?",
 			},
 		},
-		MaxTokens: 100,
+		Temperature: &temperature,
+		MaxTokens:   100,
 	}
 
 	resp, err := client.CreateMessage(ctx, req)
@@ -87,6 +89,7 @@ func TestClient_CreateMessageStream(t *testing.T) {
 	require.NoError(t, err)
 
 	var chunks []string
+	temperature := 0.0
 	req := &MessageRequest{
 		Model: "claude-3-opus-20240229",
 		Messages: []ChatMessage{
@@ -95,8 +98,9 @@ func TestClient_CreateMessageStream(t *testing.T) {
 				Content: "Count from 1 to 5",
 			},
 		},
-		MaxTokens: 100,
-		Stream:    true,
+		Temperature: &temperature,
+		MaxTokens:   100,
+		Stream:      true,
 		StreamingFunc: func(ctx context.Context, chunk []byte) error {
 			chunks = append(chunks, string(chunk))
 			return nil
@@ -126,6 +130,7 @@ func TestClient_WithAnthropicBetaHeader(t *testing.T) {
 	)
 	require.NoError(t, err)
 
+	temperature := 0.0
 	req := &MessageRequest{
 		Model: "claude-3-opus-20240229",
 		Messages: []ChatMessage{
@@ -134,7 +139,8 @@ func TestClient_WithAnthropicBetaHeader(t *testing.T) {
 				Content: "What's the weather like?",
 			},
 		},
-		MaxTokens: 100,
+		Temperature: &temperature,
+		MaxTokens:   100,
 		Tools: []Tool{
 			{
 				Name:        "get_weather",

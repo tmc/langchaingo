@@ -37,7 +37,8 @@ type chainCallOption struct {
 
 	// StreamingFunc is a function to be called for each chunk of a streaming response.
 	// Return an error to stop streaming early.
-	StreamingFunc func(ctx context.Context, chunk []byte) error
+	StreamingFunc    func(ctx context.Context, chunk []byte) error
+	streamingFuncSet bool
 
 	// TopK is the number of tokens to consider for top-k sampling in an LLM call.
 	TopK    int
@@ -99,6 +100,7 @@ func WithTemperature(temperature float64) ChainCallOption {
 func WithStreamingFunc(streamingFunc func(ctx context.Context, chunk []byte) error) ChainCallOption {
 	return func(o *chainCallOption) {
 		o.StreamingFunc = streamingFunc
+		o.streamingFuncSet = true
 	}
 }
 
@@ -188,6 +190,7 @@ func GetLLMCallOptions(options ...ChainCallOption) []llms.CallOption { //nolint:
 			opts.CallbackHandler.HandleStreamingFunc(ctx, chunk)
 			return nil
 		}
+		opts.streamingFuncSet = true
 	}
 
 	var chainCallOption []llms.CallOption
@@ -225,7 +228,9 @@ func GetLLMCallOptions(options ...ChainCallOption) []llms.CallOption { //nolint:
 	if opts.safetyConfigSet {
 		chainCallOption = append(chainCallOption, llms.WithSafetyConfig(opts.SafetyConfig))
 	}
-	chainCallOption = append(chainCallOption, llms.WithStreamingFunc(opts.StreamingFunc))
+	if opts.streamingFuncSet {
+		chainCallOption = append(chainCallOption, llms.WithStreamingFunc(opts.StreamingFunc))
+	}
 
 	return chainCallOption
 }

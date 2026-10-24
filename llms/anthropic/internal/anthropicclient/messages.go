@@ -34,27 +34,45 @@ type ChatMessage struct {
 }
 
 type messagePayload struct {
-	Model       string        `json:"model"`
-	Messages    []ChatMessage `json:"messages"`
-	System      string        `json:"system,omitempty"`
-	MaxTokens   int           `json:"max_tokens,omitempty"`
-	StopWords   []string      `json:"stop_sequences,omitempty"`
-	Stream      bool          `json:"stream,omitempty"`
-	Temperature float64       `json:"temperature"`
-	Tools       []Tool        `json:"tools,omitempty"`
-	TopP        float64       `json:"top_p,omitempty"`
+	Model    string        `json:"model"`
+	Messages []ChatMessage `json:"messages"`
+	// System is either a plain string or, when any system block carries
+	// cache control, a []TextContent block list.
+	System      any      `json:"system,omitempty"`
+	MaxTokens   int      `json:"max_tokens,omitempty"`
+	StopWords   []string `json:"stop_sequences,omitempty"`
+	Stream      bool     `json:"stream,omitempty"`
+	Temperature *float64 `json:"temperature,omitempty"`
+	Tools       []Tool   `json:"tools,omitempty"`
+	TopP        float64  `json:"top_p,omitempty"`
 
-	// Extended thinking parameters (Claude 3.7+)
+	// Thinking configures extended or adaptive thinking (Claude 3.7+).
 	Thinking *ThinkingConfig `json:"thinking,omitempty"`
 
-	StreamingFunc          func(ctx context.Context, chunk []byte) error                      `json:"-"`
+	// OutputConfig carries output controls such as the effort level.
+	OutputConfig *OutputConfig `json:"output_config,omitempty"`
+
+	StreamingFunc          func(ctx context.Context, chunk []byte) error                 `json:"-"`
 	StreamingReasoningFunc func(ctx context.Context, reasoningChunk, chunk []byte) error `json:"-"`
 }
 
-// ThinkingConfig represents the thinking configuration for Claude 3.7+
+// ThinkingConfig represents the thinking configuration for Claude 3.7+.
+// Type "enabled" requires BudgetTokens and is rejected by models that only
+// support adaptive thinking (Claude Fable 5, Claude Opus 4.7+); for those
+// models use type "adaptive" with no budget.
 type ThinkingConfig struct {
-	Type         string `json:"type"` // "enabled" or "disabled"
+	Type         string `json:"type"` // "enabled", "adaptive", or "disabled"
 	BudgetTokens int    `json:"budget_tokens,omitempty"`
+	// Display controls how thinking text is returned with adaptive
+	// thinking: "summarized" or "omitted". Empty means the API default.
+	Display string `json:"display,omitempty"`
+}
+
+// OutputConfig represents output controls for models that support them.
+type OutputConfig struct {
+	// Effort is the reasoning effort level: "low", "medium", "high",
+	// "xhigh", or "max".
+	Effort string `json:"effort,omitempty"`
 }
 
 // Tool used for the request message payload.
@@ -67,6 +85,8 @@ type Tool struct {
 // CacheControl represents Anthropic's prompt caching configuration.
 type CacheControl struct {
 	Type string `json:"type"`
+	// TTL is the cache lifetime, "5m" (the default) or "1h".
+	TTL string `json:"ttl,omitempty"`
 }
 
 // Content can be TextContent or ToolUseContent depending on the type.
@@ -136,6 +156,18 @@ func (tc ThinkingContent) GetType() string {
 	return tc.Type
 }
 
+// RedactedThinkingContent represents thinking content that was redacted for
+// safety reasons. Data is encrypted; pass it back verbatim in multi-turn
+// conversations.
+type RedactedThinkingContent struct {
+	Type string `json:"type"`
+	Data string `json:"data"`
+}
+
+func (rtc RedactedThinkingContent) GetType() string {
+	return rtc.Type
+}
+
 type MessageResponsePayload struct {
 	Content      []Content `json:"content"`
 	ID           string    `json:"id"`
@@ -191,6 +223,12 @@ func (m *MessageResponsePayload) UnmarshalJSON(data []byte) error {
 				return err
 			}
 			m.Content = append(m.Content, tc)
+		case "redacted_thinking":
+			rtc := &RedactedThinkingContent{}
+			if err := json.Unmarshal(raw, rtc); err != nil {
+				return err
+			}
+			m.Content = append(m.Content, rtc)
 		default:
 			return fmt.Errorf("unknown content type: %s\n%v", typeStruct.Type, string(raw))
 		}
@@ -203,6 +241,12 @@ func (c *Client) setMessageDefaults(payload *messagePayload) {
 	// Set defaults
 	if payload.MaxTokens == 0 {
 		payload.MaxTokens = 2048
+	}
+
+	// An empty system string must be omitted from the request; omitempty
+	// does not apply to a non-nil interface holding "".
+	if s, ok := payload.System.(string); ok && s == "" {
+		payload.System = nil
 	}
 
 	if len(payload.StopWords) == 0 {
@@ -218,7 +262,7 @@ func (c *Client) setMessageDefaults(payload *messagePayload) {
 		payload.Model = c.Model
 	// Fallback: use the default model
 	default:
-		payload.Model = defaultModel
+		payload.Model = DefaultModel
 	}
 	if payload.StreamingFunc != nil || payload.StreamingReasoningFunc != nil {
 		payload.Stream = true
@@ -243,7 +287,7 @@ func (c *Client) createMessage(ctx context.Context, payload *messagePayload, bet
 		return nil, c.decodeError(resp)
 	}
 
-	if payload.StreamingFunc != nil {
+	if payload.StreamingFunc != nil || payload.StreamingReasoningFunc != nil {
 		return parseStreamingMessageResponse(ctx, resp, payload)
 	}
 
@@ -326,7 +370,7 @@ func processStreamEvent(ctx context.Context, event map[string]interface{}, paylo
 	case "ping":
 		// Nothing to do here
 	case "error":
-		eventChan <- MessageEvent{Response: nil, Err: fmt.Errorf("received error event: %v", event)}
+		return response, fmt.Errorf("received error event: %v", event)
 	default:
 		log.Printf("unknown event type: %s - %v", eventType, event)
 	}
@@ -406,6 +450,11 @@ func handleContentBlockStartEvent(event map[string]interface{}, response Message
 		case "thinking":
 			response.Content = append(response.Content, &ThinkingContent{
 				Type: eventType,
+			})
+		case "redacted_thinking":
+			response.Content = append(response.Content, &RedactedThinkingContent{
+				Type: eventType,
+				Data: getString(contentBlock, "data"),
 			})
 		default:
 			return response, fmt.Errorf("%w: unknown content block type: %s", ErrInvalidDeltaField, eventType)

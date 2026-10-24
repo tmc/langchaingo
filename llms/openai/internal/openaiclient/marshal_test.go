@@ -134,6 +134,21 @@ func TestChatRequest_TemperatureMarshalJSON(t *testing.T) {
 			},
 			wantTemperature: false,
 		},
+		{
+			name:            "search preview model omits temperature",
+			request:         ChatRequest{Model: "gpt-4o-search-preview", Temperature: 0.7},
+			wantTemperature: false,
+		},
+		{
+			name:            "dated search preview model omits temperature",
+			request:         ChatRequest{Model: "gpt-4o-search-preview-2025-03-11", Temperature: 0.7},
+			wantTemperature: false,
+		},
+		{
+			name:            "dated mini search preview model omits temperature",
+			request:         ChatRequest{Model: "gpt-4o-mini-search-preview-2025-03-11", Temperature: 0.7},
+			wantTemperature: false,
+		},
 	}
 
 	for _, tt := range tests {

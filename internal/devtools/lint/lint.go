@@ -9,6 +9,7 @@ import (
 	"go/ast"
 	"go/format"
 	"go/parser"
+	"go/scanner"
 	"go/token"
 	"io/fs"
 	"log"
@@ -1310,12 +1311,54 @@ func fixHttprrPatternsInFileAST(filePath string, issues []HttprrIssue) error {
 		return fmt.Errorf("failed to format modified AST: %w", err)
 	}
 
+	// Removing a statement from the start of a block (e.g. t.Parallel())
+	// leaves format.Node emitting a stray blank line right after the opening
+	// brace. gofmt tolerates it but it is noise; collapse it.
+	out := removeBlankLineAfterBrace(buf.Bytes())
+
 	// Write the fixed content back to the file
-	if err := os.WriteFile(filePath, buf.Bytes(), 0644); err != nil {
+	if err := os.WriteFile(filePath, out, 0644); err != nil {
 		return fmt.Errorf("failed to write fixed file: %w", err)
 	}
 
 	return nil
+}
+
+// removeBlankLineAfterBrace drops a single blank line that immediately
+// follows a line ending in an opening brace. This cleans up the residue left
+// when a statement is removed from the start of a block during autofix.
+// Lines inside raw string literals and block comments are left untouched.
+func removeBlankLineAfterBrace(src []byte) []byte {
+	// Record the lines that lie inside a multi-line token.
+	inToken := make(map[int]bool)
+	fset := token.NewFileSet()
+	file := fset.AddFile("", fset.Base(), len(src))
+	var s scanner.Scanner
+	s.Init(file, src, nil, scanner.ScanComments)
+	for {
+		pos, tok, lit := s.Scan()
+		if tok == token.EOF {
+			break
+		}
+		if tok != token.STRING && tok != token.COMMENT {
+			continue
+		}
+		start := file.Line(pos)
+		for l := start + 1; l <= start+strings.Count(lit, "\n"); l++ {
+			inToken[l] = true
+		}
+	}
+
+	lines := strings.Split(string(src), "\n")
+	out := make([]string, 0, len(lines))
+	for i, line := range lines {
+		if strings.TrimSpace(line) == "" && i > 0 && !inToken[i+1] &&
+			strings.HasSuffix(strings.TrimSpace(lines[i-1]), "{") {
+			continue
+		}
+		out = append(out, line)
+	}
+	return []byte(strings.Join(out, "\n"))
 }
 
 // HttprrFixer implements ast.Visitor to fix httprr patterns.

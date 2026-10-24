@@ -4,12 +4,37 @@ package googleai
 
 import (
 	"context"
+	"net/http"
 	"strings"
 
 	"github.com/google/generative-ai-go/genai"
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
+	"google.golang.org/api/option"
 )
+
+type apiKeyTransport struct {
+	base http.RoundTripper
+	key  string
+}
+
+func (t apiKeyTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	clone := req.Clone(req.Context())
+	q := clone.URL.Query()
+	q.Set("key", t.key)
+	clone.URL.RawQuery = q.Encode()
+	return t.base.RoundTrip(clone)
+}
+
+func withAPIKey(client *http.Client, key string) *http.Client {
+	clone := *client
+	base := clone.Transport
+	if base == nil {
+		base = http.DefaultTransport
+	}
+	clone.Transport = apiKeyTransport{base: base, key: key}
+	return &clone
+}
 
 // GoogleAI is a type that represents a Google AI API client.
 type GoogleAI struct {
@@ -31,6 +56,10 @@ func New(ctx context.Context, opts ...Option) (*GoogleAI, error) {
 		opt(&clientOptions)
 	}
 	clientOptions.EnsureAuthPresent()
+	if clientOptions.auth == authAPIKey && clientOptions.apiKey != "" && clientOptions.httpClient != nil {
+		clientOptions.ClientOptions = append(clientOptions.ClientOptions,
+			option.WithHTTPClient(withAPIKey(clientOptions.httpClient, clientOptions.apiKey)))
+	}
 
 	gi := &GoogleAI{
 		opts:  clientOptions,
@@ -65,8 +94,8 @@ func (g *GoogleAI) SupportsReasoning() bool {
 		model = g.opts.DefaultModel
 	}
 
-	// Gemini 2.0 models support reasoning/thinking capabilities
-	if strings.Contains(model, "gemini-2.0") {
+	// Gemini 2.0 and 2.5 models support reasoning/thinking capabilities
+	if strings.Contains(model, "gemini-2.0") || strings.Contains(model, "gemini-2.5") {
 		return true
 	}
 

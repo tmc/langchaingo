@@ -103,9 +103,9 @@ func (r ChatRequest) MarshalJSON() ([]byte, error) {
 		Alias: (*Alias)(&r),
 	}
 
-	// Handle temperature for reasoning models
-	if isReasoningModel(r.Model) {
-		// Reasoning models (GPT-5, o1, o3) only accept temperature=1 (default)
+	// Handle temperature for reasoning and search-preview models
+	if isReasoningModel(r.Model) || isSearchPreviewModel(r.Model) {
+		// These models reject non-default temperature values.
 		// Omit temperature field to let API use its default value
 		aux.Temperature = nil
 	} else {
@@ -128,6 +128,12 @@ func (r ChatRequest) MarshalJSON() ([]byte, error) {
 	}
 
 	return json.Marshal(&aux)
+}
+
+// isSearchPreviewModel reports whether model is a search-preview model,
+// including dated snapshots such as gpt-4o-search-preview-2025-03-11.
+func isSearchPreviewModel(model string) bool {
+	return strings.Contains(model, "-search-preview")
 }
 
 // isReasoningModel returns true if the model is a reasoning model that has temperature constraints.

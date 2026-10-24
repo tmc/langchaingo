@@ -1,8 +1,27 @@
 package bedrockclient
 
 import (
+	"encoding/json"
 	"testing"
 )
+
+func TestNovaContentBlocksRemainOneChoice(t *testing.T) {
+	output, err := parseNovaResponseBody([]byte(`{
+		"output":{"message":{"content":[{"text":"hello "},{"text":"world"}]}},
+		"stopReason":"end_turn","usage":{"inputTokens":2,"outputTokens":3}
+	}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	res, err := novaContentResponse(output)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(res.Choices) != 1 || res.Choices[0].Content != "hello world" {
+		got, _ := json.Marshal(res)
+		t.Fatalf("response = %s, want one choice containing hello world", got)
+	}
+}
 
 func TestGetProvider_NovaModels(t *testing.T) {
 	t.Parallel()
