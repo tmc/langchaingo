@@ -32,6 +32,9 @@ func (r Retriever) GetRelevantDocuments(ctx context.Context, query string) ([]sc
 
 	docs, err := r.v.SimilaritySearch(ctx, query, r.numDocs, r.options...)
 	if err != nil {
+		if errorHandler, ok := r.CallbacksHandler.(callbacks.RetrieverErrorHandler); ok {
+			errorHandler.HandleRetrieverError(ctx, err)
+		}
 		return nil, err
 	}
 
