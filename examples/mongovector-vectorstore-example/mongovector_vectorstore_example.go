@@ -40,7 +40,7 @@ func main() {
 
 	client, err := mongo.Connect(options.Client().ApplyURI(uri))
 	if err != nil {
-		log.Fatalf("failed to connect to server: %w", err)
+		log.Fatalf("failed to connect to server: %v", err)
 	}
 
 	defer func() {
@@ -72,7 +72,7 @@ func main() {
 		// Create the vectorstore collection
 		err = client.Database(databaseName).CreateCollection(context.Background(), collectionName)
 		if err != nil {
-			log.Fatalf("failed to create vector store collection: %w", err)
+			log.Fatalf("failed to create vector store collection: %v", err)
 		}
 
 		_, err = createVectorSearchIndex(context.Background(), coll, indexDP1536, fields...)
@@ -90,7 +90,7 @@ func main() {
 
 	embedder, err := embeddings.NewEmbedder(llm)
 	if err != nil {
-		log.Fatal("failed to create an embedder: %v", err)
+		log.Fatalf("failed to create an embedder: %v", err)
 	}
 
 	// A Store is a wrapper for mongo.Collection, since adding and searching
@@ -150,7 +150,7 @@ func main() {
 		},
 	})
 	if err != nil {
-		log.Fatal("error adding documents: %v", err)
+		log.Fatalf("error adding documents: %v", err)
 	}
 
 	// Search for similar documents.

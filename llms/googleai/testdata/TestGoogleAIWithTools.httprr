@@ -1,25 +1,26 @@
 httprr trace v1
-1013 1473
-POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?%24alt=json%3Benum-encoding%3Dint HTTP/1.1
+1030 1534
+POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?%24alt=json%3Benum-encoding%3Dint&key=test-api-key HTTP/1.1
 Host: generativelanguage.googleapis.com
 User-Agent: langchaingo-httprr
 Content-Length: 594
 Content-Type: application/json
 x-goog-api-client: gl-go/X.XX.X gccl/vX.XX.X genai-go/X.XX.X gapic/X.X.X gax/X.XX.X rest/UNKNOWN
-x-goog-request-params: model=models%2Fgemini-2.0-flash
+x-goog-request-params: model=models%2Fgemini-2.5-flash
 
-{"model":"models/gemini-2.0-flash","contents":[{"parts":[{"text":"What's the weather in New York?"}],"role":"user"}],"tools":[{"functionDeclarations":[{"name":"getWeather","description":"Get the weather for a location","parameters":{"type":6,"properties":{"location":{"type":1,"description":"The location to get weather for"}},"required":["location"]}}]}],"safetySettings":[{"category":10,"threshold":3},{"category":7,"threshold":3},{"category":8,"threshold":3},{"category":9,"threshold":3}],"generationConfig":{"candidateCount":1,"maxOutputTokens":2048,"temperature":0.5,"topP":0.95,"topK":3}}HTTP/2.0 200 OK
-Content-Length: 1094
+{"model":"models/gemini-2.5-flash","contents":[{"parts":[{"text":"What's the weather in New York?"}],"role":"user"}],"tools":[{"functionDeclarations":[{"name":"getWeather","description":"Get the weather for a location","parameters":{"type":6,"properties":{"location":{"type":1,"description":"The location to get weather for"}},"required":["location"]}}]}],"safetySettings":[{"category":10,"threshold":3},{"category":7,"threshold":3},{"category":8,"threshold":3},{"category":9,"threshold":3}],"generationConfig":{"candidateCount":1,"maxOutputTokens":2048,"temperature":0.5,"topP":0.95,"topK":3}}HTTP/2.0 200 OK
+Content-Length: 1122
 Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
 Content-Type: application/json; charset=UTF-8
-Date: Mon, 18 Aug 2025 12:40:57 GMT
+Date: Sat, 03 Oct 2026 01:41:48 GMT
 Server: scaffolding on HTTPServer2
-Server-Timing: gfet4t7; dur=602
+Server-Timing: gfet4t7; dur=760
 Vary: Origin
 Vary: X-Origin
 Vary: Referer
 X-Content-Type-Options: nosniff
 X-Frame-Options: SAMEORIGIN
+X-Gemini-Service-Tier: standard
 X-Xss-Protection: 0
 
 {
@@ -33,50 +34,30 @@ X-Xss-Protection: 0
               "args": {
                 "location": "New York"
               }
-            }
+            },
+            "thoughtSignature": "CvgBAWkUfROWB9yWUu0U2N8zNEJdoTQ2iS+6Qbmk5h2p4T6m9aw9oaVnSt0rCJ4G8q46LCO8EMxKUyKBn2BVEFIXiDytWOWmKAJALSDp+flVr5Uyv8FF/ndi2NvN+SbtCPPKzQNT8efso/zgDI7eCQGJk5MfH0fVtNXMHaio+QeGAwr9u1YlK8XZ8ZSeG9uT49wJjOjWyQkvI/4anEA+gG876iCXWak/uENO5p5BZGCm8xYiv9iMXJWsFN9L/uUBDCFHbN7Rx9dFZP9tQczhSTHMIc5ptcWhOJzxZj4ZwKRumcSmR/h2/yTsc5YTQjMKcjczv/0ZZ2iqDpA="
           }
         ],
         "role": "model"
       },
       "finishReason": 1,
-      "safetyRatings": [
-        {
-          "category": 8,
-          "probability": 1
-        },
-        {
-          "category": 10,
-          "probability": 1
-        },
-        {
-          "category": 7,
-          "probability": 1
-        },
-        {
-          "category": 9,
-          "probability": 1
-        }
-      ],
-      "avgLogprobs": -6.3036306528374553e-05
+      "index": 0,
+      "finishMessage": "Model generated function call(s)."
     }
   ],
   "usageMetadata": {
-    "promptTokenCount": 27,
-    "candidatesTokenCount": 5,
-    "totalTokenCount": 32,
+    "promptTokenCount": 51,
+    "candidatesTokenCount": 15,
+    "totalTokenCount": 116,
     "promptTokensDetails": [
       {
         "modality": 1,
-        "tokenCount": 27
+        "tokenCount": 51
       }
     ],
-    "candidatesTokensDetails": [
-      {
-        "modality": 1,
-        "tokenCount": 5
-      }
-    ]
+    "thoughtsTokenCount": 50,
+    "serviceTier": 1
   },
-  "modelVersion": "gemini-2.0-flash",
-  "responseId": "WB-jaP3dOIP7nsEPuraKqAc"
+  "modelVersion": "gemini-2.5-flash",
+  "responseId": "W13AarWAKYib_uMPz9C4YA"
 }

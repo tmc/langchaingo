@@ -1,12 +1,17 @@
 package vertex
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
+	"io"
+	"net/http"
 	"strings"
 	"testing"
 
 	"cloud.google.com/go/vertexai/genai"
 	"github.com/tmc/langchaingo/llms"
+	"google.golang.org/api/option"
 )
 
 func TestConvertToolSchemaType(t *testing.T) {
@@ -677,10 +682,56 @@ func TestConstants(t *testing.T) {
 	}
 }
 
+type roundTripFunc func(*http.Request) (*http.Response, error)
+
+func (f roundTripFunc) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
+
 func TestConvertAndStreamFromIterator(t *testing.T) {
-	// Skip actual implementation tests since we can't create a real iterator
-	// These tests would need integration with the actual genai package
-	t.Skip("Skipping iterator tests - requires real genai.GenerateContentResponseIterator")
+	t.Parallel()
+	tests := []struct {
+		name    string
+		body    string
+		want    string
+		wantErr error
+	}{
+		{"text", `[{"candidates":[{"content":{"role":"model","parts":[{"text":"one"}]},"finishReason":"STOP"}]}]`, "one", nil},
+		// Gemini can end a stream without sending any response, for example
+		// when thinking uses the whole output token budget.
+		{"empty", `[]`, "", ErrNoContentInResponse},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			transport := roundTripFunc(func(req *http.Request) (*http.Response, error) {
+				return &http.Response{StatusCode: http.StatusOK, Header: http.Header{"Content-Type": {"application/json"}}, Body: io.NopCloser(strings.NewReader(tt.body)), Request: req}, nil
+			})
+			ctx := context.Background()
+			client, err := genai.NewClient(ctx, "test-project", "us-central1", genai.WithREST(), option.WithHTTPClient(&http.Client{Transport: transport}))
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer client.Close()
+			iter := client.GenerativeModel("test-model").GenerateContentStream(ctx, genai.Text("hi"))
+			var streamed strings.Builder
+			opts := &llms.CallOptions{StreamingFunc: func(_ context.Context, chunk []byte) error {
+				streamed.Write(chunk)
+				return nil
+			}}
+			resp, err := convertAndStreamFromIterator(ctx, iter, opts)
+			if !errors.Is(err, tt.wantErr) {
+				t.Fatalf("err=%v, want %v", err, tt.wantErr)
+			}
+			if err != nil {
+				return
+			}
+			if got := resp.Choices[0].Content; got != tt.want {
+				t.Errorf("content=%q, want %q", got, tt.want)
+			}
+			if got := streamed.String(); got != tt.want {
+				t.Errorf("streamed=%q, want %q", got, tt.want)
+			}
+		})
+	}
 }
 
 // Test that Vertex implements llms.Model interface

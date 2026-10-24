@@ -2,6 +2,7 @@ package openai
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"regexp"
 	"strings"
@@ -59,7 +60,27 @@ var modelCapabilities = []ModelCapability{
 		SupportsThinking: false,
 		SupportsCaching:  false,
 	},
+	// Later reasoning models (o4-mini, dated o-series snapshots, the
+	// GPT-5 series) accept system messages and reasoning_effort.
+	{
+		Pattern:          `(?i)^(o[0-9]+(-.+)?|gpt-5.*)$`,
+		SupportsSystem:   true,
+		SupportsThinking: true,
+		SupportsCaching:  false,
+	},
 	// Future models can be added here
+}
+
+// clampReasoningEffort maps an effort level to OpenAI's
+// reasoning_effort vocabulary (none, minimal, low, medium, high,
+// xhigh). Only "max" needs mapping: it is an Anthropic level with no
+// OpenAI equivalent, so it clamps to the highest OpenAI accepts. Every
+// other level passes through unchanged.
+func clampReasoningEffort(effort llms.ThinkingEffort) string {
+	if effort == llms.ThinkingEffortMax {
+		return string(llms.ThinkingEffortXHigh)
+	}
+	return string(effort)
 }
 
 // getModelCapabilities returns the capabilities for a given model
@@ -210,40 +231,14 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		}
 	}
 
-	// Extract reasoning effort for thinking models
-	// Note: OpenAI o1/o3 models have built-in reasoning and don't support reasoning_effort parameter
-	// This is kept for future models that might support it (like GPT-5)
+	// An explicit thinking effort maps to the reasoning_effort
+	// parameter on models that accept it; other models reject the
+	// parameter, so it is omitted. Levels beyond OpenAI's vocabulary
+	// clamp to the highest it accepts (see clampReasoningEffort).
 	var reasoningEffort string
-	// Commented out for now since current o1 models don't support this parameter
-	/*
-		if opts.Metadata != nil {
-			if config, ok := opts.Metadata["thinking_config"].(*llms.ThinkingConfig); ok {
-				// Map thinking mode to reasoning effort
-				switch config.Mode {
-				case llms.ThinkingModeLow:
-					reasoningEffort = "low"
-				case llms.ThinkingModeMedium:
-					reasoningEffort = "medium"
-				case llms.ThinkingModeHigh:
-					reasoningEffort = "high"
-				}
-
-				// Handle streaming for thinking
-				if config.StreamThinking && opts.StreamingReasoningFunc == nil && opts.StreamingFunc != nil {
-					// Set up default reasoning streaming if requested but not provided
-					// Wrap the single-param streaming func into a reasoning func
-					opts.StreamingReasoningFunc = func(ctx context.Context, reasoningChunk []byte, chunk []byte) error {
-						// For default behavior, we might want to stream both or just the main content
-						// Here we'll just stream the main content chunk
-						if len(chunk) > 0 {
-							return opts.StreamingFunc(ctx, chunk)
-						}
-						return nil
-					}
-				}
-			}
-		}
-	*/
+	if config, ok := opts.Metadata["thinking_config"].(*llms.ThinkingConfig); ok && modelCaps.SupportsThinking {
+		reasoningEffort = clampReasoningEffort(config.Effort)
+	}
 
 	// Filter out internal metadata that shouldn't be sent to API
 	apiMetadata := make(map[string]any)
@@ -301,12 +296,16 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 
 	// since req.Functions is deprecated, we need to use the new Tools API.
 	for _, fn := range opts.Functions {
+		parameters, err := normalizeFunctionParameters(fn.Parameters)
+		if err != nil {
+			return nil, fmt.Errorf("failed to convert function parameters: %w", err)
+		}
 		req.Tools = append(req.Tools, openaiclient.Tool{
 			Type: "function",
 			Function: openaiclient.FunctionDefinition{
 				Name:        fn.Name,
 				Description: fn.Description,
-				Parameters:  fn.Parameters,
+				Parameters:  parameters,
 				Strict:      fn.Strict,
 			},
 		})
@@ -467,16 +466,46 @@ func toolFromTool(t llms.Tool) (openaiclient.Tool, error) {
 	}
 	switch t.Type {
 	case string(openaiclient.ToolTypeFunction):
+		parameters, err := normalizeFunctionParameters(t.Function.Parameters)
+		if err != nil {
+			return openaiclient.Tool{}, fmt.Errorf("invalid function parameters: %w", err)
+		}
 		tool.Function = openaiclient.FunctionDefinition{
 			Name:        t.Function.Name,
 			Description: t.Function.Description,
-			Parameters:  t.Function.Parameters,
+			Parameters:  parameters,
 			Strict:      t.Function.Strict,
 		}
 	default:
 		return openaiclient.Tool{}, fmt.Errorf("tool type %v not supported", t.Type)
 	}
 	return tool, nil
+}
+
+func normalizeFunctionParameters(parameters any) (any, error) {
+	data, err := json.Marshal(parameters)
+	if err != nil {
+		return nil, err
+	}
+
+	var schema map[string]json.RawMessage
+	if err := json.Unmarshal(data, &schema); err != nil {
+		return parameters, nil
+	}
+	var typ string
+	if err := json.Unmarshal(schema["type"], &typ); err != nil || typ != "object" {
+		return parameters, nil
+	}
+	if _, ok := schema["properties"]; ok {
+		return parameters, nil
+	}
+
+	schema["properties"] = json.RawMessage(`{}`)
+	data, err = json.Marshal(schema)
+	if err != nil {
+		return nil, err
+	}
+	return json.RawMessage(data), nil
 }
 
 // toolCallsFromToolCalls converts a slice of llms.ToolCall to a slice of ToolCall.

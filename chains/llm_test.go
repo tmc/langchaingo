@@ -121,13 +121,14 @@ func TestLLMChainWithGoogleAI(t *testing.T) {
 	// Create httprr with API key transport wrapper
 	// This is necessary because the Google API library doesn't add the API key
 	// when a custom HTTP client is provided via WithHTTPClient
+	// Replay sends the placeholder key that recording scrubs the real one to.
 	apiKey := os.Getenv("GOOGLE_API_KEY")
-	transport := httputil.DefaultTransport
-	if apiKey != "" {
-		transport = &httputil.ApiKeyTransport{
-			Transport: transport,
-			APIKey:    apiKey,
-		}
+	if apiKey == "" {
+		apiKey = "test-api-key"
+	}
+	transport := &httputil.ApiKeyTransport{
+		Transport: httputil.DefaultTransport,
+		APIKey:    apiKey,
 	}
 
 	rr := httprr.OpenForTest(t, transport)
@@ -142,9 +143,9 @@ func TestLLMChainWithGoogleAI(t *testing.T) {
 		return nil
 	})
 
-	// Configure client with httprr
-	var opts []googleai.Option
-	opts = append(opts, googleai.WithRest(), googleai.WithHTTPClient(rr.Client()))
+	// Configure client with httprr. Passing the key keeps the client from
+	// looking for application default credentials during replay.
+	opts := []googleai.Option{googleai.WithRest(), googleai.WithHTTPClient(rr.Client()), googleai.WithAPIKey(apiKey)}
 
 	model, err := googleai.New(ctx, opts...)
 	require.NoError(t, err)

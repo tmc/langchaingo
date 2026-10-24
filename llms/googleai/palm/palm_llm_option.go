@@ -63,15 +63,21 @@ func WithAPIKey(apiKey string) Option {
 // WithCredentialsFile returns a ClientOption that authenticates
 // API calls with the given service account or refresh token JSON
 // credentials file.
+//
+// The credentials must come from a trusted source; see
+// [option.WithCredentialsJSON].
 func WithCredentialsFile(path string) Option {
-	return convertStringOption(option.WithCredentialsFile)(path)
+	return convertStringOption(option.WithCredentialsFile)(path) //nolint:staticcheck // documented: trusted credentials only
 }
 
 // WithCredentialsJSON returns a ClientOption that authenticates
 // API calls with the given service account or refresh token JSON
 // credentials.
+//
+// The credentials must come from a trusted source; see
+// [option.WithCredentialsJSON].
 func WithCredentialsJSON(json []byte) Option {
-	return convertByteArrayOption(option.WithCredentialsJSON)(json)
+	return convertByteArrayOption(option.WithCredentialsJSON)(json) //nolint:staticcheck // documented: trusted credentials only
 }
 
 func WithGRPCDialOption(opt grpc.DialOption) Option {

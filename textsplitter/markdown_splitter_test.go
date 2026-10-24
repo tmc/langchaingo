@@ -584,7 +584,10 @@ func TestMarkdownHeaderTextSplitter_SplitInline(t *testing.T) {
 func TestMarkdownHeaderTextSplitter_LenFunc(t *testing.T) {
 	t.Parallel()
 
-	tokenEncoder, _ := tiktoken.GetEncoding("cl100k_base")
+	tokenEncoder, err := tiktoken.GetEncoding("cl100k_base")
+	if err != nil {
+		t.Skipf("tokenizer unavailable: %v", err)
+	}
 
 	sampleText := "The quick brown fox jumped over the lazy dog."
 	tokensPerChunk := len(tokenEncoder.Encode(sampleText, nil, nil))

@@ -15,7 +15,12 @@ import (
 const (
 	DefaultBaseURL = "https://api.anthropic.com/v1"
 
-	defaultModel = "claude-3-5-sonnet-20240620"
+	// DefaultModel is used when neither the client nor the call
+	// specifies a model. It must be an undated alias the provider
+	// commits to maintaining; a dated snapshot eventually retires and
+	// breaks every caller that relies on the default (#1431).
+	// reviewed: 2026-07-06
+	DefaultModel = "claude-sonnet-4-6"
 )
 
 // ErrEmptyResponse is returned when the Anthropic API returns an empty response.
@@ -127,22 +132,30 @@ func (c *Client) CreateCompletion(ctx context.Context, r *CompletionRequest) (*C
 }
 
 type MessageRequest struct {
-	Model       string        `json:"model"`
-	Messages    []ChatMessage `json:"messages"`
-	System      string        `json:"system,omitempty"`
-	Temperature float64       `json:"temperature"`
-	MaxTokens   int           `json:"max_tokens,omitempty"`
-	TopP        float64       `json:"top_p,omitempty"`
-	Tools       []Tool        `json:"tools,omitempty"`
-	StopWords   []string      `json:"stop_sequences,omitempty"`
-	Stream      bool          `json:"stream,omitempty"`
+	Model    string        `json:"model"`
+	Messages []ChatMessage `json:"messages"`
+	// System is the system prompt: a plain string, or a []TextContent
+	// block list when any block carries cache control. An empty string
+	// is omitted from the request.
+	System any `json:"system,omitempty"`
+	// Temperature is omitted from the request when nil. Models such as
+	// Claude Fable 5 and Claude Opus 4.7+ reject the temperature parameter.
+	Temperature *float64 `json:"temperature,omitempty"`
+	MaxTokens   int      `json:"max_tokens,omitempty"`
+	TopP        float64  `json:"top_p,omitempty"`
+	Tools       []Tool   `json:"tools,omitempty"`
+	StopWords   []string `json:"stop_sequences,omitempty"`
+	Stream      bool     `json:"stream,omitempty"`
 
 	// Extended thinking parameters (Claude 3.7+)
 	Thinking *ThinkingConfig `json:"thinking,omitempty"`
 
+	// OutputConfig carries output controls such as the effort level.
+	OutputConfig *OutputConfig `json:"output_config,omitempty"`
+
 	// BetaHeaders are additional beta feature headers to include
 	BetaHeaders            []string                                                      `json:"-"`
-	StreamingFunc          func(ctx context.Context, chunk []byte) error                `json:"-"`
+	StreamingFunc          func(ctx context.Context, chunk []byte) error                 `json:"-"`
 	StreamingReasoningFunc func(ctx context.Context, reasoningChunk, chunk []byte) error `json:"-"`
 }
 
@@ -159,6 +172,7 @@ func (c *Client) CreateMessage(ctx context.Context, r *MessageRequest) (*Message
 		Tools:                  r.Tools,
 		Stream:                 r.Stream,
 		Thinking:               r.Thinking,
+		OutputConfig:           r.OutputConfig,
 		StreamingFunc:          r.StreamingFunc,
 		StreamingReasoningFunc: r.StreamingReasoningFunc,
 	}, r.BetaHeaders)

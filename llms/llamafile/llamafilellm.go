@@ -167,9 +167,7 @@ func makeLlamaOptionsFromOptions(input *llamafileclient.ChatRequest, opts llms.C
 	streamValue := opts.StreamingFunc != nil
 
 	input.FrequencyPenalty = opts.FrequencyPenalty // Assuming FrequencyPenalty correlates to FrequencyPenalty; adjust if necessary
-	input.MinP = float64(opts.MinLength)           // Assuming there's a direct correlation; adjust if necessary
 	input.Model = opts.Model                       // Assuming Model correlates to Model; adjust if necessary
-	input.NCtx = opts.N                            // Assuming N corresponds to NCtx; if not, adjust.
 	input.NPredict = opts.MaxTokens                // Assuming MaxTokens correlates to NPredict;
 	input.PresencePenalty = opts.PresencePenalty   // Assuming PresencePenalty correlates to PresencePenalty;
 	input.RepeatPenalty = opts.RepetitionPenalty   // Assuming RepetitionPenalty correlates to RepeatPenalty;

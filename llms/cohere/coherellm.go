@@ -15,6 +15,10 @@ var (
 	ErrMissingToken  = errors.New("missing the COHERE_API_KEY key, set it in the COHERE_API_KEY environment variable")
 
 	ErrUnexpectedResponseLength = errors.New("unexpected length of response")
+
+	errEmptyMessages      = errors.New("messages must not be empty")
+	errEmptyMessageParts  = errors.New("message parts must not be empty")
+	errNonTextMessagePart = errors.New("first message part must be text")
 )
 
 type LLM struct {
@@ -31,6 +35,17 @@ func (o *LLM) Call(ctx context.Context, prompt string, options ...llms.CallOptio
 // GenerateContent implements the Model interface.
 func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageContent, options ...llms.CallOption) (*llms.ContentResponse, error) { //nolint: lll, cyclop, whitespace
 
+	if len(messages) == 0 {
+		return nil, errEmptyMessages
+	}
+	if len(messages[0].Parts) == 0 {
+		return nil, errEmptyMessageParts
+	}
+	text, ok := messages[0].Parts[0].(llms.TextContent)
+	if !ok {
+		return nil, errNonTextMessagePart
+	}
+
 	if o.CallbacksHandler != nil {
 		o.CallbacksHandler.HandleLLMGenerateContentStart(ctx, messages)
 	}
@@ -40,11 +55,8 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		opt(opts)
 	}
 
-	// Assume we get a single text message
-	msg0 := messages[0]
-	part := msg0.Parts[0]
 	result, err := o.client.CreateGeneration(ctx, &cohereclient.GenerationRequest{
-		Prompt: part.(llms.TextContent).Text,
+		Prompt: text.Text,
 	})
 	if err != nil {
 		if o.CallbacksHandler != nil {

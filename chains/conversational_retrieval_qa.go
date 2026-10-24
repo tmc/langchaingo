@@ -153,6 +153,10 @@ func (c ConversationalRetrievalQA) GetOutputKeys() []string {
 		outputKeys = append(outputKeys, _conversationalRetrievalQADefaultSourceDocumentKey)
 	}
 
+	if c.ReturnGeneratedQuestion {
+		outputKeys = append(outputKeys, _conversationalRetrievalQADefaultGeneratedQuestionKey)
+	}
+
 	return outputKeys
 }
 

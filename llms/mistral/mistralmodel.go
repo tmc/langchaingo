@@ -10,6 +10,14 @@ import (
 	"github.com/tmc/langchaingo/llms"
 )
 
+var (
+	// ErrEmptyResponse is returned when a response has no choices.
+	ErrEmptyResponse = errors.New("no response")
+	// ErrUnexpectedResponseLength is returned when Call receives more
+	// than one choice.
+	ErrUnexpectedResponseLength = errors.New("unexpected length of response")
+)
+
 // Model encapsulates an instantiated Mistral client, the client options used to instantiate the client, and a callback handler provided by Langchain Go.
 type Model struct {
 	client           *sdk.MistralClient
@@ -23,21 +31,25 @@ var _ llms.Model = (*Model)(nil)
 // Instantiates a new Mistral Model.
 func New(opts ...Option) (*Model, error) {
 	options := &clientOptions{
-		apiKey:     os.Getenv("MISTRAL_API_KEY"),
-		endpoint:   sdk.Endpoint,
-		maxRetries: sdk.DefaultMaxRetries,
-		timeout:    sdk.DefaultTimeout,
-		model:      sdk.ModelOpenMistral7b,
+		apiKey:           os.Getenv("MISTRAL_API_KEY"),
+		endpoint:         sdk.Endpoint,
+		maxRetries:       sdk.DefaultMaxRetries,
+		timeout:          sdk.DefaultTimeout,
+		model:            sdk.ModelOpenMistral7b,
+		callbacksHandler: callbacks.SimpleHandler{},
 	}
 
 	for _, opt := range opts {
 		opt(options)
 	}
+	if options.callbacksHandler == nil {
+		options.callbacksHandler = callbacks.SimpleHandler{}
+	}
 
 	return &Model{
 		clientOptions:    options,
 		client:           sdk.NewMistralClient(options.apiKey, options.endpoint, options.maxRetries, options.timeout),
-		CallbacksHandler: callbacks.SimpleHandler{},
+		CallbacksHandler: options.callbacksHandler,
 	}, nil
 }
 
@@ -58,8 +70,12 @@ func (m *Model) Call(ctx context.Context, prompt string, options ...llms.CallOpt
 		return "", err
 	}
 	if len(res.Choices) != 1 {
+		err := ErrEmptyResponse
+		if len(res.Choices) > 1 {
+			err = ErrUnexpectedResponseLength
+		}
 		m.CallbacksHandler.HandleLLMError(ctx, err)
-		return "", errors.New("unexpected response from Mistral SDK, length of the Choices slice must be 1")
+		return "", err
 	}
 
 	return res.Choices[0].Message.Content, nil
@@ -145,17 +161,22 @@ func mistralChatParamsFromCallOptions(callOpts *llms.CallOptions) sdk.ChatReques
 
 func generateNonStreamingContent(ctx context.Context, m *Model, callOptions *llms.CallOptions, messages []sdk.ChatMessage, chatOpts sdk.ChatRequestParams) (*llms.ContentResponse, error) {
 	res, err := m.client.Chat(callOptions.Model, messages, &chatOpts)
-	m.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, nil)
 	if err != nil {
 		m.CallbacksHandler.HandleLLMError(ctx, err)
 		return nil, err
 	}
 
-	if len(res.Choices) < 1 {
-		m.CallbacksHandler.HandleLLMError(ctx, err)
-		return nil, errors.New("unexpected response from Mistral SDK, length of the Choices slice must be greater than or equal 1")
+	if len(res.Choices) == 0 {
+		m.CallbacksHandler.HandleLLMError(ctx, ErrEmptyResponse)
+		return nil, ErrEmptyResponse
 	}
+	langchainContentResponse := contentResponse(res)
+	m.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, langchainContentResponse)
 
+	return langchainContentResponse, nil
+}
+
+func contentResponse(res *sdk.ChatCompletionResponse) *llms.ContentResponse {
 	langchainContentResponse := &llms.ContentResponse{
 		Choices: make([]*llms.ContentChoice, 0),
 	}
@@ -166,14 +187,14 @@ func generateNonStreamingContent(ctx context.Context, m *Model, callOptions *llm
 			GenerationInfo: map[string]any{
 				"created": res.Created,
 				"model":   res.Model,
-				"usage":   res.Usage,
 			},
 		})
+		setUsage(langchainContentResponse.Choices[idx].GenerationInfo, res.Usage)
 		toolCalls := choice.Message.ToolCalls
 		if len(toolCalls) > 0 {
 			langchainContentResponse.Choices[idx].FuncCall = (*llms.FunctionCall)(&toolCalls[0].Function)
 			for _, tool := range toolCalls {
-				langchainContentResponse.Choices[0].ToolCalls = append(langchainContentResponse.Choices[0].ToolCalls, llms.ToolCall{
+				langchainContentResponse.Choices[idx].ToolCalls = append(langchainContentResponse.Choices[idx].ToolCalls, llms.ToolCall{
 					ID:   tool.Id,
 					Type: string(tool.Type),
 					FunctionCall: &llms.FunctionCall{
@@ -184,9 +205,16 @@ func generateNonStreamingContent(ctx context.Context, m *Model, callOptions *llm
 			}
 		}
 	}
-	m.CallbacksHandler.HandleLLMGenerateContentEnd(ctx, langchainContentResponse)
+	return langchainContentResponse
+}
 
-	return langchainContentResponse, nil
+// setUsage records u in info under "usage" and under the token-count
+// keys other providers use.
+func setUsage(info map[string]any, u sdk.UsageInfo) {
+	info["usage"] = u
+	info["PromptTokens"] = u.PromptTokens
+	info["CompletionTokens"] = u.CompletionTokens
+	info["TotalTokens"] = u.TotalTokens
 }
 
 func generateStreamingContent(ctx context.Context, m *Model, callOptions *llms.CallOptions, messages []sdk.ChatMessage, chatOpts sdk.ChatRequestParams) (*llms.ContentResponse, error) {
@@ -207,7 +235,9 @@ func generateStreamingContent(ctx context.Context, m *Model, callOptions *llms.C
 		chunkStr := ""
 		langchainContentResponse.Choices[0].GenerationInfo["created"] = chatResChunk.Created
 		langchainContentResponse.Choices[0].GenerationInfo["model"] = chatResChunk.Model
-		langchainContentResponse.Choices[0].GenerationInfo["usage"] = chatResChunk.Usage
+		if chatResChunk.Usage != (sdk.UsageInfo{}) {
+			setUsage(langchainContentResponse.Choices[0].GenerationInfo, chatResChunk.Usage)
+		}
 		if chatResChunk.Error == nil {
 			for _, choice := range chatResChunk.Choices {
 				chunkStr += choice.Delta.Content

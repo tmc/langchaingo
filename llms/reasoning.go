@@ -42,7 +42,43 @@ type ThinkingConfig struct {
 	// InterleaveThinking enables thinking between tool calls.
 	// Provider support varies.
 	InterleaveThinking bool `json:"interleave_thinking,omitempty"`
+
+	// Effort controls reasoning depth on models that expose an effort
+	// level. Providers map it to their native parameter (Anthropic
+	// output_config.effort, OpenAI reasoning_effort). The zero value
+	// means the provider default. Models that use token budgets instead
+	// of effort levels ignore it.
+	Effort ThinkingEffort `json:"effort,omitempty"`
+
+	// Display controls how thinking text is returned by models that
+	// summarize thinking. Models that stream thinking verbatim ignore
+	// it. The zero value means the provider default.
+	Display ThinkingDisplay `json:"display,omitempty"`
 }
+
+// ThinkingEffort is a reasoning-depth level. Providers that cap the
+// range clamp higher levels to their maximum.
+type ThinkingEffort string
+
+const (
+	ThinkingEffortLow    ThinkingEffort = "low"
+	ThinkingEffortMedium ThinkingEffort = "medium"
+	ThinkingEffortHigh   ThinkingEffort = "high"
+	ThinkingEffortXHigh  ThinkingEffort = "xhigh"
+	ThinkingEffortMax    ThinkingEffort = "max"
+)
+
+// ThinkingDisplay controls how a model that summarizes thinking returns
+// the thinking text.
+type ThinkingDisplay string
+
+const (
+	// ThinkingDisplayOmitted suppresses thinking text in the response.
+	ThinkingDisplayOmitted ThinkingDisplay = "omitted"
+
+	// ThinkingDisplaySummarized returns a summary of the thinking.
+	ThinkingDisplaySummarized ThinkingDisplay = "summarized"
+)
 
 // DefaultThinkingConfig returns a sensible default thinking configuration.
 func DefaultThinkingConfig() *ThinkingConfig {
@@ -130,6 +166,24 @@ func WithInterleaveThinking(enabled bool) CallOption {
 	}
 }
 
+// WithThinkingEffort sets the reasoning effort level on models that
+// expose one.
+func WithThinkingEffort(effort ThinkingEffort) CallOption {
+	return func(opts *CallOptions) {
+		config := getOrCreateThinkingConfig(opts)
+		config.Effort = effort
+	}
+}
+
+// WithThinkingDisplay sets how thinking text is returned on models
+// that summarize thinking.
+func WithThinkingDisplay(display ThinkingDisplay) CallOption {
+	return func(opts *CallOptions) {
+		config := getOrCreateThinkingConfig(opts)
+		config.Display = display
+	}
+}
+
 // Note: ReasoningModel interface is defined in llms.go
 
 // IsReasoningModel returns true if the model is a reasoning/thinking model.
@@ -175,7 +229,11 @@ func DefaultIsReasoningModel(model string) bool {
 		strings.Contains(modelLower, "claude-3.7") ||
 		strings.Contains(modelLower, "claude-4") ||
 		strings.Contains(modelLower, "claude-opus-4") ||
-		strings.Contains(modelLower, "claude-sonnet-4") {
+		strings.Contains(modelLower, "claude-sonnet-4") ||
+		strings.Contains(modelLower, "claude-sonnet-5") ||
+		strings.Contains(modelLower, "claude-haiku-4") ||
+		strings.Contains(modelLower, "claude-fable") ||
+		strings.Contains(modelLower, "claude-mythos") {
 		return true
 	}
 

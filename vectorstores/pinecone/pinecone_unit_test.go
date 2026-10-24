@@ -2,7 +2,6 @@ package pinecone
 
 import (
 	"context"
-	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -37,8 +36,6 @@ func (m *testEmbedder) EmbedQuery(ctx context.Context, query string) ([]float32,
 }
 
 func TestApplyClientOptions(t *testing.T) { //nolint:funlen // comprehensive test
-	t.Parallel()
-
 	tests := []struct {
 		name        string
 		opts        []Option
@@ -144,25 +141,8 @@ func TestApplyClientOptions(t *testing.T) { //nolint:funlen // comprehensive tes
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Save and restore env vars
-			oldKey := os.Getenv("PINECONE_API_KEY")
-			oldHost := os.Getenv("PINECONE_HOST")
-			defer func() {
-				os.Setenv("PINECONE_API_KEY", oldKey)
-				os.Setenv("PINECONE_HOST", oldHost)
-			}()
-
-			// Set test env vars
-			if tt.envKey != "" {
-				os.Setenv("PINECONE_API_KEY", tt.envKey)
-			} else {
-				os.Unsetenv("PINECONE_API_KEY")
-			}
-			if tt.envHost != "" {
-				os.Setenv("PINECONE_HOST", tt.envHost)
-			} else {
-				os.Unsetenv("PINECONE_HOST")
-			}
+			t.Setenv("PINECONE_API_KEY", tt.envKey)
+			t.Setenv("PINECONE_HOST", tt.envHost)
 
 			store, err := applyClientOptions(tt.opts...)
 
@@ -436,12 +416,10 @@ func TestWithOptions(t *testing.T) {
 }
 
 func TestNew(t *testing.T) {
-	t.Parallel()
-
 	tests := []struct {
 		name        string
 		opts        []Option
-		setupEnv    func()
+		envKey      string
 		expectError bool
 		errContains string
 	}{
@@ -451,9 +429,6 @@ func TestNew(t *testing.T) {
 				WithAPIKey("test-key"),
 				WithEmbedder(&testEmbedder{}),
 			},
-			setupEnv: func() {
-				os.Unsetenv("PINECONE_HOST")
-			},
 			expectError: true,
 			errContains: "missing host",
 		},
@@ -462,9 +437,6 @@ func TestNew(t *testing.T) {
 			opts: []Option{
 				WithHost("https://test.pinecone.io"),
 				WithEmbedder(&testEmbedder{}),
-			},
-			setupEnv: func() {
-				os.Unsetenv("PINECONE_API_KEY")
 			},
 			expectError: true,
 			errContains: "missing api key",
@@ -484,17 +456,7 @@ func TestNew(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Save and restore env vars
-			oldHost := os.Getenv("PINECONE_HOST")
-			oldKey := os.Getenv("PINECONE_API_KEY")
-			defer func() {
-				os.Setenv("PINECONE_HOST", oldHost)
-				os.Setenv("PINECONE_API_KEY", oldKey)
-			}()
-
-			if tt.setupEnv != nil {
-				tt.setupEnv()
-			}
+			t.Setenv("PINECONE_API_KEY", tt.envKey)
 
 			// We test by calling applyClientOptions since New would
 			// try to create a real client
@@ -573,12 +535,6 @@ func TestEdgeCases(t *testing.T) {
 }
 
 func TestEnvironmentVariableHandling(t *testing.T) {
-	t.Parallel()
-
-	// Save original values
-	origKey := os.Getenv("PINECONE_API_KEY")
-	defer os.Setenv("PINECONE_API_KEY", origKey)
-
 	tests := []struct {
 		name        string
 		envKey      string
@@ -611,11 +567,7 @@ func TestEnvironmentVariableHandling(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if tt.envKey != "" {
-				os.Setenv("PINECONE_API_KEY", tt.envKey)
-			} else {
-				os.Unsetenv("PINECONE_API_KEY")
-			}
+			t.Setenv("PINECONE_API_KEY", tt.envKey)
 
 			opts := []Option{
 				WithHost("https://test.pinecone.io"),
