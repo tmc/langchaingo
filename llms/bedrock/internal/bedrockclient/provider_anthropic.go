@@ -8,7 +8,6 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime/types"
 	"github.com/tmc/langchaingo/llms"
@@ -46,6 +45,25 @@ type anthropicTextGenerationInputContent struct {
 	ID    string      `json:"id,omitempty"`
 	Name  string      `json:"name,omitempty"`
 	Input interface{} `json:"input,omitempty"`
+	// CacheControl marks this content block as a prompt-cache breakpoint.
+	// The cached prefix extends from the start of the prompt up to and
+	// including this block.
+	CacheControl *anthropicCacheControl `json:"cache_control,omitempty"`
+}
+
+// anthropicCacheControl maps llms.CacheControl onto Bedrock's wire format for
+// Anthropic models.
+type anthropicCacheControl struct {
+	Type string `json:"type"`
+	TTL  string `json:"ttl,omitempty"`
+}
+
+// anthropicSystemBlock is used when the system field is emitted as an array of
+// blocks (only when at least one system part carries cache control).
+type anthropicSystemBlock struct {
+	Type         string                 `json:"type"`
+	Text         string                 `json:"text"`
+	CacheControl *anthropicCacheControl `json:"cache_control,omitempty"`
 }
 
 type anthropicTextGenerationInputMessage struct {
@@ -63,8 +81,10 @@ type anthropicTextGenerationInput struct {
 	AnthropicVersion string `json:"anthropic_version"`
 	// The maximum number of tokens to generate per result. Required
 	MaxTokens int `json:"max_tokens"`
-	// The system prompt to use. Optional
-	System string `json:"system,omitempty"`
+	// The system prompt to use. Optional.
+	// Either a string (legacy form, no caching) or []anthropicSystemBlock
+	// when at least one system part carries cache control.
+	System interface{} `json:"system,omitempty"`
 	// The messages to use. Required
 	Messages []*anthropicTextGenerationInputMessage `json:"messages"`
 	// The amount of randomness injected into the response. Optional, default = 1
@@ -81,6 +101,11 @@ type anthropicTextGenerationInput struct {
 	Tools []BedrockTool `json:"tools,omitempty"`
 	// Tool choice configuration. Optional
 	ToolChoice *BedrockToolChoice `json:"tool_choice,omitempty"`
+	// Guardrail configuration. Optional
+	GuardrailConfig *struct {
+		TagSuffix            string `json:"tagSuffix,omitempty"`
+		StreamProcessingMode string `json:"streamProcessingMode,omitempty"`
+	} `json:"amazon-bedrock-guardrailConfig,omitempty"`
 }
 
 // anthropicTextGenerationOutput is the generated output.
@@ -100,8 +125,10 @@ type anthropicTextGenerationOutput struct {
 	// Which custom stop sequence was matched, if any.
 	StopSequence string `json:"stop_sequence"`
 	Usage        struct {
-		InputTokens  int `json:"input_tokens"`
-		OutputTokens int `json:"output_tokens"`
+		InputTokens              int `json:"input_tokens"`
+		OutputTokens             int `json:"output_tokens"`
+		CacheCreationInputTokens int `json:"cache_creation_input_tokens,omitempty"`
+		CacheReadInputTokens     int `json:"cache_read_input_tokens,omitempty"`
 	} `json:"usage"`
 }
 
@@ -182,28 +209,38 @@ func createAnthropicCompletion(ctx context.Context,
 		}
 	}
 
+	// Add guardrail tag suffix and stream processing mode if provided in safety config
+	if options.SafetyConfig != nil {
+		input.GuardrailConfig = &struct {
+			TagSuffix            string `json:"tagSuffix,omitempty"`
+			StreamProcessingMode string `json:"streamProcessingMode,omitempty"`
+		}{}
+		if tagSuffix, ok := options.SafetyConfig["tag_suffix"]; ok {
+			if str, ok := tagSuffix.(string); ok {
+				input.GuardrailConfig.TagSuffix = str
+			} else {
+				return nil, errors.New("tag_suffix in safety config must be a string")
+			}
+		}
+		if streamProcessingMode, ok := options.SafetyConfig["stream_processing_mode"]; ok {
+			if str, ok := streamProcessingMode.(string); ok {
+				input.GuardrailConfig.StreamProcessingMode = str
+			} else {
+				return nil, errors.New("stream_processing_mode in safety config must be a string")
+			}
+		}
+	}
+
 	body, err := json.Marshal(input)
 	if err != nil {
 		return nil, err
 	}
 
 	if options.StreamingFunc != nil {
-		modelInput := &bedrockruntime.InvokeModelWithResponseStreamInput{
-			ModelId:     aws.String(modelID),
-			Accept:      aws.String("*/*"),
-			ContentType: aws.String("application/json"),
-			Body:        body,
-		}
-		return parseStreamingCompletionResponse(ctx, client, modelInput, options)
+		return parseStreamingCompletionResponse(ctx, client, modelID, body, options)
 	}
 
-	modelInput := &bedrockruntime.InvokeModelInput{
-		ModelId:     aws.String(modelID),
-		Accept:      aws.String("*/*"),
-		ContentType: aws.String("application/json"),
-		Body:        body,
-	}
-	resp, err := client.InvokeModel(ctx, modelInput)
+	resp, err := invokeModel(ctx, client, modelID, body, options)
 	if err != nil {
 		return nil, err
 	}
@@ -224,8 +261,10 @@ func createAnthropicCompletion(ctx context.Context,
 	choice := &llms.ContentChoice{
 		StopReason: output.StopReason,
 		GenerationInfo: map[string]interface{}{
-			"input_tokens":  output.Usage.InputTokens,
-			"output_tokens": output.Usage.OutputTokens,
+			"input_tokens":             output.Usage.InputTokens,
+			"output_tokens":            output.Usage.OutputTokens,
+			"CacheCreationInputTokens": output.Usage.CacheCreationInputTokens,
+			"CacheReadInputTokens":     output.Usage.CacheReadInputTokens,
 		},
 	}
 
@@ -263,41 +302,8 @@ func createAnthropicCompletion(ctx context.Context,
 	}, nil
 }
 
-type streamingCompletionResponseChunk struct {
-	Type  string `json:"type"`
-	Index int    `json:"index"`
-	Delta struct {
-		Type         string `json:"type"`
-		Text         string `json:"text"`
-		StopReason   string `json:"stop_reason"`
-		StopSequence any    `json:"stop_sequence"`
-	} `json:"delta"`
-	AmazonBedrockInvocationMetrics struct {
-		InputTokenCount   int `json:"inputTokenCount"`
-		OutputTokenCount  int `json:"outputTokenCount"`
-		InvocationLatency int `json:"invocationLatency"`
-		FirstByteLatency  int `json:"firstByteLatency"`
-	} `json:"amazon-bedrock-invocationMetrics"`
-	Usage struct {
-		OutputTokens int `json:"output_tokens"`
-	} `json:"usage"`
-	Message struct {
-		ID           string `json:"id"`
-		Type         string `json:"type"`
-		Role         string `json:"role"`
-		Content      []any  `json:"content"`
-		Model        string `json:"model"`
-		StopReason   any    `json:"stop_reason"`
-		StopSequence any    `json:"stop_sequence"`
-		Usage        struct {
-			InputTokens  int `json:"input_tokens"`
-			OutputTokens int `json:"output_tokens"`
-		} `json:"usage"`
-	} `json:"message"`
-}
-
-func parseStreamingCompletionResponse(ctx context.Context, client *bedrockruntime.Client, modelInput *bedrockruntime.InvokeModelWithResponseStreamInput, options llms.CallOptions) (*llms.ContentResponse, error) {
-	output, err := client.InvokeModelWithResponseStream(ctx, modelInput)
+func parseStreamingCompletionResponse(ctx context.Context, client invokeModelWithResponseStreamAPI, modelID string, body []byte, options llms.CallOptions) (*llms.ContentResponse, error) {
+	output, err := invokeModelWithResponseStream(ctx, client, modelID, body, options)
 	if err != nil {
 		return nil, err
 	}
@@ -315,14 +321,18 @@ func parseStreamingCompletionResponse(ctx context.Context, client *bedrockruntim
 
 		if v, ok := e.(*types.ResponseStreamMemberChunk); ok {
 			var resp streamingCompletionResponseChunk
-			err := json.NewDecoder(bytes.NewReader(v.Value.Bytes)).Decode(&resp)
-			if err != nil {
+			if err := json.NewDecoder(bytes.NewReader(v.Value.Bytes)).Decode(&resp); err != nil {
+				return nil, err
+			}
+			if err := checkGuardrailError(&resp); err != nil {
 				return nil, err
 			}
 
 			switch resp.Type {
 			case "message_start":
 				contentchoices[0].GenerationInfo["input_tokens"] = resp.Message.Usage.InputTokens
+				contentchoices[0].GenerationInfo["CacheCreationInputTokens"] = resp.Message.Usage.CacheCreationInputTokens
+				contentchoices[0].GenerationInfo["CacheReadInputTokens"] = resp.Message.Usage.CacheReadInputTokens
 			case "content_block_delta":
 				if err = options.StreamingFunc(ctx, []byte(resp.Delta.Text)); err != nil {
 					return nil, err
@@ -331,6 +341,12 @@ func parseStreamingCompletionResponse(ctx context.Context, client *bedrockruntim
 			case "message_delta":
 				contentchoices[0].StopReason = resp.Delta.StopReason
 				contentchoices[0].GenerationInfo["output_tokens"] = resp.Usage.OutputTokens
+				if resp.Usage.CacheCreationInputTokens > 0 {
+					contentchoices[0].GenerationInfo["CacheCreationInputTokens"] = resp.Usage.CacheCreationInputTokens
+				}
+				if resp.Usage.CacheReadInputTokens > 0 {
+					contentchoices[0].GenerationInfo["CacheReadInputTokens"] = resp.Usage.CacheReadInputTokens
+				}
 			}
 		}
 	}
@@ -343,9 +359,14 @@ func parseStreamingCompletionResponse(ctx context.Context, client *bedrockruntim
 	}, nil
 }
 
-// process the input messages to anthropic supported input
-// returns the input content and system prompt.
-func processInputMessagesAnthropic(messages []Message) ([]*anthropicTextGenerationInputMessage, string, error) {
+// converts the flattened Bedrock messages into
+// Anthropic's request shape. The returned system value is one of:
+//   - nil: no system messages were provided.
+//   - string: concatenated system text (legacy form, backward-compatible when
+//     no system part carries cache control).
+//   - []anthropicSystemBlock: emitted only when at least one system part has
+//     a cache control, so that per-block cache_control markers are preserved.
+func processInputMessagesAnthropic(messages []Message) ([]*anthropicTextGenerationInputMessage, interface{}, error) {
 	chunkedMessages := make([][]Message, 0, len(messages))
 	currentChunk := make([]Message, 0, len(messages))
 	var lastRole llms.ChatMessageType
@@ -364,23 +385,17 @@ func processInputMessagesAnthropic(messages []Message) ([]*anthropicTextGenerati
 	}
 
 	inputContents := make([]*anthropicTextGenerationInputMessage, 0, len(messages))
-	var systemPrompt string
+	var systemParts []Message
 	for _, chunk := range chunkedMessages {
 		role, err := getAnthropicRole(chunk[0].Role)
 		if err != nil {
-			return nil, "", err
+			return nil, nil, err
 		}
 		if role == AnthropicSystem {
-			if systemPrompt != "" {
-				return nil, "", errors.New("multiple system prompts")
+			if len(systemParts) > 0 {
+				return nil, nil, errors.New("multiple system prompts")
 			}
-			for _, message := range chunk {
-				c := getAnthropicInputContent(message)
-				if c.Type != AnthropicMessageTypeText {
-					return nil, "", errors.New("system prompt must be text")
-				}
-				systemPrompt += c.Text
-			}
+			systemParts = append(systemParts, chunk...)
 			continue
 		}
 		content := make([]anthropicTextGenerationInputContent, 0, len(chunk))
@@ -392,7 +407,66 @@ func processInputMessagesAnthropic(messages []Message) ([]*anthropicTextGenerati
 			Content: content,
 		})
 	}
-	return inputContents, systemPrompt, nil
+
+	system, err := buildAnthropicSystem(systemParts)
+	if err != nil {
+		return nil, nil, err
+	}
+	return inputContents, system, nil
+}
+
+// buildAnthropicSystem emits the system field in array form when any part
+// carries cache control, otherwise concatenates into a single string for
+// backward compatibility.
+func buildAnthropicSystem(parts []Message) (interface{}, error) {
+	if len(parts) == 0 {
+		return nil, nil
+	}
+	for _, m := range parts {
+		if m.Type != AnthropicMessageTypeText {
+			return nil, errors.New("system prompt must be text")
+		}
+	}
+	hasCache := false
+	for _, m := range parts {
+		if m.CacheControl != nil {
+			hasCache = true
+			break
+		}
+	}
+	if !hasCache {
+		var s string
+		for _, m := range parts {
+			s += m.Content
+		}
+		return s, nil
+	}
+	blocks := make([]anthropicSystemBlock, 0, len(parts))
+	for _, m := range parts {
+		blocks = append(blocks, anthropicSystemBlock{
+			Type:         AnthropicMessageTypeText,
+			Text:         m.Content,
+			CacheControl: cacheControlToAnthropic(m.CacheControl),
+		})
+	}
+	return blocks, nil
+}
+
+// cacheControlToAnthropic converts the provider-agnostic llms.CacheControl
+// into Anthropic's Bedrock wire format.
+func cacheControlToAnthropic(cc *llms.CacheControl) *anthropicCacheControl {
+	if cc == nil {
+		return nil
+	}
+	t := cc.Type
+	if t == "" {
+		t = "ephemeral"
+	}
+	out := &anthropicCacheControl{Type: t}
+	if cc.Duration > 0 {
+		out.TTL = "1h"
+	}
+	return out
 }
 
 // process the role of the message to anthropic supported role.
@@ -462,5 +536,6 @@ func getAnthropicInputContent(message Message) anthropicTextGenerationInputConte
 			Input: input,
 		}
 	}
+	c.CacheControl = cacheControlToAnthropic(message.CacheControl)
 	return c
 }
