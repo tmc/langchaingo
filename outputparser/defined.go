@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"strings"
 
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/schema"
@@ -64,7 +65,7 @@ func (p Defined[T]) Parse(text string) (T, error) {
 	// Removes '```json' and '```' from the start and end of the text.
 	const opening = "```json"
 	const closing = "```"
-	if text[:len(opening)] != opening || text[len(text)-len(closing):] != closing {
+	if !strings.HasPrefix(text, opening) || !strings.HasSuffix(text, closing) {
 		return target, fmt.Errorf("input text should start with %s and end with %s", opening, closing)
 	}
 	parseableJSON := text[len(opening) : len(text)-len(closing)]
