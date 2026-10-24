@@ -146,19 +146,24 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 	// Get our ollamaOptions from llms.CallOptions
 	ollamaOptions := makeOllamaOptionsFromOptions(o.options.ollamaOptions, opts)
 
-	// Handle thinking mode if specified via metadata
-	if opts.Metadata != nil {
+	// Determine think flag: WithThink option takes priority, then thinking_config metadata
+	var think *bool
+	if o.options.think != nil {
+		think = o.options.think
+	} else if opts.Metadata != nil {
 		if config, ok := opts.Metadata["thinking_config"].(*llms.ThinkingConfig); ok {
 			if config.Mode != llms.ThinkingModeNone && o.SupportsReasoning() {
-				// Enable thinking for models that support it
-				ollamaOptions.Think = true
+				t := true
+				think = &t
 			}
 		}
 	}
+
 	req := &ollamaclient.ChatRequest{
 		Model:    model,
 		Format:   format,
 		Messages: chatMsgs,
+		Think:    think,
 		Options:  ollamaOptions,
 		Stream:   opts.StreamingFunc != nil,
 	}
@@ -231,7 +236,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 
 	// Note: Ollama may include thinking in the main content when Think mode is enabled
 	// Future versions may provide separate thinking content
-	if ollamaOptions.Think && o.SupportsReasoning() {
+	if think != nil && *think && o.SupportsReasoning() {
 		genInfo["ThinkingEnabled"] = true
 	}
 
@@ -318,16 +323,6 @@ func makeOllamaOptionsFromOptions(ollamaOptions ollamaclient.Options, opts llms.
 	ollamaOptions.RepeatPenalty = float32(opts.RepetitionPenalty)
 	ollamaOptions.FrequencyPenalty = float32(opts.FrequencyPenalty)
 	ollamaOptions.PresencePenalty = float32(opts.PresencePenalty)
-
-	// Extract thinking configuration for models that support it
-	if opts.Metadata != nil {
-		if config, ok := opts.Metadata["thinking_config"].(*llms.ThinkingConfig); ok {
-			// Enable thinking mode if not explicitly disabled
-			if config.Mode != llms.ThinkingModeNone {
-				ollamaOptions.Think = true
-			}
-		}
-	}
 
 	return ollamaOptions
 }
