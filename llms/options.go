@@ -73,6 +73,9 @@ type CallOptions struct {
 	// WebSearchOptions configures web search behavior for models that support it.
 	// Currently supported by OpenAI models like gpt-4o-search-preview.
 	WebSearchOptions *WebSearchOptions `json:"web_search_options,omitempty"`
+
+	// Safety configures provider-defined safety controls for the invocation.
+	SafetyConfig map[string]any `json:"safety,omitempty"`
 }
 
 // Tool is a tool that can be used by the model.

@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
 	"github.com/tmc/langchaingo/llms"
 )
@@ -100,14 +99,7 @@ func createAi21Completion(ctx context.Context, client *bedrockruntime.Client, mo
 		return nil, err
 	}
 
-	modelInput := bedrockruntime.InvokeModelInput{
-		ModelId:     aws.String(modelID),
-		Body:        body,
-		Accept:      aws.String("*/*"),
-		ContentType: aws.String("application/json"),
-	}
-
-	resp, err := client.InvokeModel(ctx, &modelInput)
+	resp, err := invokeModel(ctx, client, modelID, body, options)
 	if err != nil {
 		return nil, err
 	}
