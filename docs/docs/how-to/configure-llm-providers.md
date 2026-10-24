@@ -43,7 +43,7 @@ llm, err := openai.New(
 
 ## Anthropic
 
-### Basic configuration
+### Basic Anthropic configuration
 
 ```go
 import "github.com/tmc/langchaingo/llms/anthropic"
@@ -55,18 +55,18 @@ llm, err := anthropic.New()
 llm, err := anthropic.New(anthropic.WithToken("your-api-key"))
 ```
 
-### Model selection
+### Anthropic model selection
 
 ```go
 llm, err := anthropic.New(
-    anthropic.WithModel("claude-3-opus-20240229"),
+    anthropic.WithModel("claude-opus-4-6"),
     anthropic.WithToken("your-api-key"),
 )
 ```
 
 ## Google AI (Gemini)
 
-### Basic configuration
+### Basic Google AI configuration
 
 ```go
 import (
@@ -89,14 +89,14 @@ llm, err := googleai.New(
 ```go
 llm, err := googleai.New(
     context.Background(),
-    googleai.WithDefaultModel("gemini-pro"),
+    googleai.WithDefaultModel("gemini-2.5-pro"),
     googleai.WithAPIKey("your-api-key"),
 )
 ```
 
 ## Vertex AI
 
-### Basic configuration
+### Basic Vertex AI configuration
 
 ```go
 import (
@@ -131,7 +131,7 @@ llm, err := vertex.New(
 
 ## Local Models (Ollama)
 
-### Basic configuration
+### Basic Ollama configuration
 
 ```go
 import "github.com/tmc/langchaingo/llms/ollama"
@@ -148,7 +148,7 @@ llm, err := ollama.New(
 
 ## Hugging Face
 
-### Basic configuration
+### Basic Hugging Face configuration
 
 ```go
 import "github.com/tmc/langchaingo/llms/huggingface"
@@ -160,7 +160,7 @@ llm, err := huggingface.New()
 llm, err := huggingface.New(huggingface.WithToken("your-hf-token"))
 ```
 
-### Model selection
+### Hugging Face model selection
 
 ```go
 llm, err := huggingface.New(
@@ -195,10 +195,10 @@ export GOOGLE_APPLICATION_CREDENTIALS="path/to/service-account.json"
 ### OpenAI functions
 
 ```go
-tools := []openai.Tool{
+tools := []llms.Tool{
     {
         Type: "function",
-        Function: openai.FunctionDefinition{
+        Function: &llms.FunctionDefinition{
             Name:        "get_weather",
             Description: "Get current weather",
             Parameters: map[string]any{

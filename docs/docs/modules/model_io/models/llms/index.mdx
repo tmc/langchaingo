@@ -1,20 +1,10 @@
----
-sidebar_position: 1
-hide_table_of_contents: true
-sidebar_label: LLMs
----
-
-import CodeBlock from "@theme/CodeBlock";
-import DocCardList from "@theme/DocCardList";
-
 # LLMs
 
-:::info
+<Info>
 [Conceptual Guide](https://python.langchain.com/docs/modules/model_io/llms)
-:::
+</Info>
 
-Large Language Models (LLMs) are a core component of LangChain. 
-LangChain does not serve its own LLMs, but rather provides a standard interface for interacting with many different LLMs.
+LangChainGo provides a shared interface for interacting with large language model providers.
 
 All LLMs implement the `llms.Model` interface:
 
@@ -47,4 +37,32 @@ For backwards compatibility, `llms.LLM` is provided as a type alias:
 type LLM = Model
 ```
 
-<DocCardList />
+<CardGroup cols={3}>
+<Card title="Fake LLM" href="Integrations/fake.mdx">
+Configured responses for tests.
+</Card>
+<Card title="Groq" href="Integrations/groq.mdx">
+Models hosted by Groq.
+</Card>
+<Card title="Hugging Face" href="Integrations/huggingface.mdx">
+Models on the Hugging Face Hub.
+</Card>
+<Card title="Llamafile" href="Integrations/llamafile.mdx">
+A model served by a local llamafile.
+</Card>
+<Card title="Local" href="Integrations/local.mdx">
+A model run as a local program.
+</Card>
+<Card title="Mistral" href="Integrations/mistral.mdx">
+Models on the Mistral platform.
+</Card>
+<Card title="OpenAI" href="Integrations/openai.mdx">
+OpenAI models.
+</Card>
+<Card title="Vertex AI" href="Integrations/vertexai.mdx">
+Models on Google Cloud Vertex AI.
+</Card>
+<Card title="watsonx" href="Integrations/watsonx.mdx">
+IBM watsonx foundation models.
+</Card>
+</CardGroup>

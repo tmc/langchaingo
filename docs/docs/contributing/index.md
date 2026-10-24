@@ -1,12 +1,12 @@
 # Contributing to LangChainGo
 
-Thank you for your interest in contributing to LangChainGo! This guide helps you get started.
+This guide covers contributing code, tests, and documentation to LangChainGo.
 
 ## Ways to contribute
 
 ### 1. Code contributions
 
-- **Bug fixes**: Help us squash bugs and improve stability
+- **Bug fixes**: Fix bugs and improve stability
 - **New features**: Implement new LLM providers, tools, or chains
 - **Performance improvements**: Optimize existing code
 - **Tests**: Improve test coverage and add missing tests
@@ -62,7 +62,7 @@ When contributing code that interacts with external APIs:
 1. Use the internal `httprr` tool for recording HTTP interactions
 2. Never commit real API keys or secrets
 3. Ensure tests can run without external dependencies
-4. See the [Architecture Guide](/docs/concepts/architecture#http-testing-with-httprr) for details
+4. See the [Architecture Guide](../concepts/architecture.md#http-testing-with-httprr) for details
 
 ## Contribution process
 
@@ -106,7 +106,7 @@ Include:
 
 ## Documentation contributions
 
-See our dedicated [Documentation Contribution Guide](./documentation) for details on:
+See our dedicated [Documentation Contribution Guide](documentation.md) for details on:
 - Writing tutorials
 - Creating how-to guides
 - Documentation style guide
@@ -128,5 +128,3 @@ Contributors are recognized in:
 - Open a [GitHub Discussion](https://github.com/tmc/langchaingo/discussions)
 - Check existing issues and PRs
 - Review the documentation
-
-Thank you for helping make LangChainGo better!
