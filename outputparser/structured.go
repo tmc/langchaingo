@@ -115,7 +115,7 @@ func (p Structured) GetFormatInstructions() string {
 		jsonLines += "\t" + fmt.Sprintf(
 			_structuredLineTemplate,
 			rs.Name,
-			"string", /* type of the filed*/
+			"string", /* type of the field*/
 			rs.Description,
 		)
 	}
