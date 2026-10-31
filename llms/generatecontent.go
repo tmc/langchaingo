@@ -45,6 +45,14 @@ func ImageURLWithDetailPart(url string, detail string) ImageURLContent {
 	}
 }
 
+// FilePart creates a new File from the given MIME type and URL.
+func FilePart(mime, url string) FileContent {
+	return FileContent{
+		MIMEType: mime,
+		URL:      url,
+	}
+}
+
 // ContentPart is an interface all parts of content have to implement.
 type ContentPart interface {
 	isPart()
@@ -85,6 +93,18 @@ func (bc BinaryContent) String() string {
 }
 
 func (BinaryContent) isPart() {}
+
+// FileContent is content holding file url with a MIME type.
+type FileContent struct {
+	MIMEType string
+	URL      string
+}
+
+func (fc FileContent) String() string {
+	return fc.URL
+}
+
+func (FileContent) IsPart() {}
 
 // FunctionCall is the name and arguments of a function call.
 type FunctionCall struct {
