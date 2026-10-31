@@ -225,7 +225,7 @@ func sanitizeHTTPError(err error) error {
 
 	// Check for context cancellation
 	if errors.Is(err, context.Canceled) {
-		return errors.New("request cancelled")
+		return context.Canceled
 	}
 
 	// Check for network timeout errors
