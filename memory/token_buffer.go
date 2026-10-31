@@ -90,6 +90,11 @@ func (tb *ConversationTokenBuffer) Clear(ctx context.Context) error {
 	return tb.ConversationBuffer.Clear(ctx)
 }
 
+// GetMemoryKey uses ConversationBuffer method for getting the memory key.
+func (tb *ConversationTokenBuffer) GetMemoryKey(ctx context.Context) string {
+	return tb.ConversationBuffer.GetMemoryKey(ctx)
+}
+
 func (tb *ConversationTokenBuffer) getNumTokensFromMessages(ctx context.Context) (int, error) {
 	messages, err := tb.ChatHistory.Messages(ctx)
 	if err != nil {
