@@ -1,0 +1,39 @@
+name: Preview Documentation Site
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  pull-requests: write
+  contents: write
+
+concurrency:
+  group: preview-pages-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: yarn
+          cache-dependency-path: "docs/package-lock.json"
+      - name: Install dependencies
+        working-directory: docs
+        run: yarn install --frozen-lockfile
+      - name: Build website
+        working-directory: docs
+        run: yarn build
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
+      - name: Preview Pages
+        uses: rajyan/preview-pages@v1
+        with:
+          source-dir: "docs/build"
