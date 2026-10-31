@@ -41,9 +41,10 @@ type GenerateRequest struct {
 type ImageData []byte
 
 type Message struct {
-	Role    string      `json:"role"` // one of ["system", "user", "assistant"]
-	Content string      `json:"content"`
-	Images  []ImageData `json:"images,omitempty"`
+	Role     string      `json:"role"` // one of ["system", "user", "assistant"]
+	Content  string      `json:"content"`
+	Thinking string      `json:"thinking,omitempty"`
+	Images   []ImageData `json:"images,omitempty"`
 }
 
 type ChatRequest struct {
