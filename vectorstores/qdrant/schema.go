@@ -6,9 +6,9 @@
 package qdrant
 
 type upsertBatch struct {
-	IDs      []string                 `json:"ids"`
-	Payloads []map[string]interface{} `json:"payloads"`
-	Vectors  [][]float32              `json:"vectors"`
+	IDs      []string         `json:"ids"`
+	Payloads []map[string]any `json:"payloads"`
+	Vectors  [][]float32      `json:"vectors"`
 }
 
 type upsertBody struct {
@@ -16,19 +16,24 @@ type upsertBody struct {
 }
 
 type result struct {
-	Score   float32                `json:"score"`
-	Payload map[string]interface{} `json:"payload"`
+	Score   float32        `json:"score"`
+	Payload map[string]any `json:"payload"`
 }
 
 type searchResponse struct {
 	Result []result `json:"result"`
 }
 
+type namedVector struct {
+	Vector []float32 `json:"vector"`
+	Name   string    `json:"name"`
+}
+
 type searchBody struct {
-	Vector         []float32 `json:"vector"`
-	Filter         any       `json:"filter"`
-	Limit          int       `json:"limit"`
-	ScoreThreshold float32   `json:"score_threshold"`
-	WithVector     bool      `json:"with_vector"`
-	WithPayload    bool      `json:"with_payload"`
+	Vector         any     `json:"vector"`
+	Filter         any     `json:"filter"`
+	Limit          int     `json:"limit"`
+	ScoreThreshold float32 `json:"score_threshold,omitempty"`
+	WithVector     bool    `json:"with_vector"`
+	WithPayload    bool    `json:"with_payload"`
 }

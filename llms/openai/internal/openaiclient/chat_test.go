@@ -122,3 +122,107 @@ func TestChatMessage_MarshalUnmarshal_WithReasoning(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, msg, msg2)
 }
+
+func TestParseStreamingChatResponse_StreamingToolCalls(t *testing.T) {
+	ctx := context.Background()
+	t.Parallel()
+
+	message := `
+data: {"choices":[{"index":0,"delta":{"role":"assistant","tool_calls":[{"function":{"name":"test","arguments":"func"}}]}}]}
+data: {"choices":[{"index":0,"delta":{"role":"assistant","tool_calls":[{"function":{"arguments":"tion"}}]}}]}
+data: {"choices":[{"index":0,"delta":{"role":"assistant","tool_calls":[{"function":{"arguments":" call"}}]}}]}
+	`
+
+	r := &http.Response{
+		StatusCode: http.StatusOK,
+		Body:       io.NopCloser(bytes.NewBufferString(message)),
+	}
+
+	req := &ChatRequest{
+		StreamingFunc: func(_ context.Context, _ []byte) error {
+			return nil
+		},
+	}
+
+	resp, err := parseStreamingChatResponse(ctx, r, req)
+
+	require.NoError(t, err)
+	assert.NotNil(t, resp)
+	assert.Len(t, resp.Choices[0].Message.ToolCalls, 1)
+	assert.Equal(t, resp.Choices[0].Message.ToolCalls[0].Function.Name, "test")
+	assert.Equal(t, resp.Choices[0].Message.ToolCalls[0].Function.Arguments, "function call")
+}
+
+func TestParseStreamingChatResponse_StreamingMultipleToolCalls(t *testing.T) {
+	ctx := context.Background()
+	t.Parallel()
+
+	message := `
+data: {"choices":[{"index":0,"delta":{"role":"assistant","tool_calls":[{"function":{"name":"test","arguments":"func"}}]}}]}
+data: {"choices":[{"index":0,"delta":{"role":"assistant","tool_calls":[{"function":{"arguments":"tion"}}]}}]}
+data: {"choices":[{"index":0,"delta":{"role":"assistant","tool_calls":[{"function":{"arguments":" call"}}]}}]}
+data: {"choices":[{"index":0,"delta":{"role":"assistant","tool_calls":[{"function":{"name":"test2","arguments":"other"}}]}}]}
+data: {"choices":[{"index":0,"delta":{"role":"assistant","tool_calls":[{"function":{"arguments":" function"}}]}}]}
+data: {"choices":[{"index":0,"delta":{"role":"assistant","tool_calls":[{"function":{"arguments":" call"}}]}}]}
+	`
+
+	r := &http.Response{
+		StatusCode: http.StatusOK,
+		Body:       io.NopCloser(bytes.NewBufferString(message)),
+	}
+
+	req := &ChatRequest{
+		StreamingFunc: func(_ context.Context, _ []byte) error {
+			return nil
+		},
+	}
+
+	resp, err := parseStreamingChatResponse(ctx, r, req)
+
+	require.NoError(t, err)
+	assert.NotNil(t, resp)
+	assert.Len(t, resp.Choices[0].Message.ToolCalls, 2)
+
+	assert.Equal(t, resp.Choices[0].Message.ToolCalls[0].Function.Name, "test")
+	assert.Equal(t, resp.Choices[0].Message.ToolCalls[0].Function.Arguments, "function call")
+
+	assert.Equal(t, resp.Choices[0].Message.ToolCalls[1].Function.Name, "test2")
+	assert.Equal(t, resp.Choices[0].Message.ToolCalls[1].Function.Arguments, "other function call")
+}
+
+func TestParseStreamingChatResponse_StreamingMultipleToolCalls_BackwardsCompatibility(t *testing.T) {
+	ctx := context.Background()
+	t.Parallel()
+
+	message := `
+data: {"choices":[{"index":0,"delta":{"role":"assistant","tool_calls":[{"type":"function", "function":{"name":"test","arguments":"func"}}]}}]}
+data: {"choices":[{"index":0,"delta":{"role":"assistant","tool_calls":[{"function":{"arguments":"tion"}}]}}]}
+data: {"choices":[{"index":0,"delta":{"role":"assistant","tool_calls":[{"function":{"arguments":" call"}}]}}]}
+data: {"choices":[{"index":0,"delta":{"role":"assistant","tool_calls":[{"type":"function", "function":{"name":"test2","arguments":"other"}}]}}]}
+data: {"choices":[{"index":0,"delta":{"role":"assistant","tool_calls":[{"function":{"arguments":" function"}}]}}]}
+data: {"choices":[{"index":0,"delta":{"role":"assistant","tool_calls":[{"function":{"arguments":" call"}}]}}]}
+	`
+
+	r := &http.Response{
+		StatusCode: http.StatusOK,
+		Body:       io.NopCloser(bytes.NewBufferString(message)),
+	}
+
+	req := &ChatRequest{
+		StreamingFunc: func(_ context.Context, _ []byte) error {
+			return nil
+		},
+	}
+
+	resp, err := parseStreamingChatResponse(ctx, r, req)
+
+	require.NoError(t, err)
+	assert.NotNil(t, resp)
+	assert.Len(t, resp.Choices[0].Message.ToolCalls, 2)
+
+	assert.Equal(t, resp.Choices[0].Message.ToolCalls[0].Function.Name, "test")
+	assert.Equal(t, resp.Choices[0].Message.ToolCalls[0].Function.Arguments, "function call")
+
+	assert.Equal(t, resp.Choices[0].Message.ToolCalls[1].Function.Name, "test2")
+	assert.Equal(t, resp.Choices[0].Message.ToolCalls[1].Function.Arguments, "other function call")
+}
