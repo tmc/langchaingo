@@ -4,15 +4,19 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	eg "golang.org/x/sync/errgroup"
 	"golang.org/x/sync/semaphore"
 )
+
+const _cleanupTimeout = 30 * time.Second
 
 type s3API interface {
 	PutObject(ctx context.Context, params *s3.PutObjectInput, optFns ...func(*s3.Options)) (*s3.PutObjectOutput, error)
@@ -28,9 +32,36 @@ func (kb *KnowledgeBase) getBucketName(bucketARN string) string {
 	return strings.TrimPrefix(bucketARN, prefix)
 }
 
-func (kb *KnowledgeBase) addToS3(ctx context.Context, bucketArn string, docs []NamedDocument) error {
+// objectKeys returns the keys of the S3 objects that hold docs: the content and, when present, the metadata.
+func objectKeys(docs []NamedDocument) []string {
+	keys := make([]string, 0, 2*len(docs))
+	for _, doc := range docs {
+		keys = append(keys, doc.Name)
+		if doc.Document.Metadata != nil {
+			keys = append(keys, doc.Name+_metadataSuffix)
+		}
+	}
+	return keys
+}
+
+// upload uploads docs to the bucket. If an upload fails, it removes the objects already uploaded.
+func (kb *KnowledgeBase) upload(ctx context.Context, bucketArn string, docs []NamedDocument) error {
+	uploaded, err := kb.addToS3(ctx, bucketArn, docs)
+	if err != nil {
+		return errors.Join(
+			fmt.Errorf("failed to upload documents to S3: %w", err),
+			kb.removeFromS3(ctx, bucketArn, uploaded),
+		)
+	}
+	return nil
+}
+
+// addToS3 uploads docs to the bucket and returns the keys of the objects uploaded, also when it fails.
+func (kb *KnowledgeBase) addToS3(ctx context.Context, bucketArn string, docs []NamedDocument) ([]string, error) {
 	sem := semaphore.NewWeighted(kb.s3Config.maxConcurrency)
 	uploadDocs, ctx := eg.WithContext(ctx)
+	var mu sync.Mutex
+	var uploaded []string
 	for _, doc := range docs {
 		uploadDocs.Go(func() error {
 			if err := sem.Acquire(ctx, 1); err != nil {
@@ -38,39 +69,64 @@ func (kb *KnowledgeBase) addToS3(ctx context.Context, bucketArn string, docs []N
 			}
 			defer sem.Release(1)
 
-			if err := kb.uploadS3Object(ctx, bucketArn, doc); err != nil {
+			keys, err := kb.uploadS3Object(ctx, bucketArn, doc)
+			mu.Lock()
+			uploaded = append(uploaded, keys...)
+			mu.Unlock()
+			if err != nil {
 				return fmt.Errorf("failed to upload document: %w", err)
 			}
 			return nil
 		})
 	}
-	return uploadDocs.Wait()
+	err := uploadDocs.Wait()
+	return uploaded, err
 }
 
-func (kb *KnowledgeBase) removeFromS3(ctx context.Context, bucketArn string, docs []NamedDocument) {
+// removeFromS3 removes the objects with keys from the bucket. It returns an error that names the objects
+// it could not remove.
+func (kb *KnowledgeBase) removeFromS3(ctx context.Context, bucketArn string, keys []string) error {
+	// The removal undoes a failed operation, so it must run also when ctx is the reason of the failure.
+	ctx, cancel := context.WithTimeout(context.WithoutCancel(ctx), _cleanupTimeout)
+	defer cancel()
+
+	bucketName := kb.getBucketName(bucketArn)
 	sem := semaphore.NewWeighted(kb.s3Config.maxConcurrency)
 	var wg sync.WaitGroup
-	for _, doc := range docs {
+	var mu sync.Mutex
+	var left []string
+	var errs []error
+	for _, key := range keys {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			if err := sem.Acquire(ctx, 1); err != nil {
-				// Log error but continue with other removals
-				return
+			err := sem.Acquire(ctx, 1)
+			if err == nil {
+				defer sem.Release(1)
+				_, err = kb.s3Config.client.DeleteObject(ctx, &s3.DeleteObjectInput{
+					Bucket: aws.String(bucketName),
+					Key:    aws.String(key),
+				})
 			}
-			defer sem.Release(1)
-
-			if err := kb.removeS3Object(ctx, bucketArn, doc); err != nil {
-				// Log error but continue with other removals
-				return
+			if err != nil {
+				mu.Lock()
+				left = append(left, key)
+				errs = append(errs, err)
+				mu.Unlock()
 			}
 		}()
 	}
 	wg.Wait()
+
+	if len(left) > 0 {
+		return fmt.Errorf("failed to remove from S3 the objects %s, left in bucket %s: %w", strings.Join(left, ", "), bucketName, errors.Join(errs...))
+	}
+	return nil
 }
 
-// uploadS3 uploads the provided file content to the specified S3 bucket and key.
-func (kb *KnowledgeBase) uploadS3Object(ctx context.Context, bucketArn string, doc NamedDocument) error {
+// uploadS3Object uploads the content and, when present, the metadata of doc to the bucket. It returns
+// the keys of the objects uploaded, also when it fails.
+func (kb *KnowledgeBase) uploadS3Object(ctx context.Context, bucketArn string, doc NamedDocument) ([]string, error) {
 	bucketName := kb.getBucketName(bucketArn)
 	input := &s3.PutObjectInput{
 		Bucket: aws.String(bucketName),
@@ -79,13 +135,14 @@ func (kb *KnowledgeBase) uploadS3Object(ctx context.Context, bucketArn string, d
 	}
 
 	if _, err := kb.s3Config.client.PutObject(ctx, input); err != nil {
-		return fmt.Errorf("error uploading file to S3: %w", err)
+		return nil, fmt.Errorf("error uploading file to S3: %w", err)
 	}
+	uploaded := []string{doc.Name}
 
 	if doc.Document.Metadata != nil {
 		bodyBytes, err := json.Marshal(metadata{doc.Document.Metadata})
 		if err != nil {
-			return fmt.Errorf("failed to marshal JSON request body: %w", err)
+			return uploaded, fmt.Errorf("failed to marshal JSON request body: %w", err)
 		}
 
 		metaDataInput := &s3.PutObjectInput{
@@ -95,34 +152,10 @@ func (kb *KnowledgeBase) uploadS3Object(ctx context.Context, bucketArn string, d
 		}
 
 		if _, err := kb.s3Config.client.PutObject(ctx, metaDataInput); err != nil {
-			return fmt.Errorf("error uploading file to S3: %w", err)
+			return uploaded, fmt.Errorf("error uploading file to S3: %w", err)
 		}
+		uploaded = append(uploaded, doc.Name+_metadataSuffix)
 	}
 
-	return nil
-}
-
-func (kb *KnowledgeBase) removeS3Object(ctx context.Context, bucketArn string, doc NamedDocument) error {
-	bucketName := kb.getBucketName(bucketArn)
-	input := &s3.DeleteObjectInput{
-		Bucket: aws.String(bucketName),
-		Key:    aws.String(doc.Name),
-	}
-
-	if _, err := kb.s3Config.client.DeleteObject(ctx, input); err != nil {
-		return fmt.Errorf("error deleting file from S3: %w", err)
-	}
-
-	if doc.Document.Metadata != nil {
-		metaDataInput := &s3.DeleteObjectInput{
-			Bucket: aws.String(bucketName),
-			Key:    aws.String(doc.Name + _metadataSuffix),
-		}
-
-		if _, err := kb.s3Config.client.DeleteObject(ctx, metaDataInput); err != nil {
-			return fmt.Errorf("error deleting file from S3: %w", err)
-		}
-	}
-
-	return nil
+	return uploaded, nil
 }

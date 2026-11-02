@@ -2,6 +2,7 @@ package bedrockknowledgebases
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"reflect"
 	"strings"
@@ -26,6 +27,8 @@ type bedrockAgentAPI interface {
 	IngestKnowledgeBaseDocuments(ctx context.Context, params *bedrockagent.IngestKnowledgeBaseDocumentsInput, optFns ...func(*bedrockagent.Options)) (*bedrockagent.IngestKnowledgeBaseDocumentsOutput, error)
 	StartIngestionJob(ctx context.Context, params *bedrockagent.StartIngestionJobInput, optFns ...func(*bedrockagent.Options)) (*bedrockagent.StartIngestionJobOutput, error)
 	GetIngestionJob(ctx context.Context, params *bedrockagent.GetIngestionJobInput, optFns ...func(*bedrockagent.Options)) (*bedrockagent.GetIngestionJobOutput, error)
+	ListIngestionJobs(ctx context.Context, params *bedrockagent.ListIngestionJobsInput, optFns ...func(*bedrockagent.Options)) (*bedrockagent.ListIngestionJobsOutput, error)
+	GetKnowledgeBaseDocuments(ctx context.Context, params *bedrockagent.GetKnowledgeBaseDocumentsInput, optFns ...func(*bedrockagent.Options)) (*bedrockagent.GetKnowledgeBaseDocumentsOutput, error)
 }
 
 type bedrockAgentRuntimeAPI interface {
@@ -42,11 +45,12 @@ type KnowledgeBase struct {
 	bedrockAgent        bedrockAgentAPI
 	bedrockAgentRuntime bedrockAgentRuntimeAPI
 	s3Config            s3Config
+	waitUntilSearchable bool
 }
 
 var _ vectorstores.VectorStore = &KnowledgeBase{}
 
-func New(ctx context.Context, knowledgeBaseID string) (*KnowledgeBase, error) {
+func New(ctx context.Context, knowledgeBaseID string, opts ...Option) (*KnowledgeBase, error) {
 	cfg, err := config.LoadDefaultConfig(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load aws config: %w", err)
@@ -56,7 +60,11 @@ func New(ctx context.Context, knowledgeBaseID string) (*KnowledgeBase, error) {
 	bedrockAgentRuntime := bedrockagentruntime.NewFromConfig(cfg)
 	s3Client := s3.NewFromConfig(cfg)
 
-	return newFromClients(knowledgeBaseID, bedrockAgent, bedrockAgentRuntime, s3Client), nil
+	kb := newFromClients(knowledgeBaseID, bedrockAgent, bedrockAgentRuntime, s3Client)
+	for _, opt := range opts {
+		opt(kb)
+	}
+	return kb, nil
 }
 
 func newFromClients(
@@ -81,7 +89,29 @@ type NamedDocument struct {
 	Document schema.Document
 }
 
+// AddDocuments adds docs to the knowledge base under generated names and returns those names.
+// The documents are ingested as described in AddNamedDocuments.
 func (kb *KnowledgeBase) AddDocuments(ctx context.Context, docs []schema.Document, options ...vectorstores.Option) ([]string, error) {
+	return kb.addDocuments(ctx, withGeneratedNames(docs), options...)
+}
+
+// AddNamedDocuments adds docs to the knowledge base under their names and returns those names.
+//
+// If an ingestion job is running on the data source, it returns ErrIngestionJobInProgress before
+// uploading anything, because Bedrock does not support ingesting documents directly while a sync is
+// running. Otherwise it uploads the documents to the S3 bucket of the data source. If the data source
+// has never been synced, it starts a sync, which ingests the whole bucket, and waits for it to complete.
+// If it has, it ingests the documents directly and waits until each of them is indexed; a document
+// that ends in any status other than INDEXED makes it return an error that lists those documents.
+//
+// The waits last until ctx is done. Depending on the vector store of the knowledge base, the documents
+// can take a few more minutes to become searchable after the call returns, unless the KnowledgeBase was
+// created with WithWaitUntilSearchable.
+func (kb *KnowledgeBase) AddNamedDocuments(ctx context.Context, docs []NamedDocument, options ...vectorstores.Option) ([]string, error) {
+	return kb.addDocuments(ctx, docs, options...)
+}
+
+func withGeneratedNames(docs []schema.Document) []NamedDocument {
 	namedDocs := make([]NamedDocument, len(docs))
 	for i, doc := range docs {
 		namedDocs[i] = NamedDocument{
@@ -89,11 +119,7 @@ func (kb *KnowledgeBase) AddDocuments(ctx context.Context, docs []schema.Documen
 			Document: doc,
 		}
 	}
-	return kb.addDocuments(ctx, namedDocs, options...)
-}
-
-func (kb *KnowledgeBase) AddNamedDocuments(ctx context.Context, docs []NamedDocument, options ...vectorstores.Option) ([]string, error) {
-	return kb.addDocuments(ctx, docs, options...)
+	return namedDocs
 }
 
 func (kb *KnowledgeBase) filterMetadata(docs []NamedDocument) {
@@ -131,79 +157,163 @@ func (kb *KnowledgeBase) filterMetadata(docs []NamedDocument) {
 	}
 }
 
-func (kb *KnowledgeBase) addDocuments(ctx context.Context, docs []NamedDocument, options ...vectorstores.Option) ([]string, error) {
-	opts := kb.getOptions(options...)
-
-	kb.filterMetadata(docs)
+func (kb *KnowledgeBase) resolveDataSource(ctx context.Context, opts *vectorstores.Options) (dataSource, error) {
 	if err := kb.checkKnowledgeBase(ctx); err != nil {
-		return nil, fmt.Errorf("failed to validate knowledge base: %w", err)
+		return dataSource{}, fmt.Errorf("failed to validate knowledge base: %w", err)
 	}
 	compatibleDs, incompatibleDs, err := kb.listDataSources(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("failed to list data sources: %w", err)
+		return dataSource{}, fmt.Errorf("failed to list data sources: %w", err)
 	}
 	if len(compatibleDs) == 0 {
 		if len(incompatibleDs) > 0 {
-			return nil, fmt.Errorf(
+			return dataSource{}, fmt.Errorf(
 				"found data sources but none with S3 type, please create a data source with S3 type for the knowledge base with id: %s in the AWS console",
 				kb.knowledgeBaseID,
 			)
 		}
-		return nil, fmt.Errorf(
+		return dataSource{}, fmt.Errorf(
 			"no data sources with S3 type found, please create a data source with S3 type for the knowledge base with id: %s in the AWS console",
 			kb.knowledgeBaseID,
 		)
 	}
 
-	var datasourceID string
-	var bucketARN string
 	if opts.NameSpace != "" {
 		for _, ds := range compatibleDs {
 			if ds.ID == opts.NameSpace {
-				datasourceID = ds.ID
-				bucketARN = ds.BucketARN
-				break
+				return ds, nil
 			}
 		}
-		if datasourceID == "" {
-			return nil, fmt.Errorf("data source with S3 type with id %s not found", opts.NameSpace)
-		}
-	} else if len(compatibleDs) == 1 {
-		datasourceID = compatibleDs[0].ID
-		bucketARN = compatibleDs[0].BucketARN
-	} else {
-		return nil, fmt.Errorf("multiple data sources with S3 type found, please specify which one you want to use by passing its id with the `vectorstores.WithNameSpace` option")
+		return dataSource{}, fmt.Errorf("data source with S3 type with id %s not found", opts.NameSpace)
 	}
-
-	if err := kb.addToS3(ctx, bucketARN, docs); err != nil {
-		return nil, fmt.Errorf("failed to upload documents to S3: %w", err)
+	if len(compatibleDs) == 1 {
+		return compatibleDs[0], nil
 	}
+	return dataSource{}, fmt.Errorf("multiple data sources with S3 type found, please specify which one you want to use by passing its id with the `vectorstores.WithNameSpace` option")
+}
 
-	if err := kb.ingestDocuments(ctx, datasourceID, bucketARN, docs); err != nil {
-		kb.removeFromS3(ctx, bucketARN, docs)
-		return nil, fmt.Errorf("failed to ingest documents: %w", err)
-	}
-
-	ingestionJobID, err := kb.startIngestionJob(ctx, datasourceID)
-	if err != nil {
-		return nil, fmt.Errorf(
-			"failed to start ingestion job. Documents are correctly loaded, please retry or manually sync the knowledgebase from the AWS console. error: %w",
-			err,
-		)
-	}
-
-	if err := kb.checkIngestionJobStatus(ctx, datasourceID, ingestionJobID); err != nil {
-		return nil, fmt.Errorf(
-			"failed to check ingestion status. Documents are correctly loaded, please retry or manually sync the knowledgebase from the AWS console. error: %w",
-			err,
-		)
-	}
-
+func documentNames(docs []NamedDocument) []string {
 	names := make([]string, len(docs))
 	for i, doc := range docs {
 		names[i] = doc.Name
 	}
-	return names, nil
+	return names
+}
+
+func (kb *KnowledgeBase) addDocuments(ctx context.Context, docs []NamedDocument, options ...vectorstores.Option) ([]string, error) {
+	opts := kb.getOptions(options...)
+	kb.filterMetadata(docs)
+	ds, err := kb.resolveDataSource(ctx, opts)
+	if err != nil {
+		return nil, err
+	}
+
+	running, err := kb.hasRunningIngestionJob(ctx, ds.ID)
+	if err != nil {
+		return nil, err
+	}
+	if running {
+		return nil, ErrIngestionJobInProgress
+	}
+	synced, err := kb.hasCompletedIngestionJob(ctx, ds.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := kb.upload(ctx, ds.BucketARN, docs); err != nil {
+		return nil, err
+	}
+
+	if !synced {
+		ingestionJobID, err := kb.startIngestionJob(ctx, ds.ID)
+		if err != nil {
+			return nil, errors.Join(
+				fmt.Errorf("failed to start the first sync of the data source: %w", err),
+				kb.removeFromS3(ctx, ds.BucketARN, objectKeys(docs)),
+			)
+		}
+		if err := kb.checkIngestionJobStatus(ctx, ds.ID, ingestionJobID); err != nil {
+			return nil, fmt.Errorf("failed to check the first sync of the data source: %w", err)
+		}
+	} else {
+		if err := kb.ingestDocuments(ctx, ds.ID, ds.BucketARN, docs); err != nil {
+			return nil, errors.Join(
+				fmt.Errorf("failed to ingest documents: %w", err),
+				kb.removeFromS3(ctx, ds.BucketARN, objectKeys(docs)),
+			)
+		}
+		if err := kb.waitForIndexedDocuments(ctx, ds, docs); err != nil {
+			return nil, err
+		}
+	}
+
+	if kb.waitUntilSearchable {
+		if err := kb.waitForSearchableDocuments(ctx, ds, docs); err != nil {
+			return nil, err
+		}
+	}
+	return documentNames(docs), nil
+}
+
+// UploadDocuments uploads docs to S3 under generated names, without ingesting them, and returns those names.
+// If an upload fails, the documents already uploaded are removed. Pair with StartSync once all
+// data sources have been uploaded.
+func (kb *KnowledgeBase) UploadDocuments(ctx context.Context, docs []schema.Document, options ...vectorstores.Option) ([]string, error) {
+	return kb.UploadNamedDocuments(ctx, withGeneratedNames(docs), options...)
+}
+
+// UploadNamedDocuments uploads docs to S3 under their names, without ingesting them, and returns those names.
+// If an upload fails, the documents already uploaded are removed. Pair with StartSync once all
+// data sources have been uploaded.
+func (kb *KnowledgeBase) UploadNamedDocuments(ctx context.Context, docs []NamedDocument, options ...vectorstores.Option) ([]string, error) {
+	opts := kb.getOptions(options...)
+	kb.filterMetadata(docs)
+	ds, err := kb.resolveDataSource(ctx, opts)
+	if err != nil {
+		return nil, err
+	}
+	if err := kb.upload(ctx, ds.BucketARN, docs); err != nil {
+		return nil, err
+	}
+	return documentNames(docs), nil
+}
+
+const (
+	_sourceURIKey = "x-amz-bedrock-kb-source-uri"
+	// _maxRetrieveResults is the largest number of results a Retrieve request accepts.
+	_maxRetrieveResults = 100
+	// _searchableCheckQuery is the query of the Retrieve requests that look for added documents. The
+	// filter on their source URIs selects the results, so any text works.
+	_searchableCheckQuery = "document"
+)
+
+// searchableSourceURIs returns which of uris have at least one chunk that Retrieve returns.
+func (kb *KnowledgeBase) searchableSourceURIs(ctx context.Context, uris []string) (map[string]bool, error) {
+	result, err := kb.bedrockAgentRuntime.Retrieve(ctx, &bedrockagentruntime.RetrieveInput{
+		KnowledgeBaseId: aws.String(kb.knowledgeBaseID),
+		RetrievalQuery:  &types.KnowledgeBaseQuery{Text: aws.String(_searchableCheckQuery)},
+		RetrievalConfiguration: &types.KnowledgeBaseRetrievalConfiguration{
+			VectorSearchConfiguration: &types.KnowledgeBaseVectorSearchConfiguration{
+				NumberOfResults: aws.Int32(_maxRetrieveResults),
+				Filter: &types.RetrievalFilterMemberIn{
+					Value: types.FilterAttribute{
+						Key:   aws.String(_sourceURIKey),
+						Value: document.NewLazyDocument(uris),
+					},
+				},
+			},
+		},
+	})
+	if err != nil {
+		return nil, err
+	}
+	found := make(map[string]bool, len(result.RetrievalResults))
+	for _, r := range result.RetrievalResults {
+		if r.Location != nil && r.Location.S3Location != nil {
+			found[aws.ToString(r.Location.S3Location.Uri)] = true
+		}
+	}
+	return found, nil
 }
 
 func (kb *KnowledgeBase) SimilaritySearch(ctx context.Context, query string, numDocuments int, options ...vectorstores.Option) (
@@ -360,6 +470,8 @@ func (kb *KnowledgeBase) unmarshalMetadataValue(value document.Interface) (any, 
 			return nil, err
 		}
 		return float32(floatValue), nil
+	case float64:
+		return float32(value), nil
 	}
 	return v, nil
 }
