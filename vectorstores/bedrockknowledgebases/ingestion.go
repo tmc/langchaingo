@@ -307,26 +307,29 @@ func poll(ctx context.Context, check func(ctx context.Context) (done bool, err e
 }
 
 func (kb *KnowledgeBase) hasRunningIngestionJob(ctx context.Context, datasourceID string) (bool, error) {
-	return kb.hasIngestionJob(ctx, datasourceID, _runningIngestionJobStatuses...)
+	for _, status := range _runningIngestionJobStatuses {
+		found, err := kb.hasIngestionJob(ctx, datasourceID, status)
+		if err != nil || found {
+			return found, err
+		}
+	}
+	return false, nil
 }
 
 func (kb *KnowledgeBase) hasCompletedIngestionJob(ctx context.Context, datasourceID string) (bool, error) {
 	return kb.hasIngestionJob(ctx, datasourceID, types.IngestionJobStatusComplete)
 }
 
-// hasIngestionJob reports whether the data source has at least one ingestion job in any of statuses.
-func (kb *KnowledgeBase) hasIngestionJob(ctx context.Context, datasourceID string, statuses ...types.IngestionJobStatus) (bool, error) {
-	values := make([]string, len(statuses))
-	for i, status := range statuses {
-		values[i] = string(status)
-	}
+// hasIngestionJob reports whether the data source has at least one ingestion job in status.
+// ListIngestionJobs matches a status filter against its first value only, so each status needs its own call.
+func (kb *KnowledgeBase) hasIngestionJob(ctx context.Context, datasourceID string, status types.IngestionJobStatus) (bool, error) {
 	result, err := kb.bedrockAgent.ListIngestionJobs(ctx, &bedrockagent.ListIngestionJobsInput{
 		KnowledgeBaseId: aws.String(kb.knowledgeBaseID),
 		DataSourceId:    aws.String(datasourceID),
 		Filters: []types.IngestionJobFilter{{
 			Attribute: types.IngestionJobFilterAttributeStatus,
 			Operator:  types.IngestionJobFilterOperatorEq,
-			Values:    values,
+			Values:    []string{string(status)},
 		}},
 		MaxResults: aws.Int32(1),
 	})

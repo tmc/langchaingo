@@ -7,7 +7,6 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"slices"
 	"strings"
 	"sync"
 	"testing"
@@ -182,9 +181,13 @@ func (t *testBedrockAgent) GetIngestionJob(_ context.Context, _ *bedrockagent.Ge
 
 func (t *testBedrockAgent) ListIngestionJobs(_ context.Context, params *bedrockagent.ListIngestionJobsInput, _ ...func(*bedrockagent.Options)) (*bedrockagent.ListIngestionJobsOutput, error) {
 	t.calls++
-	statuses := params.Filters[0].Values
-	if (slices.Contains(statuses, string(types.IngestionJobStatusInProgress)) && t.ingestionJobRunning) ||
-		(slices.Contains(statuses, string(types.IngestionJobStatusComplete)) && !t.neverSynced) {
+	values := params.Filters[0].Values
+	if len(values) != 1 {
+		return nil, fmt.Errorf("ListIngestionJobs matches a status filter against its first value only, got %v", values)
+	}
+	status := types.IngestionJobStatus(values[0])
+	if (status == types.IngestionJobStatusInProgress && t.ingestionJobRunning) ||
+		(status == types.IngestionJobStatusComplete && !t.neverSynced) {
 		return &bedrockagent.ListIngestionJobsOutput{
 			IngestionJobSummaries: []types.IngestionJobSummary{{IngestionJobId: aws.String("testIngestionJobId")}},
 		}, nil
@@ -280,7 +283,7 @@ func TestKnowledgeBaseAddDocuments(t *testing.T) {
 
 	ids, err := kb.AddDocuments(ctx, []schema.Document{{PageContent: "Mock"}})
 	require.NoError(t, err)
-	require.Equal(t, 7, testBedrockAgent.calls, "expected 7 calls to testBedrockAgent")
+	require.Equal(t, 9, testBedrockAgent.calls, "expected 9 calls to testBedrockAgent")
 	require.Equal(t, 1, s3Client.calls, "expected 1 call to s3Client")
 	require.Len(t, ids, 1, "expected 1 id")
 }
@@ -319,7 +322,7 @@ func TestKnowledgeBaseAddDocumentsWithMultipleDs(t *testing.T) {
 
 	ids, err := kb.AddDocuments(ctx, []schema.Document{{PageContent: "Mock"}}, vectorstores.WithNameSpace("testS3DatasourceID"))
 	require.NoError(t, err)
-	require.Equal(t, 8, testBedrockAgent.calls, "expected 8 calls to testBedrockAgent")
+	require.Equal(t, 10, testBedrockAgent.calls, "expected 10 calls to testBedrockAgent")
 	require.Equal(t, 1, s3Client.calls, "expected 1 call to s3Client")
 	require.Len(t, ids, 1, "expected 1 id")
 }
@@ -334,7 +337,7 @@ func TestKnowledgeBaseAddDocumentsWithMultipleMixedDs(t *testing.T) {
 
 	ids, err := kb.AddDocuments(ctx, []schema.Document{{PageContent: "Mock"}})
 	require.NoError(t, err)
-	require.Equal(t, 8, testBedrockAgent.calls, "expected 8 calls to testBedrockAgent")
+	require.Equal(t, 10, testBedrockAgent.calls, "expected 10 calls to testBedrockAgent")
 	require.Equal(t, 1, s3Client.calls, "expected 1 call to s3Client")
 	require.Len(t, ids, 1, "expected 1 id")
 }
@@ -367,7 +370,7 @@ func TestKnowledgeBaseAddNamedDocuments(t *testing.T) {
 		},
 	)
 	require.NoError(t, err)
-	require.Equal(t, 7, testBedrockAgent.calls, "expected 7 calls to testBedrockAgent")
+	require.Equal(t, 9, testBedrockAgent.calls, "expected 9 calls to testBedrockAgent")
 	require.Equal(t, 1, s3Client.calls, "expected 1 call to s3Client")
 	require.Len(t, ids, 1, "expected 1 id")
 	require.Equal(t, "Mock", ids[0], "expected id to be 'Mock'")
