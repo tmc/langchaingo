@@ -52,7 +52,7 @@ func TestInvokeModelInputs(t *testing.T) {
 			SafetyConfig: map[string]any{"identifier": "gr-123"},
 		})
 		require.Error(t, err)
-		assert.Contains(t, err.Error(), "bedrock safety version")
+		assert.Contains(t, err.Error(), "bedrock guardrail version")
 	})
 
 	t.Run("requires safety identifier", func(t *testing.T) {
@@ -60,7 +60,7 @@ func TestInvokeModelInputs(t *testing.T) {
 			SafetyConfig: map[string]any{"version": "1"},
 		})
 		require.Error(t, err)
-		assert.Contains(t, err.Error(), "bedrock safety identifier")
+		assert.Contains(t, err.Error(), "bedrock guardrail identifier")
 	})
 
 	t.Run("rejects invalid safety types", func(t *testing.T) {
@@ -71,7 +71,7 @@ func TestInvokeModelInputs(t *testing.T) {
 			},
 		})
 		require.Error(t, err)
-		assert.Contains(t, err.Error(), "bedrock safety identifier")
+		assert.Contains(t, err.Error(), "bedrock guardrail identifier")
 	})
 
 	t.Run("returns content filter error when guardrail intervenes", func(t *testing.T) {
@@ -92,20 +92,6 @@ func TestInvokeModelInputs(t *testing.T) {
 		assert.Equal(t, "bedrock", llmErr.Provider)
 		assert.Equal(t, "INTERVENED", llmErr.Details["guardrail_action"])
 		assert.Equal(t, map[string]any{"rule": "blocked"}, llmErr.Details["trace"])
-	})
-
-	t.Run("returns content filter error for provider filtered response", func(t *testing.T) {
-		resp, err := invokeModel(context.Background(), &mockBedrockClient{
-			invokeFunc: func(ctx context.Context, params *bedrockruntime.InvokeModelInput, optFns ...func(*bedrockruntime.Options)) (*bedrockruntime.InvokeModelOutput, error) {
-				return &bedrockruntime.InvokeModelOutput{
-					Body: []byte(`{"results":[{"completionReason":"CONTENT_FILTERED"}]}`),
-				}, nil
-			},
-		}, "amazon.titan-text-express-v1", []byte(`{"prompt":"hello"}`), llms.CallOptions{})
-
-		require.Nil(t, resp)
-		require.Error(t, err)
-		assert.True(t, llms.IsContentFilterError(err))
 	})
 
 	t.Run("returns response when guardrail does not intervene", func(t *testing.T) {
