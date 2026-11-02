@@ -138,8 +138,9 @@ func checkGuardrailError(response any) error {
 	if action == bedrockGuardrailIntervened {
 		err := llms.NewError(llms.ErrCodeContentFilter, "bedrock", "content blocked by Bedrock guardrail")
 		err.WithDetail("guardrail_action", action)
-		if len(trace) > 0 {
-			err.WithDetail("trace", string(trace))
+		var decodedTrace any
+		if json.Unmarshal(trace, &decodedTrace) == nil {
+			err.WithDetail("trace", decodedTrace)
 		}
 		return err
 	}
