@@ -45,11 +45,12 @@ type KnowledgeBase struct {
 	bedrockAgent        bedrockAgentAPI
 	bedrockAgentRuntime bedrockAgentRuntimeAPI
 	s3Config            s3Config
+	waitUntilSearchable bool
 }
 
 var _ vectorstores.VectorStore = &KnowledgeBase{}
 
-func New(ctx context.Context, knowledgeBaseID string) (*KnowledgeBase, error) {
+func New(ctx context.Context, knowledgeBaseID string, opts ...Option) (*KnowledgeBase, error) {
 	cfg, err := config.LoadDefaultConfig(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load aws config: %w", err)
@@ -59,7 +60,11 @@ func New(ctx context.Context, knowledgeBaseID string) (*KnowledgeBase, error) {
 	bedrockAgentRuntime := bedrockagentruntime.NewFromConfig(cfg)
 	s3Client := s3.NewFromConfig(cfg)
 
-	return newFromClients(knowledgeBaseID, bedrockAgent, bedrockAgentRuntime, s3Client), nil
+	kb := newFromClients(knowledgeBaseID, bedrockAgent, bedrockAgentRuntime, s3Client)
+	for _, opt := range opts {
+		opt(kb)
+	}
+	return kb, nil
 }
 
 func newFromClients(
@@ -100,7 +105,8 @@ func (kb *KnowledgeBase) AddDocuments(ctx context.Context, docs []schema.Documen
 // that ends in any status other than INDEXED makes it return an error that lists those documents.
 //
 // The waits last until ctx is done. Depending on the vector store of the knowledge base, the documents
-// can take a few more minutes to become searchable after the call returns.
+// can take a few more minutes to become searchable after the call returns, unless the KnowledgeBase was
+// created with WithWaitUntilSearchable.
 func (kb *KnowledgeBase) AddNamedDocuments(ctx context.Context, docs []NamedDocument, options ...vectorstores.Option) ([]string, error) {
 	return kb.addDocuments(ctx, docs, options...)
 }
@@ -229,17 +235,22 @@ func (kb *KnowledgeBase) addDocuments(ctx context.Context, docs []NamedDocument,
 		if err := kb.checkIngestionJobStatus(ctx, ds.ID, ingestionJobID); err != nil {
 			return nil, fmt.Errorf("failed to check the first sync of the data source: %w", err)
 		}
-		return documentNames(docs), nil
+	} else {
+		if err := kb.ingestDocuments(ctx, ds.ID, ds.BucketARN, docs); err != nil {
+			return nil, errors.Join(
+				fmt.Errorf("failed to ingest documents: %w", err),
+				kb.removeFromS3(ctx, ds.BucketARN, objectKeys(docs)),
+			)
+		}
+		if err := kb.waitForIndexedDocuments(ctx, ds, docs); err != nil {
+			return nil, err
+		}
 	}
 
-	if err := kb.ingestDocuments(ctx, ds.ID, ds.BucketARN, docs); err != nil {
-		return nil, errors.Join(
-			fmt.Errorf("failed to ingest documents: %w", err),
-			kb.removeFromS3(ctx, ds.BucketARN, objectKeys(docs)),
-		)
-	}
-	if err := kb.waitForIndexedDocuments(ctx, ds, docs); err != nil {
-		return nil, err
+	if kb.waitUntilSearchable {
+		if err := kb.waitForSearchableDocuments(ctx, ds, docs); err != nil {
+			return nil, err
+		}
 	}
 	return documentNames(docs), nil
 }
@@ -265,6 +276,44 @@ func (kb *KnowledgeBase) UploadNamedDocuments(ctx context.Context, docs []NamedD
 		return nil, err
 	}
 	return documentNames(docs), nil
+}
+
+const (
+	_sourceURIKey = "x-amz-bedrock-kb-source-uri"
+	// _maxRetrieveResults is the largest number of results a Retrieve request accepts.
+	_maxRetrieveResults = 100
+	// _searchableCheckQuery is the query of the Retrieve requests that look for added documents. The
+	// filter on their source URIs selects the results, so any text works.
+	_searchableCheckQuery = "document"
+)
+
+// searchableSourceURIs returns which of uris have at least one chunk that Retrieve returns.
+func (kb *KnowledgeBase) searchableSourceURIs(ctx context.Context, uris []string) (map[string]bool, error) {
+	result, err := kb.bedrockAgentRuntime.Retrieve(ctx, &bedrockagentruntime.RetrieveInput{
+		KnowledgeBaseId: aws.String(kb.knowledgeBaseID),
+		RetrievalQuery:  &types.KnowledgeBaseQuery{Text: aws.String(_searchableCheckQuery)},
+		RetrievalConfiguration: &types.KnowledgeBaseRetrievalConfiguration{
+			VectorSearchConfiguration: &types.KnowledgeBaseVectorSearchConfiguration{
+				NumberOfResults: aws.Int32(_maxRetrieveResults),
+				Filter: &types.RetrievalFilterMemberIn{
+					Value: types.FilterAttribute{
+						Key:   aws.String(_sourceURIKey),
+						Value: document.NewLazyDocument(uris),
+					},
+				},
+			},
+		},
+	})
+	if err != nil {
+		return nil, err
+	}
+	found := make(map[string]bool, len(result.RetrievalResults))
+	for _, r := range result.RetrievalResults {
+		if r.Location != nil && r.Location.S3Location != nil {
+			found[aws.ToString(r.Location.S3Location.Uri)] = true
+		}
+	}
+	return found, nil
 }
 
 func (kb *KnowledgeBase) SimilaritySearch(ctx context.Context, query string, numDocuments int, options ...vectorstores.Option) (

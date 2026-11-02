@@ -2,9 +2,11 @@ package bedrockknowledgebases
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
+	"math"
 	"net/http"
 	"os"
 	"strings"
@@ -238,6 +240,42 @@ func (t *testBedrockAgentRuntime) Retrieve(_ context.Context, _ *bedrockagentrun
 				Score: aws.Float64(0.7),
 			},
 		},
+	}, nil
+}
+
+type testSearchableRuntime struct {
+	calls       int
+	hiddenCalls int
+	requested   [][]string
+}
+
+var _ bedrockAgentRuntimeAPI = &testSearchableRuntime{}
+
+func (t *testSearchableRuntime) Retrieve(_ context.Context, params *bedrockagentruntime.RetrieveInput, _ ...func(*bedrockagentruntime.Options)) (*bedrockagentruntime.RetrieveOutput, error) {
+	t.calls++
+	filter := params.RetrievalConfiguration.VectorSearchConfiguration.Filter
+	in, ok := filter.(*runtimetypes.RetrievalFilterMemberIn)
+	if !ok || aws.ToString(in.Value.Key) != "x-amz-bedrock-kb-source-uri" {
+		return nil, fmt.Errorf("expected an in filter on the source URI, got %#v", filter)
+	}
+	value, err := in.Value.Value.MarshalSmithyDocument()
+	if err != nil {
+		return nil, err
+	}
+	var uris []string
+	if err := json.Unmarshal(value, &uris); err != nil {
+		return nil, err
+	}
+	t.requested = append(t.requested, uris)
+	if t.calls <= t.hiddenCalls {
+		return &bedrockagentruntime.RetrieveOutput{}, nil
+	}
+	return &bedrockagentruntime.RetrieveOutput{
+		RetrievalResults: []runtimetypes.KnowledgeBaseRetrievalResult{{
+			Location: &runtimetypes.RetrievalResultLocation{
+				S3Location: &runtimetypes.RetrievalResultS3Location{Uri: aws.String(uris[0])},
+			},
+		}},
 	}, nil
 }
 
@@ -478,6 +516,64 @@ func TestKnowledgeBaseAddDocumentsWithFailedRemoval(t *testing.T) {
 	_, err := kb.AddNamedDocuments(ctx, []NamedDocument{{Name: "Mock", Document: schema.Document{PageContent: "Mock"}}})
 	require.ErrorContains(t, err, "ingestion failed")
 	require.ErrorContains(t, err, "Mock, left in bucket testBucket")
+}
+
+func TestKnowledgeBaseAddDocumentsWithoutWaitUntilSearchable(t *testing.T) {
+	ctx := context.Background()
+	t.Parallel()
+
+	runtime := &testSearchableRuntime{}
+	kb := newFromClients("testKbWithOneS3Datasource", &testBedrockAgent{}, runtime, &testS3Client{})
+
+	_, err := kb.AddDocuments(ctx, []schema.Document{{PageContent: "Mock"}})
+	require.NoError(t, err)
+	require.Equal(t, 0, runtime.calls, "expected no Retrieve request")
+}
+
+func TestKnowledgeBaseAddDocumentsWithWaitUntilSearchable(t *testing.T) {
+	ctx := context.Background()
+	t.Parallel()
+
+	runtime := &testSearchableRuntime{hiddenCalls: 1}
+	kb := newFromClients("testKbWithOneS3Datasource", &testBedrockAgent{}, runtime, &testS3Client{})
+	WithWaitUntilSearchable()(kb)
+
+	_, err := kb.AddNamedDocuments(ctx, []NamedDocument{
+		{Name: "Mock1", Document: schema.Document{PageContent: "Mock"}},
+		{Name: "Mock2", Document: schema.Document{PageContent: "Mock"}},
+	})
+	require.NoError(t, err)
+	require.Equal(t, [][]string{
+		{"s3://testBucket/Mock1", "s3://testBucket/Mock2"},
+		{"s3://testBucket/Mock1", "s3://testBucket/Mock2"},
+		{"s3://testBucket/Mock2"},
+	}, runtime.requested, "expected each request to ask only for the documents not searchable yet")
+}
+
+func TestKnowledgeBaseAddDocumentsWithDataSourceNeverSyncedAndWaitUntilSearchable(t *testing.T) {
+	ctx := context.Background()
+	t.Parallel()
+
+	runtime := &testSearchableRuntime{}
+	kb := newFromClients("testKbWithOneS3Datasource", &testBedrockAgent{neverSynced: true}, runtime, &testS3Client{})
+	WithWaitUntilSearchable()(kb)
+
+	_, err := kb.AddDocuments(ctx, []schema.Document{{PageContent: "Mock"}})
+	require.NoError(t, err)
+	require.Equal(t, 1, runtime.calls, "expected the first sync to wait until the document is searchable")
+}
+
+func TestKnowledgeBaseAddDocumentsWithWaitUntilSearchableAfterContextDone(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 200*time.Millisecond)
+	defer cancel()
+	t.Parallel()
+
+	kb := newFromClients("testKbWithOneS3Datasource", &testBedrockAgent{}, &testSearchableRuntime{hiddenCalls: math.MaxInt}, &testS3Client{})
+	WithWaitUntilSearchable()(kb)
+
+	_, err := kb.AddNamedDocuments(ctx, []NamedDocument{{Name: "Mock", Document: schema.Document{PageContent: "Mock"}}})
+	require.ErrorIs(t, err, context.DeadlineExceeded)
+	require.ErrorContains(t, err, "s3://testBucket/Mock")
 }
 
 func TestKnowledgeBaseUploadNamedDocumentsWithFailedUpload(t *testing.T) {

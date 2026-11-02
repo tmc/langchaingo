@@ -398,3 +398,35 @@ func (kb *KnowledgeBase) waitForIndexedDocuments(ctx context.Context, ds dataSou
 		return true, nil
 	})
 }
+
+// waitForSearchableDocuments waits until Retrieve returns at least one chunk of every document of docs. When
+// ctx is done first, the returned error lists the documents not searchable yet.
+func (kb *KnowledgeBase) waitForSearchableDocuments(ctx context.Context, ds dataSource, docs []NamedDocument) error {
+	bucketName := kb.getBucketName(ds.BucketARN)
+	pending := make([]string, len(docs))
+	for i, doc := range docs {
+		pending[i] = "s3://" + bucketName + "/" + doc.Name
+	}
+
+	err := poll(ctx, func(ctx context.Context) (bool, error) {
+		var stillPending []string
+		for i := 0; i < len(pending); i += _documentsBatchSize {
+			batch := pending[i:min(i+_documentsBatchSize, len(pending))]
+			found, err := kb.searchableSourceURIs(ctx, batch)
+			if err != nil {
+				return false, fmt.Errorf("failed to retrieve documents: %w", err)
+			}
+			for _, uri := range batch {
+				if !found[uri] {
+					stillPending = append(stillPending, uri)
+				}
+			}
+		}
+		pending = stillPending
+		return len(pending) == 0, nil
+	})
+	if err != nil {
+		return fmt.Errorf("documents not searchable yet (%s): %w", strings.Join(pending, ", "), err)
+	}
+	return nil
+}
