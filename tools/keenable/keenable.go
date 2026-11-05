@@ -1,27 +1,24 @@
 package keenable
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
-	"os"
 	"strings"
 
+	sdk "github.com/keenableai/keenable-sdk/go"
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/httputil"
 	"github.com/tmc/langchaingo/tools"
 )
 
 const (
-	// DefaultBaseURL is the Keenable search endpoint. Without an API key the
-	// tool calls DefaultBaseURL + "/public".
-	DefaultBaseURL = "https://api.keenable.ai/v1/search"
+	// DefaultBaseURL is the Keenable API host. The SDK appends /v1/search or
+	// /v1/search/public when no API key is configured.
+	DefaultBaseURL = sdk.DefaultBaseURL
 	// DefaultAppTitle identifies the caller on the keyless public endpoint,
-	// which requires an X-Keenable-Title header.
+	// sent as X-Keenable-Title (SDK ClientSource).
 	DefaultAppTitle = "langchaingo"
 	// DefaultMaxResults is the number of results returned per query.
 	DefaultMaxResults = 5
@@ -36,7 +33,20 @@ var ErrNoGoodResult = errors.New("no good search results found")
 type Tool struct {
 	CallbacksHandler callbacks.Handler
 
+	client     *sdk.Client
+	maxResults int
+	site       string
+}
+
+var _ tools.Tool = Tool{}
+
+// Option defines a function for configuring the Keenable tool.
+type Option func(*toolConfig)
+
+type toolConfig struct {
+	withAPIKey bool
 	apiKey     string
+	withBase   bool
 	baseURL    string
 	appTitle   string
 	maxResults int
@@ -44,62 +54,87 @@ type Tool struct {
 	httpClient *http.Client
 }
 
-var _ tools.Tool = Tool{}
-
-// Option defines a function for configuring the Keenable tool.
-type Option func(*Tool)
-
 // WithAPIKey sets the Keenable API key. Without one, the keyless public
-// endpoint is used.
+// endpoint is used. Pass an empty string to force the keyless tier even when
+// KEENABLE_API_KEY is set.
 func WithAPIKey(apiKey string) Option {
-	return func(t *Tool) { t.apiKey = strings.TrimSpace(apiKey) }
+	return func(c *toolConfig) {
+		c.withAPIKey = true
+		c.apiKey = strings.TrimSpace(apiKey)
+	}
 }
 
 // WithHTTPClient sets a custom HTTP client.
 func WithHTTPClient(client *http.Client) Option {
-	return func(t *Tool) { t.httpClient = client }
+	return func(c *toolConfig) { c.httpClient = client }
 }
 
 // WithMaxResults sets the number of results per query (1-50).
 func WithMaxResults(n int) Option {
-	return func(t *Tool) { t.maxResults = n }
+	return func(c *toolConfig) { c.maxResults = n }
 }
 
 // WithSite restricts results to a single domain, e.g. "go.dev".
 func WithSite(site string) Option {
-	return func(t *Tool) { t.site = strings.TrimSpace(site) }
+	return func(c *toolConfig) { c.site = strings.TrimSpace(site) }
 }
 
-// WithBaseURL overrides the search endpoint.
+// WithBaseURL overrides the Keenable API host (https://api.keenable.ai).
+// A legacy value ending in /v1/search is normalized to the host root.
 func WithBaseURL(baseURL string) Option {
-	return func(t *Tool) { t.baseURL = strings.TrimRight(baseURL, "/") }
+	return func(c *toolConfig) {
+		c.withBase = true
+		c.baseURL = normalizeBaseURL(baseURL)
+	}
 }
 
-// WithAppTitle sets the X-Keenable-Title header sent to the keyless endpoint.
+// WithAppTitle sets the X-Keenable-Title header (SDK ClientSource) sent with
+// every request, including keyed calls.
 func WithAppTitle(title string) Option {
-	return func(t *Tool) { t.appTitle = title }
+	return func(c *toolConfig) { c.appTitle = title }
 }
 
 // New initializes a new Keenable search tool. The API key defaults to the
 // KEENABLE_API_KEY environment variable and is optional.
 func New(opts ...Option) (*Tool, error) {
-	tool := &Tool{
-		apiKey:     strings.TrimSpace(os.Getenv("KEENABLE_API_KEY")),
-		baseURL:    DefaultBaseURL,
+	cfg := &toolConfig{
 		appTitle:   DefaultAppTitle,
 		maxResults: DefaultMaxResults,
 		httpClient: &http.Client{Transport: httputil.DefaultTransport},
 	}
 	for _, opt := range opts {
-		opt(tool)
+		opt(cfg)
 	}
-	if tool.maxResults < 1 {
-		tool.maxResults = 1
+	if cfg.maxResults < 1 {
+		cfg.maxResults = 1
 	}
-	if tool.maxResults > maxResultsLimit {
-		tool.maxResults = maxResultsLimit
+	if cfg.maxResults > maxResultsLimit {
+		cfg.maxResults = maxResultsLimit
 	}
-	return tool, nil
+
+	sdkOpts := &sdk.Options{
+		ClientSource: cfg.appTitle,
+		HTTPClient:   cfg.httpClient,
+	}
+	if cfg.withBase {
+		base := cfg.baseURL
+		sdkOpts.BaseURL = &base
+	}
+	if cfg.withAPIKey {
+		key := cfg.apiKey
+		sdkOpts.APIKey = &key
+	}
+
+	client, err := sdk.New(sdkOpts)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Tool{
+		client:     client,
+		maxResults: cfg.maxResults,
+		site:       cfg.site,
+	}, nil
 }
 
 // Name returns a name for the tool.
@@ -139,80 +174,20 @@ func (t Tool) Call(ctx context.Context, input string) (string, error) {
 	return result, nil
 }
 
-type searchResult struct {
-	Title       string `json:"title"`
-	URL         string `json:"url"`
-	Snippet     string `json:"snippet"`
-	Description string `json:"description"`
-	PublishedAt string `json:"published_at"`
-}
-
-type searchResponse struct {
-	Results []searchResult `json:"results"`
-}
-
 func (t Tool) search(ctx context.Context, query string) (string, error) {
-	req, err := t.newSearchRequest(ctx, query)
-	if err != nil {
-		return "", err
-	}
-	parsed, err := t.doSearchRequest(req)
-	if err != nil {
-		return "", err
-	}
-	return formatSearchResults(parsed.Results, t.maxResults)
-}
-
-func (t Tool) searchEndpoint() string {
-	if t.apiKey == "" {
-		return t.baseURL + "/public"
-	}
-	return t.baseURL
-}
-
-func (t Tool) newSearchRequest(ctx context.Context, query string) (*http.Request, error) {
-	body := map[string]any{"query": query, "max_results": t.maxResults}
+	searchOpts := &sdk.SearchOptions{MaxResults: t.maxResults}
 	if t.site != "" {
-		body["site"] = t.site
-	}
-	payload, err := json.Marshal(body)
-	if err != nil {
-		return nil, fmt.Errorf("marshal keenable request: %w", err)
+		searchOpts.Site = t.site
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, t.searchEndpoint(), bytes.NewReader(payload))
+	resp, err := t.client.Search(ctx, query, searchOpts)
 	if err != nil {
-		return nil, fmt.Errorf("creating keenable request: %w", err)
+		return "", err
 	}
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Accept", "application/json")
-	if t.apiKey != "" {
-		req.Header.Set("X-API-Key", t.apiKey)
-	} else {
-		req.Header.Set("X-Keenable-Title", t.appTitle)
-	}
-	return req, nil
+	return formatSearchResults(resp.Results, t.maxResults)
 }
 
-func (t Tool) doSearchRequest(req *http.Request) (searchResponse, error) {
-	resp, err := t.httpClient.Do(req)
-	if err != nil {
-		return searchResponse{}, fmt.Errorf("keenable request: %w", err)
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
-		b, _ := io.ReadAll(resp.Body) // body only used for the error message
-		return searchResponse{}, fmt.Errorf("keenable api responded with %d: %s", resp.StatusCode, string(b))
-	}
-
-	var parsed searchResponse
-	if err := json.NewDecoder(resp.Body).Decode(&parsed); err != nil {
-		return searchResponse{}, fmt.Errorf("decode keenable response: %w", err)
-	}
-	return parsed, nil
-}
-
-func formatSearchResults(results []searchResult, maxResults int) (string, error) {
+func formatSearchResults(results []sdk.SearchResult, maxResults int) (string, error) {
 	var sb strings.Builder
 	n := 0
 	for _, r := range results {
@@ -223,12 +198,12 @@ func formatSearchResults(results []searchResult, maxResults int) (string, error)
 			break
 		}
 		text := r.Snippet
-		if text == "" {
-			text = r.Description
+		if text == "" && r.Description != nil {
+			text = *r.Description
 		}
 		fmt.Fprintf(&sb, "Title: %s\n", r.Title)
-		if r.PublishedAt != "" {
-			fmt.Fprintf(&sb, "Published: %s\n", r.PublishedAt)
+		if r.PublishedAt != nil && *r.PublishedAt != "" {
+			fmt.Fprintf(&sb, "Published: %s\n", *r.PublishedAt)
 		}
 		fmt.Fprintf(&sb, "Description: %s\nURL: %s\n\n", text, r.URL)
 		n++
@@ -237,4 +212,10 @@ func formatSearchResults(results []searchResult, maxResults int) (string, error)
 		return "", ErrNoGoodResult
 	}
 	return sb.String(), nil
+}
+
+// normalizeBaseURL maps legacy tool base URLs (…/v1/search) to the SDK host root.
+func normalizeBaseURL(baseURL string) string {
+	baseURL = strings.TrimRight(strings.TrimSpace(baseURL), "/")
+	return strings.TrimSuffix(baseURL, "/v1/search")
 }

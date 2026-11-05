@@ -49,7 +49,12 @@ func TestKeenableToolKeylessRequest(t *testing.T) {
 	}))
 	t.Cleanup(server.Close)
 
-	tool, err := New(WithAPIKey(""), WithBaseURL(server.URL+"/v1/search"), WithMaxResults(2), WithSite("go.dev"))
+	tool, err := New(
+		WithAPIKey(""),
+		WithBaseURL(server.URL+"/v1/search"),
+		WithMaxResults(2),
+		WithSite("go.dev"),
+	)
 	require.NoError(t, err)
 	result, err := tool.Call(context.Background(), "go")
 	require.NoError(t, err)
@@ -57,7 +62,12 @@ func TestKeenableToolKeylessRequest(t *testing.T) {
 	require.Equal(t, "/v1/search/public", gotPath)
 	require.Equal(t, DefaultAppTitle, gotTitle)
 	require.Empty(t, gotKey)
-	require.Equal(t, map[string]any{"query": "go", "max_results": float64(2), "site": "go.dev"}, gotBody)
+	require.Equal(t, map[string]any{
+		"query":       "go",
+		"max_results": float64(2),
+		"site":        "go.dev",
+		"mode":        "pro",
+	}, gotBody)
 	require.Equal(t, "Title: Go\nPublished: 2026-05-06T10:00:00Z\nDescription: Build simple, secure, scalable systems with Go.\nURL: https://go.dev\n\n", result)
 }
 
@@ -80,7 +90,7 @@ func TestKeenableToolKeyedRequest(t *testing.T) {
 
 	require.Equal(t, "/v1/search", gotPath)
 	require.Equal(t, "test-api-key", gotKey)
-	require.Empty(t, gotTitle)
+	require.Equal(t, DefaultAppTitle, gotTitle)
 	require.Equal(t, "No good Keenable Search Results was found", result)
 }
 
@@ -93,7 +103,7 @@ func TestKeenableToolHTTPError(t *testing.T) {
 	}))
 	t.Cleanup(server.Close)
 
-	tool, err := New(WithAPIKey(""), WithBaseURL(server.URL+"/v1/search"))
+	tool, err := New(WithAPIKey(""), WithBaseURL(server.URL))
 	require.NoError(t, err)
 	_, err = tool.Call(context.Background(), "go")
 	require.ErrorContains(t, err, "429")
@@ -111,4 +121,11 @@ func TestKeenableToolConstruction(t *testing.T) {
 	tool, err = New(WithMaxResults(0))
 	require.NoError(t, err)
 	require.Equal(t, 1, tool.maxResults)
+}
+
+func TestNormalizeBaseURL(t *testing.T) {
+	t.Parallel()
+
+	require.Equal(t, "https://api.keenable.ai", normalizeBaseURL("https://api.keenable.ai/v1/search"))
+	require.Equal(t, "http://127.0.0.1:1234", normalizeBaseURL("http://127.0.0.1:1234/v1/search/"))
 }
