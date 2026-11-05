@@ -306,6 +306,7 @@ require (
 )
 
 require (
+	github.com/keenableai/keenable-sdk/go v0.1.1
 	github.com/milvus-io/milvus/client/v2 v2.6.0
 	github.com/testcontainers/testcontainers-go/modules/mariadb v0.44.0
 )
