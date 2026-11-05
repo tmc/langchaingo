@@ -139,33 +139,50 @@ func (t Tool) Call(ctx context.Context, input string) (string, error) {
 	return result, nil
 }
 
+type searchResult struct {
+	Title       string `json:"title"`
+	URL         string `json:"url"`
+	Snippet     string `json:"snippet"`
+	Description string `json:"description"`
+	PublishedAt string `json:"published_at"`
+}
+
 type searchResponse struct {
-	Results []struct {
-		Title       string `json:"title"`
-		URL         string `json:"url"`
-		Snippet     string `json:"snippet"`
-		Description string `json:"description"`
-		PublishedAt string `json:"published_at"`
-	} `json:"results"`
+	Results []searchResult `json:"results"`
 }
 
 func (t Tool) search(ctx context.Context, query string) (string, error) {
+	req, err := t.newSearchRequest(ctx, query)
+	if err != nil {
+		return "", err
+	}
+	parsed, err := t.doSearchRequest(req)
+	if err != nil {
+		return "", err
+	}
+	return formatSearchResults(parsed.Results, t.maxResults)
+}
+
+func (t Tool) searchEndpoint() string {
+	if t.apiKey == "" {
+		return t.baseURL + "/public"
+	}
+	return t.baseURL
+}
+
+func (t Tool) newSearchRequest(ctx context.Context, query string) (*http.Request, error) {
 	body := map[string]any{"query": query, "max_results": t.maxResults}
 	if t.site != "" {
 		body["site"] = t.site
 	}
 	payload, err := json.Marshal(body)
 	if err != nil {
-		return "", fmt.Errorf("marshal keenable request: %w", err)
+		return nil, fmt.Errorf("marshal keenable request: %w", err)
 	}
 
-	endpoint := t.baseURL
-	if t.apiKey == "" {
-		endpoint += "/public"
-	}
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint, bytes.NewReader(payload))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, t.searchEndpoint(), bytes.NewReader(payload))
 	if err != nil {
-		return "", fmt.Errorf("creating keenable request: %w", err)
+		return nil, fmt.Errorf("creating keenable request: %w", err)
 	}
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
@@ -174,29 +191,35 @@ func (t Tool) search(ctx context.Context, query string) (string, error) {
 	} else {
 		req.Header.Set("X-Keenable-Title", t.appTitle)
 	}
+	return req, nil
+}
 
+func (t Tool) doSearchRequest(req *http.Request) (searchResponse, error) {
 	resp, err := t.httpClient.Do(req)
 	if err != nil {
-		return "", fmt.Errorf("keenable request: %w", err)
+		return searchResponse{}, fmt.Errorf("keenable request: %w", err)
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
 		b, _ := io.ReadAll(resp.Body) // body only used for the error message
-		return "", fmt.Errorf("keenable api responded with %d: %s", resp.StatusCode, string(b))
+		return searchResponse{}, fmt.Errorf("keenable api responded with %d: %s", resp.StatusCode, string(b))
 	}
 
 	var parsed searchResponse
 	if err := json.NewDecoder(resp.Body).Decode(&parsed); err != nil {
-		return "", fmt.Errorf("decode keenable response: %w", err)
+		return searchResponse{}, fmt.Errorf("decode keenable response: %w", err)
 	}
+	return parsed, nil
+}
 
+func formatSearchResults(results []searchResult, maxResults int) (string, error) {
 	var sb strings.Builder
 	n := 0
-	for _, r := range parsed.Results {
+	for _, r := range results {
 		if r.URL == "" {
 			continue
 		}
-		if n == t.maxResults {
+		if n == maxResults {
 			break
 		}
 		text := r.Snippet
