@@ -23,10 +23,11 @@ type streamingCompletionResponseChunk struct {
 	Type  string `json:"type"`
 	Index int    `json:"index"`
 	Delta struct {
-		Type         string `json:"type"`
-		Text         string `json:"text"`
-		StopReason   string `json:"stop_reason"`
-		StopSequence any    `json:"stop_sequence"`
+		Type         string                `json:"type"`
+		Text         string                `json:"text"`
+		StopReason   string                `json:"stop_reason"`
+		StopSequence any                   `json:"stop_sequence"`
+		StopDetails  *anthropicStopDetails `json:"stop_details"`
 	} `json:"delta"`
 	AmazonBedrockInvocationMetrics struct {
 		InputTokenCount   int `json:"inputTokenCount"`

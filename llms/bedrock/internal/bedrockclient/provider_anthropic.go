@@ -124,12 +124,38 @@ type anthropicTextGenerationOutput struct {
 	StopReason string `json:"stop_reason"`
 	// Which custom stop sequence was matched, if any.
 	StopSequence string `json:"stop_sequence"`
-	Usage        struct {
+	// Why the model declined the request, set only when stop_reason is "refusal".
+	StopDetails *anthropicStopDetails `json:"stop_details"`
+	Usage       struct {
 		InputTokens              int `json:"input_tokens"`
 		OutputTokens             int `json:"output_tokens"`
 		CacheCreationInputTokens int `json:"cache_creation_input_tokens,omitempty"`
 		CacheReadInputTokens     int `json:"cache_read_input_tokens,omitempty"`
 	} `json:"usage"`
+}
+
+// anthropicStopDetails explains a refusal. Category and Explanation are nil
+// when the refusal does not map to a named category.
+type anthropicStopDetails struct {
+	Type        string `json:"type"`
+	Category    any    `json:"category"`
+	Explanation any    `json:"explanation"`
+}
+
+const anthropicStopReasonRefusal = "refusal"
+
+// newAnthropicRefusalError returns the content filter error for a refusal.
+// details is nil when the response does not carry stop_details.
+func newAnthropicRefusalError(details *anthropicStopDetails) *llms.Error {
+	var category, explanation any
+	if details != nil {
+		category, explanation = details.Category, details.Explanation
+	}
+	err := llms.NewError(llms.ErrCodeContentFilter, "bedrock", "content refused by the model")
+	err.WithDetail(DetailType, BlockedByRefusal)
+	err.WithDetail(DetailCategory, category)
+	err.WithDetail(DetailExplanation, explanation)
+	return err
 }
 
 // anthropicContentBlock represents a content block in Anthropic response
@@ -251,6 +277,9 @@ func createAnthropicCompletion(ctx context.Context,
 		return nil, err
 	}
 
+	if output.StopReason == anthropicStopReasonRefusal {
+		return nil, newAnthropicRefusalError(output.StopDetails)
+	}
 	if len(output.Content) == 0 {
 		return nil, errors.New("no results")
 	} else if stopReason := output.StopReason; stopReason != AnthropicCompletionReasonEndTurn && stopReason != AnthropicCompletionReasonStopSequence && stopReason != "tool_use" {
@@ -327,26 +356,8 @@ func parseStreamingCompletionResponse(ctx context.Context, client invokeModelWit
 			if err := checkGuardrailError(&resp); err != nil {
 				return nil, err
 			}
-
-			switch resp.Type {
-			case "message_start":
-				contentchoices[0].GenerationInfo["input_tokens"] = resp.Message.Usage.InputTokens
-				contentchoices[0].GenerationInfo["CacheCreationInputTokens"] = resp.Message.Usage.CacheCreationInputTokens
-				contentchoices[0].GenerationInfo["CacheReadInputTokens"] = resp.Message.Usage.CacheReadInputTokens
-			case "content_block_delta":
-				if err = options.StreamingFunc(ctx, []byte(resp.Delta.Text)); err != nil {
-					return nil, err
-				}
-				contentchoices[0].Content += resp.Delta.Text
-			case "message_delta":
-				contentchoices[0].StopReason = resp.Delta.StopReason
-				contentchoices[0].GenerationInfo["output_tokens"] = resp.Usage.OutputTokens
-				if resp.Usage.CacheCreationInputTokens > 0 {
-					contentchoices[0].GenerationInfo["CacheCreationInputTokens"] = resp.Usage.CacheCreationInputTokens
-				}
-				if resp.Usage.CacheReadInputTokens > 0 {
-					contentchoices[0].GenerationInfo["CacheReadInputTokens"] = resp.Usage.CacheReadInputTokens
-				}
+			if err := handleAnthropicStreamingChunk(ctx, resp, contentchoices[0], options); err != nil {
+				return nil, err
 			}
 		}
 	}
@@ -357,6 +368,36 @@ func parseStreamingCompletionResponse(ctx context.Context, client invokeModelWit
 	return &llms.ContentResponse{
 		Choices: contentchoices,
 	}, nil
+}
+
+// handleAnthropicStreamingChunk records one streamed chunk in choice, passes
+// delta text to options.StreamingFunc, and returns the refusal error when the
+// stream ends in a refusal.
+func handleAnthropicStreamingChunk(ctx context.Context, resp streamingCompletionResponseChunk, choice *llms.ContentChoice, options llms.CallOptions) error {
+	switch resp.Type {
+	case "message_start":
+		choice.GenerationInfo["input_tokens"] = resp.Message.Usage.InputTokens
+		choice.GenerationInfo["CacheCreationInputTokens"] = resp.Message.Usage.CacheCreationInputTokens
+		choice.GenerationInfo["CacheReadInputTokens"] = resp.Message.Usage.CacheReadInputTokens
+	case "content_block_delta":
+		if err := options.StreamingFunc(ctx, []byte(resp.Delta.Text)); err != nil {
+			return err
+		}
+		choice.Content += resp.Delta.Text
+	case "message_delta":
+		if resp.Delta.StopReason == anthropicStopReasonRefusal {
+			return newAnthropicRefusalError(resp.Delta.StopDetails)
+		}
+		choice.StopReason = resp.Delta.StopReason
+		choice.GenerationInfo["output_tokens"] = resp.Usage.OutputTokens
+		if resp.Usage.CacheCreationInputTokens > 0 {
+			choice.GenerationInfo["CacheCreationInputTokens"] = resp.Usage.CacheCreationInputTokens
+		}
+		if resp.Usage.CacheReadInputTokens > 0 {
+			choice.GenerationInfo["CacheReadInputTokens"] = resp.Usage.CacheReadInputTokens
+		}
+	}
+	return nil
 }
 
 // converts the flattened Bedrock messages into

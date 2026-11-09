@@ -775,10 +775,11 @@ func TestAnthropicStreamingResponseChunk(t *testing.T) {
 				Type:  "content_block_delta",
 				Index: 0,
 				Delta: struct {
-					Type         string `json:"type"`
-					Text         string `json:"text"`
-					StopReason   string `json:"stop_reason"`
-					StopSequence any    `json:"stop_sequence"`
+					Type         string                `json:"type"`
+					Text         string                `json:"text"`
+					StopReason   string                `json:"stop_reason"`
+					StopSequence any                   `json:"stop_sequence"`
+					StopDetails  *anthropicStopDetails `json:"stop_details"`
 				}{
 					Type: "text_delta",
 					Text: "Hello, how can I help you today?",
@@ -790,10 +791,11 @@ func TestAnthropicStreamingResponseChunk(t *testing.T) {
 			chunk: streamingCompletionResponseChunk{
 				Type: "message_delta",
 				Delta: struct {
-					Type         string `json:"type"`
-					Text         string `json:"text"`
-					StopReason   string `json:"stop_reason"`
-					StopSequence any    `json:"stop_sequence"`
+					Type         string                `json:"type"`
+					Text         string                `json:"text"`
+					StopReason   string                `json:"stop_reason"`
+					StopSequence any                   `json:"stop_sequence"`
+					StopDetails  *anthropicStopDetails `json:"stop_details"`
 				}{
 					StopReason: AnthropicCompletionReasonEndTurn,
 				},

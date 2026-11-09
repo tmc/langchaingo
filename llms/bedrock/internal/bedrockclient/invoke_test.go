@@ -90,6 +90,7 @@ func TestInvokeModelInputs(t *testing.T) {
 		var llmErr *llms.Error
 		require.ErrorAs(t, err, &llmErr)
 		assert.Equal(t, "bedrock", llmErr.Provider)
+		assert.Equal(t, BlockedByGuardrail, llmErr.Details[DetailType])
 		assert.Equal(t, "INTERVENED", llmErr.Details["guardrail_action"])
 		assert.Equal(t, map[string]any{"rule": "blocked"}, llmErr.Details["trace"])
 	})
