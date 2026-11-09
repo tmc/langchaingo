@@ -174,8 +174,10 @@ func TestClient_CreateCompletion(t *testing.T) {
 				},
 				StopReason: AnthropicCompletionReasonEndTurn,
 				Usage: struct {
-					InputTokens  int `json:"input_tokens"`
-					OutputTokens int `json:"output_tokens"`
+					InputTokens              int `json:"input_tokens"`
+					OutputTokens             int `json:"output_tokens"`
+					CacheCreationInputTokens int `json:"cache_creation_input_tokens,omitempty"`
+					CacheReadInputTokens     int `json:"cache_read_input_tokens,omitempty"`
 				}{
 					InputTokens:  10,
 					OutputTokens: 5,
@@ -429,16 +431,20 @@ func TestClient_CreateCompletion_Streaming(t *testing.T) {
 				StopReason   any    `json:"stop_reason"`
 				StopSequence any    `json:"stop_sequence"`
 				Usage        struct {
-					InputTokens  int `json:"input_tokens"`
-					OutputTokens int `json:"output_tokens"`
+					InputTokens              int `json:"input_tokens"`
+					OutputTokens             int `json:"output_tokens"`
+					CacheCreationInputTokens int `json:"cache_creation_input_tokens,omitempty"`
+					CacheReadInputTokens     int `json:"cache_read_input_tokens,omitempty"`
 				} `json:"usage"`
 			}{
 				ID:   "msg-123",
 				Type: "message",
 				Role: "assistant",
 				Usage: struct {
-					InputTokens  int `json:"input_tokens"`
-					OutputTokens int `json:"output_tokens"`
+					InputTokens              int `json:"input_tokens"`
+					OutputTokens             int `json:"output_tokens"`
+					CacheCreationInputTokens int `json:"cache_creation_input_tokens,omitempty"`
+					CacheReadInputTokens     int `json:"cache_read_input_tokens,omitempty"`
 				}{
 					InputTokens: 10,
 				},
@@ -452,10 +458,11 @@ func TestClient_CreateCompletion_Streaming(t *testing.T) {
 			Type:  "content_block_delta",
 			Index: 0,
 			Delta: struct {
-				Type         string `json:"type"`
-				Text         string `json:"text"`
-				StopReason   string `json:"stop_reason"`
-				StopSequence any    `json:"stop_sequence"`
+				Type         string                `json:"type"`
+				Text         string                `json:"text"`
+				StopReason   string                `json:"stop_reason"`
+				StopSequence any                   `json:"stop_sequence"`
+				StopDetails  *anthropicStopDetails `json:"stop_details"`
 			}{
 				Type: "text_delta",
 				Text: "Once upon a time, ",
@@ -465,10 +472,11 @@ func TestClient_CreateCompletion_Streaming(t *testing.T) {
 			Type:  "content_block_delta",
 			Index: 0,
 			Delta: struct {
-				Type         string `json:"type"`
-				Text         string `json:"text"`
-				StopReason   string `json:"stop_reason"`
-				StopSequence any    `json:"stop_sequence"`
+				Type         string                `json:"type"`
+				Text         string                `json:"text"`
+				StopReason   string                `json:"stop_reason"`
+				StopSequence any                   `json:"stop_sequence"`
+				StopDetails  *anthropicStopDetails `json:"stop_details"`
 			}{
 				Type: "text_delta",
 				Text: "there was a brave knight.",
@@ -477,15 +485,18 @@ func TestClient_CreateCompletion_Streaming(t *testing.T) {
 		{
 			Type: "message_delta",
 			Delta: struct {
-				Type         string `json:"type"`
-				Text         string `json:"text"`
-				StopReason   string `json:"stop_reason"`
-				StopSequence any    `json:"stop_sequence"`
+				Type         string                `json:"type"`
+				Text         string                `json:"text"`
+				StopReason   string                `json:"stop_reason"`
+				StopSequence any                   `json:"stop_sequence"`
+				StopDetails  *anthropicStopDetails `json:"stop_details"`
 			}{
 				StopReason: AnthropicCompletionReasonEndTurn,
 			},
 			Usage: struct {
-				OutputTokens int `json:"output_tokens"`
+				OutputTokens             int `json:"output_tokens"`
+				CacheCreationInputTokens int `json:"cache_creation_input_tokens,omitempty"`
+				CacheReadInputTokens     int `json:"cache_read_input_tokens,omitempty"`
 			}{
 				OutputTokens: 15,
 			},
@@ -760,10 +771,11 @@ func TestClient_CreateCompletion_StreamingCancellation(t *testing.T) {
 				Type:  "content_block_delta",
 				Index: 0,
 				Delta: struct {
-					Type         string `json:"type"`
-					Text         string `json:"text"`
-					StopReason   string `json:"stop_reason"`
-					StopSequence any    `json:"stop_sequence"`
+					Type         string                `json:"type"`
+					Text         string                `json:"text"`
+					StopReason   string                `json:"stop_reason"`
+					StopSequence any                   `json:"stop_sequence"`
+					StopDetails  *anthropicStopDetails `json:"stop_details"`
 				}{
 					Type: "text_delta",
 					Text: fmt.Sprintf("Chunk %d ", i),

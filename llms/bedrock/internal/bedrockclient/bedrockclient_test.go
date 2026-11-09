@@ -258,7 +258,7 @@ func TestProcessInputMessagesAnthropic(t *testing.T) {
 		name           string
 		messages       []Message
 		expectedMsgs   int
-		expectedSystem string
+		expectedSystem interface{}
 		expectError    bool
 		errorContains  string
 	}{
@@ -268,7 +268,7 @@ func TestProcessInputMessagesAnthropic(t *testing.T) {
 				{Role: llms.ChatMessageTypeHuman, Type: "text", Content: "Hello"},
 			},
 			expectedMsgs:   1,
-			expectedSystem: "",
+			expectedSystem: nil,
 		},
 		{
 			name: "system message extracted",
@@ -304,7 +304,7 @@ func TestProcessInputMessagesAnthropic(t *testing.T) {
 				{Role: llms.ChatMessageTypeHuman, Type: "text", Content: "How are you?"},
 			},
 			expectedMsgs:   3,
-			expectedSystem: "",
+			expectedSystem: nil,
 		},
 		{
 			name: "multiple messages same role chunked together",
@@ -314,7 +314,7 @@ func TestProcessInputMessagesAnthropic(t *testing.T) {
 				{Role: llms.ChatMessageTypeAI, Type: "text", Content: "Response"},
 			},
 			expectedMsgs:   2,
-			expectedSystem: "",
+			expectedSystem: nil,
 		},
 		{
 			name: "function role converted to user",
@@ -322,7 +322,7 @@ func TestProcessInputMessagesAnthropic(t *testing.T) {
 				{Role: llms.ChatMessageTypeFunction, Type: "text", Content: "Function call"},
 			},
 			expectedMsgs:   1,
-			expectedSystem: "",
+			expectedSystem: nil,
 		},
 	}
 
@@ -673,8 +673,10 @@ func TestAnthropicResponseParsing(t *testing.T) {
 		StopReason:   AnthropicCompletionReasonEndTurn,
 		StopSequence: "",
 		Usage: struct {
-			InputTokens  int `json:"input_tokens"`
-			OutputTokens int `json:"output_tokens"`
+			InputTokens              int `json:"input_tokens"`
+			OutputTokens             int `json:"output_tokens"`
+			CacheCreationInputTokens int `json:"cache_creation_input_tokens,omitempty"`
+			CacheReadInputTokens     int `json:"cache_read_input_tokens,omitempty"`
 		}{
 			InputTokens:  10,
 			OutputTokens: 15,
@@ -746,8 +748,10 @@ func TestAnthropicStreamingResponseChunk(t *testing.T) {
 					StopReason   any    `json:"stop_reason"`
 					StopSequence any    `json:"stop_sequence"`
 					Usage        struct {
-						InputTokens  int `json:"input_tokens"`
-						OutputTokens int `json:"output_tokens"`
+						InputTokens              int `json:"input_tokens"`
+						OutputTokens             int `json:"output_tokens"`
+						CacheCreationInputTokens int `json:"cache_creation_input_tokens,omitempty"`
+						CacheReadInputTokens     int `json:"cache_read_input_tokens,omitempty"`
 					} `json:"usage"`
 				}{
 					ID:    "msg-123",
@@ -755,8 +759,10 @@ func TestAnthropicStreamingResponseChunk(t *testing.T) {
 					Role:  "assistant",
 					Model: "claude-3",
 					Usage: struct {
-						InputTokens  int `json:"input_tokens"`
-						OutputTokens int `json:"output_tokens"`
+						InputTokens              int `json:"input_tokens"`
+						OutputTokens             int `json:"output_tokens"`
+						CacheCreationInputTokens int `json:"cache_creation_input_tokens,omitempty"`
+						CacheReadInputTokens     int `json:"cache_read_input_tokens,omitempty"`
 					}{
 						InputTokens: 25,
 					},
@@ -769,10 +775,11 @@ func TestAnthropicStreamingResponseChunk(t *testing.T) {
 				Type:  "content_block_delta",
 				Index: 0,
 				Delta: struct {
-					Type         string `json:"type"`
-					Text         string `json:"text"`
-					StopReason   string `json:"stop_reason"`
-					StopSequence any    `json:"stop_sequence"`
+					Type         string                `json:"type"`
+					Text         string                `json:"text"`
+					StopReason   string                `json:"stop_reason"`
+					StopSequence any                   `json:"stop_sequence"`
+					StopDetails  *anthropicStopDetails `json:"stop_details"`
 				}{
 					Type: "text_delta",
 					Text: "Hello, how can I help you today?",
@@ -784,15 +791,18 @@ func TestAnthropicStreamingResponseChunk(t *testing.T) {
 			chunk: streamingCompletionResponseChunk{
 				Type: "message_delta",
 				Delta: struct {
-					Type         string `json:"type"`
-					Text         string `json:"text"`
-					StopReason   string `json:"stop_reason"`
-					StopSequence any    `json:"stop_sequence"`
+					Type         string                `json:"type"`
+					Text         string                `json:"text"`
+					StopReason   string                `json:"stop_reason"`
+					StopSequence any                   `json:"stop_sequence"`
+					StopDetails  *anthropicStopDetails `json:"stop_details"`
 				}{
 					StopReason: AnthropicCompletionReasonEndTurn,
 				},
 				Usage: struct {
-					OutputTokens int `json:"output_tokens"`
+					OutputTokens             int `json:"output_tokens"`
+					CacheCreationInputTokens int `json:"cache_creation_input_tokens,omitempty"`
+					CacheReadInputTokens     int `json:"cache_read_input_tokens,omitempty"`
 				}{
 					OutputTokens: 12,
 				},

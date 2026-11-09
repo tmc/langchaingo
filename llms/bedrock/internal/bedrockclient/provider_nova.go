@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
 	"github.com/tmc/langchaingo/llms"
 )
@@ -161,13 +160,7 @@ func createNovaCompletion(ctx context.Context,
 		return nil, errors.New("streaming not implemented for nova")
 	}
 
-	modelInput := &bedrockruntime.InvokeModelInput{
-		ModelId:     aws.String(modelID),
-		Accept:      aws.String("*/*"),
-		ContentType: aws.String("application/json"),
-		Body:        body,
-	}
-	resp, err := client.InvokeModel(ctx, modelInput)
+	resp, err := invokeModel(ctx, client, modelID, body, options)
 	if err != nil {
 		return nil, err
 	}

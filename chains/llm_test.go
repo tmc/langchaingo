@@ -12,6 +12,7 @@ import (
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/httputil"
 	"github.com/tmc/langchaingo/internal/httprr"
+	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/googleai"
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/prompts"
@@ -63,6 +64,31 @@ func TestLLMChain(t *testing.T) {
 	)
 	require.NoError(t, err)
 	require.True(t, strings.Contains(result, "Paris"))
+}
+
+type errorLanguageModel struct {
+	err error
+}
+
+func (m *errorLanguageModel) Call(_ context.Context, _ string, _ ...llms.CallOption) (string, error) {
+	return "", m.err
+}
+
+func (m *errorLanguageModel) GenerateContent(_ context.Context, _ []llms.MessageContent, _ ...llms.CallOption) (*llms.ContentResponse, error) {
+	return nil, m.err
+}
+
+func TestLLMChainPropagatesContentFilterError(t *testing.T) {
+	t.Parallel()
+
+	chain := NewLLMChain(
+		&errorLanguageModel{err: llms.NewError(llms.ErrCodeContentFilter, "bedrock", "blocked")},
+		prompts.NewPromptTemplate("{{.text}}", []string{"text"}),
+	)
+
+	_, err := chain.Call(context.Background(), map[string]any{"text": "unsafe prompt"})
+	require.Error(t, err)
+	require.True(t, llms.IsContentFilterError(err))
 }
 
 func TestLLMChainWithChatPromptTemplate(t *testing.T) {

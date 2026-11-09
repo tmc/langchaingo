@@ -160,6 +160,24 @@ func TestCallOptions(t *testing.T) { //nolint:funlen // comprehensive test
 				}
 			},
 		},
+		{
+			name: "WithSafetyConfig",
+			option: llms.WithSafetyConfig(map[string]any{
+				"identifier": "safety-profile",
+				"version":    "v1",
+			}),
+			verify: func(t *testing.T, opts llms.CallOptions) {
+				if opts.SafetyConfig == nil {
+					t.Fatal("SafetyConfig = nil, want non-nil")
+				}
+				if opts.SafetyConfig["identifier"] != "safety-profile" {
+					t.Errorf("SafetyConfig[identifier] = %v, want %v", opts.SafetyConfig["identifier"], "safety-profile")
+				}
+				if opts.SafetyConfig["version"] != "v1" {
+					t.Errorf("SafetyConfig[version] = %v, want %v", opts.SafetyConfig["version"], "v1")
+				}
+			},
+		},
 	}
 
 	for _, tt := range tests {
