@@ -440,14 +440,19 @@ func (mc *markdownContext) splitTableRows(header []string, bodies [][]string) {
 		return
 	}
 
+	// headerInSnippet reports whether the current snippet already holds this table's header.
+	// The snippet can be non-empty before the first row, holding text that came before the
+	// table, so an empty snippet alone does not mean the header is still missing.
+	headerInSnippet := false
 	for _, row := range bodies {
 		line := tableRowInMarkdown(row)
 
-		// If we're at the start of the current snippet, or adding the current line would
-		// overflow the chunk size, prepend the header to the line (so that the new chunk
+		// If the current snippet does not hold the header yet, or adding the current line
+		// would overflow the chunk size, prepend the header to the line (so that the chunk
 		// will include the table header).
-		if len(mc.curSnippet) == 0 || mc.lenFunc(mc.curSnippet+line) >= mc.chunkSize {
+		if !headerInSnippet || len(mc.curSnippet) == 0 || mc.lenFunc(mc.curSnippet+line) >= mc.chunkSize {
 			line = fmt.Sprintf("%s\n%s", headerMD, line)
+			headerInSnippet = true
 		}
 
 		mc.joinSnippet(line)
@@ -455,6 +460,7 @@ func (mc *markdownContext) splitTableRows(header []string, bodies [][]string) {
 		// If we're not joining table rows, create a new chunk.
 		if !mc.joinTableRows {
 			mc.applyToChunks()
+			headerInSnippet = false
 		}
 	}
 }
