@@ -1,6 +1,7 @@
 package textsplitter
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/pkoukk/tiktoken-go"
@@ -13,6 +14,10 @@ const (
 	_defaultTokenChunkSize    = 512
 	_defaultTokenChunkOverlap = 100
 )
+
+// ErrInvalidChunkConfig is returned when a splitter's chunk size or chunk overlap
+// cannot produce chunks.
+var ErrInvalidChunkConfig = errors.New("invalid chunk configuration")
 
 // TokenSplitter is a text splitter that will split texts by tokens.
 type TokenSplitter struct {
@@ -44,6 +49,15 @@ func NewTokenSplitter(opts ...Option) TokenSplitter {
 
 // SplitText splits a text into multiple text.
 func (s TokenSplitter) SplitText(text string) ([]string, error) {
+	// Each chunk must move past the previous one, or splitting never ends.
+	if s.ChunkSize <= 0 {
+		return nil, fmt.Errorf("%w: chunk size %d must be positive", ErrInvalidChunkConfig, s.ChunkSize)
+	}
+	if s.ChunkOverlap < 0 || s.ChunkOverlap >= s.ChunkSize {
+		return nil, fmt.Errorf("%w: chunk overlap %d must be at least 0 and less than chunk size %d",
+			ErrInvalidChunkConfig, s.ChunkOverlap, s.ChunkSize)
+	}
+
 	// Get the tokenizer
 	var tk *tiktoken.Tiktoken
 	var err error
@@ -72,6 +86,11 @@ func (s TokenSplitter) splitText(text string, tk *tiktoken.Tiktoken) []string {
 	for startIdx < len(inputIDs) {
 		chunkIDs := inputIDs[startIdx:curIdx]
 		splits = append(splits, tk.Decode(chunkIDs))
+		// Stop once a chunk reaches the end of the text: a later chunk would only
+		// repeat tokens that are already in this one.
+		if curIdx == len(inputIDs) {
+			break
+		}
 		startIdx += s.ChunkSize - s.ChunkOverlap
 		curIdx = startIdx + s.ChunkSize
 		if curIdx > len(inputIDs) {
