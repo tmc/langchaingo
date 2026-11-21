@@ -13,6 +13,7 @@ import (
 	"github.com/tmc/langchaingo/chains"
 	"github.com/tmc/langchaingo/internal/httprr"
 	"github.com/tmc/langchaingo/llms"
+	"github.com/tmc/langchaingo/llms/fake"
 	"github.com/tmc/langchaingo/llms/openai"
 	"github.com/tmc/langchaingo/prompts"
 	"github.com/tmc/langchaingo/tools"
@@ -143,6 +144,41 @@ func TestOpenAIFunctionsAgentComplexCalculation(t *testing.T) {
 	// Verify the result contains 30 (3*7 + 9 = 21 + 9 = 30)
 	if !strings.Contains(result, "30") {
 		t.Errorf("expected calculation result 30 in response, got: %s", result)
+	}
+}
+
+func TestOpenAIFunctionsAgentOutputKey(t *testing.T) {
+	t.Parallel()
+	for _, tt := range []struct {
+		name      string
+		options   []agents.Option
+		outputKey string
+	}{
+		{name: "default", outputKey: "output"},
+		{name: "custom", options: []agents.Option{agents.WithOutputKey("answer")}, outputKey: "answer"},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			const answer = "The answer is 42."
+			agent := agents.NewOpenAIFunctionsAgent(fake.NewFakeLLM([]string{answer}), nil, tt.options...)
+
+			t.Run("parse output", func(t *testing.T) {
+				actions, finish, err := agent.ParseOutput(&llms.ContentResponse{
+					Choices: []*llms.ContentChoice{{Content: answer}},
+				})
+				require.NoError(t, err)
+				require.Empty(t, actions)
+				require.NotNil(t, finish)
+				require.Equal(t, map[string]any{tt.outputKey: answer}, finish.ReturnValues)
+				require.Equal(t, answer, finish.Log)
+			})
+
+			t.Run("executor", func(t *testing.T) {
+				got, err := chains.Run(context.Background(), agents.NewExecutor(agent), "What is the answer?")
+				require.NoError(t, err)
+				require.Equal(t, answer, got)
+			})
+		})
 	}
 }
 
