@@ -4,8 +4,12 @@ package schema
 type AgentAction struct {
 	Tool      string
 	ToolInput string
-	Log       string
-	ToolID    string
+	// ToolArguments holds the raw arguments of the tool call exactly as the
+	// model produced them (a JSON object for function-calling models). It is
+	// replayed to the model in later turns. Empty when not applicable.
+	ToolArguments string
+	Log           string
+	ToolID        string
 }
 
 // AgentStep is a step of the agent.

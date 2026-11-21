@@ -2,6 +2,7 @@ package agents_test
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -211,5 +212,101 @@ func TestOpenAIFunctionsAgent_ParseOutput_MultipleToolCalls(t *testing.T) {
 	}
 	if len(actions) != 2 {
 		t.Errorf("expected 2 actions, got %d", len(actions))
+	}
+}
+
+// replayModel is a fake llms.Model. Its first call returns the given tool
+// call; later calls record the messages they receive and return a final
+// answer.
+type replayModel struct {
+	first    *llms.ContentChoice
+	calls    int
+	messages []llms.MessageContent
+}
+
+func (m *replayModel) GenerateContent(
+	_ context.Context, messages []llms.MessageContent, _ ...llms.CallOption,
+) (*llms.ContentResponse, error) {
+	m.calls++
+	if m.calls == 1 {
+		return &llms.ContentResponse{Choices: []*llms.ContentChoice{m.first}}, nil
+	}
+	m.messages = messages
+	return &llms.ContentResponse{Choices: []*llms.ContentChoice{{Content: "done"}}}, nil
+}
+
+func (m *replayModel) Call(ctx context.Context, prompt string, options ...llms.CallOption) (string, error) {
+	return llms.GenerateFromSinglePrompt(ctx, m, prompt, options...)
+}
+
+// echoTool returns its input unchanged.
+type echoTool struct{ input string }
+
+func (e *echoTool) Name() string        { return "echo" }
+func (e *echoTool) Description() string { return "Returns its input." }
+func (e *echoTool) Call(_ context.Context, input string) (string, error) {
+	e.input = input
+	return input, nil
+}
+
+// TestOpenAIFunctionsAgent_ScratchpadReplaysRawArguments checks that the tool
+// call replayed to the model on the next turn carries the JSON arguments the
+// model produced, not the unwrapped "__arg1" value given to the tool.
+func TestOpenAIFunctionsAgent_ScratchpadReplaysRawArguments(t *testing.T) {
+	t.Parallel()
+
+	const rawArgs = `{"__arg1":"bonjour"}`
+	tests := []struct {
+		name  string
+		first *llms.ContentChoice
+	}{
+		{
+			name: "tool_calls",
+			first: &llms.ContentChoice{
+				ToolCalls: []llms.ToolCall{{
+					ID:           "call_1",
+					Type:         "function",
+					FunctionCall: &llms.FunctionCall{Name: "echo", Arguments: rawArgs},
+				}},
+			},
+		},
+		{
+			name: "legacy_function_call",
+			first: &llms.ContentChoice{
+				FuncCall: &llms.FunctionCall{Name: "echo", Arguments: rawArgs},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			model := &replayModel{first: tt.first}
+			tool := &echoTool{}
+			agent := agents.NewOpenAIFunctionsAgent(model, []tools.Tool{tool})
+			executor := agents.NewExecutor(agent, agents.WithMaxIterations(3))
+
+			out, err := chains.Run(context.Background(), executor, "salut")
+			require.NoError(t, err)
+			require.Equal(t, "done", out)
+			require.Equal(t, "bonjour", tool.input, "the tool should receive the unwrapped __arg1 value")
+			require.Equal(t, 2, model.calls)
+
+			var replayed []llms.ToolCall
+			for _, msg := range model.messages {
+				for _, part := range msg.Parts {
+					if tc, ok := part.(llms.ToolCall); ok {
+						replayed = append(replayed, tc)
+					}
+				}
+			}
+			require.Len(t, replayed, 1)
+			require.NotNil(t, replayed[0].FunctionCall)
+			require.Equal(t, "echo", replayed[0].FunctionCall.Name)
+			args := replayed[0].FunctionCall.Arguments
+			require.True(t, json.Valid([]byte(args)), "replayed arguments are not valid JSON: %q", args)
+			require.JSONEq(t, rawArgs, args)
+		})
 	}
 }
