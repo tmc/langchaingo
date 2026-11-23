@@ -1,8 +1,0 @@
-extends: existence
-message: "Include error handling in Go examples"
-level: warning
-scope: raw
-tokens:
-  - ':= .+\(\)$'
-  - '= .+\(\)$'
-
