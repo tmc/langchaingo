@@ -206,6 +206,90 @@ func TestMarkdownHeaderTextSplitter_Table(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "text-before-table",
+			options: []Option{
+				WithChunkSize(512),
+				WithChunkOverlap(64),
+			},
+			markdown: `Some text.
+
+| Syntax      | Description |
+| ----------- | ----------- |
+| Header      | Title       |
+| Paragraph   | Text        |`,
+			expectedDocs: []schema.Document{
+				{
+					PageContent: `Some text.
+| Syntax | Description |
+| --- | --- |
+| Header | Title |`,
+					Metadata: map[string]any{},
+				},
+				{
+					PageContent: `| Syntax | Description |
+| --- | --- |
+| Paragraph | Text |`,
+					Metadata: map[string]any{},
+				},
+			},
+		},
+		{
+			name: "text-before-table-joined",
+			options: []Option{
+				WithChunkSize(512),
+				WithChunkOverlap(64),
+				WithJoinTableRows(true),
+			},
+			markdown: `Some text.
+
+| Syntax      | Description |
+| ----------- | ----------- |
+| Header      | Title       |
+| Paragraph   | Text        |`,
+			expectedDocs: []schema.Document{
+				{
+					PageContent: `Some text.
+| Syntax | Description |
+| --- | --- |
+| Header | Title |
+| Paragraph | Text |`,
+					Metadata: map[string]any{},
+				},
+			},
+		},
+		{
+			name: "text-before-table-joined-overflow",
+			options: []Option{
+				WithChunkSize(64),
+				WithChunkOverlap(32),
+				WithJoinTableRows(true),
+			},
+			markdown: `Some text.
+
+| Syntax      | Description |
+| ----------- | ----------- |
+| Header      | Title       |
+| Paragraph   | Text        |`,
+			expectedDocs: []schema.Document{
+				{
+					PageContent: `Some text.`,
+					Metadata:    map[string]any{},
+				},
+				{
+					PageContent: `| Syntax | Description |
+| --- | --- |
+| Header | Title |`,
+					Metadata: map[string]any{},
+				},
+				{
+					PageContent: `| Syntax | Description |
+| --- | --- |
+| Paragraph | Text |`,
+					Metadata: map[string]any{},
+				},
+			},
+		},
 	}
 
 	for _, tc := range testCases {
