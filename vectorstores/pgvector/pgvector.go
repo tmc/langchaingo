@@ -10,6 +10,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/pgvector/pgvector-go"
 	"github.com/tmc/langchaingo/embeddings"
 	"github.com/tmc/langchaingo/schema"
@@ -80,7 +81,7 @@ func New(ctx context.Context, opts ...Option) (Store, error) {
 		return Store{}, err
 	}
 	if store.conn == nil {
-		store.conn, err = pgx.Connect(ctx, store.connURL)
+		store.conn, err = pgxpool.New(ctx, store.connURL)
 		if err != nil {
 			return Store{}, err
 		}
