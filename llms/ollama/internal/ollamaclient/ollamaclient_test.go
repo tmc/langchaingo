@@ -301,6 +301,7 @@ func TestClient_GenerateChatWithThink(t *testing.T) {
 	client, err := NewClient(parsedURL, rr.Client())
 	require.NoError(t, err)
 
+	think := true
 	req := &ChatRequest{
 		Model: "gemma3:1b",
 		Messages: []*Message{
@@ -310,10 +311,10 @@ func TestClient_GenerateChatWithThink(t *testing.T) {
 			},
 		},
 		Stream: false,
+		Think:  &think,
 		Options: Options{
 			Temperature: 0.0,
 			NumPredict:  100,
-			Think:       true, // Enable reasoning mode
 		},
 	}
 
@@ -327,33 +328,192 @@ func TestClient_GenerateChatWithThink(t *testing.T) {
 	assert.NotNil(t, response.Message)
 	assert.NotEmpty(t, response.Message.Content)
 	assert.True(t, response.Done)
-
-	// The think parameter should be included in the request
-	// This test verifies that the parameter is properly serialized
 }
 
-func TestOptionsJSONMarshalWithThink(t *testing.T) {
-	// Test that the think parameter is properly marshaled to JSON
+func TestChatRequestJSONMarshalWithThink(t *testing.T) {
+	t.Run("think is unset (nil)", func(t *testing.T) {
+		req := &ChatRequest{
+			Model: "test-model",
+			Messages: []*Message{
+				{Role: "user", Content: "hello"},
+			},
+			Options: Options{
+				Temperature: 0.7,
+			},
+		}
+
+		data, err := json.Marshal(req)
+		require.NoError(t, err)
+
+		var result map[string]any
+		err = json.Unmarshal(data, &result)
+		require.NoError(t, err)
+
+		_, exists := result["think"]
+		assert.False(t, exists, "think field must be omitted when unset")
+
+		optionsMap, ok := result["options"].(map[string]any)
+		require.True(t, ok)
+		_, existsInOptions := optionsMap["think"]
+		assert.False(t, existsInOptions, "think field must not exist in options")
+	})
+
+	t.Run("think is explicitly true", func(t *testing.T) {
+		val := true
+		req := &ChatRequest{
+			Model: "test-model",
+			Messages: []*Message{
+				{Role: "user", Content: "hello"},
+			},
+			Think: &val,
+			Options: Options{
+				Temperature: 0.7,
+			},
+		}
+
+		data, err := json.Marshal(req)
+		require.NoError(t, err)
+
+		var result map[string]any
+		err = json.Unmarshal(data, &result)
+		require.NoError(t, err)
+
+		think, exists := result["think"]
+		assert.True(t, exists, "think field must exist at top-level")
+		assert.Equal(t, true, think)
+
+		optionsMap, ok := result["options"].(map[string]any)
+		require.True(t, ok)
+		_, existsInOptions := optionsMap["think"]
+		assert.False(t, existsInOptions, "think field must not exist in options")
+	})
+
+	t.Run("think is explicitly false", func(t *testing.T) {
+		val := false
+		req := &ChatRequest{
+			Model: "test-model",
+			Messages: []*Message{
+				{Role: "user", Content: "hello"},
+			},
+			Think: &val,
+			Options: Options{
+				Temperature: 0.7,
+			},
+		}
+
+		data, err := json.Marshal(req)
+		require.NoError(t, err)
+
+		var result map[string]any
+		err = json.Unmarshal(data, &result)
+		require.NoError(t, err)
+
+		think, exists := result["think"]
+		assert.True(t, exists, "think:false must not be dropped by omitempty")
+		assert.Equal(t, false, think)
+
+		optionsMap, ok := result["options"].(map[string]any)
+		require.True(t, ok)
+		_, existsInOptions := optionsMap["think"]
+		assert.False(t, existsInOptions, "think field must not exist in options")
+	})
+}
+
+func TestGenerateRequestJSONMarshalWithThink(t *testing.T) {
+	t.Run("think is unset (nil)", func(t *testing.T) {
+		req := &GenerateRequest{
+			Model:  "test-model",
+			Prompt: "hello",
+			Options: Options{
+				Temperature: 0.7,
+			},
+		}
+
+		data, err := json.Marshal(req)
+		require.NoError(t, err)
+
+		var result map[string]any
+		err = json.Unmarshal(data, &result)
+		require.NoError(t, err)
+
+		_, exists := result["think"]
+		assert.False(t, exists, "think field must be omitted when unset")
+
+		optionsMap, ok := result["options"].(map[string]any)
+		require.True(t, ok)
+		_, existsInOptions := optionsMap["think"]
+		assert.False(t, existsInOptions, "think field must not exist in options")
+	})
+
+	t.Run("think is explicitly true", func(t *testing.T) {
+		val := true
+		req := &GenerateRequest{
+			Model:  "test-model",
+			Prompt: "hello",
+			Think:  &val,
+			Options: Options{
+				Temperature: 0.7,
+			},
+		}
+
+		data, err := json.Marshal(req)
+		require.NoError(t, err)
+
+		var result map[string]any
+		err = json.Unmarshal(data, &result)
+		require.NoError(t, err)
+
+		think, exists := result["think"]
+		assert.True(t, exists, "think field must exist at top-level")
+		assert.Equal(t, true, think)
+
+		optionsMap, ok := result["options"].(map[string]any)
+		require.True(t, ok)
+		_, existsInOptions := optionsMap["think"]
+		assert.False(t, existsInOptions, "think field must not exist in options")
+	})
+
+	t.Run("think is explicitly false", func(t *testing.T) {
+		val := false
+		req := &GenerateRequest{
+			Model:  "test-model",
+			Prompt: "hello",
+			Think:  &val,
+			Options: Options{
+				Temperature: 0.7,
+			},
+		}
+
+		data, err := json.Marshal(req)
+		require.NoError(t, err)
+
+		var result map[string]any
+		err = json.Unmarshal(data, &result)
+		require.NoError(t, err)
+
+		think, exists := result["think"]
+		assert.True(t, exists, "think:false must not be dropped by omitempty")
+		assert.Equal(t, false, think)
+
+		optionsMap, ok := result["options"].(map[string]any)
+		require.True(t, ok)
+		_, existsInOptions := optionsMap["think"]
+		assert.False(t, existsInOptions, "think field must not exist in options")
+	})
+}
+
+func TestOptionsJSONMarshal_NoThink(t *testing.T) {
 	opts := Options{
 		Temperature: 0.5,
-		Think:       true,
 	}
 
 	data, err := json.Marshal(opts)
 	require.NoError(t, err)
 
-	// Check that the JSON contains the think field
-	var result map[string]interface{}
+	var result map[string]any
 	err = json.Unmarshal(data, &result)
 	require.NoError(t, err)
 
-	// Verify think field exists and is true
-	think, exists := result["think"]
-	assert.True(t, exists, "think field should exist in JSON")
-	assert.Equal(t, true, think, "think field should be true")
-
-	// Verify temperature field for completeness
-	temp, exists := result["temperature"]
-	assert.True(t, exists, "temperature field should exist in JSON")
-	assert.Equal(t, float64(0.5), temp, "temperature should be 0.5")
+	_, exists := result["think"]
+	assert.False(t, exists, "think field must not be present in Options struct")
 }
