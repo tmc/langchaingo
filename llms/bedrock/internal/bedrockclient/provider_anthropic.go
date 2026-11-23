@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
@@ -264,8 +265,13 @@ func createAnthropicCompletion(ctx context.Context,
 }
 
 type streamingCompletionResponseChunk struct {
-	Type  string `json:"type"`
-	Index int    `json:"index"`
+	Type         string `json:"type"`
+	Index        int    `json:"index"`
+	ContentBlock struct {
+		Type string `json:"type"`
+		ID   string `json:"id"`
+		Name string `json:"name"`
+	} `json:"content_block"`
 	Delta struct {
 		Type         string `json:"type"`
 		Text         string `json:"text"`
@@ -308,6 +314,14 @@ func parseStreamingCompletionResponse(ctx context.Context, client *bedrockruntim
 	defer stream.Close()
 
 	contentchoices := []*llms.ContentChoice{{GenerationInfo: map[string]interface{}{}}}
+	// tool_use blocks being streamed, by content block index. Their input
+	// arrives as input_json_delta fragments.
+	type streamedToolUse struct {
+		id, name string
+		input    strings.Builder
+	}
+	toolUses := map[int]*streamedToolUse{}
+	var toolCalls []llms.ToolCall
 	for e := range stream.Events() {
 		if err = stream.Err(); err != nil {
 			return nil, err
@@ -323,11 +337,51 @@ func parseStreamingCompletionResponse(ctx context.Context, client *bedrockruntim
 			switch resp.Type {
 			case "message_start":
 				contentchoices[0].GenerationInfo["input_tokens"] = resp.Message.Usage.InputTokens
+			case "content_block_start":
+				if resp.ContentBlock.Type == AnthropicMessageTypeToolUse {
+					toolUses[resp.Index] = &streamedToolUse{id: resp.ContentBlock.ID, name: resp.ContentBlock.Name}
+				}
 			case "content_block_delta":
+				if resp.Delta.Type == "input_json_delta" {
+					if toolUse, ok := toolUses[resp.Index]; ok {
+						var fragment struct {
+							Delta struct {
+								PartialJSON string `json:"partial_json"`
+							} `json:"delta"`
+						}
+						if err := json.Unmarshal(v.Value.Bytes, &fragment); err != nil {
+							return nil, err
+						}
+						toolUse.input.WriteString(fragment.Delta.PartialJSON)
+					}
+					continue
+				}
 				if err = options.StreamingFunc(ctx, []byte(resp.Delta.Text)); err != nil {
 					return nil, err
 				}
 				contentchoices[0].Content += resp.Delta.Text
+			case "content_block_stop":
+				toolUse, ok := toolUses[resp.Index]
+				if !ok {
+					continue
+				}
+				delete(toolUses, resp.Index)
+				var input any = map[string]any{}
+				if raw := toolUse.input.String(); raw != "" {
+					if err := json.Unmarshal([]byte(raw), &input); err != nil {
+						return nil, fmt.Errorf("failed to parse streamed tool input: %w", err)
+					}
+				}
+				toolCall, err := convertBedrockToolCallToLLMToolCall(BedrockToolCall{
+					Type:  AnthropicMessageTypeToolUse,
+					ID:    toolUse.id,
+					Name:  toolUse.name,
+					Input: input,
+				})
+				if err != nil {
+					return nil, fmt.Errorf("failed to convert tool call: %w", err)
+				}
+				toolCalls = append(toolCalls, toolCall)
 			case "message_delta":
 				contentchoices[0].StopReason = resp.Delta.StopReason
 				contentchoices[0].GenerationInfo["output_tokens"] = resp.Usage.OutputTokens
@@ -336,6 +390,12 @@ func parseStreamingCompletionResponse(ctx context.Context, client *bedrockruntim
 	}
 	if err = stream.Err(); err != nil {
 		return nil, err
+	}
+
+	contentchoices[0].ToolCalls = toolCalls
+	// Set legacy FuncCall field for backward compatibility
+	if len(toolCalls) > 0 {
+		contentchoices[0].FuncCall = toolCalls[0].FunctionCall
 	}
 
 	return &llms.ContentResponse{
