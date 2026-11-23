@@ -2,7 +2,7 @@ module github.com/tmc/langchaingo
 
 go 1.26.0
 
-toolchain go1.26.10
+toolchain go1.26.11
 
 // Note: Thanks to Go's module graph pruning (https://go.dev/ref/mod#graph-pruning),
 // importing langchaingo does NOT pull in all dependencies listed below. You only
@@ -107,8 +107,8 @@ require (
 	github.com/google/go-cmp v0.7.0
 	github.com/nikolalohinski/gonja v1.5.3
 	github.com/zeebo/blake3 v0.2.4
-	golang.org/x/sync v0.23.0
-	golang.org/x/tools v0.49.0
+	golang.org/x/sync v0.24.0
+	golang.org/x/tools v0.51.0
 	sigs.k8s.io/yaml v1.4.0
 )
 
@@ -265,7 +265,7 @@ require (
 	github.com/huandu/xstrings v1.3.3 // indirect
 	github.com/imdario/mergo v0.3.13 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/klauspost/compress v1.19.2 // indirect
+	github.com/klauspost/compress v1.20.2 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.11 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
@@ -295,11 +295,11 @@ require (
 	github.com/tklauser/numcpus v0.12.0 // indirect
 	github.com/yargevad/filepathx v1.0.0 // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
-	golang.org/x/crypto v0.57.0 // indirect
+	golang.org/x/crypto v0.58.0 // indirect
 	golang.org/x/exp v0.0.0-20251113190631-e25ba8c21ef6 // indirect
-	golang.org/x/net v0.60.0 // indirect
-	golang.org/x/sys v0.48.0 // indirect
-	golang.org/x/text v0.42.0 // indirect
+	golang.org/x/net v0.62.0 // indirect
+	golang.org/x/sys v0.49.0 // indirect
+	golang.org/x/text v0.43.0 // indirect
 	golang.org/x/time v0.15.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
