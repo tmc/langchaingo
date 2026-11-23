@@ -4,6 +4,18 @@ import (
 	"github.com/tmc/langchaingo/vectorstores"
 )
 
+// Option configures a KnowledgeBase created with New.
+type Option func(*KnowledgeBase)
+
+// WithWaitUntilSearchable makes AddDocuments and AddNamedDocuments return only once SimilaritySearch
+// returns every added document. Indexed documents can take some time to become searchable, depending on
+// the vector store of the knowledge base.
+func WithWaitUntilSearchable() Option {
+	return func(kb *KnowledgeBase) {
+		kb.waitUntilSearchable = true
+	}
+}
+
 func (kb *KnowledgeBase) getOptions(options ...vectorstores.Option) *vectorstores.Options {
 	opts := &vectorstores.Options{}
 	for _, opt := range options {
