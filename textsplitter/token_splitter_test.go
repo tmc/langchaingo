@@ -90,3 +90,62 @@ Bye!
 		assert.Equal(t, tc.expectedDocs, docs)
 	}
 }
+
+func TestTokenSplitterStopsAtEndOfText(t *testing.T) {
+	t.Parallel()
+	if _, err := tiktoken.GetEncoding(_defaultTokenEncoding); err != nil {
+		t.Skipf("tokenizer unavailable: %v", err)
+	}
+
+	text := "one two three four five six seven eight nine"
+	testCases := []struct {
+		chunkSize    int
+		chunkOverlap int
+		expected     []string
+	}{
+		{
+			chunkSize:    5,
+			chunkOverlap: 1,
+			expected:     []string{"one two three four five", " five six seven eight nine"},
+		},
+		{
+			chunkSize:    3,
+			chunkOverlap: 2,
+			expected: []string{
+				"one two three", " two three four", " three four five", " four five six",
+				" five six seven", " six seven eight", " seven eight nine",
+			},
+		},
+		{
+			chunkSize:    20,
+			chunkOverlap: 5,
+			expected:     []string{text},
+		},
+	}
+	for _, tc := range testCases {
+		splitter := NewTokenSplitter(WithChunkSize(tc.chunkSize), WithChunkOverlap(tc.chunkOverlap))
+		chunks, err := splitter.SplitText(text)
+		require.NoError(t, err)
+		assert.Equal(t, tc.expected, chunks, "size=%d overlap=%d", tc.chunkSize, tc.chunkOverlap)
+	}
+}
+
+func TestTokenSplitterRejectsInvalidChunkConfig(t *testing.T) {
+	t.Parallel()
+
+	testCases := []struct {
+		chunkSize    int
+		chunkOverlap int
+	}{
+		{chunkSize: 3, chunkOverlap: 3},
+		{chunkSize: 3, chunkOverlap: 4},
+		{chunkSize: 3, chunkOverlap: -1},
+		{chunkSize: 0, chunkOverlap: 0},
+	}
+	for _, tc := range testCases {
+		splitter := NewTokenSplitter(WithChunkSize(tc.chunkSize), WithChunkOverlap(tc.chunkOverlap))
+		chunks, err := splitter.SplitText("one two three four five")
+		require.ErrorIs(t, err, ErrInvalidChunkConfig, "size=%d overlap=%d", tc.chunkSize, tc.chunkOverlap)
+		assert.Nil(t, chunks)
+	}
+}
