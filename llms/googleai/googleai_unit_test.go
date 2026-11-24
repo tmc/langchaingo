@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/google/generative-ai-go/genai"
 	"github.com/stretchr/testify/assert"
 	"github.com/tmc/langchaingo/llms"
 )
@@ -569,4 +570,18 @@ func TestConvertTools(t *testing.T) { //nolint:funlen // comprehensive test //no
 		assert.Contains(t, customizationsProp.Items.Required, "option")
 		assert.Contains(t, customizationsProp.Items.Required, "value")
 	})
+}
+
+func TestGenerateFromMessagesSystemOnlyReturnsError(t *testing.T) {
+	t.Parallel()
+
+	messages := []llms.MessageContent{
+		{
+			Role:  llms.ChatMessageTypeSystem,
+			Parts: []llms.ContentPart{llms.TextPart("you are a helpful assistant")},
+		},
+	}
+
+	_, err := generateFromMessages(context.Background(), &genai.GenerativeModel{}, messages, &llms.CallOptions{})
+	assert.ErrorIs(t, err, ErrNoNonSystemMessages)
 }
