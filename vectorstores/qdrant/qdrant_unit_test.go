@@ -9,10 +9,12 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"strings"
+	"sync/atomic"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tmc/langchaingo/httputil"
 	"github.com/tmc/langchaingo/schema"
 	"github.com/tmc/langchaingo/vectorstores"
 )
@@ -522,6 +524,88 @@ func TestOptions(t *testing.T) {
 		opt(store)
 		assert.Equal(t, key, store.contentKey)
 	})
+
+	t.Run("WithHTTPClient", func(t *testing.T) {
+		client := &http.Client{}
+		opt := WithHTTPClient(client)
+		store := &Store{}
+		opt(store)
+		assert.Same(t, client, store.httpClient)
+	})
+}
+
+func TestNew_HTTPClient(t *testing.T) {
+	t.Parallel()
+
+	baseOpts := []Option{
+		WithURL(url.URL{Scheme: "http", Host: "localhost:6333"}),
+		WithCollectionName("test-collection"),
+		WithEmbedder(&testEmbedder{}),
+	}
+
+	t.Run("defaults to httputil.DefaultClient", func(t *testing.T) {
+		store, err := New(baseOpts...)
+		require.NoError(t, err)
+		assert.Same(t, httputil.DefaultClient, store.httpClient)
+	})
+
+	t.Run("nil client falls back to httputil.DefaultClient", func(t *testing.T) {
+		store, err := New(append(baseOpts, WithHTTPClient(nil))...)
+		require.NoError(t, err)
+		assert.Same(t, httputil.DefaultClient, store.httpClient)
+	})
+}
+
+// countingTransport counts the requests it sends before passing them on.
+type countingTransport struct {
+	next     http.RoundTripper
+	requests atomic.Int32
+}
+
+func (c *countingTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	c.requests.Add(1)
+	return c.next.RoundTrip(req)
+}
+
+func TestWithHTTPClient_IsUsed(t *testing.T) {
+	t.Parallel()
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var resp any = map[string]any{"status": "ok"}
+		if strings.HasSuffix(r.URL.Path, "/points/search") {
+			resp = searchResponse{
+				Result: []result{
+					{Score: 0.9, Payload: map[string]any{"content": "found"}},
+				},
+			}
+		}
+		w.WriteHeader(http.StatusOK)
+		assert.NoError(t, json.NewEncoder(w).Encode(resp))
+	}))
+	defer server.Close()
+
+	serverURL, err := url.Parse(server.URL)
+	require.NoError(t, err)
+
+	transport := &countingTransport{next: server.Client().Transport}
+	store, err := New(
+		WithURL(*serverURL),
+		WithCollectionName("test-collection"),
+		WithEmbedder(&testEmbedder{}),
+		WithHTTPClient(&http.Client{Transport: transport}),
+	)
+	require.NoError(t, err)
+
+	ctx := context.Background()
+	_, err = store.AddDocuments(ctx, []schema.Document{{PageContent: "doc"}})
+	require.NoError(t, err)
+
+	docs, err := store.SimilaritySearch(ctx, "query", 1)
+	require.NoError(t, err)
+	require.Len(t, docs, 1)
+	assert.Equal(t, "found", docs[0].PageContent)
+
+	assert.Equal(t, int32(2), transport.requests.Load(), "both requests should go through the custom client")
 }
 
 func TestGetScoreThreshold(t *testing.T) {
