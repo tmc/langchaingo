@@ -176,7 +176,7 @@ require (
 )
 
 // Cryptography and security - indirect
-require filippo.io/edwards25519 v1.1.0 // indirect
+require filippo.io/edwards25519 v1.1.1 // indirect
 
 // Document processing and web scraping - indirect
 require (
