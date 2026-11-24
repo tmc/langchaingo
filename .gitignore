@@ -21,7 +21,7 @@ Thumbs.db
 # dev
 .env
 .env.local
-vendor/*
+**/vendor/*
 service-account.json
 
 # IDE specific files
