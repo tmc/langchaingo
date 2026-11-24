@@ -1,6 +1,0 @@
-extends: spelling
-message: "Check spelling of '%s'"
-level: warning
-ignore:
-  - langchaingo/ignore.txt
-
