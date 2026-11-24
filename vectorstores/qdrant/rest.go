@@ -37,8 +37,8 @@ func (s Store) upsertPoints(
 	url := baseURL.JoinPath("collections", s.collectionName, "points")
 	body,
 		status,
-		err := DoRequest(
-		ctx, *url,
+		err := doRequest(
+		ctx, s.httpClient, *url,
 		s.apiKey,
 		http.MethodPut,
 		payload,
@@ -80,8 +80,8 @@ func (s Store) searchPoints(
 	url := baseURL.JoinPath("collections", s.collectionName, "points", "search")
 	body,
 		statusCode,
-		err := DoRequest(
-		ctx, *url,
+		err := doRequest(
+		ctx, s.httpClient, *url,
 		s.apiKey,
 		http.MethodPost,
 		payload,
@@ -122,13 +122,29 @@ func (s Store) searchPoints(
 	return docs, nil
 }
 
-// doRequest performs an HTTP request to the Qdrant API.
+// DoRequest performs an HTTP request to the Qdrant API using httputil.DefaultClient.
 func DoRequest(ctx context.Context,
 	url url.URL,
 	apiKey,
 	method string,
 	payload interface{},
 ) (io.ReadCloser, int, error) {
+	return doRequest(ctx, httputil.DefaultClient, url, apiKey, method, payload)
+}
+
+// doRequest performs an HTTP request to the Qdrant API using the given client.
+// A nil client falls back to httputil.DefaultClient.
+func doRequest(ctx context.Context,
+	client *http.Client,
+	url url.URL,
+	apiKey,
+	method string,
+	payload interface{},
+) (io.ReadCloser, int, error) {
+	if client == nil {
+		client = httputil.DefaultClient
+	}
+
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
 		return nil, 0, err
@@ -143,7 +159,7 @@ func DoRequest(ctx context.Context,
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("api-Key", apiKey)
 
-	r, err := httputil.DefaultClient.Do(req)
+	r, err := client.Do(req)
 	if err != nil {
 		return nil, 0, err
 	}

@@ -3,9 +3,11 @@ package qdrant
 import (
 	"errors"
 	"fmt"
+	"net/http"
 	"net/url"
 
 	"github.com/tmc/langchaingo/embeddings"
+	"github.com/tmc/langchaingo/httputil"
 )
 
 const (
@@ -56,6 +58,14 @@ func WithContentKey(contentKey string) Option {
 	}
 }
 
+// WithHTTPClient returns an Option for setting the HTTP client used to call
+// the Qdrant REST API. Optional. Defaults to httputil.DefaultClient.
+func WithHTTPClient(client *http.Client) Option {
+	return func(p *Store) {
+		p.httpClient = client
+	}
+}
+
 func applyClientOptions(opts ...Option) (Store, error) {
 	o := &Store{
 		contentKey: defaultContentKey,
@@ -63,6 +73,10 @@ func applyClientOptions(opts ...Option) (Store, error) {
 
 	for _, opt := range opts {
 		opt(o)
+	}
+
+	if o.httpClient == nil {
+		o.httpClient = httputil.DefaultClient
 	}
 
 	if o.collectionName == "" {

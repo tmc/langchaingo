@@ -3,6 +3,7 @@ package qdrant
 import (
 	"context"
 	"errors"
+	"net/http"
 	"net/url"
 
 	"github.com/tmc/langchaingo/embeddings"
@@ -16,6 +17,7 @@ type Store struct {
 	qdrantURL      url.URL
 	apiKey         string
 	contentKey     string
+	httpClient     *http.Client
 }
 
 var _ vectorstores.VectorStore = Store{}
