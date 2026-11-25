@@ -134,6 +134,12 @@ func (c *Client) makeEmbeddingPayload(r *EmbeddingRequest) *embeddingPayload {
 
 // CreateEmbedding creates embeddings.
 func (c *Client) CreateEmbedding(ctx context.Context, r *EmbeddingRequest) ([][]float32, error) {
+	// azure addresses the deployment through the url, an empty one would
+	// silently request /openai/deployments//embeddings
+	if IsAzure(c.apiType) && c.EmbeddingModel == "" {
+		return nil, ErrMissingAzureEmbeddingModel
+	}
+
 	if r.Model == "" {
 		r.Model = defaultEmbeddingModel
 	}
