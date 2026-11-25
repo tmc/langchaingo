@@ -20,6 +20,9 @@ type options struct {
 	keepAlive           string
 	pullModel           bool
 	pullTimeout         time.Duration
+	// think controls reasoning mode for models that support it.
+	// nil means not set (use server default), false explicitly disables thinking.
+	think *bool
 }
 
 type Option func(*options)
@@ -270,9 +273,10 @@ func WithPredictPenalizeNewline(val bool) Option {
 
 // WithThink enables reasoning mode for models that support it (Ollama 0.9.0+).
 // When enabled, the model will show its internal reasoning process.
+// When explicitly set to false, thinking is disabled even on reasoning models.
 func WithThink(val bool) Option {
 	return func(opts *options) {
-		opts.ollamaOptions.Think = val
+		opts.think = &val
 	}
 }
 
