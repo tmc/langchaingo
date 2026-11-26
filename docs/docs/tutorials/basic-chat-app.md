@@ -100,7 +100,10 @@ func main() {
 
     for {
         fmt.Print("You: ")
-        input, _ := reader.ReadString('\n')
+        input, err := reader.ReadString('\n')
+        if err != nil {
+            break // stdin closed
+        }
         input = strings.TrimSpace(input)
 
         if input == "quit" {
@@ -155,7 +158,10 @@ func main() {
 
     for {
         fmt.Print("You: ")
-        input, _ := reader.ReadString('\n')
+        input, err := reader.ReadString('\n')
+        if err != nil {
+            break // stdin closed
+        }
         input = strings.TrimSpace(input)
 
         if input == "quit" {
@@ -192,7 +198,7 @@ func main() {
 
 ## Step 6: Add a Conversation Chain
 
-For a more sophisticated approach using chains that automatically manage memory:
+Use a conversation chain to manage memory across calls:
 
 ```go
 package main
@@ -233,7 +239,10 @@ func main() {
 
     for {
         fmt.Print("You: ")
-        input, _ := reader.ReadString('\n')
+        input, err := reader.ReadString('\n')
+        if err != nil {
+            break // stdin closed
+        }
         input = strings.TrimSpace(input)
 
         if input == "quit" {
@@ -268,4 +277,4 @@ You can find the complete working example with all steps in the [tutorial-basic-
 
 ## Conclusion
 
-You've now built a fully functional chat application with LangChainGo! This foundation can be extended with additional features like tool calling, RAG (Retrieval Augmented Generation), and more sophisticated conversation management.
+The application sends user input to a model and keeps conversation history between calls.

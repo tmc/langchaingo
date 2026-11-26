@@ -1,26 +1,19 @@
 ---
-sidebar_label: LLM Chain
-sidebar_position: 1
 draft: true
 ---
 
-import CodeBlock from "@theme/CodeBlock";
-import ExampleLLM from "@examples/llm-chain-example/llm_chain.go";
-
 # Getting Started: LLMChain
 
-:::info
+<Info>
 [Conceptual Guide](https://python.langchain.com/docs/modules/chains)
-:::
+</Info>
 
 An `LLMChain` is a simple chain that adds some functionality around language models. It is used widely throughout LangChain, including in other chains and agents.
 
-An `LLMChain` consists of a `PromptTemplate` and a language model (either an [LLM](../models/llms/) or [chat model](../models/chat/)).
+An `LLMChain` consists of a `PromptTemplate` and a language model (either an [LLM](../model_io/models/llms/index.mdx) or [chat model](../model_io/models/chat/index.mdx)).
 
 ## Usage with LLMs
 
 We can construct an LLMChain which takes user input, formats it with a PromptTemplate, and then passes the formatted response to an LLM:
 
-<CodeBlock language="go">{ExampleLLM}</CodeBlock>
-
-
+<Code src="/examples/llm-chain-example/llm_chain.go" title="examples/llm-chain-example/llm_chain.go" link />

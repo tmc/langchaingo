@@ -51,6 +51,8 @@ Every major component is defined by interfaces:
 ```go
 type Model interface {
     GenerateContent(ctx context.Context, messages []MessageContent, options ...CallOption) (*ContentResponse, error)
+    // Deprecated: use GenerateContent.
+    Call(ctx context.Context, prompt string, options ...CallOption) (string, error)
 }
 
 type Chain interface {
@@ -135,7 +137,7 @@ response, err := llm.GenerateContent(ctx, messages,
 
 The models layer provides abstractions for different types of language models:
 
-```
+```text
 ┌─────────────────────────────────────────────────────────┐
 │                    Models Layer                         │
 ├─────────────────┬─────────────────┬─────────────────────┤
@@ -173,7 +175,7 @@ prompt, err := template.Format(map[string]any{
 
 Memory provides stateful conversation management:
 
-```
+```text
 ┌─────────────────────────────────────────────────────────┐
 │                  Memory Subsystem                       │
 ├─────────────────┬─────────────────┬─────────────────────┤
@@ -195,7 +197,7 @@ chain1 := chains.NewLLMChain(llm, template1)
 chain2 := chains.NewLLMChain(llm, template2)
 
 // For simple sequential chains where output of one feeds to next
-sequential := chains.NewSimpleSequentialChain([]chains.Chain{chain1, chain2})
+simple, err := chains.NewSimpleSequentialChain([]chains.Chain{chain1, chain2})
 
 // Or for complex sequential chains with specific input/output keys
 sequential, err := chains.NewSequentialChain(
@@ -209,7 +211,7 @@ sequential, err := chains.NewSequentialChain(
 
 Agents provide autonomous behavior:
 
-```
+```text
 ┌─────────────────────────────────────────────────────────┐
 │                  Agent Framework                        │
 ├─────────────────┬─────────────────┬─────────────────────┤
@@ -225,14 +227,14 @@ Agents provide autonomous behavior:
 ## Data flow
 
 ### Request flow
-```
+```text
 User Input → Prompt Template → LLM → Output Parser → Response
      ↓             ↓              ↓         ↓           ↓
    Memory ←── Chain Logic ←── API Call ←── Processing ←── Memory
 ```
 
 ### Agent flow
-```
+```text
 User Input → Agent Planning → Tool Selection → Tool Execution
      ↓              ↓              ↓              ↓
    Memory ←── Result Analysis ←── Tool Results ←── External APIs
@@ -320,19 +322,33 @@ func (t *CustomTool) Call(ctx context.Context, input string) (string, error) {
 ```
 
 ### Custom memory
-Implement the `Memory` interface:
+Implement the `schema.Memory` interface:
 
 ```go
 type CustomMemory struct {
-    storage map[string][]MessageContent
+    history []string
 }
 
-func (m *CustomMemory) ChatHistory(ctx context.Context) schema.ChatMessageHistory {
-    // Return chat history implementation
+func (m *CustomMemory) GetMemoryKey(ctx context.Context) string {
+    return "history"
 }
 
 func (m *CustomMemory) MemoryVariables(ctx context.Context) []string {
     return []string{"history"}
+}
+
+func (m *CustomMemory) LoadMemoryVariables(ctx context.Context, inputs map[string]any) (map[string]any, error) {
+    return map[string]any{"history": strings.Join(m.history, "\n")}, nil
+}
+
+func (m *CustomMemory) SaveContext(ctx context.Context, inputs, outputs map[string]any) error {
+    m.history = append(m.history, fmt.Sprint(inputs["input"]), fmt.Sprint(outputs["text"]))
+    return nil
+}
+
+func (m *CustomMemory) Clear(ctx context.Context) error {
+    m.history = nil
+    return nil
 }
 ```
 
@@ -422,7 +438,7 @@ func (m *MockLLM) GenerateContent(ctx context.Context, messages []MessageContent
     }
     
     response := &ContentResponse{
-        Choices: []ContentChoice{{Content: m.responses[m.index]}},
+        Choices: []*ContentChoice{{Content: m.responses[m.index]}},
     }
     m.index++
     return response, nil
@@ -437,20 +453,16 @@ For internal testing of HTTP-based LLM providers, LangChainGo uses [httprr](http
 
 ```go
 func TestOpenAIWithRecording(t *testing.T) {
-    // Start httprr recorder
-    recorder := httprr.New("testdata/openai_recording")
-    defer recorder.Stop()
-    
-    // Configure HTTP client to use recorder
-    client := &http.Client{
-        Transport: recorder,
+    // Replay testdata/TestOpenAIWithRecording.httprr, or record it
+    // when the test runs with -httprecord=.
+    rr := httprr.OpenForTest(t, http.DefaultTransport)
+
+    opts := []openai.Option{openai.WithHTTPClient(rr.Client())}
+    if !rr.Recording() {
+        // Replay needs no real key; recording reads OPENAI_API_KEY.
+        opts = append(opts, openai.WithToken("test-api-key"))
     }
-    
-    // Create LLM with custom client
-    llm, err := openai.New(
-        openai.WithHTTPClient(client),
-        openai.WithToken("test-token"), // Will be redacted in recording
-    )
+    llm, err := openai.New(opts...)
     require.NoError(t, err)
     
     // Make actual API call (recorded on first run, replayed on subsequent runs)
@@ -464,7 +476,7 @@ func TestOpenAIWithRecording(t *testing.T) {
 
 #### Recording guidelines
 
-1. **Initial Recording**: Run tests with real API credentials to create recordings
+1. **Initial Recording**: Run tests with `-httprecord=.` and real API credentials to create recordings
 2. **Sensitive Data**: httprr automatically redacts common sensitive headers
 3. **Deterministic Tests**: Recordings ensure consistent test results across environments
 4. **Version Control**: Commit recording files for team consistency
@@ -476,20 +488,16 @@ When contributing to LangChainGo's internal tests:
 1. **Use httprr for new LLM providers**:
    ```go
    func TestNewProvider(t *testing.T) {
-       recorder := httprr.New("testdata/newprovider_test")
-       defer recorder.Stop()
-       
-       // Test implementation
+       rr := httprr.OpenForTest(t, http.DefaultTransport)
+
+       // Pass rr.Client() to the provider and run the test
    }
    ```
 
 2. **Update recordings when APIs change**:
    ```bash
-   # Delete old recordings
-   rm testdata/provider_test.httprr
-   
-   # Re-run tests with real credentials
-   PROVIDER_API_KEY=real_key go test
+   # Re-record with real credentials; old recordings are replaced
+   PROVIDER_API_KEY=real_key go test -run TestNewProvider -httprecord=.
    ```
 
 3. **Verify recordings are committed**:

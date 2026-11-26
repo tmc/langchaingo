@@ -1,22 +1,22 @@
 # Tutorials
 
-Welcome to the LangChainGo tutorials! These step-by-step guides help you build complete applications using LangChainGo.
+These tutorials walk through building applications with LangChainGo.
 
 ## Learning path
 
 Follow these tutorials in order to progressively learn LangChainGo:
 
 ### 1. Foundation applications
-- [Building a simple chat application](./basic-chat-app) - Learn the basics with conversation memory
-- [AI Code Reviewer](./code-reviewer) - Analyze Go code for bugs, style, and performance issues
-- [Intelligent Log Analyzer](./log-analyzer) - Parse and analyze application logs with AI insights
+- [Building a simple chat application](basic-chat-app.md) - Learn the basics with conversation memory
+- [AI Code Reviewer](code-reviewer.md) - Analyze Go code for bugs, style, and performance issues
+- [Intelligent Log Analyzer](log-analyzer.md) - Parse and analyze application logs with AI insights
 
 ### 2. Advanced applications  
-- [Smart documentation generator](./smart-documentation) - Auto-generate API docs from your codebase
+- [Smart documentation generator](smart-documentation.md) - Auto-generate API docs from your codebase
 
 ### 3. Coming soon
 
-Want to help? Check our [documentation contribution guide](/docs/contributing/documentation) to write these tutorials:
+Want to help? Check our [documentation contribution guide](../contributing/documentation.md) to write these tutorials:
 
 - Building a RAG (retrieval-augmented generation) system
 - Creating an agent with tools  
@@ -29,7 +29,7 @@ Want to help? Check our [documentation contribution guide](/docs/contributing/do
 
 Before starting these tutorials, ensure you have:
 
-- Go 1.23 or later installed
+- Go 1.26 or later installed
 - An API key for at least one LLM provider (OpenAI, Anthropic, etc.)
 - Basic familiarity with Go programming
 
@@ -44,4 +44,4 @@ These tutorials go beyond simple chatbots to show practical applications:
 - **Production skills**: Deploy, monitor, and scale AI-powered applications
 - **Integration techniques**: Connect with external tools and services
 
-Let's get started with your first LangChainGo application!
+Start with the [chat application tutorial](basic-chat-app.md).

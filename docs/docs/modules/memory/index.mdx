@@ -1,17 +1,10 @@
----
-sidebar_label: Memory
-sidebar_position: 4
----
-
-import DocCardList from "@theme/DocCardList";
-
 # Memory
 
-:::info
-[Conceptual Guide](../../concepts/) • [How-to Guides](../../how-to/)
-:::
+<Info>
+[Conceptual Guide](../../concepts/index.md) • [How-to Guides](../../how-to/index.md)
+</Info>
 
-Memory enables LangChainGo applications to persist state between calls, maintaining conversation context and enabling sophisticated, stateful interactions.
+Memory keeps conversation state between calls.
 
 ## Key Concepts
 
@@ -22,9 +15,9 @@ Memory in LangChainGo provides several critical capabilities:
 - **State Persistence**: Save conversation state to various storage backends
 - **Memory Types**: Different strategies for managing conversation context
 
-:::warning
+<Warning>
 Do not share the same memory instance between different chains. Each memory instance represents the history of a single conversation and should be isolated.
-:::
+</Warning>
 
 ## Memory Types
 
@@ -59,7 +52,7 @@ LangChainGo memory can persist to various backends:
 Chains automatically handle memory integration:
 
 ```go
-chain := chains.NewConversationChain(llm, memory)
+chain := chains.NewConversation(llm, memory)
 ```
 
 ### With Agents
@@ -93,4 +86,4 @@ messages, err := memory.ChatHistory.Messages(ctx)
 
 ## Memory Classes
 
-<DocCardList />
+- [Examples](examples/index.mdx)

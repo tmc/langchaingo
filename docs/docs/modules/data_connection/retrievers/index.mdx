@@ -1,32 +1,18 @@
----
-hide_table_of_contents: true
-sidebar_position: 4
----
-
-import DocCardList from "@theme/DocCardList";
-
 # Retrievers
 
-:::info
+<Info>
 [Conceptual Guide](https://python.langchain.com/docs/modules/data_connection/retrievers/)
-:::
-The concept of a "retriever" within a language or framework, particularly in blockchain contexts, refers to a mechanism designed to extract or fetch data from a designated source. In the realm of blockchain, this could involve retrieving transaction details, block information, or the states of smart contracts from the blockchain's ledger.
+</Info>
+A retriever returns documents relevant to a query. LangChainGo's
+`schema.Retriever` interface exposes `GetRelevantDocuments`, which accepts
+a context and query string and returns documents or an error.
 
-## Reasons for Using a Retriever:
-- **Data Accessibility**: Provides a gateway for accessing data stored on the blockchain, crucial for applications needing to present this information to users or leverage it for further processing.
+A vector store can be adapted to this interface with
+`vectorstores.ToRetriever`. The example below uses Ollama for embeddings
+and Qdrant to search a collection.
 
-- **Efficiency**: Optimizes the process of fetching data, reducing latency and enhancing the performance of blockchain applications.
+## Configure an embedder
 
-- **Abstraction**: Simplifies querying the blockchain by hiding its underlying complexity, offering developers a more straightforward API.
-
-- **Integration**: Enables the seamless incorporation of blockchain data into other applications or services, broadening potential use cases and functionalities.
-
-- **Security**: Allows applications to access blockchain data safely without direct ledger interactions, minimizing exposure to security risks.
-
-## How To
-The implementation of a retriever varies depending on the blockchain platform and the specific data requirements. However, the general process involves the following steps:
-
-You need use a embedder, can you ollama, huggingface ..
 ```go
 	llm, err := ollama.New(ollama.WithModel("llama2"))
 
@@ -40,7 +26,9 @@ You need use a embedder, can you ollama, huggingface ..
 	}
 ```
 
-After it chose a storage vector like pinecone, postgres, Qdrant, in example I'll use qdrant
+## Configure a vector store
+
+Connect to Qdrant and select the collection to search:
 ```go
 	url, err := url.Parse("http://localhost:6333")
 	if err != nil {
@@ -56,10 +44,11 @@ After it chose a storage vector like pinecone, postgres, Qdrant, in example I'll
 		log.Fatal(err)
 	}
 
-
 ```
 
-Now Create a retriever
+## Retrieve documents
+
+Adapt the store and search for relevant documents:
 ```go
 	searchQuery := "how to make a cake"
 	
@@ -73,6 +62,4 @@ Now Create a retriever
 	}
 ```
 
-This is a simple example of how to use a retriever, you can use it in a lot of ways, like a chatbot, a search engine, a recommendation system, etc.
-
-<DocCardList />
+See the [Qdrant example](https://github.com/tmc/langchaingo/tree/main/examples/qdrant-vectorstore-example) for a complete program.

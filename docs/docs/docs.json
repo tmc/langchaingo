@@ -1,0 +1,9 @@
+{
+  "navbar": {
+    "primary": {
+      "type": "github",
+      "href": "https://github.com/tmc/langchaingo"
+    }
+  },
+  "ref": "main"
+}

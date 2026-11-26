@@ -27,30 +27,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v2
-        with:
-          version: 9
-
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 18
-          cache: pnpm
-          cache-dependency-path: docs/pnpm-lock.yaml
-
       - name: Setup Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
+          cache: false
 
-      - name: Build search index
+      - name: Install md2html
         working-directory: docs
-        run: go run search-indexer.go
+        env:
+          GOTOOLCHAIN: local
+        run: make install
+
+      - name: Check docs
+        working-directory: docs
+        run: make vet
 
       - name: Build docs
         working-directory: docs
-        run: |
-          pnpm install --frozen-lockfile
-          pnpm run build
+        run: make build
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
@@ -58,7 +53,7 @@ jobs:
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: docs/build
+          path: docs/_site
           name: github-pages
 
       - name: Deploy
@@ -81,7 +76,7 @@ jobs:
         with:
           script: |
             const url = '${{ steps.deployment.outputs.page_url }}';
-            const message = `📚 Documentation preview available at: ${url}`;
+            const message = `Documentation preview available at: ${url}`;
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,

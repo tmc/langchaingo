@@ -1,19 +1,10 @@
----
-hide_table_of_contents: true
-sidebar_label: Chains
-sidebar_position: 3
----
-
-import DocCardList from "@theme/DocCardList";
-import CodeBlock from "@theme/CodeBlock";
-
 # Chains
 
-:::info
-[Conceptual Guide](../../concepts/) • [How-to Guides](../../how-to/)
-:::
+<Info>
+[Conceptual Guide](../../concepts/index.md) • [How-to Guides](../../how-to/index.md)
+</Info>
 
-Chains enable you to combine language models with other sources of information, third-party APIs, or even other language models. This allows you to create powerful, multi-step applications that go beyond single LLM calls.
+Chains enable you to combine language models with other sources of information, third-party APIs, or even other language models. Use chains to coordinate multiple calls in an application.
 
 LangChainGo provides a standard interface for chains, along with several built-in implementations for common patterns. You can also create custom chains by implementing the `Chain` interface.
 
@@ -62,7 +53,7 @@ if err != nil {
 fmt.Println(res)
 ```
 
-```
+```text
 map[text:
 
 Socktastic!]
@@ -83,7 +74,7 @@ if err != nil {
 fmt.Println(text)
 ```
 
-```
+```text
 Socktastic!
 ```
 
@@ -96,8 +87,8 @@ text, err := chains.Predict(
     chain,
     map[string]any{
       "product": "colorful socks",
-      "description": "The company is based in California"
-    }
+      "description": "The company is based in California",
+    },
 )
 if err != nil {
   log.Fatal(err)
@@ -124,5 +115,3 @@ type Chain interface {
 	GetOutputKeys() []string
 }
 ```
-
-<DocCardList />

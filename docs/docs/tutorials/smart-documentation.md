@@ -13,7 +13,7 @@ A CLI tool that:
 
 ## Prerequisites
 
-- Go 1.21+
+- Go 1.26 or later
 - LLM API key
 - A Go project to document
 
@@ -41,9 +41,7 @@ import (
     "go/doc"
     "go/parser"
     "go/token"
-    "path/filepath"
     "strings"
-    "unicode"
 )
 
 type CodeAnalyzer struct {
@@ -552,9 +550,7 @@ package main
 
 import (
     "context"
-    "encoding/json"
     "fmt"
-    "path/filepath"
     "strings"
     "text/template"
 
@@ -974,6 +970,8 @@ import (
     "log"
     "os"
     "path/filepath"
+    "strings"
+    "time"
 )
 
 func main() {
@@ -1276,5 +1274,3 @@ This smart documentation generator can:
 3. **Create internal documentation** for large codebases
 4. **Maintain up-to-date docs** in CI/CD pipelines
 5. **Generate examples** for complex APIs
-
-This tutorial shows how LangChainGo can create sophisticated development tools that save significant time and improve code quality!
