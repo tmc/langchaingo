@@ -170,6 +170,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 
 	var fn ollamaclient.ChatResponseFunc
 	streamedResponse := ""
+	streamedThinking := ""
 	var resp ollamaclient.ChatResponse
 
 	fn = func(response ollamaclient.ChatResponse) error {
@@ -180,12 +181,14 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		}
 		if response.Message != nil {
 			streamedResponse += response.Message.Content
+			streamedThinking += response.Message.Thinking
 		}
 		if !req.Stream || response.Done {
 			resp = response
 			resp.Message = &ollamaclient.Message{
-				Role:    "assistant",
-				Content: streamedResponse,
+				Role:     "assistant",
+				Content:  streamedResponse,
+				Thinking: streamedThinking,
 			}
 		}
 		return nil
@@ -201,8 +204,10 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 
 	// Handle case where Message might be nil (e.g., context cancelled during streaming)
 	content := ""
+	thinkingContent := ""
 	if resp.Message != nil {
 		content = resp.Message.Content
+		thinkingContent = resp.Message.Thinking
 	}
 
 	// Build generation info with standardized fields
@@ -210,9 +215,8 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		"CompletionTokens": resp.EvalCount,
 		"PromptTokens":     resp.PromptEvalCount,
 		"TotalTokens":      resp.EvalCount + resp.PromptEvalCount,
-		// Add empty thinking fields for cross-provider compatibility
-		"ThinkingContent": "", // Ollama doesn't separate thinking content
-		"ThinkingTokens":  0,  // Ollama doesn't track thinking tokens separately
+		"ThinkingContent":  thinkingContent,
+		"ThinkingTokens":   0, // Ollama doesn't track thinking tokens separately
 	}
 
 	// If context caching is enabled, track cache usage
@@ -229,16 +233,16 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		}
 	}
 
-	// Note: Ollama may include thinking in the main content when Think mode is enabled
-	// Future versions may provide separate thinking content
-	if ollamaOptions.Think && o.SupportsReasoning() {
+	// Mark if thinking was enabled and content was returned
+	if ollamaOptions.Think {
 		genInfo["ThinkingEnabled"] = true
 	}
 
 	choices := []*llms.ContentChoice{
 		{
-			Content:        content,
-			GenerationInfo: genInfo,
+			Content:          content,
+			ReasoningContent: thinkingContent,
+			GenerationInfo:   genInfo,
 		},
 	}
 

@@ -229,6 +229,7 @@ func (c *Client) GenerateChat(ctx context.Context, req *ChatRequest, fn ChatResp
 	if !req.Stream {
 		var finalResp ChatResponse
 		var accumulatedContent string
+		var accumulatedThinking string
 		return c.stream(ctx, http.MethodPost, "/api/chat", req, func(bts []byte) error {
 			var resp ChatResponse
 			if err := json.Unmarshal(bts, &resp); err != nil {
@@ -238,9 +239,14 @@ func (c *Client) GenerateChat(ctx context.Context, req *ChatRequest, fn ChatResp
 			// Copy the response structure
 			finalResp = resp
 
-			// Accumulate content
-			if resp.Message != nil && resp.Message.Content != "" {
-				accumulatedContent += resp.Message.Content
+			// Accumulate content and thinking
+			if resp.Message != nil {
+				if resp.Message.Content != "" {
+					accumulatedContent += resp.Message.Content
+				}
+				if resp.Message.Thinking != "" {
+					accumulatedThinking += resp.Message.Thinking
+				}
 			}
 
 			// If this is the final chunk, set the complete content and call fn
@@ -249,6 +255,7 @@ func (c *Client) GenerateChat(ctx context.Context, req *ChatRequest, fn ChatResp
 					finalResp.Message = &Message{}
 				}
 				finalResp.Message.Content = accumulatedContent
+				finalResp.Message.Thinking = accumulatedThinking
 				return fn(finalResp)
 			}
 
