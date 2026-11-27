@@ -79,7 +79,9 @@ type ChatRequest struct {
 	// Deprecated: use Tools instead.
 	Functions []FunctionDefinition `json:"functions,omitempty"`
 	// Deprecated: use ToolChoice instead.
-	FunctionCallBehavior FunctionCallBehavior `json:"function_call,omitempty"`
+	// FunctionCallBehavior can be a string ("none", "auto") or an object {"name": "my_function"}
+	// to force the model to call a specific function.
+	FunctionCallBehavior any `json:"function_call,omitempty"`
 
 	// Metadata allows you to specify additional information that will be passed to the model.
 	Metadata map[string]any `json:"metadata,omitempty"`

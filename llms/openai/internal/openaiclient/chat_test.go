@@ -106,6 +106,58 @@ func TestChatMessage_MarshalUnmarshal(t *testing.T) {
 	require.Equal(t, msg, msg2)
 }
 
+func TestChatRequest_FunctionCallBehavior_Marshal(t *testing.T) {
+	t.Parallel()
+
+	t.Run("string none", func(t *testing.T) {
+		req := ChatRequest{
+			Model:                "gpt-3.5-turbo",
+			FunctionCallBehavior: FunctionCallBehaviorNone,
+		}
+		b, err := json.Marshal(req)
+		require.NoError(t, err)
+		var m map[string]json.RawMessage
+		require.NoError(t, json.Unmarshal(b, &m))
+		assert.Equal(t, `"none"`, string(m["function_call"]))
+	})
+
+	t.Run("string auto", func(t *testing.T) {
+		req := ChatRequest{
+			Model:                "gpt-3.5-turbo",
+			FunctionCallBehavior: FunctionCallBehaviorAuto,
+		}
+		b, err := json.Marshal(req)
+		require.NoError(t, err)
+		var m map[string]json.RawMessage
+		require.NoError(t, json.Unmarshal(b, &m))
+		assert.Equal(t, `"auto"`, string(m["function_call"]))
+	})
+
+	t.Run("object form forces specific function", func(t *testing.T) {
+		req := ChatRequest{
+			Model: "gpt-3.5-turbo",
+			FunctionCallBehavior: struct {
+				Name string `json:"name"`
+			}{Name: "my_function"},
+		}
+		b, err := json.Marshal(req)
+		require.NoError(t, err)
+		var m map[string]json.RawMessage
+		require.NoError(t, json.Unmarshal(b, &m))
+		assert.Equal(t, `{"name":"my_function"}`, string(m["function_call"]))
+	})
+
+	t.Run("unset is omitted", func(t *testing.T) {
+		req := ChatRequest{Model: "gpt-3.5-turbo"}
+		b, err := json.Marshal(req)
+		require.NoError(t, err)
+		var m map[string]json.RawMessage
+		require.NoError(t, json.Unmarshal(b, &m))
+		_, present := m["function_call"]
+		assert.False(t, present, "function_call should be omitted when unset")
+	})
+}
+
 func TestChatMessage_MarshalUnmarshal_WithReasoning(t *testing.T) {
 	t.Parallel()
 	msg := ChatMessage{
