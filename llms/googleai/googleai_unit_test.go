@@ -570,3 +570,23 @@ func TestConvertTools(t *testing.T) { //nolint:funlen // comprehensive test //no
 		assert.Contains(t, customizationsProp.Items.Required, "value")
 	})
 }
+
+
+func TestGenerateFromMessages_SystemOnly(t *testing.T) {
+	t.Parallel()
+
+	client := &GoogleAI{
+		opts: DefaultOptions(),
+	}
+
+	messages := []llms.MessageContent{
+		{
+			Role:  llms.ChatMessageTypeSystem,
+			Parts: []llms.ContentPart{llms.TextContent{Text: "You are a helpful assistant."}},
+		},
+	}
+
+	_, err := client.GenerateContent(context.Background(), messages)
+	assert.Error(t, err)
+	assert.ErrorIs(t, err, ErrNoMessages)
+}
