@@ -452,10 +452,11 @@ func TestClient_CreateCompletion_Streaming(t *testing.T) {
 			Type:  "content_block_delta",
 			Index: 0,
 			Delta: struct {
-				Type         string `json:"type"`
-				Text         string `json:"text"`
-				StopReason   string `json:"stop_reason"`
-				StopSequence any    `json:"stop_sequence"`
+				Type         string                `json:"type"`
+				Text         string                `json:"text"`
+				StopReason   string                `json:"stop_reason"`
+				StopSequence any                   `json:"stop_sequence"`
+				StopDetails  *anthropicStopDetails `json:"stop_details"`
 			}{
 				Type: "text_delta",
 				Text: "Once upon a time, ",
@@ -465,10 +466,11 @@ func TestClient_CreateCompletion_Streaming(t *testing.T) {
 			Type:  "content_block_delta",
 			Index: 0,
 			Delta: struct {
-				Type         string `json:"type"`
-				Text         string `json:"text"`
-				StopReason   string `json:"stop_reason"`
-				StopSequence any    `json:"stop_sequence"`
+				Type         string                `json:"type"`
+				Text         string                `json:"text"`
+				StopReason   string                `json:"stop_reason"`
+				StopSequence any                   `json:"stop_sequence"`
+				StopDetails  *anthropicStopDetails `json:"stop_details"`
 			}{
 				Type: "text_delta",
 				Text: "there was a brave knight.",
@@ -477,10 +479,11 @@ func TestClient_CreateCompletion_Streaming(t *testing.T) {
 		{
 			Type: "message_delta",
 			Delta: struct {
-				Type         string `json:"type"`
-				Text         string `json:"text"`
-				StopReason   string `json:"stop_reason"`
-				StopSequence any    `json:"stop_sequence"`
+				Type         string                `json:"type"`
+				Text         string                `json:"text"`
+				StopReason   string                `json:"stop_reason"`
+				StopSequence any                   `json:"stop_sequence"`
+				StopDetails  *anthropicStopDetails `json:"stop_details"`
 			}{
 				StopReason: AnthropicCompletionReasonEndTurn,
 			},
@@ -760,10 +763,11 @@ func TestClient_CreateCompletion_StreamingCancellation(t *testing.T) {
 				Type:  "content_block_delta",
 				Index: 0,
 				Delta: struct {
-					Type         string `json:"type"`
-					Text         string `json:"text"`
-					StopReason   string `json:"stop_reason"`
-					StopSequence any    `json:"stop_sequence"`
+					Type         string                `json:"type"`
+					Text         string                `json:"text"`
+					StopReason   string                `json:"stop_reason"`
+					StopSequence any                   `json:"stop_sequence"`
+					StopDetails  *anthropicStopDetails `json:"stop_details"`
 				}{
 					Type: "text_delta",
 					Text: fmt.Sprintf("Chunk %d ", i),

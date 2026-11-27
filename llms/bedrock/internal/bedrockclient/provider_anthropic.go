@@ -8,7 +8,6 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime/types"
 	"github.com/tmc/langchaingo/llms"
@@ -81,6 +80,11 @@ type anthropicTextGenerationInput struct {
 	Tools []BedrockTool `json:"tools,omitempty"`
 	// Tool choice configuration. Optional
 	ToolChoice *BedrockToolChoice `json:"tool_choice,omitempty"`
+	// Guardrail configuration. Optional
+	GuardrailConfig *struct {
+		TagSuffix            string `json:"tagSuffix,omitempty"`
+		StreamProcessingMode string `json:"streamProcessingMode,omitempty"`
+	} `json:"amazon-bedrock-guardrailConfig,omitempty"`
 }
 
 // anthropicTextGenerationOutput is the generated output.
@@ -99,10 +103,36 @@ type anthropicTextGenerationOutput struct {
 	StopReason string `json:"stop_reason"`
 	// Which custom stop sequence was matched, if any.
 	StopSequence string `json:"stop_sequence"`
-	Usage        struct {
+	// Why the model declined the request, set only when stop_reason is "refusal".
+	StopDetails *anthropicStopDetails `json:"stop_details"`
+	Usage       struct {
 		InputTokens  int `json:"input_tokens"`
 		OutputTokens int `json:"output_tokens"`
 	} `json:"usage"`
+}
+
+// anthropicStopDetails explains a refusal. Category and Explanation are nil
+// when the refusal does not map to a named category.
+type anthropicStopDetails struct {
+	Type        string `json:"type"`
+	Category    any    `json:"category"`
+	Explanation any    `json:"explanation"`
+}
+
+const anthropicStopReasonRefusal = "refusal"
+
+// newAnthropicRefusalError returns the content filter error for a refusal.
+// details is nil when the response does not carry stop_details.
+func newAnthropicRefusalError(details *anthropicStopDetails) *llms.Error {
+	var category, explanation any
+	if details != nil {
+		category, explanation = details.Category, details.Explanation
+	}
+	err := llms.NewError(llms.ErrCodeContentFilter, "bedrock", "content refused by the model")
+	err.WithDetail(DetailType, BlockedByRefusal)
+	err.WithDetail(DetailCategory, category)
+	err.WithDetail(DetailExplanation, explanation)
+	return err
 }
 
 // anthropicContentBlock represents a content block in Anthropic response
@@ -182,28 +212,38 @@ func createAnthropicCompletion(ctx context.Context,
 		}
 	}
 
+	// Add guardrail tag suffix and stream processing mode if provided in safety config
+	if options.SafetyConfig != nil {
+		input.GuardrailConfig = &struct {
+			TagSuffix            string `json:"tagSuffix,omitempty"`
+			StreamProcessingMode string `json:"streamProcessingMode,omitempty"`
+		}{}
+		if tagSuffix, ok := options.SafetyConfig["tag_suffix"]; ok {
+			if str, ok := tagSuffix.(string); ok {
+				input.GuardrailConfig.TagSuffix = str
+			} else {
+				return nil, errors.New("tag_suffix in safety config must be a string")
+			}
+		}
+		if streamProcessingMode, ok := options.SafetyConfig["stream_processing_mode"]; ok {
+			if str, ok := streamProcessingMode.(string); ok {
+				input.GuardrailConfig.StreamProcessingMode = str
+			} else {
+				return nil, errors.New("stream_processing_mode in safety config must be a string")
+			}
+		}
+	}
+
 	body, err := json.Marshal(input)
 	if err != nil {
 		return nil, err
 	}
 
 	if options.StreamingFunc != nil {
-		modelInput := &bedrockruntime.InvokeModelWithResponseStreamInput{
-			ModelId:     aws.String(modelID),
-			Accept:      aws.String("*/*"),
-			ContentType: aws.String("application/json"),
-			Body:        body,
-		}
-		return parseStreamingCompletionResponse(ctx, client, modelInput, options)
+		return parseStreamingCompletionResponse(ctx, client, modelID, body, options)
 	}
 
-	modelInput := &bedrockruntime.InvokeModelInput{
-		ModelId:     aws.String(modelID),
-		Accept:      aws.String("*/*"),
-		ContentType: aws.String("application/json"),
-		Body:        body,
-	}
-	resp, err := client.InvokeModel(ctx, modelInput)
+	resp, err := invokeModel(ctx, client, modelID, body, options)
 	if err != nil {
 		return nil, err
 	}
@@ -214,6 +254,9 @@ func createAnthropicCompletion(ctx context.Context,
 		return nil, err
 	}
 
+	if output.StopReason == anthropicStopReasonRefusal {
+		return nil, newAnthropicRefusalError(output.StopDetails)
+	}
 	if len(output.Content) == 0 {
 		return nil, errors.New("no results")
 	} else if stopReason := output.StopReason; stopReason != AnthropicCompletionReasonEndTurn && stopReason != AnthropicCompletionReasonStopSequence && stopReason != "tool_use" {
@@ -263,41 +306,8 @@ func createAnthropicCompletion(ctx context.Context,
 	}, nil
 }
 
-type streamingCompletionResponseChunk struct {
-	Type  string `json:"type"`
-	Index int    `json:"index"`
-	Delta struct {
-		Type         string `json:"type"`
-		Text         string `json:"text"`
-		StopReason   string `json:"stop_reason"`
-		StopSequence any    `json:"stop_sequence"`
-	} `json:"delta"`
-	AmazonBedrockInvocationMetrics struct {
-		InputTokenCount   int `json:"inputTokenCount"`
-		OutputTokenCount  int `json:"outputTokenCount"`
-		InvocationLatency int `json:"invocationLatency"`
-		FirstByteLatency  int `json:"firstByteLatency"`
-	} `json:"amazon-bedrock-invocationMetrics"`
-	Usage struct {
-		OutputTokens int `json:"output_tokens"`
-	} `json:"usage"`
-	Message struct {
-		ID           string `json:"id"`
-		Type         string `json:"type"`
-		Role         string `json:"role"`
-		Content      []any  `json:"content"`
-		Model        string `json:"model"`
-		StopReason   any    `json:"stop_reason"`
-		StopSequence any    `json:"stop_sequence"`
-		Usage        struct {
-			InputTokens  int `json:"input_tokens"`
-			OutputTokens int `json:"output_tokens"`
-		} `json:"usage"`
-	} `json:"message"`
-}
-
-func parseStreamingCompletionResponse(ctx context.Context, client *bedrockruntime.Client, modelInput *bedrockruntime.InvokeModelWithResponseStreamInput, options llms.CallOptions) (*llms.ContentResponse, error) {
-	output, err := client.InvokeModelWithResponseStream(ctx, modelInput)
+func parseStreamingCompletionResponse(ctx context.Context, client invokeModelWithResponseStreamAPI, modelID string, body []byte, options llms.CallOptions) (*llms.ContentResponse, error) {
+	output, err := invokeModelWithResponseStream(ctx, client, modelID, body, options)
 	if err != nil {
 		return nil, err
 	}
@@ -315,22 +325,14 @@ func parseStreamingCompletionResponse(ctx context.Context, client *bedrockruntim
 
 		if v, ok := e.(*types.ResponseStreamMemberChunk); ok {
 			var resp streamingCompletionResponseChunk
-			err := json.NewDecoder(bytes.NewReader(v.Value.Bytes)).Decode(&resp)
-			if err != nil {
+			if err := json.NewDecoder(bytes.NewReader(v.Value.Bytes)).Decode(&resp); err != nil {
 				return nil, err
 			}
-
-			switch resp.Type {
-			case "message_start":
-				contentchoices[0].GenerationInfo["input_tokens"] = resp.Message.Usage.InputTokens
-			case "content_block_delta":
-				if err = options.StreamingFunc(ctx, []byte(resp.Delta.Text)); err != nil {
-					return nil, err
-				}
-				contentchoices[0].Content += resp.Delta.Text
-			case "message_delta":
-				contentchoices[0].StopReason = resp.Delta.StopReason
-				contentchoices[0].GenerationInfo["output_tokens"] = resp.Usage.OutputTokens
+			if err := checkGuardrailError(&resp); err != nil {
+				return nil, err
+			}
+			if err := handleAnthropicStreamingChunk(ctx, resp, contentchoices[0], options); err != nil {
+				return nil, err
 			}
 		}
 	}
@@ -341,6 +343,28 @@ func parseStreamingCompletionResponse(ctx context.Context, client *bedrockruntim
 	return &llms.ContentResponse{
 		Choices: contentchoices,
 	}, nil
+}
+
+// handleAnthropicStreamingChunk records one streamed chunk in choice, passes
+// delta text to options.StreamingFunc, and returns the refusal error when the
+// stream ends in a refusal.
+func handleAnthropicStreamingChunk(ctx context.Context, resp streamingCompletionResponseChunk, choice *llms.ContentChoice, options llms.CallOptions) error {
+	switch resp.Type {
+	case "message_start":
+		choice.GenerationInfo["input_tokens"] = resp.Message.Usage.InputTokens
+	case "content_block_delta":
+		if err := options.StreamingFunc(ctx, []byte(resp.Delta.Text)); err != nil {
+			return err
+		}
+		choice.Content += resp.Delta.Text
+	case "message_delta":
+		if resp.Delta.StopReason == anthropicStopReasonRefusal {
+			return newAnthropicRefusalError(resp.Delta.StopDetails)
+		}
+		choice.StopReason = resp.Delta.StopReason
+		choice.GenerationInfo["output_tokens"] = resp.Usage.OutputTokens
+	}
+	return nil
 }
 
 // process the input messages to anthropic supported input
