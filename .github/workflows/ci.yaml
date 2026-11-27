@@ -17,14 +17,14 @@ jobs:
     name: lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version-file: go.mod
           cache: true
           check-latest: false
       - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v7
+        uses: golangci/golangci-lint-action@v9
         with:
           version: v2.9.0
           args: --timeout=5m
@@ -34,8 +34,8 @@ jobs:
     name: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version-file: go.mod
           cache: true
@@ -47,8 +47,8 @@ jobs:
     name: govulncheck
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version-file: go.mod
           cache: true
@@ -60,8 +60,8 @@ jobs:
     name: test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version-file: go.mod
           cache: true
@@ -81,7 +81,7 @@ jobs:
         run: |
           go test -v -json -coverprofile=coverage-${{ steps.go-version.outputs.version }}.out ./... | tee test-results-${{ steps.go-version.outputs.version }}.ndjson
       - name: Upload test results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: test-results-go${{ steps.go-version.outputs.version }}.ndjson
@@ -93,8 +93,8 @@ jobs:
     name: test -race
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version-file: "go.mod"
           cache: true
@@ -106,7 +106,7 @@ jobs:
         shell: bash
         run: go test -v -json ./... -race | tee test-results-race-${{ steps.go-version.outputs.version }}.ndjson
       - name: Upload race test results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: test-results-race-go${{ steps.go-version.outputs.version }}.ndjson
@@ -120,14 +120,14 @@ jobs:
       contents: read
       pull-requests: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version: stable
           cache: true
           check-latest: false
       - name: Download all test results
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           pattern: test-results-*
           path: test-results
@@ -170,7 +170,7 @@ jobs:
           cat coverage-summary.md >> $GITHUB_STEP_SUMMARY
       
       - name: Upload coverage artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         id: coverage-artifact
         with:
           name: coverage-report-html
