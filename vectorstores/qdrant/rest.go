@@ -34,11 +34,15 @@ func (s Store) upsertPoints(
 		},
 	}
 
-	url := baseURL.JoinPath("collections", s.collectionName, "points")
+	upsertURL := baseURL.JoinPath("collections", s.collectionName, "points")
+	queryParams := url.Values{}
+	queryParams.Add("wait", fmt.Sprintf("%t", s.waitForInsert))
+	upsertURL.RawQuery = queryParams.Encode()
+
 	body,
 		status,
 		err := DoRequest(
-		ctx, *url,
+		ctx, *upsertURL,
 		s.apiKey,
 		http.MethodPut,
 		payload,
@@ -135,7 +139,7 @@ func DoRequest(ctx context.Context,
 	}
 	body := bytes.NewReader(payloadBytes)
 
-	req, err := http.NewRequestWithContext(ctx, method, url.String()+"?wait=true", body)
+	req, err := http.NewRequestWithContext(ctx, method, url.String(), body)
 	if err != nil {
 		return nil, 0, err
 	}
