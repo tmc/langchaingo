@@ -354,7 +354,7 @@ func (o *OpenAIFunctionsAgent) ParseOutput(contentResp *llms.ContentResponse) (
 	// No function/tool call - this is a finish
 	return nil, &schema.AgentFinish{
 		ReturnValues: map[string]any{
-			"output": choice.Content,
+			o.OutputKey: choice.Content,
 		},
 		Log: choice.Content,
 	}, nil
