@@ -2,6 +2,7 @@ package chains
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/tmc/langchaingo/callbacks"
 	"github.com/tmc/langchaingo/llms"
@@ -11,7 +12,10 @@ import (
 	"github.com/tmc/langchaingo/schema"
 )
 
-const _llmChainDefaultOutputKey = "text"
+const (
+	_llmChainDefaultOutputKey     = "text"
+	_llmChainMultiPromptOutputKey = "choices"
+)
 
 type LLMChain struct {
 	Prompt           prompts.FormatPrompter
@@ -19,6 +23,8 @@ type LLMChain struct {
 	Memory           schema.Memory
 	CallbacksHandler callbacks.Handler
 	OutputParser     schema.OutputParser[any]
+	// When enabled usesMultiplePrompts will not 'flatten' the prompt into a single message.
+	useMultiPrompt bool
 
 	OutputKey string
 }
@@ -41,9 +47,15 @@ func NewLLMChain(llm llms.Model, prompt prompts.FormatPrompter, opts ...ChainCal
 		Memory:           memory.NewSimple(),
 		OutputKey:        _llmChainDefaultOutputKey,
 		CallbacksHandler: opt.CallbackHandler,
+		useMultiPrompt:   false,
 	}
 
 	return chain
+}
+
+func (c *LLMChain) EnableMultiPrompt() {
+	c.useMultiPrompt = true
+	c.OutputKey = _llmChainMultiPromptOutputKey
 }
 
 // Call formats the prompts with the input values, generates using the llm, and parses
@@ -56,17 +68,27 @@ func (c LLMChain) Call(ctx context.Context, values map[string]any, options ...Ch
 		return nil, err
 	}
 
-	result, err := llms.GenerateFromSinglePrompt(ctx, c.LLM, promptValue.String(), getLLMCallOptions(options...)...)
-	if err != nil {
-		return nil, err
-	}
+	llmsOptions := getLLMCallOptions(options...)
+	var llmOutput any
+	if c.useMultiPrompt {
+		llmsReponse, err := c.LLM.GenerateContent(ctx, chatMessagesToLLmMessageContent(promptValue.Messages()), llmsOptions...)
+		if err != nil {
+			return nil, fmt.Errorf("llm generate content: %w", err)
+		}
 
-	finalOutput, err := c.OutputParser.ParseWithPrompt(result, promptValue)
-	if err != nil {
-		return nil, err
-	}
+		llmOutput = llmsReponse.Choices
+	} else {
+		resp, err := llms.GenerateFromSinglePrompt(ctx, c.LLM, promptValue.String(), llmsOptions...)
+		if err != nil {
+			return nil, err
+		}
 
-	return map[string]any{c.OutputKey: finalOutput}, nil
+		llmOutput, err = c.OutputParser.ParseWithPrompt(resp, promptValue)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return map[string]any{c.OutputKey: llmOutput}, nil
 }
 
 // GetMemory returns the memory.
@@ -86,4 +108,23 @@ func (c LLMChain) GetInputKeys() []string {
 // GetOutputKeys returns the output keys the chain will return.
 func (c LLMChain) GetOutputKeys() []string {
 	return []string{c.OutputKey}
+}
+
+// Convert ChatMessage to MessageContent.
+// Each ChatMessage is directly converted to a MessageContent with the same content and type.
+func chatMessagesToLLmMessageContent(chatMessages []llms.ChatMessage) []llms.MessageContent {
+	msgs := make([]llms.MessageContent, len(chatMessages))
+	for idx, m := range chatMessages {
+		msgs[idx] = chatMessageToLLm(m)
+	}
+	return msgs
+}
+
+func chatMessageToLLm(in llms.ChatMessage) llms.MessageContent {
+	return llms.MessageContent{
+		Parts: []llms.ContentPart{
+			llms.TextContent{Text: in.GetContent()},
+		},
+		Role: in.GetType(),
+	}
 }
