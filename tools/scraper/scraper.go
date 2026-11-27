@@ -114,6 +114,7 @@ func (s Scraper) Call(ctx context.Context, input string) (string, error) {
 	}
 
 	var siteData strings.Builder
+	var siteDataMutex sync.Mutex
 	homePageLinks := make(map[string]bool)
 	scrapedLinks := make(map[string]bool)
 	scrapedLinksMutex := sync.RWMutex{}
@@ -147,26 +148,27 @@ func (s Scraper) Call(ctx context.Context, input string) (string, error) {
 			scrapedLinks[currentURL] = true
 			scrapedLinksMutex.Unlock()
 
-			siteData.WriteString("\n\nPage URL: " + currentURL)
+			var pageData strings.Builder
+			pageData.WriteString("\n\nPage URL: " + currentURL)
 
 			title := e.ChildText("title")
 			if title != "" {
-				siteData.WriteString("\nPage Title: " + title)
+				pageData.WriteString("\nPage Title: " + title)
 			}
 
 			description := e.ChildAttr("meta[name=description]", "content")
 			if description != "" {
-				siteData.WriteString("\nPage Description: " + description)
+				pageData.WriteString("\nPage Description: " + description)
 			}
 
-			siteData.WriteString("\nHeaders:")
+			pageData.WriteString("\nHeaders:")
 			e.ForEach("h1, h2, h3, h4, h5, h6", func(_ int, el *colly.HTMLElement) {
-				siteData.WriteString("\n" + el.Text)
+				pageData.WriteString("\n" + el.Text)
 			})
 
-			siteData.WriteString("\nContent:")
+			pageData.WriteString("\nContent:")
 			e.ForEach("p", func(_ int, el *colly.HTMLElement) {
-				siteData.WriteString("\n" + el.Text)
+				pageData.WriteString("\n" + el.Text)
 			})
 
 			if currentURL == input {
@@ -174,10 +176,13 @@ func (s Scraper) Call(ctx context.Context, input string) (string, error) {
 					link := el.Attr("href")
 					if link != "" && !homePageLinks[link] {
 						homePageLinks[link] = true
-						siteData.WriteString("\nLink: " + link)
+						pageData.WriteString("\nLink: " + link)
 					}
 				})
 			}
+			siteDataMutex.Lock()
+			siteData.WriteString(pageData.String())
+			siteDataMutex.Unlock()
 		} else {
 			scrapedLinksMutex.Unlock()
 		}
@@ -217,7 +222,9 @@ func (s Scraper) Call(ctx context.Context, input string) (string, error) {
 			scrapedLinksMutex.RUnlock()
 			err := c.Visit(u.String())
 			if err != nil {
+				siteDataMutex.Lock()
 				siteData.WriteString(fmt.Sprintf("\nError following link %s: %v", link, err))
+				siteDataMutex.Unlock()
 			}
 		} else {
 			scrapedLinksMutex.RUnlock()
