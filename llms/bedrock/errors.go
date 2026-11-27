@@ -4,6 +4,21 @@ import (
 	"strings"
 
 	"github.com/tmc/langchaingo/llms"
+	"github.com/tmc/langchaingo/llms/bedrock/internal/bedrockclient"
+)
+
+// Details keys and values of the content filter errors returned when Bedrock
+// blocks content. DetailType is BlockedByGuardrail when a guardrail
+// intervened, and BlockedByRefusal when the model declined the request. A
+// refusal also carries DetailCategory and DetailExplanation, which are nil when
+// the refusal does not map to a named category.
+const (
+	DetailType        = bedrockclient.DetailType
+	DetailCategory    = bedrockclient.DetailCategory
+	DetailExplanation = bedrockclient.DetailExplanation
+
+	BlockedByGuardrail = bedrockclient.BlockedByGuardrail
+	BlockedByRefusal   = bedrockclient.BlockedByRefusal
 )
 
 // errorMapping represents a mapping from error patterns to error codes.
