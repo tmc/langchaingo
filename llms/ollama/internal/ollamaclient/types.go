@@ -34,6 +34,7 @@ type GenerateRequest struct {
 	Context   []int  `json:"context,omitempty"`
 	Stream    *bool  `json:"stream"`
 	KeepAlive string `json:"keep_alive,omitempty"`
+	Truncate  *bool  `json:"truncate,omitempty"`
 
 	Options Options `json:"options"`
 }
@@ -52,6 +53,7 @@ type ChatRequest struct {
 	Stream    bool       `json:"stream,omitempty"`
 	Format    string     `json:"format"`
 	KeepAlive string     `json:"keep_alive,omitempty"`
+	Truncate  *bool      `json:"truncate,omitempty"`
 
 	Options Options `json:"options"`
 }

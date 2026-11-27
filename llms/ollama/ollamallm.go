@@ -161,6 +161,7 @@ func (o *LLM) GenerateContent(ctx context.Context, messages []llms.MessageConten
 		Messages: chatMsgs,
 		Options:  ollamaOptions,
 		Stream:   opts.StreamingFunc != nil,
+		Truncate: o.options.truncate,
 	}
 
 	keepAlive := o.options.keepAlive
