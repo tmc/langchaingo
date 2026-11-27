@@ -14,7 +14,7 @@ import (
 
 func main() {
 	// Command-line flags
-	model := flag.String("model", "anthropic/claude-haiku-4.5", "Hubris model to use (see https://hubris.pw/models)")
+	model := flag.String("model", "anthropic/claude-haiku-4.5", "Hubris model to use (see https://hubris.pro/models)")
 	prompt := flag.String("prompt", "Write a haiku about Go programming language.", "Prompt to send to the model")
 	temperature := flag.Float64("temp", 0.8, "Temperature for response generation (0.0-2.0)")
 	streaming := flag.Bool("stream", true, "Use streaming mode")
@@ -22,17 +22,17 @@ func main() {
 
 	// Hubris is an OpenAI-compatible LLM gateway billed in Russian rubles:
 	// one API key for models from OpenAI, Anthropic, Google, DeepSeek, Qwen and others.
-	// Get your API key from https://hubris.pw/keys
+	// Get your API key from https://hubris.pro/keys
 	apiKey := os.Getenv("HUBRIS_API_KEY")
 	if apiKey == "" {
 		log.Fatal("Please set HUBRIS_API_KEY environment variable\n" +
-			"Get your key from https://hubris.pw/keys")
+			"Get your key from https://hubris.pro/keys")
 	}
 
 	// Create an OpenAI-compatible client configured for Hubris
 	llm, err := openai.New(
 		openai.WithModel(*model),
-		openai.WithBaseURL("https://api.hubris.pw/v1"),
+		openai.WithBaseURL("https://api.hubris.pro/v1"),
 		openai.WithToken(apiKey),
 	)
 	if err != nil {
@@ -73,7 +73,7 @@ func main() {
 	if err != nil {
 		if strings.Contains(err.Error(), "429") {
 			fmt.Println("⚠️  Rate limit reached (key spending limit or upstream 429).")
-			fmt.Println("    Check the key limits at https://hubris.pw/keys or try another model with -model")
+			fmt.Println("    Check the key limits at https://hubris.pro/keys or try another model with -model")
 		} else {
 			log.Printf("Error: %v\n", err)
 		}
