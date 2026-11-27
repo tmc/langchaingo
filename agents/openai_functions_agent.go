@@ -231,13 +231,19 @@ func (o *OpenAIFunctionsAgent) constructScratchPad(steps []schema.AgentStep) []l
 			currentLog = step.Action.Log
 		}
 
-		// Add this tool call to the current group
+		// Add this tool call to the current group. Replay the arguments the
+		// model produced rather than the unwrapped tool input: providers such
+		// as Ollama reject tool call arguments that are not valid JSON.
+		arguments := step.Action.ToolArguments
+		if arguments == "" {
+			arguments = step.Action.ToolInput
+		}
 		currentToolCalls = append(currentToolCalls, llms.ToolCall{
 			ID:   step.Action.ToolID,
 			Type: "function",
 			FunctionCall: &llms.FunctionCall{
 				Name:      step.Action.Tool,
-				Arguments: step.Action.ToolInput,
+				Arguments: arguments,
 			},
 		})
 	}
@@ -298,10 +304,11 @@ func (o *OpenAIFunctionsAgent) ParseOutput(contentResp *llms.ContentResponse) (
 			}
 
 			actions = append(actions, schema.AgentAction{
-				Tool:      functionName,
-				ToolInput: toolInput,
-				Log:       fmt.Sprintf("Invoking: %s with %s %s", functionName, toolInputStr, contentMsg),
-				ToolID:    toolCall.ID,
+				Tool:          functionName,
+				ToolInput:     toolInput,
+				ToolArguments: toolInputStr,
+				Log:           fmt.Sprintf("Invoking: %s with %s %s", functionName, toolInputStr, contentMsg),
+				ToolID:        toolCall.ID,
 			})
 		}
 
@@ -320,10 +327,11 @@ func (o *OpenAIFunctionsAgent) ParseOutput(contentResp *llms.ContentResponse) (
 			// Try to use it directly as tool input
 			return []schema.AgentAction{
 				{
-					Tool:      functionName,
-					ToolInput: toolInputStr,
-					Log:       fmt.Sprintf("Invoking: %s with %s\n", functionName, toolInputStr),
-					ToolID:    "", // Legacy function calls don't have tool IDs
+					Tool:          functionName,
+					ToolInput:     toolInputStr,
+					ToolArguments: toolInputStr,
+					Log:           fmt.Sprintf("Invoking: %s with %s\n", functionName, toolInputStr),
+					ToolID:        "", // Legacy function calls don't have tool IDs
 				},
 			}, nil, nil
 		}
@@ -343,10 +351,11 @@ func (o *OpenAIFunctionsAgent) ParseOutput(contentResp *llms.ContentResponse) (
 
 		return []schema.AgentAction{
 			{
-				Tool:      functionName,
-				ToolInput: toolInput,
-				Log:       fmt.Sprintf("Invoking: %s with %s \n %s \n", functionName, toolInputStr, contentMsg),
-				ToolID:    "", // Legacy function calls don't have tool IDs
+				Tool:          functionName,
+				ToolInput:     toolInput,
+				ToolArguments: toolInputStr,
+				Log:           fmt.Sprintf("Invoking: %s with %s \n %s \n", functionName, toolInputStr, contentMsg),
+				ToolID:        "", // Legacy function calls don't have tool IDs
 			},
 		}, nil, nil
 	}
