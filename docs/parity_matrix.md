@@ -257,6 +257,7 @@ These are newer features from LangChain Python that represent the current direct
 | Zapier                             | ✅     |
 | Metaphor Search                    | ✅     |
 | Perplexity Search                  | ✅     |
+| Outcrawl Search and Scrape         | ✅     |
 | Python REPL                        | ❌     |
 | Bash                               | ❌     |
 | File System                        | ❌     |
