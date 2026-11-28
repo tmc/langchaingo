@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"strings"
 
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/schema"
@@ -94,8 +95,12 @@ func marshalStruct(vType reflect.Type, name string) ([]byte, error) { // nolint:
 	moreStructs := make([][]byte, 0, numStructs)
 	for i := 0; i < vType.NumField(); i++ {
 		field := vType.Field(i)
+		tag := field.Tag.Get("json")
+		if tag == "-" {
+			continue
+		}
 		b.WriteString("\t")
-		name := field.Tag.Get("json")
+		name, _, _ := strings.Cut(tag, ",")
 		if name == "" {
 			name = field.Name
 		}
