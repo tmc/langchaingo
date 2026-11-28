@@ -57,14 +57,8 @@ func (p RegexDict) parse(text string) (map[string]string, error) {
 			}
 		}
 
-		if len(matches) > expectedMatches {
-			return nil, ParseError{
-				Text:   text,
-				Reason: fmt.Sprintf("Multiple matches found for expression %s", expression),
-			}
-		}
-
-		match := matches[1]
+		// The value capture follows any captures in the configured format.
+		match := matches[len(matches)-1]
 
 		if match == p.NoUpdateValue {
 			continue
