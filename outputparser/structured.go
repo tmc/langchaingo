@@ -68,15 +68,14 @@ func (p Structured) parse(text string) (map[string]string, error) {
 		return nil, ParseError{Text: text, Reason: "no ```json at start of output"}
 	}
 
-	jsonString, _, ok := strings.Cut(withoutJSONStart, "```")
-	if !ok {
-		return nil, ParseError{Text: text, Reason: "no ``` at end of output"}
-	}
-
 	var parsed map[string]string
-	err := json.Unmarshal([]byte(jsonString), &parsed)
+	decoder := json.NewDecoder(strings.NewReader(withoutJSONStart))
+	err := decoder.Decode(&parsed)
 	if err != nil {
 		return nil, err
+	}
+	if !strings.HasPrefix(strings.TrimSpace(withoutJSONStart[decoder.InputOffset():]), "```") {
+		return nil, ParseError{Text: text, Reason: "no ``` at end of output"}
 	}
 
 	// Validate that the parsed map contains all fields specified in the response
