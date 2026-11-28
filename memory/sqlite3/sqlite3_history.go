@@ -3,7 +3,6 @@
 package sqlite3
 
 import (
-	"bytes"
 	"context"
 	"database/sql"
 	"strings"
@@ -129,32 +128,28 @@ func (h *SqliteChatMessageHistory) SetMessages(ctx context.Context, messages []l
 		return nil
 	}
 
-	/*
-	 BEGIN TRANSACTION;
-	 DELETE FROM table WHERE session = ?;
-	 INSERT INTO table (session, content, type)
-	 VALUES (?, ?, ?), ...;
-	 COMMIT;`
-	*/
-	buf := bytes.NewBufferString("BEGIN TRANSACTION;")
-	buf.WriteString(" DELETE FROM ")
-	buf.WriteString(h.TableName)
-	buf.WriteString(" WHERE session = ?;")
-	buf.WriteString(" INSERT INTO ")
-	buf.WriteString(h.TableName)
-	buf.WriteString(" (session, content, type) VALUES ")
-
-	inputs := make([]string, len(messages))
-	values := []interface{}{h.Session}
-
-	for i, msg := range messages {
-		inputs[i] = "(?, ?, ?)"
-		values = append(values, h.Session, msg.GetContent(), string(msg.GetType()))
+	tx, err := h.DB.BeginTx(ctx, nil)
+	if err != nil {
+		return err
 	}
+	defer func() { _ = tx.Rollback() }()
 
-	buf.WriteString(strings.Join(inputs, ", "))
-	buf.WriteString("; COMMIT;")
-
-	_, err := h.DB.ExecContext(ctx, buf.String(), values...)
-	return err
+	deleteQuery := strings.Join([]string{"DELETE FROM ", " WHERE session = ?;"}, h.TableName)
+	if _, err := tx.ExecContext(ctx, deleteQuery, h.Session); err != nil {
+		return err
+	}
+	if len(messages) > 0 {
+		inputs := make([]string, len(messages))
+		values := make([]any, 0, len(messages)*3)
+		for i, msg := range messages {
+			inputs[i] = "(?, ?, ?)"
+			values = append(values, h.Session, msg.GetContent(), string(msg.GetType()))
+		}
+		query := strings.Join([]string{"INSERT INTO ", " (session, content, type) VALUES "}, h.TableName)
+		query += strings.Join(inputs, ", ")
+		if _, err := tx.ExecContext(ctx, query, values...); err != nil {
+			return err
+		}
+	}
+	return tx.Commit()
 }
