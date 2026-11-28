@@ -51,7 +51,7 @@ var _ Chain = MapRerankDocuments{}
 
 // NewMapRerankDocuments creates a new map rerank documents chain.
 func NewMapRerankDocuments(mapRerankLLMChain *LLMChain) *MapRerankDocuments {
-	mapRerankRE := `\s*(?P<answer>.*?)\nScore: (?P<score>.*)`
+	mapRerankRE := `(?s)\s*(?P<answer>.*?)\r?\nScore: (?P<score>[^\r\n]*)`
 	mapRerankLLMChain.OutputParser = outputparser.NewRegexParser(mapRerankRE)
 
 	return &MapRerankDocuments{
